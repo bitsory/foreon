@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- <meta name="viewport" content="width=device-width"> -->
+    <meta content="width=device-width,minimum-scale=1.0" name="viewport">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1"> -->
+    <link rel="stylesheet" href="style.css">
+	<title>Cafe FORE</title>    
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jost:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *{      
+            font-family: 'Jost', sans-serif;
+        }
+    </style>    
+    <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
+    
+    <link rel="icon" href="/images/logo.png">
+    
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar_or">
+            <div class="navbar_w4">
+                <div class="navbar_logo">
+                    <a href="http://localhost:8080" class="logo_btn"></a>
+                    <!-- <a href="./cafeFORE">Cafe FORE</a> -->
+                </div>
+
+                <a href="javascript:;" class="navbar_toggleBtn">
+              
+                </a>
+        <!-- </div> -->
+            </div>
+            <ul class="navbar_nav_list">
+                <!-- <li><a href="/" data-link-T>HOME</a></li> -->
+                <li><a href="/about" data-link-T>ABOUT</a></li>
+                <li><a href="/menu" data-link-T>MENU</a></li>   
+                <li><a href="/shop" data-link-T>ONLINE SHOP</a></li>             
+                <li><a href="/contact" data-link-T>CONTACT</a></li>
+                
+            </ul>
+            <div class="login">
+                <form action="/sign_out" method="post" class="user_logout">
+                    
+                    <input type="submit" class="user_logout_btn" name="sign_out" value="Sign Out" >
+                </form>
+                <!-- <button class="sign_out" onClick="signOut()">Sign Out</button>
+                <script>
+                    function signOut() {
+                        console.log("sign out");
+                        
+
+                    }
+                </script> -->
+                <a href="#"><h3 class="user_info"><%= post %></h3></a>
+                
+            </div>
+            <div class="navbar_icons">
+                <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a>
+
+
+            </div>
+        </div>
+    </nav>
+
+    <section class="main">
+        
+        <div class="modal">
+            <div class="modal_page">
+                <div class="modal_body">                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="main_background">
+            <div class="mainback1"></div>
+            
+
+        </div>
+        <div class="lorem">
+            
+
+        </div>
+       
+    </section>
+    
+    <section class="footer" style="padding-left: 0px; padding-right: 0px;">
+        <div class="footer_first">
+            <div class="footer_left">
+                <div class="foot_address">
+                    <br>
+                    <span><i aria-hidden="true" class="fas fa-map-marker-alt"></i></span>
+                    <span><bold>LOCATION.</bold></span><br>
+                    <div class="foot_adr">
+                    4400 Roswell RD Ste 126<br>
+                    Inside LA Fitness<br>
+                    Marietta, GA 30062<br><br>
+                    
+                    <span>
+                        <a href='tel:470-263-6495'><i aria-hidden="true" class="fas fa-phone-alt"></i></span>
+                        <span>(470) 263-6495</span></a></div><br>
+                </div>   
+    
+            </div>
+            <div class="footer_mid">
+                <div class="foot_hours">
+                    
+                    <br>
+                    <span><i aria-hidden="true" class="fas fa-clock"></i></span>
+                    <span><bold>HOURS.</bold></span><br>
+                    
+                    <div class="foot_hr">
+                    Monday - Friday<br>
+                    11am - 8pm<br>  
+                    Satday - Sunday<br>
+                    12 - 6pm<br>                    
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer_second">
+            <div class="footer_mid2">
+                <div class="foot_icons">
+                    <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank" style="padding-right: 2rem;"><i class="fab fa-facebook"></i></a>
+                    <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a>
+                    
+                </div>
+            </div>
+    
+            <div class="footer_right">
+                <div class="logo_btn foot_logo"></div><i class="fa-solid fa-angles-up"></i>
+            </div>
+        </div>        
+    </section>
+	
+    <script type="module" src="index.js"></script>
+    <script type="module" src="./pages/login.js"></script>
+    
+
+    
+</body>
+</html>
