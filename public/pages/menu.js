@@ -2,22 +2,8 @@ export default class {
     constructor() {
         document.title = "Cafe FORE";
         console.log("menu");
-        console.log(document.title);
-        this.test = "menu test";
-        this.test2 = "test2";
-        // coffee_btn = document.querySelector('.coffee_button');
-        // coffee_menu = document.querySelector('.coffee_menu');
-
-
-        // this.coffee_btn.addEventListener('click', ()=> {
-        //     coffee_menu.classList.toggle('on');
-        // });
-
-    }
-
-    
-    testMenu() {
-        console.log("Menu page test");
+      
+        
     }
 
     menuIconClickEvent (event) {

@@ -1,10 +1,16 @@
 import place_order from "./place_order.js";
+import cart from "./cart.js";
 
 export default class {
     constructor() {
         document.title = "Cafe FORE";
         console.log("shop page");
 
+        const n_cart = new cart();
+       
+        this.user_info = n_cart.getCookie(document.cookie);        
+      
+        console.log(`user_info : ${this.user_info}`);        
 
         document.addEventListener('click',function(e){    
             if(e.target && e.target.className == 'place_order_btn') {
@@ -17,8 +23,13 @@ export default class {
                 
             } 
         });
+
+        
         
     }
+
+    
+    
 
 
     

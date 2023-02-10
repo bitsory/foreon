@@ -1,9 +1,24 @@
+import order_confirm from "./oder_confirm.js";
+
 export default class {
     constructor(param) {
         document.title = "Cafe FORE";
         console.log("place order page");
         this.count = param;
         
+        document.addEventListener('click',function(e){    
+            if(e.target && e.target.className == 'proceed_order_btn') {
+                console.log("order confirm action")
+                const orderConfirm = new order_confirm();
+                document.querySelector(".online_order").innerHTML = orderConfirm.getHtml();
+                
+                
+            } if(e.target && e.target.className == 'cancel_proceed_order_btn') {
+                window.history.back();
+                
+                
+            }
+        });
 
     }
 
@@ -18,7 +33,8 @@ export default class {
 
     proceedEventListener () {
         this.$proceed_order_btn.addEventListener('click', (event)=> {
-            window.location.href = "http://localhost:8080/shop/order_confirm.html"
+            const orderConfirm = new order_confirm(order);
+            document.querySelector(".online_order").innerHTML = orderConfirm.getHtml();
         });
         
         this.$cancel_proceed_order_btn.addEventListener('click', (event)=> {
@@ -49,7 +65,8 @@ export default class {
         
         <h2>Your Order</h2>
         Total ${this.count} Ginger Bottles
-        <h3>$ ${this.count * 18.00}</h3> 
+        <h3>$ ${this.count * 18.00}</h3>
+        3 days delivery 
 
         <h2>Would you like proceed your order?</h2>
 

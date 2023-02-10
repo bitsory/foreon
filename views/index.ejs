@@ -44,16 +44,13 @@
             <div class="login">
                 <form action="/sign_out" method="post" class="user_logout">
                     
-                    <input type="submit" class="user_logout_btn" name="sign_out" value="Sign Out" >
+                    <input type="submit" class="user_logout_btn" name="sign_out" value="Sign Out" onclick='deleteCookie("cafefore")'>
                 </form>
-                <!-- <button class="sign_out" onClick="signOut()">Sign Out</button>
+                
                 <script>
-                    function signOut() {
-                        console.log("sign out");
-                        
-
-                    }
-                </script> -->
+                    function deleteCookie(name) {document.cookie = name + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';}
+                </script>
+                
                 <a href="#"><h3 class="user_info"><%= post %></h3></a>
                 
             </div>
@@ -138,6 +135,7 @@
 	
     <script type="module" src="index.js"></script>
     <script type="module" src="./pages/login.js"></script>
+    <!-- <script type="module" src="./public/index.js"></script> -->
     
 
     

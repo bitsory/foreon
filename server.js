@@ -26,10 +26,10 @@ app.get('/',(req,res) => {
     if (req.session.loginData) {
         console.log("login data exist");
         // res.sendFile(__dirname + "/index.html");
-		res.render('index.ejs', {post : req.session.loginData[0].name});//세션이 있으면 이처리
+		res.render('index.ejs', {post : req.session.loginData[0].name});
 	} else {
         console.log("login data nothing");
-		res.sendFile(__dirname + "/public/index.html");//없으면 여기로 이동
+		res.sendFile(__dirname + "/public/index.html");
 	}
 });
 
@@ -54,9 +54,9 @@ app.post("/sign_out", function (req, res) {
 app.get('/home',(req,res) => {
     console.log(`req about: ${req}`);
     if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData[0].name});//세션이 있으면 이처리
-	} else {
-		res.sendFile(__dirname + "/public/index.html");//없으면 여기로 이동
+		res.render('index.ejs', {post : req.session.loginData[0].name});	
+    } else {
+		res.sendFile(__dirname + "/public/index.html");
 	}
     console.log(`req home: ${req}`);
 });
@@ -65,18 +65,18 @@ app.get('/about',(req,res) => {
     // res.sendFile(__dirname + "/public/index.html")
     console.log(`req about: ${req}`);
     if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData[0].name});//세션이 있으면 이처리
+		res.render('index.ejs', {post : req.session.loginData[0].name});
 	} else {
-		res.sendFile(__dirname + "/public/index.html");//없으면 여기로 이동
+		res.sendFile(__dirname + "/public/index.html");
 	}
 });
 
 app.get('/menu',(req,res) => {
     console.log(`req about: ${req}`);
     if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData[0].name});//세션이 있으면 이처리
+		res.render('index.ejs', {post : req.session.loginData[0].name});
 	} else {
-		res.sendFile(__dirname + "/public/index.html");//없으면 여기로 이동
+		res.sendFile(__dirname + "/public/index.html");
 	}
     console.log(`req menu: ${req}`);
 });
@@ -86,9 +86,9 @@ app.get('/menu',(req,res) => {
 app.get('/contact',(req,res) => {
     console.log(`req about: ${req}`);
     if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData[0].name});//세션이 있으면 이처리
+		res.render('index.ejs', {post : req.session.loginData[0].name});
 	} else {
-		res.sendFile(__dirname + "/public/index.html");//없으면 여기로 이동
+		res.sendFile(__dirname + "/public/index.html");
 	}
     console.log(`req contact : ${req}`);
 });
@@ -96,10 +96,12 @@ app.get('/contact',(req,res) => {
 app.get('/shop',(req,res) => {
     console.log(`req about: ${req}`);
     console.log("shop shop shop shop shop ");
+    
     if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData[0].name});//세션이 있으면 이처리
+        
+		res.render('index.ejs', {post : req.session.loginData[0].name});
 	} else {
-		res.sendFile(__dirname + "/public/index.html");//없으면 여기로 이동
+		res.sendFile(__dirname + "/public/index.html");
 	}
     console.log(`req contact : ${req}`);
 });
@@ -195,7 +197,17 @@ app.post('/sign_in', function (req,res) {
                 req.session.loginData = result;
                 console.log(`req.session.user_id : ${req.session.loginData[0].name}`);
                 console.log(req.session.loginData);
+                // res.json(req.session.loginData);
+                res.cookie(
+                    'cafefore',{
+                    name : req.session.loginData[0].name,
+                    id : "test",
+                    authorized : true
+                });
                 res.redirect(redirect_path);
+                // res.json(req.session.loginData);
+                
+                // res.send({name : "StackOverFlow", reason : "Need help!", redirect_path: redirect_path})
                 // res.render(redirect_path, {post : req.session.loginData[0].name});
             });
             // console.log(`update: ${r_name}`);            

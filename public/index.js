@@ -58,6 +58,10 @@ gotoTop.addEventListener('click', () => {
         behavior: 'smooth'});
 });
 
+const deleteCookie = function(name) {
+	document.cookie = name + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
+}
+
 
 
 
@@ -146,13 +150,6 @@ const router = async () => {
             //     toggleBtn.classList.toggle('on');
             //     console.log(`menu.classList.length: ${menu.classList.length}`);
             // }
-
-        // } else {
-        //     console.log("shop router run");
-        //     window.location.href = "http://localhost:8080/shop/shop.html";
-        // }
-
-        
     }
 
 }; 
@@ -161,12 +158,12 @@ window.addEventListener("popstate", router);
 
 
 document.addEventListener("DOMContentLoaded", () => { // run first
-    var link = document.location.href; 
-    console.log(`link : ${link}`);
+    // var link = document.location.href; 
+    // console.log(`link : ${link}`);
     
     document.body.addEventListener("click", (e) => { // menu link click
-        var link = document.location.href; 
-        console.log(`link : ${link}`);
+        // var link = document.location.href; 
+        // console.log(`link : ${link}`);
         
         // console.log(`index.js document.body.addEventListener(click, (e): ${JSON.stringify(e)}`);
         // console.log(`index.js document.body.addEventListener(click, (e): ${e}`);
@@ -181,18 +178,19 @@ document.addEventListener("DOMContentLoaded", () => { // run first
         }
     });
     console.log("data - link router router");
+    router();
 
-    if (!(link == "http://localhost:8080/shop/shop.html")) {// this is not a shop page
-        console.log("beginning main home page");
-        router(); 
-        console.log("after main home page");
-    } 
+    // if (!(link == "http://localhost:8080/shop/shop.html")) {// this is not a shop page
+    //     console.log("beginning main home page");
+    //     router(); 
+    //     console.log("after main home page");
+    // } 
 
-    if (!(link == "http://localhost:8080/home")) {// this is not a shop page
-        console.log("beginning main home page");
-        router(); 
-        console.log("after main home page");
-    } 
+    // if (!(link == "http://localhost:8080/home")) {// this is not a shop page
+    //     console.log("beginning main home page");
+    //     router(); 
+    //     console.log("after main home page");
+    // } 
     
 
 });
