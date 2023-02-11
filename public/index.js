@@ -4,6 +4,8 @@ import Menu from "./pages/menu.js";
 import Contact from "./pages/contact.js";
 import NotFound from "./pages/notfound.js";
 import Shop from "./pages/shop.js";
+import Login from "./pages/login.js";
+import Cart from "./pages/cart.js";
 
 
 const toggleBtn = document.querySelector('.navbar_toggleBtn');
@@ -19,7 +21,15 @@ const footer = document.querySelector('.footer');
 const navbar_logo = document.querySelector('.navbar_logo');
 const foot_logo = document.querySelector('.foot_logo');
 const gotoTop = document.querySelector('.fa-angles-up');
+const user_info = document.querySelector('.user_info');
 
+const modal = document.querySelector('.modal');
+
+
+
+const user_cart = new Cart(document.cookie);
+
+export default user_cart
 
 
 toggleBtn.addEventListener('click', (e) => {
@@ -58,9 +68,67 @@ gotoTop.addEventListener('click', () => {
         behavior: 'smooth'});
 });
 
-const deleteCookie = function(name) {
-	document.cookie = name + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
+document.addEventListener('click', function(e){    
+
+    var user_info =  document.querySelector('.user_info');
+    var user_profile_container =  document.querySelector('.user_profile_container');
+    //var user_profile =  document.querySelector('.user_profile');
+    // var modal_body = document.querySelector('.modal_body');
+    
+    console.log(e.target);
+    
+
+    if(e.target == user_info) { // user info modal window show
+        console.log("user info");        
+        user_profile_container.style.display = "block";
+        document.querySelector(".user_profile").innerHTML = user_cart.getUserProfile();        
+    }
+
+    if (user_profile_container && e.target != user_info) // user info modal window off
+        if(e.target!= user_profile_container && user_profile_container.style.display == "block") {
+            user_profile_container.style.display = "none";
+            console.log("close pop up")
+        }
+
+    if (e.target && e.target.className == 'user_logout_btn') { 
+        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
+    }
+
+    // if (e.target != document.querySelector(".login_modal_pop"))
+    //     if (modal_body && e.target != modal_body && modal.style.display == "block") {
+    //         console.log("modal remove");
+    //         // modal_body.remove();
+    //         // modal.style.display = 'none';
+    //         // document.body.style.overflow = 'auto';
+    //     }
+
+    if (e.target && e.target.className == 'user_profile_cart_btn') {
+        console.log("view cart view")
+        
+
+    }
+    if (e.target && e.target.className == 'test_btn') {
+        console.log("test button test");
+        console.log(user_cart);
+        console.log(user_cart.c_name);
+        console.log(user_cart.c_items);
+        
+
+    }
+    
+
+
+});
+
+window.addEventListener('click', (e) => {
+    e.target === modal ? modalClose() : false
+})
+
+function modalClose() {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
+
 
 
 
@@ -138,18 +206,18 @@ const router = async () => {
             
             }
             
-            // if (menu.classList.length == 2) {
+            if (menu.classList.length == 2) { // menu button toggle back
 
-            //     console.log("length 2");
-            //     console.log("toggle on");
+                console.log("length 2");
+                console.log("toggle on");
                 
-            //     main.classList.toggle('on');
-            //     menu.classList.toggle('on');
-            //     icons.classList.toggle('on');
-            //      footer.classList.toggle('on');
-            //     toggleBtn.classList.toggle('on');
-            //     console.log(`menu.classList.length: ${menu.classList.length}`);
-            // }
+                main.classList.toggle('on');
+                menu.classList.toggle('on');
+                icons.classList.toggle('on');
+                footer.classList.toggle('on');
+                toggleBtn.classList.toggle('on');
+                console.log(`menu.classList.length: ${menu.classList.length}`);
+            }
     }
 
 }; 

@@ -286,6 +286,11 @@ app.post('/sign_up', (req,res) => {
 });
 // app.get('/',(req,res)=>res.sendFile('C:/Users/Jk/Documents/web_workspace/Test/index.html'));
 
+app.post('/shop/member/qqq/cart', (req,res) => {
+    res.send("cart");
+
+});
+
 
 function makeConnect() {
     console.log("make connect");

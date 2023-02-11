@@ -1,3 +1,10 @@
+// import cart from "./cart.js";
+
+export default class {
+
+}
+
+
 const login_modal_pop = document.querySelector('.login_modal_pop');
 
 const modal = document.querySelector('.modal');
@@ -12,32 +19,59 @@ const user_pw = document.querySelector('.user_pw');
 
 
 
-login_modal_pop.addEventListener('click', () => {
-    console.log("login");
-    var link = document.location.href; 
-    modal.style.display = 'block';
-    // document.body.style.overflow = 'hidden';
-    modal_page.innerHTML = `
-        <div class="modal_body">
-        Login Page
-        <button class="modal_exit">X</button>
-        <br><br><br>
-        <form action="/sign_in?path=${document.location.href}" method="post" class="user_login_form">
-            <label class="label_user_id">ID</label>
-            <input type="text" class="user_id" name="sign_in_id" required />
-            <br>
-            <label class="label_user_pw">Password</label>
-            <input type="password" class="user_pw" name="sign_in_pw" required />
-            <br>
-            <input type="submit" class="btn_sign_in" value="Sign In">
-            <button class="btn_signup">Sign Up</button>
+// login_modal_pop.addEventListener('click', () => {
+//     console.log("login");
+//     var link = document.location.href; 
+//     modal.style.display = 'block';
+//     // document.body.style.overflow = 'hidden';
+//     modal_page.innerHTML = `
+//         <div class="modal_body">
+//         Login Page
+//         <button class="modal_exit">X</button>
+//         <br><br><br>
+//         <form action="/sign_in?path=${document.location.href}" method="post" class="user_login_form">
+//             <label class="label_user_id">ID</label>
+//             <input type="text" class="user_id" name="sign_in_id" required />
+//             <br>
+//             <label class="label_user_pw">Password</label>
+//             <input type="password" class="user_pw" name="sign_in_pw" required />
+//             <br>
+//             <input type="submit" class="btn_sign_in" value="Sign In">
+//             <button class="btn_signup">Sign Up</button>
             
-        </form>
-        </div>`
-});
+//         </form>
+//         </div>`
+// });
 
 
 document.addEventListener('click',function(e){    
+    if(e.target && e.target.className == 'login_modal_pop') {
+        console.log("login");
+        var link = document.location.href; 
+        modal.style.display = 'block';
+        // document.body.style.overflow = 'hidden';
+        modal_page.innerHTML = `
+            <div class="modal_body">
+            Login Page
+            <button class="modal_exit">X</button>
+            <br><br><br>
+            <form action="/sign_in?path=${document.location.href}" method="post" class="user_login_form">
+                <label class="label_user_id">ID</label>
+                <input type="text" class="user_id" name="sign_in_id" required />
+                <br>
+                <label class="label_user_pw">Password</label>
+                <input type="password" class="user_pw" name="sign_in_pw" required />
+                <br>
+                <input type="submit" class="btn_sign_in" value="Sign In">
+                <button class="btn_signup">Sign Up</button>
+                
+            </form>
+            </div>`
+    }
+    
+    
+    
+    
     if(e.target && e.target.className == 'modal_exit') {
         console.log(" modal exit");
         document.querySelector('.modal_body').remove();
@@ -46,7 +80,9 @@ document.addEventListener('click',function(e){
     } 
     
     if(e.target && e.target.className == 'btn_signup') {
+
         console.log("SIGN UP");
+        // const n_cart = new cart();
         document.querySelector('.user_login_form').remove();
         modal_page.innerHTML = `
         <div class="modal_body">

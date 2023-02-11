@@ -1,17 +1,22 @@
 export default class {
     
     
-    constructor() {
+    constructor(param) {
         document.title = "Cafe FORE";
         console.log("shop cart");
         
-     
+        this.c_name = this.getCookie(param);
     }
 
     c_name = '';
-    c_total = 0;
-    c_amount = 0;
-    C_quantity = 10;
+    c_items = [
+        {c_item_name : '',
+         c_item_price : 0,
+         c_item_quantity : 0}
+    ];
+    
+    
+    
 
    
 
@@ -39,4 +44,32 @@ export default class {
         return result;
         
     }
+
+    viewCart() {
+        console.log("view cart");
+        console.log(this.c_name);
+    }
+
+    getUserProfile() {
+        return `
+            <div class='user_profile_greet'>Hello</div>
+            <div class='user_profile_name'>${this.getCookie(document.cookie)}</div>
+            <div class='user_profile_cart'>
+                
+            <form action='/shop/member/${this.getCookie(document.cookie)}/cart' method="post" class="form_user_profile_cart">
+                    
+                <input type="submit" class="user_profile_cart_btn" name="view_cart" value="GO Cart" onclick=${this.viewCart()}>
+            </form>
+                
+            </div>
+            <div class='user_profile_log_out'>
+            <form action="/sign_out" method="post" class="user_logout">
+                    
+                <input type="submit" class="user_logout_btn" name="sign_out" value="Sign Out">
+            </form>
+                
+            </div>
+        `
+    }
+
 }

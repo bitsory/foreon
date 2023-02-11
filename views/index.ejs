@@ -42,24 +42,23 @@
                 
             </ul>
             <div class="login">
-                <form action="/sign_out" method="post" class="user_logout">
-                    
-                    <input type="submit" class="user_logout_btn" name="sign_out" value="Sign Out" onclick='deleteCookie("cafefore")'>
-                </form>
-                
-                <script>
-                    function deleteCookie(name) {document.cookie = name + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';}
-                </script>
-                
                 <a href="#"><h3 class="user_info"><%= post %></h3></a>
+                <div class="user_profile_container">
+                    <div class="user_profile">
+                        <div class="user_profile_name"></div>
+                    </div>
+                </div>
                 
             </div>
-            <div class="navbar_icons">
+            <div class="test">
+                <button class="test_btn">test_test</button>
+            </div>
+            <!-- <div class="navbar_icons">
                 <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank"><i class="fab fa-facebook"></i></a>
                 <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a>
 
 
-            </div>
+            </div> -->
         </div>
     </nav>
 

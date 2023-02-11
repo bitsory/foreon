@@ -112,6 +112,29 @@ nav {
     transform: translateX(-50%) translateY(-50%);
 }
 
+.user_profile_container {
+    display: none;
+    width: 240px;
+    position: absolute;
+    right: 0;
+    top: 36px;
+    background: rgb(98, 31, 31);
+    border-radius: 2px;
+    opacity: 1;
+    z-index: 100;
+    margin: 0;
+    padding: 20px;
+    border: none;
+    font-size: 12px;
+}
+
+
+
+
+.user_profile_greet, .user_profile_name, .user_profile_cart, .user_profile_log_out {
+    color: aliceblue;
+}
+
 .q_btn_container {
     margin-top: 2rem;
 }
