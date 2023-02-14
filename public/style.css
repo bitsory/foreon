@@ -159,6 +159,8 @@ nav {
 .pic2 {
     max-width: 100%;
     height: auto;
+   
+    z-index: 1;
     
 }
 
@@ -172,17 +174,11 @@ nav {
     width: 30vw;
     height: 30vw;
     background: url(images/sm_t.png) left/cover no-repeat;
-    /* background-size: contain; */
+    
     border-radius: 10% 10% 0 10%;
     
-    /* animation: motion 0.5s infinite; */
+   
 }
-/* 
-@keyframes motion {
-	0% {margin-top: 0px;}
-	100% {margin-top: 10px;}
-} */
-
 
 
 .sm_neon {
@@ -191,11 +187,59 @@ nav {
     height: 30vw;
     background: url(images/sm_neon.png) left/cover no-repeat;
     /* background-size: contain; */
+    /* background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); */
+
     border-radius: 70%;
-    
+    /* animation: gradient 1s ease infinite; */
+    /* animation: blink-effect 1s step-end infinite; */
+        
 }
 
+.pic2__blink {
+    overflow: hidden;
+    position: relative;
+}
+.pic2__blink::before {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-left: 70px solid rgba(255, 251, 237, 0.16);
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      -webkit-animation: blink 2.5s infinite ease;
+              animation: blink 2.5s infinite ease;
+}
 
+  @-webkit-keyframes blink {
+  0% {
+      -webkit-transform: translateX(-87px) skew(35deg);
+              transform: translateX(-87px) skew(35deg);
+  }
+  50% {
+      -webkit-transform: translateX(110%) skew(35deg);
+              transform: translateX(110%) skew(35deg);
+  }
+  100% {
+      -webkit-transform: translateX(110%) skew(35deg);
+              transform: translateX(110%) skew(35deg);
+  }
+  }
+  @keyframes blink {
+  0% {
+      -webkit-transform: translateX(-87px) skew(35deg);
+              transform: translateX(-87px) skew(35deg);
+  }
+  50% {
+      -webkit-transform: translateX(110%) skew(35deg);
+              transform: translateX(110%) skew(35deg);
+  }
+  100% {
+      -webkit-transform: translateX(110%) skew(35deg);
+              transform: translateX(110%) skew(35deg);
+  }
+    }
 
 .home_video {
   
@@ -267,6 +311,26 @@ nav {
 
     aspect-ratio: 16/8;   
     
+}
+
+
+.main_background__blink {
+    overflow: hidden;
+    position: relative;
+}
+.main_background__blink::before {
+      display: block;
+      width: 100%;
+      height: 100%;
+      /* border-left: 100px solid rgba(255, 251, 237, 0.16) */
+      border-left: 70px solid hsl(32deg 87% 97%);
+      opacity: 50%;
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      -webkit-animation: blink 2s infinite ease;
+              animation: blink 2s infinite ease;
 }
 
 @supports not (aspect-ratio: 16/8) {

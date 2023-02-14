@@ -40,7 +40,7 @@ export default class {
                         
                     </div>
                 </div>
-                <div class="home_pic pic2">
+                <div class="home_pic pic2__blink">
                     <div class="sm_neon"></div>
                 </div>
                 <div class="home_pic pic3">

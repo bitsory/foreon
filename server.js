@@ -33,13 +33,43 @@ app.get('/',(req,res) => {
 	}
 });
 
+app.get('/test',(req,res) => {
+    console.log(`req test: ${req}`);
+    console.log("test test etst test test test etst  ");
+    
+    if (req.session.loginData) {
+        
+		res.render('test.ejs', {post : req.session.loginData[0].name, 
+                                item : "Ginger Bottle 16 oz....",
+                                price : 18.00,
+                                description : "100% Handmade Squeezed Ginger Juice"
+                            });
+	} else {
+		res.render('shop_test.ejs', { post : "GUEST",
+            product_number : 1001,
+            product_name : "Ginger Bottle 16 oz....",
+            product_price : 18.00,
+            description : "100% Handmade Squeezed Ginger Juice"
+        });
+
+	}
+    
+});
+
 
 
 
 app.use(bodyParser.urlencoded({extended : true}));
+// app.use(bodyParser().json())
 app.use(express.static('public'));
 
-
+app.post("/new", function (req, res) {
+    console.log("new new new new new new new");
+    
+    console.log(req.body);
+    console.log("new end new end new end new end new end new end ");
+    res.send({"test":"jooo"});
+  });
 
 
 app.post("/sign_out", function (req, res) {
@@ -52,13 +82,13 @@ app.post("/sign_out", function (req, res) {
 
 
 app.get('/home',(req,res) => {
-    console.log(`req about: ${req}`);
+    console.log(`req home: ${req}`);
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData[0].name});	
     } else {
 		res.sendFile(__dirname + "/public/index.html");
 	}
-    console.log(`req home: ${req}`);
+    
 });
 
 app.get('/about',(req,res) => {
@@ -72,29 +102,29 @@ app.get('/about',(req,res) => {
 });
 
 app.get('/menu',(req,res) => {
-    console.log(`req about: ${req}`);
+    console.log(`req menu: ${req}`);
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData[0].name});
 	} else {
 		res.sendFile(__dirname + "/public/index.html");
 	}
-    console.log(`req menu: ${req}`);
+    
 });
 
 
 
 app.get('/contact',(req,res) => {
-    console.log(`req about: ${req}`);
+    console.log(`req contact: ${req}`);
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData[0].name});
 	} else {
 		res.sendFile(__dirname + "/public/index.html");
 	}
-    console.log(`req contact : ${req}`);
+    
 });
 
 app.get('/shop',(req,res) => {
-    console.log(`req about: ${req}`);
+    console.log(`req shop: ${req}`);
     console.log("shop shop shop shop shop ");
     
     if (req.session.loginData) {
@@ -103,8 +133,9 @@ app.get('/shop',(req,res) => {
 	} else {
 		res.sendFile(__dirname + "/public/index.html");
 	}
-    console.log(`req contact : ${req}`);
+    
 });
+
 
 // app.get('/sign_in', (req, res) => {
 //     res.sendFile(__dirname + "/public/index.html")
@@ -286,8 +317,17 @@ app.post('/sign_up', (req,res) => {
 });
 // app.get('/',(req,res)=>res.sendFile('C:/Users/Jk/Documents/web_workspace/Test/index.html'));
 
-app.post('/shop/member/qqq/cart', (req,res) => {
+// app.post('/shop/member/:id/cart', (req,res) => {
+//     res.send("cart");
+
+// });
+
+app.post('/shop/cart/:id', (req,res) => {
+    console.log("go cart ");
+    console.log(req.rawHeaders);
+    console.log(req.rawHeaders[0]);
     res.send("cart");
+    // res.send(JSON.stringify(req));
 
 });
 

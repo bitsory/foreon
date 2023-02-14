@@ -3,7 +3,7 @@ import About from "./pages/about.js";
 import Menu from "./pages/menu.js";
 import Contact from "./pages/contact.js";
 import NotFound from "./pages/notfound.js";
-import Shop from "./pages/shop.js";
+// import Shop from "./pages/shop.js";
 import Login from "./pages/login.js";
 import Cart from "./pages/cart.js";
 
@@ -13,7 +13,7 @@ const menu = document.querySelector('.navbar_nav_list');
 const icons = document.querySelector('.navbar_icons');
 
 const main = document.querySelector('.main');
-const main_background = document.querySelector('.main_background');
+const main_background = document.querySelector('.main_background__blink');
 const lorem = document.querySelector('.lorem');
 const mainback1 = document.querySelector('.mainback1');
 
@@ -25,11 +25,13 @@ const user_info = document.querySelector('.user_info');
 
 const modal = document.querySelector('.modal');
 
-
-
+const users = [];
 const user_cart = new Cart(document.cookie);
 
-export default user_cart
+users.push(user_cart);
+export default user_cart;
+
+console.log(users);
 
 
 toggleBtn.addEventListener('click', (e) => {
@@ -145,7 +147,9 @@ const router = async () => {
         { path: "/about", view1: About },
         { path: "/menu", view1: Menu },
         { path: "/contact", view1: Contact },
-        { path: "/shop", view1: Shop }
+        { path: "/shop", view1: "Shop" },
+        { path: "/test", view1: "Test" }
+
         
     ];
 
@@ -176,8 +180,17 @@ const router = async () => {
         document.querySelector(".lorem").innerHTML = await page.getHtml();
     } else {
 
-        // if (!(match.route.path == "/shop/shop.html")){
+        // if (match.route.path == "/test") {
+        //     console.log("test page test page")
+        //     document.querySelector(".lorem").innerHTML = `<h1>TeST TEST TEST</h1>`;
+        // }    
+
+          if (!(match.route.path == "/test")){
+
+        
             console.log(" !!! shop");
+
+         
             const page = new match.route.view1();       
             
             
@@ -218,6 +231,7 @@ const router = async () => {
                 toggleBtn.classList.toggle('on');
                 console.log(`menu.classList.length: ${menu.classList.length}`);
             }
+        }
     }
 
 }; 

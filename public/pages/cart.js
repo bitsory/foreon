@@ -1,4 +1,4 @@
-export default class {
+export default class Cart{
     
     
     constructor(param) {
@@ -11,13 +11,12 @@ export default class {
     c_name = '';
     c_items = [
         {c_item_name : '',
+         c_item_no : 0,
          c_item_price : 0,
          c_item_quantity : 0}
     ];
     
     
-    
-
    
 
     getCookie(name) {
@@ -56,7 +55,7 @@ export default class {
             <div class='user_profile_name'>${this.getCookie(document.cookie)}</div>
             <div class='user_profile_cart'>
                 
-            <form action='/shop/member/${this.getCookie(document.cookie)}/cart' method="post" class="form_user_profile_cart">
+            <form action='/shop/cart/${this.getCookie(document.cookie)}' method="post" class="form_user_profile_cart">
                     
                 <input type="submit" class="user_profile_cart_btn" name="view_cart" value="GO Cart" onclick=${this.viewCart()}>
             </form>

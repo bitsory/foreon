@@ -1,8 +1,12 @@
 // import cart from "./cart.js";
+import Main from "../index.js"
 
 export default class {
+    
 
 }
+
+console.log("log in.js");
 
 
 const login_modal_pop = document.querySelector('.login_modal_pop');
@@ -15,6 +19,8 @@ const btn_login = document.querySelector('.btn_login');
 const btn_signup = document.querySelector('.btn_signup');
 const user_id = document.querySelector('.user_id');
 const user_pw = document.querySelector('.user_pw');
+
+
 // const user_login_form = document.querySelector('.user_login_form');
 
 
@@ -44,10 +50,15 @@ const user_pw = document.querySelector('.user_pw');
 // });
 
 
-document.addEventListener('click',function(e){    
+document.addEventListener('click',function(e){   
+     
     if(e.target && e.target.className == 'login_modal_pop') {
-        console.log("login");
-        var link = document.location.href; 
+        // const login_main = Main;
+        //     login_main.push("test_login");
+        //     console.log(login_main);
+        //     console.log("login");
+
+        // var link = document.location.href; 
         modal.style.display = 'block';
         // document.body.style.overflow = 'hidden';
         modal_page.innerHTML = `
@@ -66,7 +77,9 @@ document.addEventListener('click',function(e){
                 <button class="btn_signup">Sign Up</button>
                 
             </form>
-            </div>`
+            </div>
+            
+            `
     }
     
     
