@@ -13,9 +13,10 @@ export default class {
             <div class="about_us">About us<br><br></div>
             We are a snack & juice bar right inside the LA Fitness East Cobb.<br>
             You can just feel free open the door come inside.<br><br>
-            Enjoy our sort of Coffee, powerful supplement smoothie, Acai bowl, wellness shot 
+            Enjoy our sort of Coffee, Powerful Supplement Smoothie, Acai bowl, Wellness shot 
             and Korean style snack & food K-Bop.<br><br>
-            Order online or call now!!<br>            
+            We also have useful products in online mall.<br><br>
+            Take a look around!!<br>            
             </h3>
             <div class="about_video">
                 <video src="/images/about_video.mp4" playsinline autoplay muted loop class="aboutVideo" >

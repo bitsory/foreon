@@ -26,7 +26,7 @@ nav {
     /* display: flex;
     align-items: center;
     justify-content: space-between; */
-    /* height: 5rem; */
+    height: 5rem;
     display: flex;
     justify-content: space-evenly;
     align-items: center;
@@ -154,6 +154,7 @@ nav {
     max-width: 100%;
     height: auto;
     /* padding-top: 100%;*/
+    overflow:hidden;
 }
 
 .pic2 {
@@ -173,13 +174,22 @@ nav {
 .sm_cho {
     width: 30vw;
     height: 30vw;
-    background: url(images/sm_t.png) left/cover no-repeat;
+    background: url(images/sm_t2.png) left/cover no-repeat;
     
     border-radius: 10% 10% 0 10%;
+    animation: bannermove 5s linear infinite;
     
    
 }
 
+@keyframes bannermove {
+    0% {
+        transform: translate(0, -50%);
+    }
+    100% {
+        transform: translate(0, 50%);
+    }
+  }
 
 .sm_neon {
     
@@ -381,7 +391,7 @@ nav {
 
 .navbar_icons a {
     padding: 8px 20px;
-    font-size: 2rem;
+    font-size: 1rem;
 }
 
 
@@ -511,6 +521,11 @@ nav {
     display: flex;
 }
 
+.online_item_pic {
+    width: 20rem;
+    height: auto;
+}
+
 
 #contact {
     display: flex;
@@ -619,6 +634,31 @@ nav {
 .thankyou_message {
     margin-top: 3rem;
     font-size: x-large;
+}
+
+
+.shop_category {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.online_main_items {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.online_main_item_contatiner {
+    display: block;
+}
+
+.online_main_item_pic_container {
+    width: 8rem;
+    height: auto;
+}
+
+.online_main_item_pic {
+    width: 8rem;
+    height: auto;
 }
 
 
@@ -994,7 +1034,7 @@ i.fa-solid.fa-angles-up {
     .sm_cho {
         width: 25vw;
         height: 25vw;
-        background: url(images/sm_t.png) left/cover no-repeat;
+        /* background: url(images/sm_t.png) left/cover no-repeat; */
         /* background-size: contain; */
         border-radius: 10% 10% 0 10%;
         /* max-width:100%; max-height:100%; width:auto; height:auto; */
@@ -1187,7 +1227,7 @@ i.fa-solid.fa-angles-up {
         flex-direction: column;
         margin-left: 0;
         
-    }
+    }background
 
         
     .pic1,.pic2,.pic3 {
@@ -1208,7 +1248,7 @@ i.fa-solid.fa-angles-up {
     .sm_cho {
         width: 80vw;
         height: 80vw;
-        background: url(images/sm_t.png) left/cover no-repeat;
+        /* background: url(images/sm_t.png) left/cover no-repeat; */
         background-size: contain;
         border-radius: 10% 10% 0 10%;
         

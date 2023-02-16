@@ -25,13 +25,38 @@ const user_info = document.querySelector('.user_info');
 
 const modal = document.querySelector('.modal');
 
-const users = [];
+
 const user_cart = new Cart(document.cookie);
 
-users.push(user_cart);
+
 export default user_cart;
 
-console.log(users);
+console.log(user_cart);
+
+// function getCookie() {
+//     console.log(`get cookie : ${document.cookie}`);
+//     let cook = decodeURIComponent(document.cookie).split(';');// get array
+   
+//     var result='GUEST';
+//     cook.forEach((item) => { 
+//         const obj = new Object();
+//         const elem = item.trim();
+//         const tmp = elem.split('=');
+//         const key = tmp[0];
+//         const val = tmp[1];
+//         obj.key = val;
+        
+//         if (key === 'cafefore') {
+//             var start = val.indexOf('":"');
+//             var end = val.indexOf('",');                
+//             result = val.substring(start+3, end);                                
+//         } 
+
+//     });
+
+//     return result;
+    
+// }
 
 
 toggleBtn.addEventListener('click', (e) => {
@@ -77,13 +102,15 @@ document.addEventListener('click', function(e){
     //var user_profile =  document.querySelector('.user_profile');
     // var modal_body = document.querySelector('.modal_body');
     
-    console.log(e.target);
-    
 
     if(e.target == user_info) { // user info modal window show
         console.log("user info");        
         user_profile_container.style.display = "block";
-        document.querySelector(".user_profile").innerHTML = user_cart.getUserProfile();        
+        if (document.querySelector(".user_info").innerText !== "GUEST") {
+            document.querySelector(".user_profile").innerHTML = user_cart.getUserProfile();
+        } else {
+            document.querySelector(".user_profile").innerHTML = user_cart.getGuestProfile();
+        }
     }
 
     if (user_profile_container && e.target != user_info) // user info modal window off
@@ -93,7 +120,9 @@ document.addEventListener('click', function(e){
         }
 
     if (e.target && e.target.className == 'user_logout_btn') { 
-        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
+        console.log("user log out");
+        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT; domain=localhost;path=/;';
+        console.log("user log out user log out user log out user log out user log out ");
     }
 
     // if (e.target != document.querySelector(".login_modal_pop"))
@@ -109,14 +138,7 @@ document.addEventListener('click', function(e){
         
 
     }
-    if (e.target && e.target.className == 'test_btn') {
-        console.log("test button test");
-        console.log(user_cart);
-        console.log(user_cart.c_name);
-        console.log(user_cart.c_items);
-        
 
-    }
     
 
 
@@ -147,8 +169,8 @@ const router = async () => {
         { path: "/about", view1: About },
         { path: "/menu", view1: Menu },
         { path: "/contact", view1: Contact },
-        { path: "/shop", view1: "Shop" },
-        { path: "/test", view1: "Test" }
+        // { path: "/shop", view1: "Shop" },
+        // { path: "/shop/*", view1: "Test" }
 
         
     ];
@@ -171,22 +193,22 @@ const router = async () => {
 
     console.log("match :", match);
 
-    if (!match) {
-        match = {
-            route: location.pathname,
-            isMatch: true,
-        };
-        const page = new NotFound();
-        document.querySelector(".lorem").innerHTML = await page.getHtml();
-    } else {
+    // if (!match) {
+    //     match = {
+    //         route: location.pathname,
+    //         isMatch: true,
+    //     };
+    //     const page = new NotFound();
+    //     document.querySelector(".lorem").innerHTML = await page.getHtml();
+    // } else {
 
         // if (match.route.path == "/test") {
         //     console.log("test page test page")
         //     document.querySelector(".lorem").innerHTML = `<h1>TeST TEST TEST</h1>`;
         // }    
 
-          if (!(match.route.path == "/test")){
-
+        // if(match.route.path == "/home" || match.route.path == "/" || match.route.path == "" || match.route.path == "/cafefore/" || match.route.path == "/cafeFORE/" || match.route.path == "/about" || match.route.path == "/menu" || match.route.path == "/contact"){
+        if (match && match !== "/shop") {
         
             console.log(" !!! shop");
 
@@ -196,7 +218,7 @@ const router = async () => {
             
             document.querySelector(".lorem").innerHTML = await page.getHtml();
                     
-            console.log(`page: ${JSON.stringify(page)}`);
+            // console.log(`page: ${JSON.stringify(page)}`);
         
         
             if(match.route.path == "/home" || match.route.path == "/" || match.route.path == "" || match.route.path == "/cafefore/" || match.route.path == "/cafeFORE/") {
@@ -232,7 +254,7 @@ const router = async () => {
                 console.log(`menu.classList.length: ${menu.classList.length}`);
             }
         }
-    }
+    // }
 
 }; 
 

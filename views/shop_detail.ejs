@@ -6,7 +6,8 @@
     <!-- <meta name="viewport" content="width=device-width"> -->
     <meta content="width=device-width,minimum-scale=1.0" name="viewport">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1"> -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
+    
 	<title>Cafe FORE</title>    
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jost:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -17,6 +18,7 @@
     <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
     
     <link rel="icon" href="/images/logo.png">
+    <!-- <base href="/"> -->
     
 </head>
 <body>
@@ -93,100 +95,76 @@
                             <button class="shop_kids_btn">Kids</button>
                         </div>
                         <div class="shop_cat_test">
-                            <button class="shop_test_btn">Test</button>
+                            <button class="shop_test_btn">Kids</button>
                         </div>
                     </div>
                 </div>
             
                     <div class="online_main">
-                        Popular item
-                        <div class="online_main_items">
-                            
+                        <!-- <div class="online_main_items">
+                            Popular item
                             
                             <% for (var i = 0 ; i < product.length ; i++) { %>
-                            <div class="online_main_item_contatiner">
-                                <div class="online_main_item_pic_container">
-                                    <a href="/shop/view/item/<%= product[i].prodnum %>">
-                                        <img class="online_main_item_pic" src=<%= product[i].image %> >
-                                    </a>
-                                </div>
+                                <a href="/shop/view/item/<%= product[i].prodnum %>"><div class="online_main_item_pic_container">
+                                    <img class="online_main_item_pic" src=<%= product[i].image %> >
+                                </div></a>
                                 
                                 <div class="online_main_item_number" style="display: none;">                    
                                     <%= product[i].prodnum %>                
                                 </div>
-                                <div class="online_main_item_name">                    
-                                    <a href="/shop/view/item/<%= product[i].prodnum %>"><%= product[i].name %>
-                                    </a>               
-                                </div>
-                                <div class="online_main_item_price">                    
-                                    <a href="/shop/view/item/<%= product[i].prodnum %>">$<%= product[i].price_sell %>
-                                    </a>
-                                </div>
-                            </div>          
+                                <a href="#"><div class="online_main_item_name">                    
+                                    <%= product[i].name %>                
+                                </div></a>
+                                <a href="#"><div class="online_main_item_price">                    
+                                    $<%= product[i].price_sell %>
+                                </div></a>            
                                 
                             <% } %>
+                        </div> -->
+                        <div class="online_items">
+                            <% for (var i = 0 ; i < product.length ; i++) { %>
+                            <div class="online_item_pic_container">
+                                <img class="online_item_pic" src=<%= product[i].image %> >
+                            </div>
+                            <div class="online_item_number" style="display: none;">                    
+                                <%= product[i].prodnum %>                
+                            </div>
+                            <div class="online_item_name">                    
+                                <%= product[i].name %>                
+                            </div>
+                            <div class="online_item_price">                    
+                                $<%= product[i].price_sell %>
+                            </div>
 
+                            <div class="online_item_description">                    
+                                <%= product[i].content %>
+                            </div>
 
+                            <div class="online_item_quantity"> 
+                                <select name="Choose Your Quantity" id="order_quantity" >
+                                    <option value="0">Choose Your Quantity</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
+            
+                            <button class="add_cart_btn">Add Cart</button>
+                            <button class="buy_now_btn">BUY IT NOW</button>
+                            <br><br><br>
 
-
-
+                            <% } %>
+                            <div class="check_go_cart_container">                       
+                            </div>                    
                         </div>
                     </div>
-
-
-
-
-
-
-                
-                <!--  
-                <div class="online_items">
-                    <% for (var i = 0 ; i < product.length ; i++) { %>
-                    <div class="online_item_pic_container">
-                        <img class="online_item_pic" src=<%= product[i].image %> >
-                    </div>
-                    <div class="online_item_number" style="display: none;">                    
-                        <%= product[i].prodnum %>                
-                    </div>
-                    <div class="online_item_name">                    
-                        <%= product[i].name %>                
-                    </div>
-                    <div class="online_item_price">                    
-                        $<%= product[i].price_sell %>
-                    </div>
-
-                    <div class="online_item_description">                    
-                        <%= product[i].content %>
-                    </div>
-
-                    <div class="online_item_quantity"> 
-                        <select name="Choose Your Quantity" id="order_quantity" >
-                            <option value="0">Choose Your Quantity</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
-                    </div>
-    
-                    <button class="add_cart_btn">Add Cart</button>
-                    <button class="buy_now_btn">BUY IT NOW</button>
-                    <br><br><br>
-
-                    <% } %>
-                    <div class="check_go_cart_container">                       
-                    </div>                    
-                </div>
-                -->
-
-
-
             </div>
         </div>     
     </section>
@@ -240,13 +218,13 @@
                 <div class="logo_btn foot_logo"></div><i class="fa-solid fa-angles-up"></i>
             </div>
         </div>  
-        shop_test.ejs      
+        shop_detail.ejs      
     </section>
 	
-    <script type="module" src="index.js"></script>
-    <script type="module" src="./pages/login.js"></script>
-    <script type="module" src="./pages/shop.js"></script>
-    <script type="module" src="./pages/test.js"></script>
+    <script type="module" src="/index.js"></script>
+    <script type="module" src="/pages/login.js"></script>
+    <script type="module" src="/pages/shop.js"></script>
+    <script type="module" src="/pages/test.js"></script>
     <!-- <script type="module" src="./public/index.js"></script> -->
     
 

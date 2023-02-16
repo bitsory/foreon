@@ -33,42 +33,244 @@ app.get('/',(req,res) => {
 	}
 });
 
-app.get('/test',(req,res) => {
+
+app.get('/shop',(req,res) => {
     console.log(`req test: ${req}`);
     console.log("test test etst test test test etst  ");
-    
-    if (req.session.loginData) {
-        
-		res.render('test.ejs', {post : req.session.loginData[0].name, 
-                                item : "Ginger Bottle 16 oz....",
-                                price : 18.00,
-                                description : "100% Handmade Squeezed Ginger Juice"
-                            });
-	} else {
-		res.render('shop_test.ejs', { post : "GUEST",
-            product_number : 1001,
-            product_name : "Ginger Bottle 16 oz....",
-            product_price : 18.00,
-            description : "100% Handmade Squeezed Ginger Juice"
-        });
+    var member = '';
+    if (req.session.loginData) {member = req.session.loginData[0].name;}
+    const mysql = require('mysql');
 
-	}
+    const con = mysql.createConnection({
+        host: '127.0.0.1',
+        port: '3306',
+        user: 'root',
+        password: '111111',
+        database: 'test1',
+        
+    });
+
+    con.connect((err) => {
+        if(err){
+        console.log('Error connecting to Db');
+        return;
+        }
+        console.log('Connection established');
+    });
+
+
+    // const sign_in_id = req.body.sign_in_id;
+    // const sign_in_pw = req.body.sign_in_pw;
+    // const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
+    // console.log(redirect_path);
+
+    var date;
+    date = new Date();
+    date = date.getFullYear() + '-' +
+    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
+    ('00' + date.getDate()).slice(-2) + ' ' + 
+    ('00' + date.getHours()).slice(-2) + ':' + 
+    ('00' + date.getMinutes()).slice(-2) + ':' + 
+    ('00' + date.getSeconds()).slice(-2);
+
+     
     
+   
+    
+        
+    con.query('SELECT * from product'
+        , (err, result) => {
+                if(err){
+                    res.send(err);
+                    con.end();
+                // }
+                //  else if(result[0].no === 'false') {
+                //     res.send('check your ID and PW');
+                //     con.end();
+                } else {
+
+                    console.log("SELECT * from product where prodnum = ");
+                    console.log(`${result[0].prodnum}`);
+                    
+                    // res.send(result[0].name);
+                    if(member) {
+                        res.render('shop_test.ejs', { 
+                            post : member,
+                            product : result
+                            // product_number : result[0].prodnum,
+                            // product_name : result[0].name,
+                            // product_price : result[0].price_sell,
+                            // product_description : result[0].content
+                        })
+                    } else {
+
+                        res.render('shop_test.ejs', { 
+                            post : "GUEST",
+                            product : result
+                            // product_number : result[0].prodnum,
+                            // product_name : result[0].name,
+                            // product_price : result[0].price_sell,
+                            // product_description : result[0].content
+                        })
+                    }
+                }
+                    
+    });    
+    
+    // if (req.session.loginData) {
+        
+	// 	res.render('test.ejs', {post : req.session.loginData[0].name, 
+    //                             item : "Ginger Bottle 16 oz....",
+    //                             price : 18.00,
+    //                             description : "100% Handmade Squeezed Ginger Juice"
+    //                         });
+	// } else {
+	// 	res.render('shop_test.ejs', { post : "GUEST",
+    //         product_number : 1001,
+    //         product_name : "Ginger Bottle 16 oz....",
+    //         product_price : 18.00,
+    //         description : "100% Handmade Squeezed Ginger Juice"
+    //     });
+
+	// }
+    
+});
+
+app.get('/shop/view/item/:id',(req,res) => {
+    
+    var p_number = parseInt(req.params.id);
+    var member = '';
+
+    console.log(`/shop/view/item:id: ${p_number}`);
+    if (req.session.loginData) {member = req.session.loginData[0].name;}
+    const mysql = require('mysql');
+
+    const con = mysql.createConnection({
+        host: '127.0.0.1',
+        port: '3306',
+        user: 'root',
+        password: '111111',
+        database: 'test1',
+        
+    });
+
+    con.connect((err) => {
+        if(err){
+        console.log('Error connecting to Db');
+        return;
+        }
+        console.log('Connection established');
+    });
+
+
+    // const sign_in_id = req.body.sign_in_id;
+    // const sign_in_pw = req.body.sign_in_pw;
+    // const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
+    // console.log(redirect_path);
+
+    var date;
+    date = new Date();
+    date = date.getFullYear() + '-' +
+    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
+    ('00' + date.getDate()).slice(-2) + ' ' + 
+    ('00' + date.getHours()).slice(-2) + ':' + 
+    ('00' + date.getMinutes()).slice(-2) + ':' + 
+    ('00' + date.getSeconds()).slice(-2);
+
+     
+    
+   
+    
+        
+    con.query('SELECT * from product where prodnum = ?', [p_number]
+        , (err, result) => {
+                if(err){
+                    res.send(err);
+                    con.end();
+                // }
+                //  else if(result[0].no === 'false') {
+                //     res.send('check your ID and PW');
+                //     con.end();
+                } else {
+
+                    console.log("SELECT * from product where prodnum = ");
+                    console.log(`${result[0].prodnum}`);
+                    
+                    // res.send(result[0].name);
+                    if(member) {
+                        res.render('shop_detail.ejs', { 
+                            post : member,
+                            product : result
+                          
+                        })
+                    } else {
+
+                        res.render('shop_detail.ejs', { 
+                            post : "GUEST",
+                            product : result
+                           
+                        })
+                    }
+                }
+            });  
+
+
 });
 
 
 
-
+app.use(express.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({extended : true}));
-// app.use(bodyParser().json())
+
 app.use(express.static('public'));
 
-app.post("/new", function (req, res) {
-    console.log("new new new new new new new");
+
+
+
+app.post("/add_cart", function (req, res) {
+    console.log("get_cart get_cart get_cart");
     
-    console.log(req.body);
-    console.log("new end new end new end new end new end new end ");
-    res.send({"test":"jooo"});
+    console.log(req.body)
+    
+    console.log("get_cart end get_cart end get_cart end get_cart end get_cart end ");
+    
+    const mysql = require('mysql');
+
+    const con = mysql.createConnection({
+        host: '127.0.0.1',
+        port: '3306',
+        user: 'root',
+        password: '111111',
+        database: 'test1',
+        
+    });
+
+    con.connect((err) => {
+        if(err){
+        console.log('Error connecting to Db');
+        return;
+        }
+        console.log('Connection established');
+    });
+
+    const u_id = req.body.c_name;
+    const prodnum = req.body.c_items[0].c_item_no;
+    const quantity = req.body.c_items[0].c_item_quantity;
+
+    var date;
+    date = new Date();
+    date = date.getFullYear() + '-' +
+    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
+    ('00' + date.getDate()).slice(-2) + ' ' + 
+    ('00' + date.getHours()).slice(-2) + ':' + 
+    ('00' + date.getMinutes()).slice(-2) + ':' + 
+    ('00' + date.getSeconds()).slice(-2);
+
+        
+    con.query('INSERT INTO cart (u_id, prodnum, quantity, indate) values (?,?,?,?)', 
+    [u_id, prodnum, quantity, date]);
+        
+    res.json(req.body)
   });
 
 
@@ -122,25 +324,6 @@ app.get('/contact',(req,res) => {
 	}
     
 });
-
-app.get('/shop',(req,res) => {
-    console.log(`req shop: ${req}`);
-    console.log("shop shop shop shop shop ");
-    
-    if (req.session.loginData) {
-        
-		res.render('index.ejs', {post : req.session.loginData[0].name});
-	} else {
-		res.sendFile(__dirname + "/public/index.html");
-	}
-    
-});
-
-
-// app.get('/sign_in', (req, res) => {
-//     res.sendFile(__dirname + "/public/index.html")
-
-// })
 
 
 
@@ -206,17 +389,13 @@ app.post('/sign_in', function (req,res) {
                     result.forEach( (result) => {
                         
                         console.log(`${result.no}`);
-                        test(result.no);
+                        
                         updateLastLog(result.no);                         
                     }) 
                 }
                     
     });    
     
-    function test(param) {
-        console.log(`res_name test: ${param}`);       
-
-    }
 
     function updateLastLog(param) {
         
