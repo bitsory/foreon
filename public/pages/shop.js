@@ -1,118 +1,179 @@
-import Place_order from "./place_order.js";
+import PlaceOrder from "./place_order.js";
 import Main from "../index.js";
+import ShopDetail from "./shop_detail.js"
 
 
-// import cart from "./cart.js";
-
-
-    // constructor() {
+export default class {
+    constructor() {
         document.title = "Cafe FORE";
         console.log("shop page");
+    }
 
-        // const n_cart = new cart();
-       
-        // this.user_info = n_cart.getCookie(document.cookie);        
-      
-        // console.log(`user_info : ${this.user_info}`);        
+    
 
-        const n_cart = Main;
-        let guest_cart = [];
+    getHtml() {  
 
-        console.log(`n_cart : ${n_cart}`);
-        console.log(n_cart);
-        document.addEventListener('click',function(e){ 
-            if (e.target && e.target.className == 'buy_now_btn' || e.target && e.target.className == 'add_cart_btn') {   
-                var order_quantity = parseInt(document.getElementById('order_quantity').value);
-                var product_number = document.querySelector('.online_item_number').innerText.trim();
-                var product_name = document.querySelector('.online_item_name').innerText;
-                var product_price = parseInt(document.querySelector('.online_item_price').innerText.substr(1));
-            }
-
-            if(e.target && e.target.className == 'buy_now_btn') {
-                                
-                console.log(`order count = ${order_quantity}`);
-                const placeOrder = new Place_order(order_quantity);
-                document.querySelector(".online_order").innerHTML = placeOrder.getOrder();
-                
-                
-            } 
-
-            if(e.target && e.target.className == 'add_cart_btn') {
-                let user = n_cart.getCookie(document.cookie);
-                console.log(`user : ${user}`);
-                
-                
-                document.querySelector(".check_go_cart_container").innerHTML =
-                    `<div class="check_go_cart">
-                        <h2>You added ${product_name} for ${order_quantity} items.</h2>
-                        <form action="/shop/cart/temp_user" method="post" class="go_cart_form">
-                        <input type="submit" class="go_cart_btn" value="Go Cart">
-                        </form>
-                        
-                        <button class="check_out">Check Out</button><br>
-                        <button class="continue_shopping">Continue Shopping</button>
+        
+        return `
+        <div class="online_container">
+            <div class="online_title">
+                Cafe FORE Online Shop
+                <form class="example" action="#">
+                    <input type="text" placeholder="Search.." name="search">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+                <div class="shop_category">
+                    <div class="shop_cat_wellness">
+                        <button class="shop_wellness_btn">Wellness</button>
                     </div>
-                    `
-                // console.log(tmp_cart);
-                // console.log(n_cart);
-                // console.log(product_name);
-                // console.log(product_price);
-                // console.log(n_cart.c_items.length);
-                // if (tmp_cart) {                
-                //     for (var i = 0 ; i < tmp_cart.length ;  i++) {
-                //         u_cart.push(tmp_cart[i]);
-                //     }
-                // }
-                // // u_cart.push(tmp_cart);
-                // console.log(`tmp_cart : ${tmp_cart}`);
+                    <div class="shop_cat_dessert">
+                        <button class="shop_dessert_btn">Dessert</button>
+                    </div>
+                    <div class="shop_cat_kids">
+                        <button class="shop_kids_btn">Kids</button>
+                    </div>
+                    <div class="shop_cat_test">
+                        <button class="shop_test_btn">Test</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div id="online_main" class="online_main">
+                MD's Choice items
                 
+                <div class="online_main_items">
+                </div>
+            </div>
 
-                    for (var i=0 ; i < n_cart.c_items.length  ; i++) {
-                        n_cart.c_items[i].c_item_no = product_number;
-                        // n_cart.c_items[0].c_item_name = item_name;
-                        n_cart.c_items[i].c_item_price = product_price;
-                        n_cart.c_items[i].c_item_quantity = n_cart.c_items[0].c_item_quantity + order_quantity;
+            <div id="test_container" class="test_container">test test
+            </div>
 
-                    }
-                if (user === "GUEST") {
-                    let tmp_cart = JSON.parse(localStorage.getItem("cart"));
-                    console.log(`tmp_cart: ${tmp_cart}`);
-                    if (tmp_cart) {                
-                        for (var i = 0 ; i < tmp_cart.length ;  i++) {
-                            guest_cart.push(tmp_cart[i]);
-                        }
-                    }
-                    // u_cart.push(tmp_cart);
-                    guest_cart.push(n_cart);
-                    localStorage.setItem("cart", JSON.stringify(guest_cart));
-                    console.log(`guest_cart: ${guest_cart}`); 
-                    console.log(guest_cart);
+        </div>
+        `
+        
+    }
+}
 
+document.addEventListener('click', function(e) {
+
+    if (e.target && (e.target.className =='online_main_item_name' || e.target.className == 'online_main_item_pic' || e.target.className == 'online_main_item_price')) {
+        
+        let item_num = e.target.parentElement.getAttribute('link_data_itemid');
+        console.log('itemid');
+        console.log(item_num);
+
+        const send_data = { post : "item detail view"};
+        const data = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+               
+                },
+            body: JSON.stringify(send_data)
+        };
+        console.log(data);
+
+        fetch(`/shop/view/item/${item_num}`, data)
+        // fetch('/shopview', data)
+        .then((res) => res.json())
+        .then(result => {
+            
+            console.log(result)  
+            const shop_detail = new ShopDetail();
+            const item_image = result.image;
+            const item_num = result.prodnum;
+            const item_name = result.name;
+            const item_price = result.price_sell;
+            const item_content = result.content;
+
+            // document.querySelector(".online_main").innerHTML = 
+            //     shop_detail.getHtml(item_image, item_num, item_name, item_price, item_content);
+
+            if (typeof (history.pushState) != "undefined") { 
+                history.pushState(null, null, `/shop/view/item/${result.prodnum}`); 
+                console.log(result)
+                // const place_order = new PlaceOrder();
+                // PlaceOrder.test();
+                document.querySelector(".online_main").innerHTML = 
+                shop_detail.getHtml(item_image, item_num, item_name, item_price, item_content);
+                // `<div class="online_item_pic_container">ITEM
+                // </div>`
                 
-                // console.log(u_cart);
-                } else {               
-
-                    const data = {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                            // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                            },
-                        body: JSON.stringify(n_cart)
-                    };
-
-                    fetch('/add_cart', data)
-                    .then((res) => res.json())
-                    .then(result => {
-                        console.log(result)
-                    });
-                }   
-
-
-
-            }
-
-            if(e.target && e.target.className == 'continue_shopping') {
-                document.querySelector(".check_go_cart").remove();
+                // document.querySelector(".shop_test").innerHTML = result.name;
+                // document.querySelector('.cart_time_remaining').innerText = cart_time_remaining;
+            } else { 
+                this.location.href = `http://localhost:8080/shop/view/item/${result.prodnum}`
             }
         });
+    }
+
+    
+    if (e.target && e.target.className == 'shop_wellness_btn') {
+        console.log("shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn ");
+
+        document.querySelector('.test_container').innerText = "test";
+    }
+
+
+    /*
+
+    if (e.target && (e.target.className).substr(0, 17) == 'nline_main_item_' && e.target && (e.target.className).slice(-2, -1) == 'c') {
+        
+        var item_num = (e.target.className).slice(-1);
+        console.log(item_num)
+        // var send_data = { prodnum : item_num };
+        
+
+        const send_data = { post : "item detail view"};
+        const data = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+               
+                },
+            body: JSON.stringify(send_data)
+        };
+        console.log(data);
+
+        fetch(`/shop/view/item/${item_num}`, data)
+        // fetch('/shopview', data)
+        .then((res) => res.json())
+        .then(result => {
+            
+            console.log(result)  
+            const shop_detail = new ShopDetail();
+            const item_image = result.image;
+            const item_num = result.prodnum;
+            const item_name = result.name;
+            const item_price = result.price_sell;
+            const item_content = result.content;
+
+            // document.querySelector(".online_main").innerHTML = 
+            //     shop_detail.getHtml(item_image, item_num, item_name, item_price, item_content);
+
+            if (typeof (history.pushState) != "undefined") { 
+                history.pushState(null, null, `/shop/view/item/${result.prodnum}`); 
+                console.log(result)
+                // const place_order = new PlaceOrder();
+                // PlaceOrder.test();
+                document.querySelector(".online_main").innerHTML = 
+                shop_detail.getHtml(item_image, item_num, item_name, item_price, item_content);
+                // `<div class="online_item_pic_container">ITEM
+                // </div>`
+                
+                // document.querySelector(".shop_test").innerHTML = result.name;
+                // document.querySelector('.cart_time_remaining').innerText = cart_time_remaining;
+            } else { 
+                this.location.href = `http://localhost:8080/shop/view/item/${result.prodnum}`
+            }
+
+            
+        });
+    
+    
+    
+    }
+
+    */
+});
+

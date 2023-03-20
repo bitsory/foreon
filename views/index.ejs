@@ -15,6 +15,8 @@
         }
     </style>    
     <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.polyfill.io/v3/polyfill.min.js"></script>
+    <script src="https://checkout.sandbox.dev.clover.com/sdk.js"></script>
     
     <link rel="icon" href="/images/logo.png">
     
@@ -37,13 +39,15 @@
                 <!-- <li><a href="/" data-link-T>HOME</a></li> -->
                 <li><a href="/about" data-link-T>ABOUT</a></li>
                 <li><a href="/menu" data-link-T>MENU</a></li>   
-                <li><a href="/shop">ONLINE SHOP</a></li>             
+                <li><a href="/shop" data-link-T>ONLINE SHOP</a></li>             
                 <li><a href="/contact" data-link-T>CONTACT</a></li>
-                <!-- <li><a href="/test">test</a></li> -->
+                <!-- <li><a href="/test" data-link-T>test</a></li> -->
                 
             </ul>
             <div class="login">
-                <a href="#"><div class="user_info"><%= post %></div></a>
+                <div class="user_info">
+                    <button class="user_info_btn"><%= post %></button>
+                </div>
                 <div class="user_profile_container">
                     <div class="user_profile">
                         <div class="user_profile_name"></div>
@@ -55,7 +59,7 @@
                 <button class="test_btn">test_test</button>
             </div> -->
             <div class="navbar_icons">
-                <a href="#">Cart</a>
+                <button class="go_cart">Cart</button>
                 <!-- <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank"><i class="fab fa-facebook"></i></a>
                 <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a> -->
 
@@ -80,7 +84,7 @@
             <div class="mainback1"></div>    
 
         </div>
-        <div class="lorem">            
+        <div id="lorem" class="lorem">            
 
         </div>
        
@@ -139,7 +143,7 @@
     <script type="module" src="index.js"></script>
     <script type="module" src="./pages/login.js"></script>
     <!-- <script type="module" src="./pages/shop.js"></script> -->
-    <script type="module" src="./pages/test.js"></script>
+    <script type="module" src="./pages/shop.js"></script>
     <!-- <script type="module" src="./public/index.js"></script> -->
     
 

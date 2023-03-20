@@ -142,15 +142,7 @@ export default class {
 
             </div>
         </div>
-            
-           
-            
-            
-            `
-            
-            
-            ;
-        });
+            `;});
 
         this.kbop_btn.addEventListener('click', (event)=> {
             console.log("kbop event listener");
