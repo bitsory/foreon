@@ -161,7 +161,7 @@ export default class {
                 console.log("proceed_order_btn proceed_order_btn proceed_order_btn ");
                 let tmp_cart = '';
                 let check_out_cart = [];
-                const orderConfirm = new order_confirm(user_id);
+                // const orderConfirm = new order_confirm(user_id);
                 console.log(user_id)
                 
                 let checked_test = '';
@@ -206,6 +206,8 @@ export default class {
                         console.log('check_out_cart')
                         console.log(check_out_cart)
 
+
+                        const orderConfirm = new order_confirm(user_id, check_out_cart);
                         document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
                         orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
                         })
@@ -250,7 +252,7 @@ export default class {
                             proceed_checkout_total = proceed_checkout_total + element.quantity * element.price_sell;
                         })
 
-                        // const orderConfirm = new order_confirm(user_id, proceed_checkout_selected_order_cart);
+                        const orderConfirm = new order_confirm(user_id, proceed_checkout_selected_order_cart);
                         document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
                         orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
                     })
@@ -612,10 +614,10 @@ export default class {
                         console.log("tmp_checked_order_cart");
                         console.log(tmp_checked_order_cart);
                         */
-
-                        result.forEach(element => {
-                            tmp_total = tmp_total + element.quantity * element.price_sell;
-                        })
+                        
+                        result.length > 0 ? 
+                        result.forEach(element => {tmp_total = tmp_total + element.quantity * element.price_sell;}) : false;
+                        
                         document.querySelector('.online_place_order_item_grandtotal').innerText = '$$' + tmp_total.toFixed(2);
                     
                         console.log(result)

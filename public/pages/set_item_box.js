@@ -1,25 +1,25 @@
 export default class {
 
     
-    check_out_items_container = document.querySelector('.check_out_items_container');
+    // check_out_items_container = document.querySelector('.check_out_items_container');
+    online_main = document.getElementById('online_main');
+    // user_checkout_submit_button_container = document.querySelector('.user_checkout_submit_button_container');
 
     constructor (user_id, item_attribute, check_out_cart) {
-        // g_total = tmp_total;
+      
+        this.setReadyCart(check_out_cart)
+        // user_checkout_ready_cart = check_out_cart;
 
-        this.user_checkout_ready_cart = check_out_cart;
+       
 
-        this.check_out_items_container.addEventListener('click', (e) =>{
+
+        this.online_main.addEventListener('click', (e) => {
             console.log("set item box click_test");
             console.log(e.target)
             console.log(user_id)
             console.log(check_out_cart);
 
             let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
-
-            
-            console.log(user_checkout_ready_cart);
-
-
 
             if(e.target && (e.target.className) == `${item_attribute}_plus_quantity_btn`) {
                 console.log(`${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn`)
@@ -82,6 +82,7 @@ export default class {
                     
                     const amount = document.querySelector('.payment_amount');
                     amount.value = parseFloat(g_total).toFixed(2);
+                    this.setReadyCart(check_out_cart);
                 
                 } else {  /////////////////// user add up
                     let selected_number = check_out_cart.map(element => {
@@ -116,9 +117,12 @@ export default class {
                         })
 
                         document.querySelector(`.user_checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
-                        this.rerenderTotal(new_grandtotal);                    
+                        this.rerenderTotal(new_grandtotal);
+                        this.setReadyCart(result); 
+                                  
                     })        
                 }
+                
             }
         
             if(e.target && (e.target.className) == `${item_attribute}_minus_quantity_btn`) { // item quantity subtract
@@ -167,6 +171,7 @@ export default class {
                     
                         const amount = document.querySelector('.payment_amount');
                         amount.value = parseFloat(g_total).toFixed(2);
+                        this.setReadyCart(check_out_cart);
 
                     } else {
                         let selected_number = check_out_cart.map(element => {
@@ -201,10 +206,13 @@ export default class {
                             })
     
                             document.querySelector(`.user_checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
-                            this.rerenderTotal(new_grandtotal);                        
+                            this.rerenderTotal(new_grandtotal);    
+                            this.setReadyCart(result);                     
                         })        
                     }
+                    
                 }
+                
             }
         
             if(e.target && (e.target.className) == `${item_attribute}_delete_btn`) { // item delete
@@ -255,6 +263,7 @@ export default class {
                     
                     const amount = document.querySelector('.payment_amount');
                     amount.value = parseFloat(g_total).toFixed(2);
+                    this.setReadyCart(check_out_cart);
 
                 } else {
                     ///// item delete in user cart 
@@ -287,9 +296,11 @@ export default class {
                             new_grandtotal = new_grandtotal + element.price_sell * element.quantity;
                         })
                         document.querySelector(`.user_checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
-                        this.rerenderTotal(new_grandtotal);                
+                        this.rerenderTotal(new_grandtotal);  
+                        this.setReadyCart(result);               
                     })
                 }
+                
             }
         });
     }
@@ -459,7 +470,7 @@ export default class {
         
     }
 
-    getTotal(total) {
+    setTotal(total) {
 
         g_total = total;
 
@@ -480,307 +491,19 @@ export default class {
 
     }
 
-    
-
-    /*
-    check_out_items_container = document.querySelector('.check_out_items_container');
-
-    constructor (user_id, item_attribute, check_out_cart) {
-        // g_total = tmp_total;
-
-        this.user_checkout_ready_cart = check_out_cart;
-
-        this.check_out_items_container.addEventListener('click', (e) =>{
-            console.log("set item box click_test");
-            console.log(e.target)
-            console.log(user_id)
-            console.log(check_out_cart);
-
-            let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
-
-            
-            console.log(user_checkout_ready_cart);
-
-
-
-            if(e.target && (e.target.className) == `${item_attribute}_plus_quantity_btn`) {
-                console.log(`${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn`)
-
-                /////////////// rendering item subtotal /////////////////////////
-                let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
-                let item_quantity_id = document.querySelector(`[quantity-itemid="${item_number}"]`);
-                let item_quantity = parseInt(item_quantity_id.innerText);
-        
-                item_quantity_id.innerText = item_quantity + 1;        
-        
-                const item_new_quantity = parseInt(item_quantity_id.innerText);
-                const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).innerText.slice(1)); 
-        
-                const item_subtotal = parseFloat(item_new_quantity * item_price);
-                document.querySelector(`[subtotal-itemid="${item_number}"]`).innerText = '$'+item_subtotal.toFixed(2);
-                // let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
-
-                let new_grandtotal = 0;
-                
-                //////user cart add up
-                if (user_id === 'GUEST') {
-                
-                    /////////////guest cart add up
-                    console.log(`check_out_cart : ${check_out_cart}`);
-                    console.log(`${check_out_cart}`);
-                    check_out_cart.forEach(element => {
-                        console.log('element');
-                        console.log(element);
-        
-                        if (element.c_item_no === item_number) {
-                            console.log(item_number)
-                            element.c_item_quantity++;
-
-                            tmp_cart.forEach(ele => {
-                                console.log('ele');
-                                console.log(ele);
-                                ele.c_item_no === element.c_item_no ? ele.c_item_quantity++ : false;
-                            })
-                        }
-                    })
-        
-                    sessionStorage.setItem("checkoutcart", JSON.stringify(check_out_cart));
-                    sessionStorage.setItem("cart", JSON.stringify(tmp_cart));
-                    // let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
-                    // tmp_cart.forEach(element => {
-                    //     if (element.c_item_no == check_out_cart.c_item_no) {
-                    //         element.c_item_quantity++;
-                    //     }
-                    // })
-
-                    console.log("sessionStorage.getItem(cart)");
-                    console.log(sessionStorage.getItem("cart"));
-
-                    /// rerendering total
-                    console.log(`g_total : ${g_total}`)
-                    const guest_new_grandtotal = g_total + item_price;
-                    g_total = guest_new_grandtotal;
-                    document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
-                    
-                    const amount = document.querySelector('.payment_amount');
-                    amount.value = parseFloat(g_total).toFixed(2);
-                
-                } else {  /////////////////// user add up
-                    let selected_number = check_out_cart.map(element => {
-                        return element.prodnum;
-                    })
-                    console.log("selected_number");
-                    console.log(selected_number);
-
-                    let data = {
-                        u_id : user_id,
-                        item_num : item_number,
-                        selected_num : selected_number
-
-                    };
-        
-                    const options = {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(data)
-                    };
-                    console.log(data);
-        
-                    fetch(`/item_addup_v2`, options)
-                    
-                    .then((res) => res.json())
-                    .then(result => { 
-                        
-                        console.log(result)
-
-                        result.forEach(element => {
-                            new_grandtotal = new_grandtotal + element.price_sell * element.quantity;
-                        })
-
-                        document.querySelector(`.user_checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
-                        this.rerenderTotal(new_grandtotal);                    
-                    })        
-                }
-            }
-        
-            if(e.target && (e.target.className) == `${item_attribute}_minus_quantity_btn`) { // item quantity subtract
-                console.log("online_place_order_item_minus_quantity_btn");
-                let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
-                console.log(item_number);
-                let item_quantity_id = document.querySelector(`[quantity-itemid="${item_number}"]`);
-                let item_quantity = parseInt(item_quantity_id.innerText);
-
-                let new_grandtotal = 0;
-        
-                // let item_quantity = parseInt(document.querySelector(`.online_place_order_item_quantity.o${item_number}`).innerText);
-                if (item_quantity > 1) {
-                    item_quantity_id.innerHTML = item_quantity - 1;
-                    const item_new_quantity = parseInt(item_quantity_id.innerText);
-                    const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).innerText.slice(1)); 
-        
-                    const item_subtotal = parseFloat(item_new_quantity * item_price);
-                    document.querySelector(`[subtotal-itemid="${item_number}"]`).innerText = '$'+item_subtotal.toFixed(2);
-                    // let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
-        
-                    if (user_id === 'GUEST') {
-                    
-                        /////////////guest cart subtract
-                        console.log(`tmp_order_cart : ${check_out_cart}`);
-                        check_out_cart.forEach(element => {
-                            console.log(element);
-        
-                            if (element.c_item_no === item_number) {
-                                console.log(item_number)
-                                element.c_item_quantity--;
-
-                                tmp_cart.forEach(ele => {
-                                    ele.c_item_no == element.c_item_no ? ele.c_item_quantity-- : false;
-                                })
-                            }    
-                        })
-            
-                        sessionStorage.setItem("checkoutcart", JSON.stringify(check_out_cart));
-                        sessionStorage.setItem("cart", JSON.stringify(tmp_cart));
-
-                        console.log(`g_total : ${g_total}`)
-                        const guest_new_grandtotal = g_total - item_price;
-                        g_total = guest_new_grandtotal;
-                        document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
-                    
-                        const amount = document.querySelector('.payment_amount');
-                        amount.value = parseFloat(g_total).toFixed(2);
-
-                    } else {
-                        let selected_number = check_out_cart.map(element => {
-                            return element.prodnum;
-                        })
-                        console.log("selected_number");
-                        console.log(selected_number);
-    
-                        let data = {
-                            u_id : user_id,
-                            item_num : item_number,
-                            selected_num : selected_number
-    
-                        };
-            
-                        const options = {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify(data)
-                        };
-                        console.log(data);
-            
-                        fetch(`/item_subtract_v2`, options)
-                        
-                        .then((res) => res.json())
-                        .then(result => { 
-                            
-                            console.log(result)
-    
-                            result.forEach(element => {
-                                new_grandtotal = new_grandtotal + element.price_sell * element.quantity;
-                            })
-    
-                            document.querySelector(`.user_checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
-                            this.rerenderTotal(new_grandtotal);                        
-                        })        
-                    }
-                }
-            }
-        
-            if(e.target && (e.target.className) == `${item_attribute}_delete_btn`) { // item delete
-                // console.log("online_place_order_item_delete_btn");
-                let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
-                console.log(item_number);
-                let item_quantity_id = document.querySelector(`[quantity-itemid="${item_number}"]`);
-                let item_quantity = parseInt(item_quantity_id.innerText);
-                const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).innerText.slice(1)); 
-                // let item_number = (e.target.className).slice(-1);
-                // let item_quantity = parseInt(document.querySelector(`.online_place_order_item_quantity.o${item_number}`).innerText);
-                // const item_price = parseFloat(document.querySelector(`.online_place_order_item_price.o${item_number}`).innerText.slice(1)); 
-                const delete_item_subtotal = parseFloat(item_quantity * item_price);
-                const delete_item = document.querySelector(`[itemid="${item_number}"]`);
-                console.log(delete_item);
-                let test = document.getElementById(`${item_attribute}s_container`);
-                console.log(test);
-                
-                document.getElementById(`${item_attribute}s_container`).removeChild(delete_item);
-
-                let new_grandtotal = 0;
-        
-                if (user_id === 'GUEST') {            
-                    /////////////item delete in guest cart 
-                    console.log(`tmp_order_cart : ${tmp_order_cart}`);            
-        
-                    let filtered = check_out_cart.filter((element) => element.c_item_no !== item_number);
-        
-                    console.log(filtered);
-                    console.log(check_out_cart)
-                    check_out_cart = filtered;
-        
-                    sessionStorage.setItem("checkoutcart", JSON.stringify(check_out_cart));
-
-                    let tmp_cart_filtered = tmp_cart.filter(element => {
-                        console.log("delete element")
-                        console.log(element)
-                        return element.c_item_no !== item_number;
-                    });
-
-                    console.log(tmp_cart_filtered)
-
-                    sessionStorage.setItem("cart", JSON.stringify(tmp_cart_filtered));
-
-                    const guest_new_grandtotal = g_total - delete_item_subtotal;
-                    g_total = guest_new_grandtotal;
-                    document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
-                    
-                    const amount = document.querySelector('.payment_amount');
-                    amount.value = parseFloat(g_total).toFixed(2);
-
-                } else {
-                    ///// item delete in user cart 
-                    let selected_number = check_out_cart.map(element => {
-                        return element.prodnum;
-                    })
-                    console.log("selected_number");
-                    console.log(selected_number);
-
-                    let data = {
-                        u_id : user_id,
-                        item_num : item_number,
-                        selected_num : selected_number
-
-                    };
-        
-                    const options = {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(data)
-                    };
-                    console.log(data);
-        
-                    fetch(`/item_delete_v2`, options)
-                    
-                    .then((res) => res.json())
-                    .then(result => {                         
-                        console.log(result)
-                        result.forEach(element => {
-                            new_grandtotal = new_grandtotal + element.price_sell * element.quantity;
-                        })
-                        document.querySelector(`.user_checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
-                        this.rerenderTotal(new_grandtotal);                
-                    })
-                }
-            }
-        });
+    setReadyCart(cart) {
+        user_checkout_ready_cart = cart;
     }
-    */
+
+    getReadyCart() {
+        // let ready_cart_test = this.ready_cart;
+        return user_checkout_ready_cart;
+
+    }
 }
 
 let g_total = 0;
 let tmp_order_cart = {};
 let user_checkout_ready_cart = [];
-
 
 

@@ -926,13 +926,34 @@ app.post("/add_cart", function (req, res) {
 
     let date = getDate();
 
-    var cartnum = date.replace(/\s|:|\-/g,"") + "C" + u_id.substr(0, 2);
+    var cartnum = date.replace(/\s|:|\-/g,"") + "CT" + u_id.substr(0, 3);
 
     console.log(date);
     console.log(cartnum);
     console.log(prodnum);
     // check the same item in cart   
 
+    con.query('SELECT cartnum, quantity from cart where u_id = ? and prodnum = ? and result = "n"',
+    //con.query('SELECT COALESCE(MAX(cartnum), "false") AS cartnum from cart where u_id = ? and prodnum = ?',
+        [u_id, prodnum], (err, result) => {
+        if (result[0] != undefined) { // add up item quantity
+            console.log(result[0]);
+            console.log(result[0].quantity);
+            console.log(result[0].cartnum);
+            con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`cartnum` = ?)', [result[0].quantity + quantity, date, result[0].cartnum]);
+            console.log("added up same item in cart")
+
+        } else {
+            console.log("put in new item in cart")
+            con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, indate, modate) values (?,?,?,?,?,?)', 
+            [cartnum, u_id, prodnum, quantity, date, date]);
+            
+            // res.json(req.body)
+        }
+    });
+
+
+    /*
     con.query('SELECT * from cart where u_id = ? and result = "n"', [u_id],
         (err, result) => {
             console.log("add cart")
@@ -971,6 +992,7 @@ app.post("/add_cart", function (req, res) {
 
 
         })
+    */
 
 
 /*
@@ -1598,19 +1620,19 @@ app.post('/make_default_billing_info', (req,res) => {
         console.log('Connection established');
     });
 
-    con.query('UPDATE billing_info SET default_payment="n" WHERE id = ?', [u_id], (err, result) => {
+    con.query('UPDATE test1.billing_info SET default_payment="n" WHERE id = ?', [u_id], (err, result) => {
         if (err) {
             res.send(err);
             con.end();
         } else {
             console.log(result);  
-            con.query('UPDATE billing_info SET default_payment="default" WHERE id = ? and bi_number = ?', [u_id, bi_number], (err, result) => {
+            con.query('UPDATE test1.billing_info SET default_payment="default" WHERE id = ? and bi_number = ?', [u_id, bi_number], (err, result) => {
                 if (err) {
                     res.send(err);
                     con.end();
                 } else {
                     console.log(result);
-                    con.query('SELECT clv_id FROM billing_info WHERE id = ?', [u_id], (err, result) => {
+                    con.query('SELECT clv_id FROM test1.billing_info WHERE id = ?', [u_id], (err, result) => {
                         if (err) {
                             res.send(err);
                             con.end();
@@ -1634,7 +1656,7 @@ app.post('/make_default_billing_info', (req,res) => {
                                 })
                                 console.log(res_data);
                                 
-                                con.querycon.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
+                                con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM test1.billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
                                     if (err) {
                                         res.send(err);
                                         con.end();
@@ -2898,6 +2920,231 @@ app.post('/item_delete_v2', (req,res) => {
 })
 
 
+app.post('/user_checkout_submit', (req,res) => {
+
+    const u_id = req.session.loginData.id;
+    const amount = req.body.amount;
+    const cart = req.body.cart;
+    let default_payment_method = '';
+    let clv_id = '';
+    let default_shipping_info = {};
+    // const cart_num = '';
+    const date = getDate();
+    const order_number = date.replace(/\s|:|\-/g,"") + "OD" + u_id.substr(0, 3);
+    const cart_numbers = cart.map(element => {
+        return element.cartnum;
+    });
+        
+    const items = cart.map(element => {
+        return { 
+            amount : element.price_sell * 100,
+            currency : "usd",
+            description : element.content.substring(0,120),
+            quantity : element.quantity,
+            type:"sku",
+            tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
+        }
+
+    })
+
+    
+    
+
+    ////////////////// get default payment method /////////////////////
+
+    
+    const mysql = require('mysql');
+
+    const con = mysql.createConnection({
+        host: '127.0.0.1',
+        port: '3306',
+        user: 'root',
+        password: '111111',
+        database: 'test1',
+        
+    });
+
+    con.connect((err) => {
+        if(err){
+        console.log('Error connecting to Db');
+        return;
+        }
+        console.log('Connection established');
+    });
+
+    getDefaultShippingInfo();
+
+    getDefaultBillingInfo()
+    .then(() => { 
+        console.log("make payment");      
+        makePayment();
+    });
+
+
+    function getDefaultBillingInfo() {
+        return new Promise((resolve, reject) => { 
+            con.query('SELECT clv_id, clv_tk FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    con.end();        
+                } else {
+                    console.log(result);            
+                    default_payment_method = result[0].clv_tk;
+                    clv_id = result[0].clv_id;
+                    resolve();
+                }
+            }); 
+        }) 
+    }
+
+
+    function getDefaultShippingInfo() {
+        con.query('SELECT recipient, address1, address2, city, state, zip, phone, email, shipping_option FROM shipping_info WHERE id= ? and default_address="default" and inuse="y"',[u_id], (err, result) => {
+            if(err){                        
+                res.send(err);
+                con.end();        
+            } else {                           
+                default_shipping_info = result[0];
+                console.log("default_shipping_info");
+                console.log(default_shipping_info); 
+            }
+        }); 
+
+
+
+    }
+
+    function setOrders(response) {
+        console.log('order_number');
+        console.log(order_number);       
+        con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, indate) VALUES (?,?,?,?,?,?,?)',
+        [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, date], (err, result) => {
+            if(err){                        
+                res.send(err);
+                con.end();        
+            } else {
+                console.log('set orders') 
+                console.log(result);
+                
+                // updateOrderedCart(order_number, date, cart_numbers, u_id)
+            }
+        }); 
+    }
+
+    function updateOrderedCart(order_num, oddate, cart_num, user_id) {
+        con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ? WHERE cartnum in (?) and u_id = ?'
+        ,[order_num, oddate, cart_num, user_id], (err, result) => {
+            if(err){                        
+                res.send(err);
+                con.end();        
+            } else {
+                console.log('update complete Order Cart') 
+                console.log(result);
+                res.send(result)
+                 
+            }
+        }); 
+    }
+
+
+
+
+    ////////////////////////////////////// make payment ////////////////////////
+
+
+    function makePayment() {
+        console.log("user_checkout_submit user_checkout_submituser_checkout_submituser_checkout_submit")
+
+        const options = {
+            method: 'POST',
+            headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            },
+            body: JSON.stringify({
+            items: items,
+            shipping: {
+                address: {
+                city: default_shipping_info.city,
+                line1: default_shipping_info.address1,
+                line2: default_shipping_info.address2,
+                postal_code: default_shipping_info.zip,
+                state: default_shipping_info.state,
+                country:"US"
+                },
+                name: default_shipping_info.recipient,
+                phone: default_shipping_info.phone,
+                email: default_shipping_info.email
+            },
+            currency: 'usd',
+            email: default_shipping_info.email,
+            customer: clv_id
+            })
+        };
+        console.log("options");
+        console.log(options);
+        
+        fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+            .then(response => response.json())
+            .then(response => {
+                console.log("make order")
+                console.log(response)
+
+                const options = {
+                    method: 'POST',
+                    headers: {
+                    accept: 'application/json',
+                    'content-type': 'application/json',
+                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                    },
+                    body: JSON.stringify({"source":default_payment_method,
+                    "email":"rangdad@gmail.com",
+                    "stored_credentials":{
+                        "sequence": "SUBSEQUENT",
+                        "is_scheduled": false,
+                        "initiator": "CARDHOLDER"}})
+                };
+                
+                fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
+                    .then(response => response.json())
+                    .then(response => {
+                        console.log(`make payment for created order ${response.id}`)
+                        console.log(response)
+                        if (response.status == 'paid') {
+                            setOrders(response);    
+                            updateOrderedCart(order_number, date, cart_numbers, u_id)
+                            ////// make empty guest cart         
+                                      
+                        }                        
+                    })
+                    .catch(err => console.error(err));               
+                
+            })
+            .catch(err => console.error(err));
+    }
+
+
+
+});
+
+
+
+
+
+function getDate() {
+    let date;
+    date = new Date();
+    date = date.getFullYear() + '-' +
+    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
+    ('00' + date.getDate()).slice(-2) + ' ' + 
+    ('00' + date.getHours()).slice(-2) + ':' + 
+    ('00' + date.getMinutes()).slice(-2) + ':' + 
+    ('00' + date.getSeconds()).slice(-2);
+    return date;
+}
+
+/*
 app.post('/item_addup', (req,res) => {
     let user_id = req.body.u_id;
     let item_num = req.body.item_num;
@@ -3106,205 +3353,3 @@ app.post('/checked_item', (req,res) => {
 
 })
 */
-
-
-app.post('/user_checkout_submit', (req,res) => {
-
-    const u_id = req.session.loginData.id;
-    const amount = req.body.amount;
-    let default_payment_method = '';
-    let clv_id = '';
-    let default_shipping_info = {};
-    const cart_num = '';
-    const date = getDate();
-    
-
-    ////////////////// get default payment method /////////////////////
-
-    
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    getDefaultShippingInfo();
-
-    getDefaultBillingInfo()
-    .then(() => { 
-        console.log("make payment");      
-        makePayment();
-    });
-
-
-    function getDefaultBillingInfo() {
-        return new Promise((resolve, reject) => { 
-            con.query('SELECT clv_id, clv_tk FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();        
-                } else {
-                    console.log(result);            
-                    default_payment_method = result[0].clv_tk;
-                    clv_id = result[0].clv_id;
-                    resolve();
-                }
-            }); 
-        }) 
-    }
-
-
-    function getDefaultShippingInfo() {
-        con.query('SELECT recipient, address1, address2, city, state, zip, phone, email, shipping_option FROM shipping_info WHERE id= ? and default_address="default" and inuse="y"',[u_id], (err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();        
-            } else {
-                           
-                default_shipping_info = result[0];
-                console.log("default_shipping_info");
-                console.log(default_shipping_info); 
-            }
-        }); 
-
-
-
-    }
-
-    function setOrders(response) {
-        con.query('INSERT INTO orders (order_number, u_id, cart_number, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, indate) VALUES (?,?,?,?,?,?,?,?)',
-        [order_number, u_id, cart_num, response.id, response.charge, response.ref_num, response.status_transitions.paid, date], (err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();        
-            } else {
-                console.log(result);  
-                res.send(result);         
-                
-            }
-        }); 
-
-
-
-    }
-
-
-
-
-    ////////////////////////////////////// make payment ////////////////////////
-
-
-    function makePayment() {
-        console.log("user_checkout_submit user_checkout_submituser_checkout_submituser_checkout_submit")
-
-        const options = {
-            method: 'POST',
-            headers: {
-            accept: 'application/json',
-            'content-type': 'application/json',
-            authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-            },
-            body: JSON.stringify({
-            items: [
-                {        
-                amount : amount,
-                    currency:"usd",
-                    description:"Ginger Bottle 16oz",
-                    quantity: 2,
-                    type:"sku",
-                    tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
-                //   inventory_id: '010001'
-                }
-            ],
-            shipping: {
-                address: {
-                city: default_shipping_info.city,
-                line1: default_shipping_info.address1,
-                line2: default_shipping_info.address2,
-                postal_code: default_shipping_info.zip,
-                state: default_shipping_info.state,
-                country:"US"
-                },
-                name: default_shipping_info.recipient,
-                phone: default_shipping_info.phone,
-                email: default_shipping_info.email
-            },
-            currency: 'usd',
-            email: default_shipping_info.email,
-            customer: clv_id
-            })
-        };
-        console.log("options");
-        console.log(options);
-        
-        fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
-            .then(response => response.json())
-            .then(response => {
-                console.log("make order")
-                console.log(response)
-
-                const options = {
-                    method: 'POST',
-                    headers: {
-                    accept: 'application/json',
-                    'content-type': 'application/json',
-                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                    },
-                    body: JSON.stringify({"source":default_payment_method,
-                    "email":"rangdad@gmail.com",
-                    "stored_credentials":{
-                        "sequence": "SUBSEQUENT",
-                        "is_scheduled": false,
-                        "initiator": "CARDHOLDER"}})
-                };
-                
-                fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
-                    .then(response => response.json())
-                    .then(response => {
-                        console.log(`make payment for created order ${response.id}`)
-                        console.log(response)
-                        if (response.status == 'paid') {
-                            // setOrders(response);        
-                            ////// make empty cart         
-                            res.send(response)           
-                        }                        
-                    })
-                    .catch(err => console.error(err));               
-                
-            })
-            .catch(err => console.error(err));
-    }
-
-
-
-});
-
-
-
-
-
-function getDate() {
-    let date;
-    date = new Date();
-    date = date.getFullYear() + '-' +
-    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-    ('00' + date.getDate()).slice(-2) + ' ' + 
-    ('00' + date.getHours()).slice(-2) + ':' + 
-    ('00' + date.getMinutes()).slice(-2) + ':' + 
-    ('00' + date.getSeconds()).slice(-2);
-    return date;
-}
-  

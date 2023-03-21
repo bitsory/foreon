@@ -75,11 +75,11 @@ export default class Cart{
         
     }
 
-    viewCart() {
-        console.log("view cart");
-        console.log(this.c_name);
+    // viewCart() {
+    //     console.log("view cart");
+    //     console.log(this.c_name);
 
-    }
+    // }
 
     
 
@@ -87,11 +87,13 @@ export default class Cart{
         return `
             <div class='user_profile_greet'>Hello</div>
             <div class='user_profile_name'>${this.getCookie(document.cookie)[0]}</div>
-            <div class='user_profile_chage'>
-                
-                <button class="user_profile_change_btn">Change Profile</button>               
-                
+            <div class='user_profile_chage'>                
+                <button class="user_profile_change_btn">Change Profile</button>                               
             </div>
+            <div class='user_order_history'>
+                <button class='user_order_history_btn'>Order History</button>
+            </div>
+
             
             
             <div class='user_profile_log_out'>
@@ -140,21 +142,30 @@ document.addEventListener('click',function(e){
         
     }
 
+    if(e.target && e.target.className == 'user_order_history_btn') {
 
-    if(e.target && e.target.className == 'btn change_password_btn') {
-        document.querySelector('.change_password_container').classList.toggle('pw_active');
-        // document.querySelector('.change_password_container').innerHTML = changePassword();
+        document.querySelector('.main_background__blink').style.display = "none";
+        viewOrderHistory();
+        
+
     }
-    if(e.target && e.target.className == 'btn billing_info_add_btn') {
-        document.querySelector('.billing_info_box').innerHTML = addBillingInfoBox();
-        addBillingMethodForm();
-        document.querySelector('.billing_info_add_btn_container').style.display = "none";
-    }
-    if(e.target && e.target.className == 'btn shipping_info_add_btn') {
-        document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();
-        document.querySelector('.shipping_info_add_btn_container').style.display = "none";
-        addShippingInfo();
-    }
+
+
+
+    // if(e.target && e.target.className == 'btn change_password_btn') {
+    //     document.querySelector('.change_password_container').classList.toggle('pw_active');
+    //     // document.querySelector('.change_password_container').innerHTML = changePassword();
+    // }
+    // if(e.target && e.target.className == 'btn billing_info_add_btn') {
+    //     document.querySelector('.billing_info_box').innerHTML = addBillingInfoBox();
+    //     addBillingMethodForm();
+    //     document.querySelector('.billing_info_add_btn_container').style.display = "none";
+    // }
+    // if(e.target && e.target.className == 'btn shipping_info_add_btn') {
+    //     document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();
+    //     document.querySelector('.shipping_info_add_btn_container').style.display = "none";
+    //     addShippingInfo();
+    // }
 
 
     if(e.target && e.target.className == 'tab-link') {
@@ -1592,6 +1603,14 @@ function changePassword() {
         </div>
     
     `;
+}
+
+function viewOrderHistory() {
+
+    console.log("view Order History")
+
+
+
 }
 
 

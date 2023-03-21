@@ -1,6 +1,10 @@
 import setItemBox from "./set_item_box.js";
 
 export default class {
+
+
+    online_main = document.getElementById('online_main');
+
     constructor(user_id, proceed_checkout_selected_order_cart) {
         document.title = "Cafe FORE";
         console.log("order_confirm page")
@@ -9,8 +13,64 @@ export default class {
         console.log(this.order_info)
         this.user_id = user_id;
 
-        // this.check_out_box = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
+        // this.check_out_box_test = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
+
+        this.check_out_box = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
         // console.log(this.check_out_box.user_checkout_ready_cart);
+
+        this.online_main.addEventListener('click', (e) => {
+
+            if(e.target && e.target.className == 'user_checkout_submit_button') {
+                console.log('user_checkout_submit_button user_checkout_submit_button user_checkout_submit_button')
+
+                let placed_order_cart = this.check_out_box.getReadyCart()
+                console.log(placed_order_cart);
+
+                
+                let user_total_amount = 1900;
+                const data = {
+                    amount : user_total_amount,
+                    cart : placed_order_cart
+                
+                };
+
+                
+
+                const options = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'               
+                        },
+                    body: JSON.stringify(data)
+                };
+                console.log(options);
+
+                fetch('/user_checkout_submit', options)
+                .then(response => response.json())
+                .then(response => console.log(response))
+                .catch(err => console.error(err)); 
+
+                
+
+
+
+            }
+
+            if(e.target && e.target.className == 'guest_test_submit') {
+                console.log('guest_test_submit guest_test_submit guest_test_submitguest_test_submit')
+
+                let placed_order_cart = this.check_out_box.getReadyCart()
+                console.log(placed_order_cart);
+
+
+
+            }
+
+
+        })
+
+
+
     }
 
 
@@ -212,6 +272,8 @@ export default class {
                 <button class="get_single_customer">get_single_customer</button>
                 <button class="delete_card">delete_card</button>
                 <button class="save_card">save_card</button>
+                <button class="guest_test_submit">guest_test_submit</button>
+
                 
                 
             </div>
@@ -228,9 +290,11 @@ export default class {
         console.log(proceed_checkout_total)
         console.log(proceed_checkout_selected_order_cart)
 
-        const check_out_box = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
-        console.log(check_out_box);
-        console.log(check_out_box.user_checkout_ready_cart);
+        // const check_out_box = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
+        // console.log(check_out_box);
+
+        // console.log(check_out_box.user_checkout_ready_cart);
+        // ready_for_place_order_cart = proceed_checkout_selected_order_cart;
         
         // check_out_box.getGrandTotal(proceed_checkout_total);
         
@@ -264,7 +328,7 @@ export default class {
         
 
         proceed_checkout_selected_order_cart.forEach(element => {
-            check_out_box.setItemContainer(element.prodnum, element.price_sell, element.name, element.quantity, element.image, "check_out_items_container", "check_out_item")
+            this.check_out_box.setItemContainer(element.prodnum, element.price_sell, element.name, element.quantity, element.image, "check_out_items_container", "check_out_item")
             // check_out_amount = check_out_amount + (element.price_sell * element.quantity);
             console.log("check_out_amount");
             // console.log(check_out_amount);
@@ -420,14 +484,14 @@ export default class {
 
 
     makeGuestCheckOutForm(check_out_cart, checked_order_list) {
-        const check_out_items_container = document.getElementById('check_out_items_container');
+        // const check_out_items_container = document.getElementById('check_out_items_container');
 
         // const check_out_items = document.createElement('div');
         // check_out_items.setAttribute('id', `check_out_items`);
         // check_out_items.setAttribute('id', `check_out_items`);
         
-        const check_out_box = new setItemBox(this.user_id, 'check_out_item', check_out_cart);
-        console.log(check_out_box);
+        // const check_out_box = new setItemBox(this.user_id, 'check_out_item', check_out_cart);
+        console.log(this.check_out_box);
 
 
         // make grand total, rendering initiative grand total.
@@ -451,17 +515,17 @@ export default class {
 
             
     
-            if (total_amount !=0) check_out_box.getGrandTotal(total_amount);  // initial render grand total      
+            if (total_amount !=0) this.check_out_box.getGrandTotal(total_amount);  // initial render grand total      
         
         }//////////////////////////////
 
         
-        check_out_box.getTotal(total_amount);
+        this.check_out_box.setTotal(total_amount);
         let check_out_amount = 0;
         
 
         check_out_cart.forEach(element => {
-            check_out_box.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "check_out_items_container", "check_out_item")
+            this.check_out_box.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "check_out_items_container", "check_out_item")
             // check_out_amount = check_out_amount + (element.c_item_price * element.c_item_price);
             // console.log(check_out_amount);
         })
@@ -721,6 +785,7 @@ function setUserCheckoutShippingInfo(recipient, address1, address2, city, state,
 }
 
 
+/*
 document.addEventListener('click',function(e){  
 
     console.log(e.target);
@@ -729,7 +794,22 @@ document.addEventListener('click',function(e){
         
         console.log("user_checkout_submit_button hit");
         
+        const ready_for_place_order_item = document.querySelectorAll('.check_out_item_container');
+        const selected_items_number_list = [];
+        ready_for_place_order_item.forEach((el) => {
+                        console.log(el)
+                        
+                            selected_items_number_list.push(el.getAttribute('itemid'));
+                        
+                    });
+                    console.log(selected_items_number_list);
 
+
+
+        // let test = ready_for_place_order_cart;
+        // console.log('ready_for_place_order_cart');
+        // console.log(test);
+        
         
         let user_total_amount = 1900;
         const data = {
@@ -752,11 +832,16 @@ document.addEventListener('click',function(e){
         .then(response => response.json())
         .then(response => console.log(response))
         .catch(err => console.error(err)); 
-
+        
+        
 
 
     }
 });
+*/
+
+
+
 
 
 
