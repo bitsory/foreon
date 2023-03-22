@@ -45,7 +45,7 @@ export default class {
             console.log(user_id)
 
             /////////////////////////////// check box hit //////////////////////////////////
-            if(e.target && (e.target.className) === `online_place_order_item_check_btn`) {
+            if(e.target && (e.target.className) == `online_place_order_item_check_btn`) {
                 console.log('online_place_order_item_check_btn');
                 
                 ////////////////////////// get selected item number list ///////////////////
@@ -92,7 +92,7 @@ export default class {
                             this.order_list.forEach(element => {
                                 if (element.prodnum == tmp_checked_cart[i].c_item_no) {
                                     let price = element.price_sell;
-                                    let quantity = (user_id === "GUEST") ? 
+                                    let quantity = (user_id == "GUEST") ? 
                                         tmp_checked_cart[i].c_item_quantity : element.quantity;
                                     total_amount = total_amount + (price * quantity); 
                                 }
@@ -154,7 +154,7 @@ export default class {
 
             }
 
-            if(e.target && (e.target.className) === `proceed_order_btn`) {
+            if(e.target && (e.target.className) == `proceed_order_btn`) {
 
                 //////////////////// if ( grand total > 0) //////////////////////////
 
@@ -176,12 +176,12 @@ export default class {
                 console.log(selected_items_number_list);
 
 
-                if(user_id === 'GUEST') {
+                if(user_id == 'GUEST') {
                     tmp_cart = JSON.parse(sessionStorage.getItem("cart"));            
                     
                     for (let i =0 ; i < selected_items_number_list.length ; i++) {
                         tmp_cart.forEach(element => {
-                            element.c_item_no === selected_items_number_list[i] ? check_out_cart.push(element) : false;
+                            element.c_item_no == selected_items_number_list[i] ? check_out_cart.push(element) : false;
                         })
                     }
                     console.log(check_out_cart);
@@ -260,7 +260,7 @@ export default class {
             }
 
             ///////////////////////////////////////////////  plus button hit ///////////////////////////
-            if(e.target && (e.target.className) === 'online_place_order_item_plus_quantity_btn') {
+            if(e.target && (e.target.className) == 'online_place_order_item_plus_quantity_btn') {
                 console.log('online_place_order_item_plus_quantity_btn online_place_order_item_plus_quantity_btn' )
 
                 ////////////////////// rerendering item subtotal
@@ -295,14 +295,14 @@ export default class {
 
                
                 /////////////////////////////////////////cart add up
-                if (user_id === 'GUEST') {
+                if (user_id == 'GUEST') {
                 
                     /////////////guest cart add up
                     console.log(`tmp_order_cart : ${tmp_order_cart}`);
                     tmp_order_cart.forEach(element => {
                         console.log(element);
         
-                        if (element.c_item_no === item_number) {
+                        if (element.c_item_no == item_number) {
                             console.log(item_number)
                             element.c_item_quantity++;
                         }
@@ -330,7 +330,7 @@ export default class {
                             this.order_list.forEach(element => {
                                 if (element.prodnum == tmp_checked_cart[i].c_item_no) {
                                     let price = element.price_sell;
-                                    let quantity = (user_id === "GUEST") ? 
+                                    let quantity = (user_id == "GUEST") ? 
                                         tmp_checked_cart[i].c_item_quantity : element.quantity;
                                     total_amount = total_amount + (price * quantity); 
                                 }
@@ -379,7 +379,7 @@ export default class {
 
 
             ///////////////////////////////////// hit subtract button ////////////////////////////        
-            if(e.target && (e.target.className) === 'online_place_order_item_minus_quantity_btn') { // item quantity subtract
+            if(e.target && (e.target.className) == 'online_place_order_item_minus_quantity_btn') { // item quantity subtract
                 console.log("online_place_order_item_minus_quantity_btn");
                 let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
                 console.log(item_number);
@@ -409,14 +409,14 @@ export default class {
         
                     const selected_items_number_list = this.checkSelectedItems();
         
-                    if (user_id === 'GUEST') {
+                    if (user_id == 'GUEST') {
                     
                         /////////////guest cart subtract
                         console.log(`tmp_order_cart : ${tmp_order_cart}`);
                         tmp_order_cart.forEach(element => {
                             console.log(element);
         
-                            if (element.c_item_no === item_number) {
+                            if (element.c_item_no == item_number) {
                                 console.log(item_number)
                                 element.c_item_quantity--;
                             }
@@ -452,7 +452,7 @@ export default class {
                                 this.order_list.forEach(element => {
                                     if (element.prodnum == tmp_checked_cart[i].c_item_no) {
                                         let price = element.price_sell;
-                                        let quantity = (user_id === "GUEST") ? 
+                                        let quantity = (user_id == "GUEST") ? 
                                             tmp_checked_cart[i].c_item_quantity : element.quantity;
                                         total_amount = total_amount + (price * quantity); 
                                     }
@@ -515,7 +515,7 @@ export default class {
             }
             
         
-            if(e.target && (e.target.className) === 'online_place_order_item_delete_btn') { // item delete
+            if(e.target && (e.target.className) == 'online_place_order_item_delete_btn') { // item delete
                 // console.log("online_place_order_item_delete_btn");
                 let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
                 console.log(item_number);
@@ -532,7 +532,7 @@ export default class {
 
                 const selected_items_number_list = this.checkSelectedItems();
         
-                if (user_id === 'GUEST') {            
+                if (user_id == 'GUEST') {            
                     /////////////item delete in guest cart 
                     console.log(`tmp_order_cart : ${tmp_order_cart}`);            
         
@@ -568,7 +568,7 @@ export default class {
                             this.order_list.forEach(element => {
                                 if (element.prodnum == tmp_checked_cart[i].c_item_no) {
                                     let price = element.price_sell;
-                                    let quantity = (user_id === "GUEST") ? 
+                                    let quantity = (user_id == "GUEST") ? 
                                         tmp_checked_cart[i].c_item_quantity : element.quantity;
                                     total_amount = total_amount + (price * quantity); 
                                 }
@@ -696,9 +696,9 @@ export default class {
             order_list.forEach(element => {
 
                 let price = element.price_sell;
-                let quantity = (user_id === "GUEST") ? 
+                let quantity = (user_id == "GUEST") ? 
                     (order_cart.filter(item => {
-                    return item.c_item_name === element.name})[0].c_item_quantity) : element.quantity;
+                    return item.c_item_name == element.name})[0].c_item_quantity) : element.quantity;
                 
                 setOrderItemContainer(element.prodnum, element.price_sell, element.name, quantity, element.image);
                 

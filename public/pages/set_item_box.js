@@ -41,7 +41,7 @@ export default class {
                 let new_grandtotal = 0;
                 
                 //////user cart add up
-                if (user_id === 'GUEST') {
+                if (user_id == 'GUEST') {
                 
                     /////////////guest cart add up
                     console.log(`check_out_cart : ${check_out_cart}`);
@@ -50,14 +50,14 @@ export default class {
                         console.log('element');
                         console.log(element);
         
-                        if (element.c_item_no === item_number) {
+                        if (element.c_item_no == item_number) {
                             console.log(item_number)
                             element.c_item_quantity++;
 
                             tmp_cart.forEach(ele => {
                                 console.log('ele');
                                 console.log(ele);
-                                ele.c_item_no === element.c_item_no ? ele.c_item_quantity++ : false;
+                                ele.c_item_no == element.c_item_no ? ele.c_item_quantity++ : false;
                             })
                         }
                     })
@@ -144,14 +144,14 @@ export default class {
                     document.querySelector(`[subtotal-itemid="${item_number}"]`).innerText = '$'+item_subtotal.toFixed(2);
                     // let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
         
-                    if (user_id === 'GUEST') {
+                    if (user_id == 'GUEST') {
                     
                         /////////////guest cart subtract
                         console.log(`tmp_order_cart : ${check_out_cart}`);
                         check_out_cart.forEach(element => {
                             console.log(element);
         
-                            if (element.c_item_no === item_number) {
+                            if (element.c_item_no == item_number) {
                                 console.log(item_number)
                                 element.c_item_quantity--;
 
@@ -235,11 +235,11 @@ export default class {
 
                 let new_grandtotal = 0;
         
-                if (user_id === 'GUEST') {            
+                if (user_id == 'GUEST') {            
                     /////////////item delete in guest cart 
                     console.log(`tmp_order_cart : ${tmp_order_cart}`);            
         
-                    let filtered = check_out_cart.filter((element) => element.c_item_no !== item_number);
+                    let filtered = check_out_cart.filter((element) => element.c_item_no != item_number);
         
                     console.log(filtered);
                     console.log(check_out_cart)
@@ -250,7 +250,7 @@ export default class {
                     let tmp_cart_filtered = tmp_cart.filter(element => {
                         console.log("delete element")
                         console.log(element)
-                        return element.c_item_no !== item_number;
+                        return element.c_item_no != item_number;
                     });
 
                     console.log(tmp_cart_filtered)

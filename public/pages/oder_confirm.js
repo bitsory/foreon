@@ -25,16 +25,12 @@ export default class {
 
                 let placed_order_cart = this.check_out_box.getReadyCart()
                 console.log(placed_order_cart);
-
                 
                 let user_total_amount = 1900;
                 const data = {
                     amount : user_total_amount,
-                    cart : placed_order_cart
-                
-                };
-
-                
+                    cart : placed_order_cart                
+                };                
 
                 const options = {
                     method: 'POST',
@@ -52,11 +48,7 @@ export default class {
                     ////////// order-confirmation page ///////////////////////
 
                 })
-                .catch(err => console.error(err)); 
-
-                
-
-
+                .catch(err => console.error(err));
 
             }
 
@@ -158,7 +150,7 @@ export default class {
             </div>
 
             <div class="container">            
-                <form action="/charge" method="post" id="payment-form">
+                <form id="payment-form">
                     <div class="billing_info">
                         <div class="order_info_title">Billing Infomation</div>
                         <div class="form-row top-row">
@@ -277,6 +269,8 @@ export default class {
                 <button class="delete_card">delete_card</button>
                 <button class="save_card">save_card</button>
                 <button class="guest_test_submit">guest_test_submit</button>
+                <button class="check_guest_cart">check_guest_cart</button>
+                
 
                 
                 
@@ -496,6 +490,7 @@ export default class {
         
         // const check_out_box = new setItemBox(this.user_id, 'check_out_item', check_out_cart);
         console.log(this.check_out_box);
+        console.log(check_out_cart)
 
 
         // make grand total, rendering initiative grand total.
@@ -505,9 +500,9 @@ export default class {
             checked_order_list.forEach(element => {
 
                 let price = element.price_sell;
-                let quantity = (this.user_id === "GUEST") ? 
+                let quantity = (this.user_id == "GUEST") ? 
                     (check_out_cart.filter(item => {
-                    return item.c_item_name === element.name})[0].c_item_quantity) : element.quantity;
+                    return item.c_item_name == element.name})[0].c_item_quantity) : element.quantity;
                 
                 // setOrderItemContainer(element.prodnum, element.price_sell, element.name, quantity, element.image);
                 
@@ -536,7 +531,9 @@ export default class {
 
 
    
-        const order_info = this.order_info;        
+        const order_info = this.order_info;   
+        const order_items = sessionStorage.getItem("checkoutcart"); 
+        console.log(order_items);  
         const clover = new Clover('3de85b3b5c3bbea456e24e24596245fd');
     
         const elements = clover.elements();
@@ -627,12 +624,10 @@ export default class {
     }    
 }
 
-let g_total = 0;
-let tmp_order_cart = {};
-
 
 function cloverTokenHandler(token, order_info) {
     console.log(token)
+    const order_items = sessionStorage.getItem("checkoutcart"); 
     // Insert the token ID into the form so it gets submitted to the server
     var form = document.getElementById('payment-form');
     var hiddenInput = document.createElement('input');
@@ -647,7 +642,42 @@ function cloverTokenHandler(token, order_info) {
     orderInput.setAttribute('value', order_info);
     form.appendChild(orderInput);
 
-    form.submit();
+    var orderItems = document.createElement('input');
+    orderItems.setAttribute('type', 'hidden');
+    orderItems.setAttribute('name', 'order_items');
+    orderItems.setAttribute('value', order_items);
+    form.appendChild(orderItems);
+
+    const formData = new FormData(form);
+    const payload = new URLSearchParams(formData);
+    
+    fetch('/guest_order_checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: payload,
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("/guest_order_checkout complete")
+        console.log(data)
+        let guest_cart = JSON.parse(sessionStorage.getItem("cart"));
+        console.log(guest_cart)
+        for (let i =0 ; i < data.length ; i++) {
+            for(let j = 0; i < guest_cart.length; j++) {
+                if(guest_cart[j].c_item_no == data[i]) {
+                    guest_cart.splice(guest_cart[j], 1);
+                    j--;
+                }
+            }
+        }
+        console.log(guest_cart)
+
+
+    });
+       
+    // form.submit();
 }
 
 // function setUserCheckoutInfo() {
@@ -1018,6 +1048,26 @@ document.addEventListener('click',function(e){
         .then(response => response.json())
         .then(response => console.log(response))
         .catch(err => console.error(err)); 
+    }
+
+    if(e.target && e.target.className == 'check_guest_cart') {
+        let data = [3,2,1];
+        let guest_cart = sessionStorage.getItem("cart");
+        let test = JSON.parse(guest_cart);
+        console.log(test)
+        for (let i =0 ; i < data.length ; i++) {
+            for(let j = 0; i < test.length; j++) {
+                console.log(data[i])
+                console.log(test[j].c_item_no)
+                if(test[j].c_item_no == data[i]) {
+                    test.splice(test[j], 1);
+                    j--;
+                }
+            }
+        }
+        console.log(test)
+        
+        
     }
 
     

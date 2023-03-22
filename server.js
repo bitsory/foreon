@@ -128,8 +128,6 @@ app.get('/crypto', (req,res) => {
 })
 
 
-
-
 app.get('/save_card', (req,res) => {
     const options = {
         method: 'PUT',
@@ -755,46 +753,7 @@ app.get('/submit_payment_test', (req,res) => {
 })
 
 
-app.post('/charge', (req,res) => {
-    console.log("/charge /charge /charge /charge /charge   ");
 
-    const uuid = uuid4.v4();
-    console.log(req.body)
-    const amount = (parseFloat(req.body.amount)*100).toFixed(0);
-    console.log(`amount : ${amount}`);
-    console.log(req.body.order_info);
-    
-
-    const id = req.body.cloverToken
-
-    const options = {
-        method: 'POST',
-        headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        'idempotency-key' : uuid,
-        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        },
-        body: JSON.stringify({
-            ecomind: 'ecom',
-            currency: 'usd',
-            amount: (parseFloat(req.body.amount)*100).toFixed(0),
-            source: 
-            id,
-            
-            tax_rate_uuid: process.env.TAX_UUID
-        })
-    };
-
-    console.log(options);
-    
-    fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-   
-    res.send(req.body.order_info);
-});
 
 // app.get('/test', (req,res) => {
 //     console.log("test test etst test test test etst  ");
@@ -936,21 +895,54 @@ app.post("/add_cart", function (req, res) {
     con.query('SELECT cartnum, quantity from cart where u_id = ? and prodnum = ? and result = "n"',
     //con.query('SELECT COALESCE(MAX(cartnum), "false") AS cartnum from cart where u_id = ? and prodnum = ?',
         [u_id, prodnum], (err, result) => {
-        if (result[0] != undefined) { // add up item quantity
-            console.log(result[0]);
-            console.log(result[0].quantity);
-            console.log(result[0].cartnum);
-            con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`cartnum` = ?)', [result[0].quantity + quantity, date, result[0].cartnum]);
-            console.log("added up same item in cart")
-
-        } else {
-            console.log("put in new item in cart")
-            con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, indate, modate) values (?,?,?,?,?,?)', 
-            [cartnum, u_id, prodnum, quantity, date, date]);
-            
-            // res.json(req.body)
-        }
+            if(err){                        
+                res.send(err);
+                con.end();
+            } else {        
+                if (result[0] != undefined) { // add up item quantity
+                    console.log(result[0]);
+                    console.log(result[0].quantity);
+                    console.log(result[0].cartnum);
+                    con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`cartnum` = ?)', [quantity, date, result[0].cartnum], (err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            con.end();
+                        } else {
+                            console.log(result);        
+                            viewAddedItem();
+                        }                    
+                    })
+                } else {
+                    console.log("put in new item in cart")
+                    con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, indate, modate) values (?,?,?,?,?,?)', 
+                    [cartnum, u_id, prodnum, quantity, date, date], (err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            con.end();
+                        } else {
+                            console.log(result);        
+                            viewAddedItem();
+                        }                    
+                    })
+                }
+            }
     });
+
+    function viewAddedItem() {
+        con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n" and cart.prodnum = ?', [u_id, prodnum]
+        ,(err, result) => {
+            if(err){                        
+                res.send(err);
+                con.end();
+            
+            } else {
+                console.log("result");
+                console.log(result);
+                
+                res.send(result);
+            }
+        });
+    }
 
 
     /*
@@ -2390,6 +2382,47 @@ app.get('/shop',(req,res) => {
     
 });
 
+app.post('/get_item_info',(req,res) => {
+
+    console.log('/get_item_info get_item_info get_item_info get_item_infoget_item_info')
+    console.log(req.body);
+    const prodnum = req.body.buy_now_cart_prodnum;
+    // const item_quantity = req.body.buy_now_cart_quantity;
+    // const item_name = req.body.buy_now_cart_name;
+
+    const mysql = require('mysql');
+
+    const con = mysql.createConnection({
+        host: '127.0.0.1',
+        port: '3306',
+        user: 'root',
+        password: '111111',
+        database: 'test1',
+        
+    });
+
+    con.connect((err) => {
+        if(err){
+        console.log('Error connecting to Db');
+        return;
+        }
+        console.log('Connection established');
+    });
+        
+    con.query('SELECT * FROM product WHERE prodnum = ?',[prodnum], (err, result) => {
+        if(err){
+            res.send(err);
+            con.end();
+
+        } else {
+            res.send(result);            
+        }
+                    
+    });
+    con.end();    
+
+})
+
 
 app.post('/shop',(req,res) => {
     console.log(`req test: ${req}`);
@@ -3165,6 +3198,91 @@ app.post('/user_checkout_submit', (req,res) => {
 
 
 
+});
+
+app.post('/guest_order_checkout', (req,res) => {
+    console.log("/charge /charge /charge /charge /charge   ");
+
+    const uuid = uuid4.v4(); 
+    const order_items = JSON.parse(req.body.order_items);
+    console.log(req.body); 
+    console.log(order_items);
+    const token_id = req.body.cloverToken;
+    const items = order_items.map(element => {
+        return { 
+            amount : element.c_item_price * 100,
+            currency : "usd",
+            description : element.c_item_no + "," + element.c_item_name,
+            quantity : element.c_item_quantity,
+            type:"sku",
+            tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
+        }
+
+    })
+
+
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({
+          items: items,
+          shipping: {
+            address: {
+              city: req.body.shipping_address_city,
+              country: 'US',
+              line1: req.body.shipping_address_street,
+              postal_code: req.body.shipping_address_zip ,
+              state: req.body.shipping_address_state
+            },
+            name: req.body.shipping_recipient,
+            phone: req.body.order_contact_phone
+          },
+          email: req.body.order_contact_email,
+          currency: 'usd'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(result => {
+            console.log(result)
+            
+            if (result.status == 'created') {
+                const options = {
+                    method: 'POST',
+                    headers: {
+                    accept: 'application/json',
+                    'content-type': 'application/json',
+                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                    },
+                    body: JSON.stringify({ecomind: 'ecom', source: token_id})
+                };
+                
+                fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result.id}/pay`, options)
+                    .then(response => response.json())
+                    .then(response => {
+                        console.log("response")
+                        console.log(response)
+                        const res_items = response.items;
+                        console.log(res_items)
+                        
+                        let order_items_number = res_items.forEach(element => {
+                            return element.description.substring(0, element.description.indexOf(','));
+                        })
+                        console.log(order_items_number);
+                        const send_data = JSON.stringify(order_items_number);
+                        res.send(send_data);
+                    })
+                    .catch(err => console.error(err));
+
+            }
+        
+        })
+        .catch(err => console.error(err));
 });
 
 

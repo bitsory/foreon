@@ -96,107 +96,97 @@ document.addEventListener('click',function(e){
     }
 
     if(e.target && e.target.className == 'buy_now_btn') {
-                        
-        console.log(`order count = ${order_quantity}`);
-        console.log("proceed_order_btn proceed_order_btn proceed_order_btn ");
-                let tmp_cart = '';
-                let check_out_cart = [];
-                // const orderConfirm = new order_confirm(user_id);
-                console.log(user_id)
+
+        let buy_now_cart = {
+            buy_now_cart_prodnum : product_number,
+            buy_now_cart_quantity : order_quantity,
+            buy_now_cart_name : product_name
+        }
+
+        const options = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(buy_now_cart)
+        };
+
+        fetch('/get_item_info', options)
+        .then((res) => res.json())
+        .then(buy_now_checkout_cart => {
+            console.log('buy_now_checkout_cart');
+            console.log(buy_now_checkout_cart);
+
+            if(user_id === 'GUEST') {
+
+                let guest_buy_now_checkout_cart = [{
+                    c_id : "GUEST",
+                    c_item_image : "http://localhost:8080"+buy_now_checkout_cart[0].image,
+                    c_item_name : buy_now_checkout_cart[0].name,
+                    c_item_no : buy_now_checkout_cart[0].prodnum,
+                    c_item_price : buy_now_checkout_cart[0].price_sell,
+                    c_item_quantity : order_quantity,
+                    c_name : "GUEST"
+                }];
+
+                console.log(guest_buy_now_checkout_cart)
+
+                let tmp_guest_order_cart = JSON.parse(sessionStorage.getItem("cart")) ? JSON.parse(sessionStorage.getItem("cart")) : [];  
+                console.log(tmp_guest_order_cart)          
                 
-               
-                let ckecked_item = 'input[name="online_place_order_item_check_btn"]:checked';
-
-                const selectedEls = document.querySelectorAll(ckecked_item);
-                const selected_items_number_list = [];
-                selectedEls.forEach((el) => {
-                    console.log(el)
-                    selected_items_number_list.push(el.getAttribute('checked_itemid'));
-                });
-                console.log(selected_items_number_list);
-
-
-                if(user_id === 'GUEST') {
-                    tmp_cart = JSON.parse(sessionStorage.getItem("cart"));            
+                let repetition_item_check = tmp_guest_order_cart.filter(element => {
+                    return element.c_item_no == guest_buy_now_checkout_cart[0].c_item_no});
+                console.log(repetition_item_check)
                     
-                    for (let i =0 ; i < selected_items_number_list.length ; i++) {
-                        tmp_cart.forEach(element => {
-                            element.c_item_no === selected_items_number_list[i] ? check_out_cart.push(element) : false;
-                        })
-                    }
-                    console.log(check_out_cart);
+                let check_item_number = repetition_item_check.length ? repetition_item_check[0].c_item_no : false;
+                                
+                console.log(check_item_number)
 
-                    sessionStorage.setItem("checkoutcart", JSON.stringify(check_out_cart));
+                check_item_number ? 
+                tmp_guest_order_cart.forEach(element => {
+                    element.c_item_no == check_item_number ? element.c_item_quantity = order_quantity : false;
+                })
+                : tmp_guest_order_cart.push(guest_buy_now_checkout_cart[0]);
 
-                    const data = {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                            // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                            },
-                        body: JSON.stringify(check_out_cart)
-                    };
-        
-                    fetch('/shop/order', data)
-                    .then((res) => res.json())
-                    .then(checked_order_list => {
-                        console.log('checked_order_list');
-                        console.log(checked_order_list);
-
-                        console.log('check_out_cart')
-                        console.log(check_out_cart)
-
-
-                        const orderConfirm = new order_confirm(user_id, check_out_cart);
-                        document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
-                        orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
-                        })
-                } else {  ///////////////////// user check out proceed
-                    let data = {
-                        u_id : user_id, 
-                        // checked_items_number_list : selected_items_number_list                      
-                    };
-
-
-                    const options = {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                            // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                            },
-                        body: JSON.stringify(data)
-                    };
-        
-                    fetch('/shop/order', options)
-                    .then((res) => res.json())
-                    .then(order_list => {
-                        console.log("order_list")
-                        console.log(order_list)
-
-                        let proceed_checkout_total = 0;
-                        let proceed_checkout_selected_order_cart = [];
-                        for (let i =0 ; i < selected_items_number_list.length ; i++) {
-                            order_list.forEach(element => {
-                                console.log(element)
-                                if (element.prodnum == selected_items_number_list[i]) {
-                                    proceed_checkout_selected_order_cart.push(element)
-                                }
+                sessionStorage.setItem("cart", JSON.stringify(tmp_guest_order_cart));
+                sessionStorage.setItem("checkoutcart", JSON.stringify(guest_buy_now_checkout_cart));
+                const orderConfirm = new order_confirm(user_id, guest_buy_now_checkout_cart);
+                document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
+                orderConfirm.makeGuestCheckOutForm(guest_buy_now_checkout_cart, buy_now_checkout_cart); 
+            
                 
-                            })
-                        }
+            } else {  ///////////////////// user buy now proceed
 
-                        console.log("proceed_checkout_selected_order_cart");
-                        console.log(proceed_checkout_selected_order_cart);
+                n_cart.c_item_quantity = order_quantity;
+                n_cart.c_item_no = product_number;
+                const data = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                    body: JSON.stringify(n_cart)
+                };
 
-                        proceed_checkout_selected_order_cart.forEach(element => {
-                            proceed_checkout_total = proceed_checkout_total + element.quantity * element.price_sell;
-                        })
+                fetch('/add_cart', data)
+                .then((res) => res.json())
+                .then(result => {
+                    console.log(result)
 
-                        const orderConfirm = new order_confirm(user_id, proceed_checkout_selected_order_cart);
-                        document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
-                        orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
+                    let proceed_checkout_total = 0;
+                    let proceed_checkout_selected_order_cart = result;
+
+                    result.forEach(element => {
+                        proceed_checkout_total = proceed_checkout_total + element.quantity * element.price_sell;
                     })
-                }
+
+                    const orderConfirm = new order_confirm(user_id, proceed_checkout_selected_order_cart);
+                    document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
+                    orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
+
+
+                });
+
+            }
+        })
         
         
     } 
