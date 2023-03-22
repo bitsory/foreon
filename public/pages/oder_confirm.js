@@ -47,7 +47,11 @@ export default class {
 
                 fetch('/user_checkout_submit', options)
                 .then(response => response.json())
-                .then(response => console.log(response))
+                .then(response => {
+                    console.log(response)
+                    ////////// order-confirmation page ///////////////////////
+
+                })
                 .catch(err => console.error(err)); 
 
                 

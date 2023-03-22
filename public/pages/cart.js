@@ -74,24 +74,17 @@ export default class Cart{
         return result;
         
     }
-
-    // viewCart() {
-    //     console.log("view cart");
-    //     console.log(this.c_name);
-
-    // }
-
-    
+   
 
     getUserProfile() {
         return `
             <div class='user_profile_greet'>Hello</div>
             <div class='user_profile_name'>${this.getCookie(document.cookie)[0]}</div>
             <div class='user_profile_chage'>                
-                <button class="user_profile_change_btn">Change Profile</button>                               
+                <button class="user_profile_change_btn">ACCOUNT</button>                               
             </div>
-            <div class='user_order_history'>
-                <button class='user_order_history_btn'>Order History</button>
+            <div class='user_purchase_history'>
+                <button class='user_purchase_history_btn'>PURCHASE HISTORY</button>
             </div>
 
             
@@ -99,7 +92,7 @@ export default class Cart{
             <div class='user_profile_log_out'>
                 <form action="/sign_out" method="post" class="user_logout">
                         
-                    <input type="submit" class="user_logout_btn" name="sign_out" value="Sign Out">
+                    <input type="submit" class="user_logout_btn" name="sign_out" value="SIGN OUT">
                 </form>                
             </div>
         `
@@ -142,30 +135,31 @@ document.addEventListener('click',function(e){
         
     }
 
-    if(e.target && e.target.className == 'user_order_history_btn') {
+    if(e.target && e.target.className == 'user_purchase_history_btn') {
 
         document.querySelector('.main_background__blink').style.display = "none";
-        viewOrderHistory();
+        viewPurchaseHistory(u_id);
         
 
     }
 
 
 
-    // if(e.target && e.target.className == 'btn change_password_btn') {
-    //     document.querySelector('.change_password_container').classList.toggle('pw_active');
-    //     // document.querySelector('.change_password_container').innerHTML = changePassword();
-    // }
-    // if(e.target && e.target.className == 'btn billing_info_add_btn') {
-    //     document.querySelector('.billing_info_box').innerHTML = addBillingInfoBox();
-    //     addBillingMethodForm();
-    //     document.querySelector('.billing_info_add_btn_container').style.display = "none";
-    // }
-    // if(e.target && e.target.className == 'btn shipping_info_add_btn') {
-    //     document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();
-    //     document.querySelector('.shipping_info_add_btn_container').style.display = "none";
-    //     addShippingInfo();
-    // }
+    if(e.target && e.target.className == 'btn change_password_btn') {
+        document.querySelector('.change_password_container').classList.toggle('pw_active');
+        // document.querySelector('.change_password_container').innerHTML = changePassword();
+    }
+
+    if(e.target && e.target.className == 'btn billing_info_add_btn') {
+        document.querySelector('.billing_info_box').innerHTML = addBillingInfoBox();
+        addBillingMethodForm();
+        document.querySelector('.billing_info_add_btn_container').style.display = "none";
+    }
+    if(e.target && e.target.className == 'btn shipping_info_add_btn') {
+        document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();
+        document.querySelector('.shipping_info_add_btn_container').style.display = "none";
+        addShippingInfo();
+    }
 
 
     if(e.target && e.target.className == 'tab-link') {
@@ -435,22 +429,19 @@ document.addEventListener('click',function(e){
                 shipping_info_box.removeChild(shipping_info_box.firstChild);
               }
             renderShippingInfo(result);
-
         });
     }
-    
-
-    
-    
-
-    
-
 });
 
-function changeProfile() {
-    
-    document.querySelector('.lorem').innerHTML = 
-    `<div class="change_profile_form_container">
+
+function changeProfile() {    
+    document.querySelector('.lorem').innerHTML = mekeChangePrifileTap();    
+}
+
+
+function mekeChangePrifileTap() {
+    return `
+    <div class="change_profile_form_container">
 
         <ul class="tabs">
             <li class="tab-link current" data-tab="tab-1">General Infomation</li>
@@ -639,15 +630,9 @@ function changeProfile() {
                 </div>
             </div>
         </div>        
-    </div>`;
-
+    </div>
+    `;
 }
-
-// <button class="btn change_profile_general_info_btn">General Infomation</button>
-// <button class="btn change_profile_billing_info_btn">Billing Infomation</button>
-// <button class="btn change_profile_shipping_info_btn">Shipping Infomation</button>
-// <div class="change_profile_form">
-// </div>
 
 function changeProfileGeneral() {
 
@@ -852,24 +837,6 @@ function changeProfileShipping() {
 
 }
 
-function makeBillingInfoBox() {
-    return `
-    <div class="billing_info">
-        <div class="billing_info_detial">
-            <div class="billing_info_name">Name</div>
-            <div class="billing_info_card_company">VISA</div>
-            <div class="billing_info_last4">4242</div>
-        </div>
-        <div class="choose_defualt_btn">
-            <input type="radio" name="check_default_payment" value="default">Default Payment
-        </div>
-
-
-        
-    </div>    
-    `;
-}
-
 function addBillingInfoBox() {
     return `
         <div class="change_profile_billing_form_container">
@@ -927,26 +894,6 @@ function addBillingInfoBox() {
 
 }
 
-function makeShippingInfoBox() {
-    return `
-    <div class="shipping_info">
-    
-        <div class="shipping_info_detial">
-            <div class="shipping_info_recipient">Name</div>
-            <div class="shipping_info_address_line1">4400 Roswell Rd</div>
-            <div class="shipping_info_address_line2"></div>
-            <div class="shipping_info_address_csz">Marietta GA 30062</div>
-            <div class="shipping_info_phone"></div>
-            <div class="shipping_info_email"></div>
-
-        </div>
-        <div class="choose_defualt_btn">
-            <input type="radio" name="check_default_shipping" value="default">Default Address</input>
-        </div>
-        
-    </div>    
-    `;
-}
 
 
 function addBillingMethodForm() {
@@ -1605,14 +1552,216 @@ function changePassword() {
     `;
 }
 
-function viewOrderHistory() {
+function viewPurchaseHistory(u_id) {
 
-    console.log("view Order History")
+    console.log("view purchase History")
+    document.querySelector('.lorem').innerHTML = makePurchaseHistoryContainer();
+
+    const data = {id : u_id}
+
+        const option = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'                
+                },
+            body: JSON.stringify(data)
+        };
+        console.log(option);
+
+        fetch('/check_purchase_history', option)
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result)
+            setPurchaseHistory(result);
+
+            // const delete_node = document.getElementById(`billing_info BIN${delete_card_index}`);
+            // document.querySelector('.billing_info_box').removeChild(delete_node);
+
+        });
+
+
 
 
 
 }
 
+function makePurchaseHistoryContainer() {
+    return `
+    <div id="purchase_history_container" class="purchase_history_container">
+        <div id="purchase_history_page" class="purchase_history_page">
+            <div id="purchase_history_title" class="purchase_history_title">Your Orders</div>
+            <div id="purchase_history_box" class="purchase_history_box">
+            </div>
+        </div>   
+    </div>
+    `;
+}
+
+function setPurchaseHistory(result) {
+    result.forEach(element => {
+        let order_id = element.order_number;
+        let cart_id = element.cartnum;
+        let prodnum = element.prodnum;
+        let image_src = element.image;
+        let item_name = element.name;
+        let item_description = element.content;
+
+        let total_amount = element.total_order_amount;
+        let oddate = element.oddate;
+        // let $purchase_history = document.querySelector(`[orderid="${order_id}"]`);
+        if (document.querySelector(`[orderid="${order_id}"]`)) {
+            
+            setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, item_description);
+
+        } else {
+            const purchase_history = document.createElement('div');
+            purchase_history.setAttribute('id', `purchase_history`);
+            purchase_history.setAttribute('class', `purchase_history`);
+            purchase_history.setAttribute('orderid', `${order_id}`);
+            document.getElementById('purchase_history_box').appendChild(purchase_history);
+            setPurchaseHistoryHead(order_id, oddate, total_amount);
+            setPurchaseHistoryMain(order_id, cart_id, prodnum, image_src, item_name, item_description);
+
+
+        } 
+    })
+
+}
+
+function setPurchaseHistoryHead(order_id, oddate, total_amount) {
+    const purchase_history_head = document.createElement('div');
+    purchase_history_head.setAttribute('id', `purchase_history_head`);
+    purchase_history_head.setAttribute('class', `purchase_history_head`);
+    purchase_history_head.setAttribute('head_orderid', `${order_id}`);
+    document.querySelector(`[orderid="${order_id}"]`).appendChild(purchase_history_head);
+    purchase_history_head.innerText = order_id;
+    
+    setPurchaseHistoryHeadOrderdate(order_id, oddate)
+    setPurchaseHistoryHeadOrderTotal(order_id, total_amount)
+}
+
+function setPurchaseHistoryHeadOrderdate(order_id, oddate) {
+    const purchase_history_head_orderdate = document.createElement('div');
+    purchase_history_head_orderdate.setAttribute('id', `purchase_history_head_orderdate`);
+    purchase_history_head_orderdate.setAttribute('class', `purchase_history_head_orderdate`);
+    // purchase_history_head_orderdate.setAttribute('head_orderid', `${order_id}`);
+    document.querySelector(`[head_orderid="${order_id}"]`).appendChild(purchase_history_head_orderdate);
+    purchase_history_head_orderdate.innerText = oddate;
+}
+
+function setPurchaseHistoryHeadOrderTotal(order_id, total_amount) {
+    const purchase_history_head_order_total = document.createElement('div');
+    purchase_history_head_order_total.setAttribute('id', `purchase_history_head_order_total`);
+    purchase_history_head_order_total.setAttribute('class', `purchase_history_head_order_total`);
+    // purchase_history_head_orderdate.setAttribute('head_orderid', `${order_id}`);
+    document.querySelector(`[head_orderid="${order_id}"]`).appendChild(purchase_history_head_order_total);
+    purchase_history_head_order_total.innerText = '$' + parseFloat(total_amount).toFixed(2);
+}
+
+
+
+
+
+function setPurchaseHistoryMain(order_id, cart_id, prodnum, image_src, item_name, item_description) {
+    const purchase_history_main = document.createElement('div');
+    purchase_history_main.setAttribute('id', `purchase_history_main`);
+    purchase_history_main.setAttribute('class', `purchase_history_main`);
+    purchase_history_main.setAttribute('main_orderid', `${order_id}`);
+    document.querySelector(`[orderid="${order_id}"]`).appendChild(purchase_history_main);
+
+    setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, item_description);
+
+}
+
+function setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, item_description) {
+    const purchase_history_item = document.createElement('div');
+    purchase_history_item.setAttribute('id', `purchase_history_item`);
+    purchase_history_item.setAttribute('class', `purchase_history_item`);
+    purchase_history_item.setAttribute('item_orderid', `${cart_id}`);
+    document.querySelector(`[main_orderid="${order_id}"]`).appendChild(purchase_history_item);
+    purchase_history_item.innerText = cart_id;
+
+    setPurchaseHistoryItemImagebox(cart_id, prodnum, image_src);
+    setPurchaseHistoryItemContentbox(cart_id, prodnum, item_name, item_description);
+    setPurchaseHistoryItemExtrabox(cart_id, prodnum);
+}
+
+function setPurchaseHistoryItemImagebox(cart_id, prodnum, image_src) {
+    const purchase_history_item_imagebox = document.createElement('div');
+    purchase_history_item_imagebox.setAttribute('id', `purchase_history_item_imagebox`);
+    purchase_history_item_imagebox.setAttribute('class', `purchase_history_item_imagebox`);
+    purchase_history_item_imagebox.setAttribute('imagebox_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[item_orderid="${cart_id}"]`).appendChild(purchase_history_item_imagebox);
+    setPurchaseHistoryItemImage(cart_id, prodnum, image_src)
+}
+
+function setPurchaseHistoryItemImage(cart_id, prodnum, image_src) {
+    const purchase_history_item_image = document.createElement('img');
+    purchase_history_item_image.setAttribute('id', `purchase_history_item_image`);
+    purchase_history_item_image.setAttribute('class', `purchase_history_item_image`);
+    purchase_history_item_image.setAttribute('src', `${image_src}`);
+    document.querySelector(`[imagebox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_image);   
+
+}
+
+
+function setPurchaseHistoryItemContentbox(cart_id, prodnum, item_name, item_description) {
+    const purchase_history_item_contentbox = document.createElement('div');
+    purchase_history_item_contentbox.setAttribute('id', `purchase_history_item_contentbox`);
+    purchase_history_item_contentbox.setAttribute('class', `purchase_history_item_contentbox`);
+    purchase_history_item_contentbox.setAttribute('contentbox_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[item_orderid="${cart_id}"]`).appendChild(purchase_history_item_contentbox);
+    
+    setPurchaseHistoryItemName(cart_id, prodnum, item_name)
+    setPurchaseHistoryItemDescription(cart_id, prodnum, item_description)
+    
+
+}
+
+function setPurchaseHistoryItemName(cart_id, prodnum, item_name) {
+    const purchase_history_item_name = document.createElement('div');
+    purchase_history_item_name.setAttribute('id', `purchase_history_item_name`);
+    purchase_history_item_name.setAttribute('class', `purchase_history_item_name`);
+    // purchase_history_item_name.setAttribute('item_name_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[contentbox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_name);
+    purchase_history_item_name.innerText = item_name;
+
+}
+
+function setPurchaseHistoryItemDescription(cart_id, prodnum, item_description) {
+    const purchase_history_item_description = document.createElement('div');
+    purchase_history_item_description.setAttribute('id', `purchase_history_item_description`);
+    purchase_history_item_description.setAttribute('class', `purchase_history_item_description`);
+    // purchase_history_item_description.setAttribute('item_desc_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[contentbox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_description);
+    purchase_history_item_description.innerText = item_description;
+
+}
+
+function setPurchaseHistoryItemExtrabox(cart_id, prodnum) {
+    const purchase_history_item_extrabox = document.createElement('div');
+    purchase_history_item_extrabox.setAttribute('id', `purchase_history_item_extrabox`);
+    purchase_history_item_extrabox.setAttribute('class', `purchase_history_item_extrabox`);
+    purchase_history_item_extrabox.setAttribute('extrabox_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[item_orderid="${cart_id}"]`).appendChild(purchase_history_item_extrabox);
+    
+    setPurchaseHistoryItemReorder(cart_id, prodnum)
+    
+
+}
+
+function setPurchaseHistoryItemReorder(cart_id, prodnum) {
+    const purchase_history_item_reorder_btn = document.createElement('button');
+    purchase_history_item_reorder_btn.setAttribute('id', `purchase_history_item_reorder_btn`);
+    purchase_history_item_reorder_btn.setAttribute('class', `purchase_history_item_reorder_btn`);
+    purchase_history_item_reorder_btn.setAttribute('title', `reorder_button`);    
+    purchase_history_item_reorder_btn.setAttribute('itemid', `${prodnum}`);
+    document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_reorder_btn);
+    purchase_history_item_reorder_btn.innerText = 'But It Again';
+
+
+
+}
 
 
 

@@ -164,7 +164,7 @@ export default class {
                 // const orderConfirm = new order_confirm(user_id);
                 console.log(user_id)
                 
-                let checked_test = '';
+               
                 let ckecked_item = 'input[name="online_place_order_item_check_btn"]:checked';
 
                 const selectedEls = document.querySelectorAll(ckecked_item);

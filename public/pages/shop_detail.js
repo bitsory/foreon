@@ -1,6 +1,7 @@
 import PlaceOrder from "./place_order.js";
 import Main from "../index.js";
-import place_order from "./place_order.js";
+import order_confirm from "./oder_confirm.js";
+// import place_order from "./place_order.js";
 
 
 export default class {
@@ -97,8 +98,105 @@ document.addEventListener('click',function(e){
     if(e.target && e.target.className == 'buy_now_btn') {
                         
         console.log(`order count = ${order_quantity}`);
-        const place_order = new PlaceOrder();
-        // document.querySelector(".online_order").innerHTML = placeOrder.getOrder();
+        console.log("proceed_order_btn proceed_order_btn proceed_order_btn ");
+                let tmp_cart = '';
+                let check_out_cart = [];
+                // const orderConfirm = new order_confirm(user_id);
+                console.log(user_id)
+                
+               
+                let ckecked_item = 'input[name="online_place_order_item_check_btn"]:checked';
+
+                const selectedEls = document.querySelectorAll(ckecked_item);
+                const selected_items_number_list = [];
+                selectedEls.forEach((el) => {
+                    console.log(el)
+                    selected_items_number_list.push(el.getAttribute('checked_itemid'));
+                });
+                console.log(selected_items_number_list);
+
+
+                if(user_id === 'GUEST') {
+                    tmp_cart = JSON.parse(sessionStorage.getItem("cart"));            
+                    
+                    for (let i =0 ; i < selected_items_number_list.length ; i++) {
+                        tmp_cart.forEach(element => {
+                            element.c_item_no === selected_items_number_list[i] ? check_out_cart.push(element) : false;
+                        })
+                    }
+                    console.log(check_out_cart);
+
+                    sessionStorage.setItem("checkoutcart", JSON.stringify(check_out_cart));
+
+                    const data = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                            },
+                        body: JSON.stringify(check_out_cart)
+                    };
+        
+                    fetch('/shop/order', data)
+                    .then((res) => res.json())
+                    .then(checked_order_list => {
+                        console.log('checked_order_list');
+                        console.log(checked_order_list);
+
+                        console.log('check_out_cart')
+                        console.log(check_out_cart)
+
+
+                        const orderConfirm = new order_confirm(user_id, check_out_cart);
+                        document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
+                        orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
+                        })
+                } else {  ///////////////////// user check out proceed
+                    let data = {
+                        u_id : user_id, 
+                        // checked_items_number_list : selected_items_number_list                      
+                    };
+
+
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                            },
+                        body: JSON.stringify(data)
+                    };
+        
+                    fetch('/shop/order', options)
+                    .then((res) => res.json())
+                    .then(order_list => {
+                        console.log("order_list")
+                        console.log(order_list)
+
+                        let proceed_checkout_total = 0;
+                        let proceed_checkout_selected_order_cart = [];
+                        for (let i =0 ; i < selected_items_number_list.length ; i++) {
+                            order_list.forEach(element => {
+                                console.log(element)
+                                if (element.prodnum == selected_items_number_list[i]) {
+                                    proceed_checkout_selected_order_cart.push(element)
+                                }
+                
+                            })
+                        }
+
+                        console.log("proceed_checkout_selected_order_cart");
+                        console.log(proceed_checkout_selected_order_cart);
+
+                        proceed_checkout_selected_order_cart.forEach(element => {
+                            proceed_checkout_total = proceed_checkout_total + element.quantity * element.price_sell;
+                        })
+
+                        const orderConfirm = new order_confirm(user_id, proceed_checkout_selected_order_cart);
+                        document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
+                        orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
+                    })
+                }
         
         
     } 

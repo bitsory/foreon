@@ -1135,6 +1135,41 @@ ul.tabs li.current{
 }
 
 
+#purchase_history {
+    border: 0.5px solid gray;
+    margin: 1rem;
+}
+
+#purchase_history_head {
+    border: 0.5px solid gray;
+    margin: 1rem;
+}
+
+#purchase_history_main{
+    border: 0.5px solid gray;
+    margin: 1rem;
+}
+
+#purchase_history_item {
+    display: flex;
+    border: 0.5px solid gray;
+    margin: 1rem;
+}
+
+#purchase_history_item_image {
+    width: 100px;
+    height: auto;
+}
+
+#purchase_history_item_imagebox {
+    border: 0.5px solid gray;
+    margin: 1rem;
+}
+
+#purchase_history_item_contentbox {
+    border: 0.5px solid gray;
+    margin: 1rem;
+}
 
 
 

@@ -2917,7 +2917,44 @@ app.post('/item_delete_v2', (req,res) => {
                 }
         });
     }
-})
+});
+
+app.post('/check_purchase_history', (req,res) => {
+
+    const id= req.body.id;
+    const u_id = req.session.loginData.id;
+
+    if (id === u_id) {
+        const mysql = require('mysql');
+
+        const con = mysql.createConnection({
+            host: '127.0.0.1',
+            port: '3306',
+            user: 'root',
+            password: '111111',
+            database: 'test1',
+            
+        });
+
+        con.connect((err) => {
+            if(err){
+            console.log('Error connecting to Db');
+            return;
+            }
+            console.log('Connection established');
+        });
+
+        con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
+            if(err){                        
+                res.send(err);
+                con.end();        
+            } else {
+                console.log(result);  
+                res.send(result);      
+            }
+        })
+    } else console.log("id Check")
+});
 
 
 app.post('/user_checkout_submit', (req,res) => {
@@ -2947,7 +2984,9 @@ app.post('/user_checkout_submit', (req,res) => {
 
     })
 
-    
+    const tmp_amount_items = items.map(element => {return element.amount/100 * element.quantity ;})
+    const total_order_amount = tmp_amount_items.reduce((a,b) => (a+b));
+    console.log(total_order_amount);    
     
 
     ////////////////// get default payment method /////////////////////
@@ -3017,8 +3056,8 @@ app.post('/user_checkout_submit', (req,res) => {
     function setOrders(response) {
         console.log('order_number');
         console.log(order_number);       
-        con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, indate) VALUES (?,?,?,?,?,?,?)',
-        [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, date], (err, result) => {
+        con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
+        [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date], (err, result) => {
             if(err){                        
                 res.send(err);
                 con.end();        
@@ -3040,7 +3079,7 @@ app.post('/user_checkout_submit', (req,res) => {
             } else {
                 console.log('update complete Order Cart') 
                 console.log(result);
-                res.send(result)
+                res.send({transaction : "complete"})
                  
             }
         }); 
