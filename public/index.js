@@ -87,10 +87,27 @@ document.addEventListener('click', function(e){
 
     let user_info_btn =  document.querySelector('.user_info_btn');
     let user_profile_container =  document.querySelector('.user_profile_container');
+    const account_modal_pop_btn = document.getElementById('account_modal_pop_btn');
+    const account_modal_pop_container = document.getElementById("account_modal_pop_container");
+    const sign_in_btn = document.getElementById("sign_in_btn");
+    const account_modal = document.getElementById("account_modal");
     //var user_profile =  document.querySelector('.user_profile');
     // var modal_body = document.querySelector('.modal_body');
 
-    
+    if(e.target == account_modal_pop_btn) { // account modal pop
+        console.log('account_modal_pop_btn')
+        account_modal_pop_container.style.display = "block";
+       
+        account_modal_pop_container.innerHTML = accountModalPop();
+        
+    }
+
+    if (account_modal && e.target != sign_in_btn) // account modal window off
+        if(e.target!= account_modal_pop_container && account_modal_pop_container.style.display == "block") {
+            account_modal_pop_container.style.display = "none";
+            account_modal_pop_container.removeChild(document.getElementById('account_modal'));
+            console.log("close pop up")
+        }
    
 
     if(e.target == user_info_btn) { // user info modal window show
@@ -212,6 +229,27 @@ document.addEventListener('click', function(e){
     
 
 });
+
+
+function accountModalPop() {
+    return `
+        <div id="account_modal" class="account_modal">
+            <div class='greet'>Hello</div>
+            
+            <div class='sign_in'>                
+                <button id="sign_in_btn" class="sign_in_btn">SIGN IN</button>                               
+            </div>
+            <div class='create_an_account'>
+                <button class='create_an_account_btn'>CREATE AN ACCOUNT</button>
+            </div>
+            
+            <div class='track_my_order'>
+                <button id='track_my_order_btn' class='track_my_order_btn'>TRACK MY ORDER</button>
+            </div>
+        </div>
+    `
+}
+
 
 
 

@@ -3203,6 +3203,25 @@ app.post('/user_checkout_submit', (req,res) => {
 app.post('/guest_order_checkout', (req,res) => {
     console.log("/charge /charge /charge /charge /charge   ");
 
+    const mysql = require('mysql');
+
+    const con = mysql.createConnection({
+        host: '127.0.0.1',
+        port: '3306',
+        user: 'root',
+        password: '111111',
+        database: 'test1',
+        
+    });
+
+    con.connect((err) => {
+        if(err){
+        console.log('Error connecting to Db');
+        return;
+        }
+        console.log('Connection established');
+});
+
     const uuid = uuid4.v4(); 
     const order_items = JSON.parse(req.body.order_items);
     console.log(req.body); 
@@ -3265,17 +3284,77 @@ app.post('/guest_order_checkout', (req,res) => {
                 fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result.id}/pay`, options)
                     .then(response => response.json())
                     .then(response => {
-                        console.log("response")
-                        console.log(response)
-                        const res_items = response.items;
-                        console.log(res_items)
+
                         
-                        let order_items_number = res_items.forEach(element => {
+
+                        //////////////////// store order info into DB
+                        const u_id = 'GUEST';
+                        const amount = req.body.amount;
+                        // const cart = req.body.cart;
+                        let default_payment_method = '';
+                        let clv_id = '';
+                        let default_shipping_info = {};
+                        
+                        const date = getDate();
+                        const cart_num = date.replace(/\s|:|\-/g,"") + "CTGUEST";
+                        const order_num = date.replace(/\s|:|\-/g,"") + "ODGUEST";
+                        const order_items = response.items;
+
+                        setOrders(order_num, u_id, response, date);
+
+                        const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`,`order_number`,`oddate`) values ?;"
+                        let insert_cart_value = [];
+
+                        let insert_cart_value_element = [];
+                       
+                        for(let i in order_items) {
+                            insert_cart_value_element.push(cart_num);
+                            insert_cart_value_element.push(u_id);
+                            insert_cart_value_element.push(order_items[i].description.substring(0, order_items[i].description.indexOf(',')));
+                            insert_cart_value_element.push(order_items[i].quantity);
+                            insert_cart_value_element.push('y');
+                            insert_cart_value_element.push(date);
+                            insert_cart_value_element.push(date);
+                            insert_cart_value_element.push(order_num);
+                            insert_cart_value_element.push(date);
+
+                            insert_cart_value.push(insert_cart_value_element);
+                            insert_cart_value_element = [];
+                        }
+                        console.log(insert_cart_value)
+                    
+                        
+                        // const clv_od_id = response.id;
+                        // const clv_cha_id =response.charge;
+                        // const clv_ref_num = response.ref_num;
+                        // const clv_transc_id = response.status_transitions.paid;
+                        // const total_od_amount = response.amount;
+                        
+                        
+                        
+
+                        con.query(insert_cart_query, [insert_cart_value], (err, result) => {
+                            if(err) {
+                                console.log(err);
+                            } else {
+                                // console.log(query_str.sql); // SQL Query문 출력
+                                console.log(result);
+                            }
+                        });
+
+                        
+
+                        
+
+
+                        ////////////////////////////////////
+                        
+                        let order_items_number = response.items.map(element => {
+                            console.log(element.description)                            
                             return element.description.substring(0, element.description.indexOf(','));
                         })
-                        console.log(order_items_number);
-                        const send_data = JSON.stringify(order_items_number);
-                        res.send(send_data);
+                        
+                        res.send(order_items_number);
                     })
                     .catch(err => console.error(err));
 
@@ -3283,9 +3362,56 @@ app.post('/guest_order_checkout', (req,res) => {
         
         })
         .catch(err => console.error(err));
+
+        function setOrders(order_number, u_id, response, date) {
+            console.log('order_number');
+            console.log(order_number);       
+            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
+            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    con.end();        
+                } else {
+                    console.log('set orders') 
+                    console.log(result);
+                    
+                    // updateOrderedCart(order_number, date, cart_numbers, u_id)
+                }
+            }); 
+        }
 });
 
+function setOrders(order_number, u_id, response, date) {
+    console.log('order_number');
+    console.log(order_number);       
+    con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
+    [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount, date], (err, result) => {
+        if(err){                        
+            res.send(err);
+            con.end();        
+        } else {
+            console.log('set orders') 
+            console.log(result);
+            
+            // updateOrderedCart(order_number, date, cart_numbers, u_id)
+        }
+    }); 
+}
 
+function updateOrderedCart(order_num, oddate, cart_num, user_id) {
+    con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ? WHERE cartnum in (?) and u_id = ?'
+    ,[order_num, oddate, cart_num, user_id], (err, result) => {
+        if(err){                        
+            res.send(err);
+            con.end();        
+        } else {
+            console.log('update complete Order Cart') 
+            console.log(result);
+            res.send({transaction : "complete"})
+             
+        }
+    }); 
+}
 
 
 

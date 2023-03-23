@@ -213,8 +213,62 @@ export default class {
                             </div>
 
                             <div class="form-row csz">
+                                
                                 <div id="shipping_address" class="field shipping_address_state">
-                                <input type="text" name="shipping_address_state" class="input_shipping_address" placeholder="State">
+                                    <select name="shipping_address_state" id="shipping_address_state" class="input_shipping_address">
+                                    <option value="AL">Alabama</option>
+                                    <option value="AK">Alaska</option>
+                                    <option value="AZ">Arizona</option>
+                                    <option value="AR">Arkansas</option>
+                                    <option value="CA">California</option>
+                                    <option value="CO">Colorado</option>
+                                    <option value="CT">Connecticut</option>
+                                    <option value="DE">Delaware</option>
+                                    <option value="DC">District Of Columbia</option>
+                                    <option value="FL">Florida</option>
+                                    <option value="GA">Georgia</option>
+                                    <option value="HI">Hawaii</option>
+                                    <option value="ID">Idaho</option>
+                                    <option value="IL">Illinois</option>
+                                    <option value="IN">Indiana</option>
+                                    <option value="IA">Iowa</option>
+                                    <option value="KS">Kansas</option>
+                                    <option value="KY">Kentucky</option>
+                                    <option value="LA">Louisiana</option>
+                                    <option value="ME">Maine</option>
+                                    <option value="MD">Maryland</option>
+                                    <option value="MA">Massachusetts</option>
+                                    <option value="MI">Michigan</option>
+                                    <option value="MN">Minnesota</option>
+                                    <option value="MS">Mississippi</option>
+                                    <option value="MO">Missouri</option>
+                                    <option value="MT">Montana</option>
+                                    <option value="NE">Nebraska</option>
+                                    <option value="NV">Nevada</option>
+                                    <option value="NH">New Hampshire</option>
+                                    <option value="NJ">New Jersey</option>
+                                    <option value="NM">New Mexico</option>
+                                    <option value="NY">New York</option>
+                                    <option value="NC">North Carolina</option>
+                                    <option value="ND">North Dakota</option>
+                                    <option value="OH">Ohio</option>
+                                    <option value="OK">Oklahoma</option>
+                                    <option value="OR">Oregon</option>
+                                    <option value="PA">Pennsylvania</option>
+                                    <option value="RI">Rhode Island</option>
+                                    <option value="SC">South Carolina</option>
+                                    <option value="SD">South Dakota</option>
+                                    <option value="TN">Tennessee</option>
+                                    <option value="TX">Texas</option>
+                                    <option value="UT">Utah</option>
+                                    <option value="VT">Vermont</option>
+                                    <option value="VA">Virginia</option>
+                                    <option value="WA">Washington</option>
+                                    <option value="WV">West Virginia</option>
+                                    <option value="WI">Wisconsin</option>
+                                    <option value="WY">Wyoming</option>
+                                    </select>
+                                
                                 </div>
                             </div>
 
@@ -662,18 +716,19 @@ function cloverTokenHandler(token, order_info) {
       .then(data => {
         console.log("/guest_order_checkout complete")
         console.log(data)
+        
         let guest_cart = JSON.parse(sessionStorage.getItem("cart"));
-        console.log(guest_cart)
+       
         for (let i =0 ; i < data.length ; i++) {
-            for(let j = 0; i < guest_cart.length; j++) {
-                if(guest_cart[j].c_item_no == data[i]) {
-                    guest_cart.splice(guest_cart[j], 1);
+            for(let j = 0; j < guest_cart.length; j++) { 
+                if(guest_cart[j].c_item_no == data[i]) {                    
+                    guest_cart.splice([j], 1);
                     j--;
                 }
             }
         }
-        console.log(guest_cart)
-
+        sessionStorage.setItem("cart", JSON.stringify(guest_cart)); // set left over cart
+        sessionStorage.removeItem("checkoutcart");
 
     });
        
@@ -1051,21 +1106,87 @@ document.addEventListener('click',function(e){
     }
 
     if(e.target && e.target.className == 'check_guest_cart') {
-        let data = [3,2,1];
-        let guest_cart = sessionStorage.getItem("cart");
-        let test = JSON.parse(guest_cart);
+
+
+        // let data = [];
+        let order_items = [
+            {
+              quantity: 10,
+              amount: 1800,
+              description: '1,Ginger Bottle 16 oz.',
+              
+            },
+            {
+              quantity: 10,
+              amount: 2199,
+              description: '3,Toy Storage Baskets and Play Mats',
+              
+            },
+            {
+              quantity: 10,
+              amount: 1000,
+              description: '2,Fish-shaped Bun',
+             
+            }
+        ];
+
+        const u_id = 'GUEST';
+
+
+        let insert_cart_value = [];
+
+        let insert_cart_value_element = [];       
+        for(let i in order_items) {
+            insert_cart_value_element.push('cart_num');
+            insert_cart_value_element.push(u_id);
+            insert_cart_value_element.push(order_items[i].description.substring(0, order_items[i].description.indexOf(',')));
+            insert_cart_value_element.push(order_items[i].quantity);
+            insert_cart_value_element.push('y');
+            insert_cart_value_element.push('date');
+            insert_cart_value_element.push('date');
+            insert_cart_value_element.push('order_num');
+            insert_cart_value_element.push('date');
+            insert_cart_value.push(insert_cart_value_element);
+            insert_cart_value_element = [];
+        }
+
+        console.log(insert_cart_value)
+
+    /*
+
+          let order_items_number = data.forEach(element => {
+            console.log(element.description)                            
+            element.description.substring(0, element.description.indexOf(','));
+        })
+        console.log(order_items_number);
+        let test = [];
+        let str = ['1,Ginger Bottle 16 oz.' , '3,Toy Storage Baskets and Play Mats', '2,Fish-shaped Bun'];
+        test = str.map(element => {
+            console.log(element) 
+            return element.substring(0, element.indexOf(','));
+
+        })
+        
         console.log(test)
+        /*
+        let data = [3,1];
+        let guest_cart = JSON.parse(sessionStorage.getItem("cart"));
+       
         for (let i =0 ; i < data.length ; i++) {
-            for(let j = 0; i < test.length; j++) {
-                console.log(data[i])
-                console.log(test[j].c_item_no)
-                if(test[j].c_item_no == data[i]) {
-                    test.splice(test[j], 1);
+            for(let j = 0; j < guest_cart.length; j++) { 
+                if(guest_cart[j].c_item_no == data[i]) {                    
+                    guest_cart.splice([j], 1);
                     j--;
                 }
             }
         }
-        console.log(test)
+
+        sessionStorage.setItem("cart", JSON.stringify(guest_cart)); // set left over cart
+
+        */
+        
+        
+
         
         
     }
