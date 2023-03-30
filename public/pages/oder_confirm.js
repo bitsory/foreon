@@ -1,4 +1,5 @@
 import setItemBox from "./set_item_box.js";
+import orderComplete from "./order_complete.js";
 
 export default class {
 
@@ -20,9 +21,11 @@ export default class {
 
         this.online_main.addEventListener('click', (e) => {
 
+            console.log("order confirm double check order confirm double check order confirm double check ")
+
             if(e.target && e.target.className == 'user_checkout_submit_button') {
                 console.log('user_checkout_submit_button user_checkout_submit_button user_checkout_submit_button')
-
+                
                 let placed_order_cart = this.check_out_box.getReadyCart()
                 console.log(placed_order_cart);
                 
@@ -45,31 +48,21 @@ export default class {
                 .then(response => response.json())
                 .then(response => {
                     console.log(response)
+                    if (response.status == 'complete') {
                     ////////// order-confirmation page ///////////////////////
+
+                    setOrderConfirmationPage(response);
+
+
+                    }
+                    
 
                 })
                 .catch(err => console.error(err));
 
             }
-
-            if(e.target && e.target.className == 'guest_test_submit') {
-                console.log('guest_test_submit guest_test_submit guest_test_submitguest_test_submit')
-
-                let placed_order_cart = this.check_out_box.getReadyCart()
-                console.log(placed_order_cart);
-
-
-
-            }
-
-
         })
-
-
-
     }
-
-
 
     
     getUserOrderConfirm() {
@@ -100,7 +93,7 @@ export default class {
                 <div class="user_checkout_submit_summary_container">
                     <div class="user_checkout_submit_summary_title">Order Summary</div>
                     <div class="user_checkout_submit_summary_detail">
-                        <span class="user_checkout_submit_summary_items">items:</span>
+                        <span class="user_checkout_submit_summary_items">Items:</span>
                         <span class="user_checkout_submit_summary_value">
                         <span class="usd">$</span><span class="user_checkout_submit_summary_items_value">00.00</span>
                         </span>
@@ -167,7 +160,7 @@ export default class {
 
                         <div class="form-row">
                             <div id="card-name" class="field card-name">
-                            <input type="text" name="card-name" class="input_card_name" placeholder="Cardholder Name">
+                            <input type="text" name='card_name' class="input_card_name" placeholder="Cardholder Name">
                             </div>
                         </div>                    
 
@@ -193,15 +186,31 @@ export default class {
                         
                         <div class="order_info_title">Shipping Infomation</div>
 
+                        <div class="shipping_info_recipient">
+                            <div class="form-row">
+                                <div id="recipient_first_name" class="field recipient_first_name">
+                                <input type="text" name="recipient_first_name" class="input_recipient_first_name" placeholder="First Name">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div id="recipient_last_name" class="field recipient_last_name">
+                                <input type="text" name="recipient_last_name" class="input_recipient_last_name" placeholder="Last Name">
+                                </div>
+                            </div>
+                        </div>
+
+
+
                         <div class="form-row">
-                            <div id="recipient" class="field recipient">
-                            <input type="text" name="shipping_recipient" class="input_recipient" placeholder="Recipient">
+                            <div id="shipping_address" class="field shipping_address_line1">
+                            <input type="text" name="shipping_address_street_line1" class="input_shipping_address_line1" placeholder="Shipping Address Street Line 1">
                             </div>
                         </div>
 
                         <div class="form-row">
-                            <div id="shipping_address" class="field shipping_address">
-                            <input type="text" name="shipping_address_street" class="input_shipping_address" placeholder="Shipping Address Street">
+                            <div id="shipping_address" class="field shipping_address_line2">
+                            <input type="text" name="shipping_address_street_line2" class="input_shipping_address_line2" placeholder="Shipping Address Street Line 2">
                             </div>
                         </div>
 
@@ -324,6 +333,8 @@ export default class {
                 <button class="save_card">save_card</button>
                 <button class="guest_test_submit">guest_test_submit</button>
                 <button class="check_guest_cart">check_guest_cart</button>
+                <button class="crypto_test">crypto_test</button>
+               
                 
 
                 
@@ -713,15 +724,17 @@ function cloverTokenHandler(token, order_info) {
         body: payload,
       })
       .then(res => res.json())
-      .then(data => {
+      .then(response => {
         console.log("/guest_order_checkout complete")
-        console.log(data)
+        console.log(response)
         
+        const paid_item_no = response.paid_items_number;
+        console.log(paid_item_no)
         let guest_cart = JSON.parse(sessionStorage.getItem("cart"));
        
-        for (let i =0 ; i < data.length ; i++) {
+        for (let i =0 ; i < paid_item_no.length ; i++) {
             for(let j = 0; j < guest_cart.length; j++) { 
-                if(guest_cart[j].c_item_no == data[i]) {                    
+                if(guest_cart[j].c_item_no == paid_item_no[i]) {                    
                     guest_cart.splice([j], 1);
                     j--;
                 }
@@ -729,6 +742,8 @@ function cloverTokenHandler(token, order_info) {
         }
         sessionStorage.setItem("cart", JSON.stringify(guest_cart)); // set left over cart
         sessionStorage.removeItem("checkoutcart");
+
+        setOrderConfirmationPage(response);
 
     });
        
@@ -741,6 +756,15 @@ function cloverTokenHandler(token, order_info) {
 
 
 // }
+
+function setOrderConfirmationPage(response) {
+    const lorem_page = document.getElementById('lorem');
+    const order_complete_page = new orderComplete();
+    console.log(order_complete_page);
+    lorem_page.innerHTML = order_complete_page.getHtml();
+    order_complete_page.setConfirmInfo(response);
+    history.pushState(null, null, `/order-confirmation`);
+}
 
 function setUserCheckoutBillingInfo(cardholder, type, last4) {
     const user_checkout_billing_info_detail = document.createElement('div');
@@ -1188,6 +1212,21 @@ document.addEventListener('click',function(e){
         
 
         
+        
+    }
+
+    if(e.target && e.target.className == 'crypto_test') {
+
+        console.log('test')
+                  
+        fetch('/test')
+        .then(response => response.json())
+        .then(response => {
+            console.log(response)
+            // window.location.href = response.url;
+        })
+        .catch(err => console.error(err)); 
+
         
     }
 

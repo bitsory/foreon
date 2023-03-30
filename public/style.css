@@ -811,7 +811,7 @@ nav {
     height: 44px;
   }
 
-  .input_recipient,.input_card_name, .input_shipping_address, .input_shipping_option, .order_contact_phone, .order_contact_email  {
+  .input_recipient_first_name, .input_recipient_last_name,.input_card_name, .input_shipping_address_line1, .input_shipping_address_line2, .input_shipping_address, .input_shipping_option, .order_contact_phone, .order_contact_email  {
     border: none;
     height: 100%;
     width: 100%;
@@ -825,6 +825,11 @@ nav {
     font-weight: bolder;
     font-size: 20px;
     width: 50%;
+  }
+
+  .shipping_info_recipient {
+    display: flex;
+    justify-content: center;
   }
 
   .shipping_info_csz {
@@ -876,6 +881,11 @@ nav {
   .order_total_amount_title {
     margin-left: 3rem;
     font-size: 16px;
+  }
+
+
+  .g_id_signin {
+    width: 600px;
   }
 
 

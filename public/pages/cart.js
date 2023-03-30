@@ -1,12 +1,289 @@
 export default class Cart{
     
+    // navbar = document.getElementById('navbar');
+    // lorem = document.getElementById('lorem');
     
+
     constructor(param) {
         document.title = "Cafe FORE";
-        console.log("shop cart");
+        console.log("cart.js");
         
         this.c_name = this.getCookie(param)[0];
         this.c_id = this.getCookie(param)[1];
+
+        /*
+        this.navbar.addEventListener('click',function(e){ 
+            console.log("cart click double check navbar")
+            if(e.target && e.target.className == 'user_profile_change_btn') {
+
+                document.querySelector('.main_background__blink').style.display = "none";              
+                changeProfile();       
+                
+            }
+        
+            if(e.target && e.target.className == 'user_purchase_history_btn') {        
+
+                document.querySelector('.main_background__blink').style.display = "none";
+                viewPurchaseHistory(u_id);               
+        
+            }
+        });
+
+        this.lorem.addEventListener('click',function(e){ 
+            console.log("cart click double check lorem")
+            if(e.target && e.target.className == 'btn billing_info_add_btn') {
+                document.querySelector('.billing_info_box').innerHTML = addBillingInfoBox();
+                addBillingMethodForm();
+                document.querySelector('.billing_info_add_btn_container').style.display = "none";
+            }
+            if(e.target && e.target.className == 'btn shipping_info_add_btn') {
+                document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();
+                document.querySelector('.shipping_info_add_btn_container').style.display = "none";
+                addShippingInfo();
+            }
+        
+        
+            if(e.target && e.target.className == 'tab-link') {
+                let tab_id = e.target.getAttribute('data-tab');
+                let tab_links = document.querySelectorAll('li.tab-link');
+                let tab_contents = document.querySelectorAll('div.tab-content');
+        
+                for (const element of tab_links) {
+                    element.classList.remove('current');                
+                }
+                for (const element of tab_contents) {             
+                    element.classList.remove('current');
+                }
+                
+                e.target.classList.add('current');
+                document.getElementById(tab_id).classList.add('current');
+        
+                if (tab_id === 'tab-2') {
+                    const billing_info_box = document.querySelector('.billing_info_box');
+                    while (billing_info_box.hasChildNodes()) {	
+                        billing_info_box.removeChild(billing_info_box.firstChild);
+                    }
+        
+                    // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
+                    document.querySelector('.billing_info_add_btn_container').style.display = "block";
+                    fetch('/get_user_billing_info') // get billiing info from DB
+                    .then((res) => res.json())
+                    .then(result => {
+                        console.log(result);
+                        if (result.length > 0) {
+                            console.log(result)        
+                            renderBillingInfo(result);
+                        }
+                    })
+        
+        
+                } else if (tab_id === 'tab-3') {            
+                    
+                    const shipping_info_box = document.querySelector('.shipping_info_box');
+                    while (shipping_info_box.hasChildNodes()) {	
+                        shipping_info_box.removeChild(shipping_info_box.firstChild);
+                    }
+        
+                    // document.querySelector('.shipping_info_box').innerHTML.removeChild();
+                    document.querySelector('.shipping_info_add_btn_container').style.display = "block";
+                    fetch('/get_user_shipping_info') // get shipping info from DB
+                    .then((res) => res.json())
+                    .then(result => {
+                        renderShippingInfo(result)
+                    });
+                }
+            }
+        
+            // if(e.target && e.target == 'billing_info_delete_btn') {
+            //     console.log("'billing_info_delete_btn' 'billing_info_delete_btn' 'billing_info_delete_btn'")
+            //     let str = e.target.className;
+            //     console.log(str.indexOf("BIN"));
+            // }
+        
+            if(e.target && e.target.value == 'make_default_billing_info') {
+                let str = e.target.className;
+                
+                let uid = u_id;
+                let new_default_billing_index = str.substring(str.indexOf("BIN")+3);
+                // let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
+                const data = {id : uid, billing_index : new_default_billing_index}
+        
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(data)
+                };
+                console.log(option);
+        
+                fetch('/make_default_billing_info', option)
+                .then((res) => res.json())
+                .then(result => {
+                    const billing_info_box = document.querySelector('.billing_info_box');
+                    while (billing_info_box.hasChildNodes()) {	
+                        billing_info_box.removeChild(billing_info_box.firstChild);
+                      }
+                    renderBillingInfo(result);
+        
+                });
+            }
+        
+            if(e.target && e.target.value == 'delete_payment_method') {
+                console.log("Delete 'billing_info_delete_btn' 'billing_info_delete_btn' 'billing_info_delete_btn'")
+                let str = e.target.className;
+                console.log(str.indexOf("BIN"));
+                console.log(str.substring(str.indexOf("BIN")+3))
+                
+            
+                let uid = u_id;
+                let delete_card_index = str.substring(str.indexOf("BIN")+3);
+                let default_payment_indicate = document.getElementById(`billing_info_default_btn BIN${delete_card_index}`).value;
+        
+                const data = {id : uid, card_index : delete_card_index, default_payment : default_payment_indicate}
+        
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(data)
+                };
+                console.log(option);
+        
+                fetch('/delete_payment_method', option)
+                .then((res) => res.json())
+                .then(result => {
+                    console.log(result)
+                    const billing_info_box = document.querySelector('.billing_info_box');
+                    while (billing_info_box.hasChildNodes()) {	
+                        billing_info_box.removeChild(billing_info_box.firstChild);
+                    }
+                    renderBillingInfo(result);
+                    // const delete_node = document.getElementById(`billing_info BIN${delete_card_index}`);
+                    // document.querySelector('.billing_info_box').removeChild(delete_node);
+        
+                });
+            }
+        
+        /////////////////////// edit shipping info //////////////////////////////////////////
+        
+            if(e.target && e.target.value == 'edit_shipping_info') {
+                console.log("edit_shipping_info edit_shipping_info")
+        
+                let str = e.target.className;
+                let uid = u_id;
+                let edit_shipping_index = str.substring(str.indexOf("SHN")+3);
+        
+                let recipient = (document.querySelector(`.shipping_info_recipient.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_recipient.SHN${edit_shipping_index}`).innerText : '';
+                let address1 = (document.querySelector(`.shipping_info_address1.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_address1.SHN${edit_shipping_index}`).innerText : '';
+                let address2 = (document.querySelector(`.shipping_info_address2.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_address2.SHN${edit_shipping_index}`).innerText : '';
+                let city = (document.querySelector(`.shipping_info_city.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_city.SHN${edit_shipping_index}`).innerText : '';
+                let state = (document.querySelector(`.shipping_info_state.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_state.SHN${edit_shipping_index}`).innerText : '';
+                let zip = (document.querySelector(`.shipping_info_zip.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_zip.SHN${edit_shipping_index}`).innerText : '';
+                let phone = (document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`).innerText : '';
+                let email = (document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`).innerText : '';
+                
+                document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();        
+                document.querySelector('.shipping_info_add_btn_container').style.display = "none";
+                
+                document.querySelector('.input_recipient').value = recipient;
+                document.querySelector('.input_shipping_address_line1').value = address1;
+                document.querySelector('.input_shipping_address_line2').value = address2;
+                document.querySelector('.input_shipping_address_city').value = city;
+                
+                let selected_state = document.getElementById('change_profile_state');        
+        
+                for (let i = 0 ; i < selected_state.options.length ; i++) {
+                    if (selected_state.options[i].value == state) {
+                        selected_state.options[i].selected = true;                
+                    }
+                }
+        
+                document.querySelector('.input_shipping_address_zip').value = zip;
+                document.querySelector('.input_shipping_address_phone').value = phone;
+                document.querySelector('.input_shipping_address_email').value = email;
+        
+                let edit_form = document.getElementById('change_profile_shipping_info_form');
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'shipping_index');
+                hiddenInput.setAttribute('value', edit_shipping_index);
+                edit_form.appendChild(hiddenInput);
+        
+                editShippingInfo();
+        
+            }
+            
+        
+            if(e.target && e.target.value == 'delete_shipping_info') {
+        
+        
+                // console.log("delete_shipping_info delete_shipping_info")
+                let str = e.target.className;
+                
+                let uid = u_id;
+                let delete_shipping_index = str.substring(str.indexOf("SHN")+3);
+                let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
+               
+                const data = {id : uid, shipping_index : delete_shipping_index, default_address : default_addr}
+        
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(data)
+                };
+                console.log(option);
+        
+                fetch('/delete_shipping_info', option)
+                .then((res) => res.json())
+                .then(result => {
+                    console.log(result)
+                    const shipping_info_box = document.querySelector('.shipping_info_box');
+                    while (shipping_info_box.hasChildNodes()) {	
+                        shipping_info_box.removeChild(shipping_info_box.firstChild);
+                      }
+                    renderShippingInfo(result);
+        
+                });
+        
+            }
+        
+            if(e.target && e.target.value == 'make_default_shipping_info') {
+                let str = e.target.className;
+                
+                let uid = u_id;
+                let new_default_shipping_index = str.substring(str.indexOf("SHN")+3);
+                // let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
+                const data = {id : uid, shipping_index : new_default_shipping_index}
+        
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(data)
+                };
+                console.log(option);
+        
+                fetch('/make_default_shipping_info', option)
+                .then((res) => res.json())
+                .then(result => {
+                    const shipping_info_box = document.querySelector('.shipping_info_box');
+                    while (shipping_info_box.hasChildNodes()) {	
+                        shipping_info_box.removeChild(shipping_info_box.firstChild);
+                      }
+                    renderShippingInfo(result);
+                });
+            }
+
+
+
+        });
+        */
+
     }
 
     
@@ -86,8 +363,6 @@ export default class Cart{
             <div class='user_purchase_history'>
                 <button class='user_purchase_history_btn'>PURCHASE HISTORY</button>
             </div>
-
-            
             
             <div class='user_profile_log_out'>
                 <form action="/sign_out" method="post" class="user_logout">
@@ -98,32 +373,50 @@ export default class Cart{
         `
     }
 
-    getGuestProfile() {
-        return `
-            <div class='user_profile_greet'>Hello</div>
-            <div class='user_profile_name'>${this.getCookie(document.cookie)}</div>
-            <div class='user_profile_cart'>
-                
-                <form action='/shop/cart/${this.getCookie(document.cookie)}' method="post" class="form_user_profile_cart">
-                        
-                    <input type="submit" class="user_profile_cart_btn" name="view_cart" value="GO Cart" onclick=${this.viewCart()}>
-                </form>
-                
-            </div>
-            
-        `
+    changeProfile() {    
+        document.querySelector('.lorem').innerHTML = mekeChangePrifileTap();    
     }
+
+    viewPurchaseHistory(u_id) {
+        console.log("view purchase History")
+        document.querySelector('.lorem').innerHTML = makePurchaseHistoryContainer();
+    
+        const data = {id : u_id}
+    
+        const option = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'                
+                },
+            body: JSON.stringify(data)
+        };
+        console.log(option);
+
+        fetch('/check_purchase_history', option)
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result)
+            setPurchaseHistory(result);
+
+        });
+    }
+    
 
 }
 
 let u_id = '';
 
+
+
 document.addEventListener('click',function(e){ 
+
+    console.log("cart click double check ")
     
         
     if(e.target && e.target.className == 'user_profile_change_btn') {
 
-        document.querySelector('.main_background__blink').style.display = "none";
+        history.pushState(null, null, `/account`); // url change
+        (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
       
         changeProfile();
 
@@ -137,7 +430,8 @@ document.addEventListener('click',function(e){
 
     if(e.target && e.target.className == 'user_purchase_history_btn') {
 
-        document.querySelector('.main_background__blink').style.display = "none";
+        history.pushState(null, null, `/purchase-history`); // url change
+        (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
         viewPurchaseHistory(u_id);
         
 
@@ -194,38 +488,38 @@ document.addEventListener('click',function(e){
 
                     renderBillingInfo(result);
 
-                    /*
-                    console.log(result.sort(date_descending)) // 내림차순
+                    
+                    // console.log(result.sort(date_descending)) // 내림차순
 
-                    function date_descending(a, b) {
-                    var dateA = new Date(a['indate']).getTime();
-                    var dateB = new Date(b['indate']).getTime();
-                    return dateA < dateB ? 1 : -1;
-                    }
+                    // function date_descending(a, b) {
+                    // var dateA = new Date(a['indate']).getTime();
+                    // var dateB = new Date(b['indate']).getTime();
+                    // return dateA < dateB ? 1 : -1;
+                    // }
 
-                    let data = result.filter(element => {
-                        return element.inuse === 'y';
-                    })
+                    // let data = result.filter(element => {
+                    //     return element.inuse === 'y';
+                    // })
 
-                    if (data.length >0) {
+                    // if (data.length >0) {
 
-                        let sorted_res = (data.sort(date_descending)).filter(element => {
-                            return element.default_payment !== 'default';
-                        });                    
+                    //     let sorted_res = (data.sort(date_descending)).filter(element => {
+                    //         return element.default_payment !== 'default';
+                    //     });                    
 
-                        const default_payment = data.filter(element => {             
-                            return element.default_payment === 'default';
-                        });
+                    //     const default_payment = data.filter(element => {             
+                    //         return element.default_payment === 'default';
+                    //     });
                         
-                        console.log(default_payment)
-                        setBillingInfo(default_payment[0].bi_number, default_payment[0].cardholder, default_payment[0].type, default_payment[0].last4, "default");
+                    //     console.log(default_payment)
+                    //     setBillingInfo(default_payment[0].bi_number, default_payment[0].cardholder, default_payment[0].type, default_payment[0].last4, "default");
 
-                        sorted_res.forEach(element => {
-                            setBillingInfo(element.bi_number, element.cardholder, element.type, element.last4, "n");
+                    //     sorted_res.forEach(element => {
+                    //         setBillingInfo(element.bi_number, element.cardholder, element.type, element.last4, "n");
 
-                        }) 
-                    }
-                    */
+                    //     }) 
+                    // }
+                    
                 }
             })
 
@@ -432,6 +726,8 @@ document.addEventListener('click',function(e){
         });
     }
 });
+
+
 
 
 function changeProfile() {    
@@ -1578,11 +1874,6 @@ function viewPurchaseHistory(u_id) {
             // document.querySelector('.billing_info_box').removeChild(delete_node);
 
         });
-
-
-
-
-
 }
 
 function makePurchaseHistoryContainer() {

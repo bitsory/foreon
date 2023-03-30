@@ -2,6 +2,7 @@ export default class {
     constructor() {
         document.title = "Cafe FORE";
         console.log("about page");
+        this.title = "about";
     }
 
     
@@ -36,3 +37,9 @@ export default class {
         `;
     }
 }
+
+document.addEventListener('click', function(e) {
+
+    console.log("about document.addEventListener('click', function(e)");
+
+});

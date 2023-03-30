@@ -17,23 +17,27 @@
     <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
     <script src="https://cdn.polyfill.io/v3/polyfill.min.js"></script>
     <script src="https://checkout.sandbox.dev.clover.com/sdk.js"></script>
+    <script type="text/javascript" src="./pages/jsencrypt.min.js"></script>
+    <!-- <meta name ="google-signin-client_id" content="848599037536-2qfs9feovnsi0bf2fs6brch8jvqrcj44.apps.googleusercontent.com"> -->
+    <!-- <script src="https://accounts.google.com/gsi/client" async defer></script> -->
+    
     
     <link rel="icon" href="/images/logo.png">
     
 </head>
 <body>
-    <div class="modal">
-        <div class="modal_page">
-            <div class="modal_body">
+    <div id="modal" class="modal">
+        <div id="modal_page" class="modal_page">
+            <!-- <div id="modal_body" class="modal_body"> -->
 
-            </div>
+            <!-- </div> -->
         </div>          
     </div>
 
-    <nav class="navbar">
-        <div class="navbar_or">
-            <div class="navbar_w4">
-                <div class="navbar_logo">
+    <nav id="navbar" class="navbar">
+        <div id="navbar_or" class="navbar_or">
+            <div id="navbar_w4" class="navbar_w4">
+                <div id="navbar_logo" class="navbar_logo">
                     <a href="http://localhost:8080" class="logo_btn"></a>
                     <!-- <a href="./cafeFORE">Cafe FORE</a> -->
                 </div>
@@ -64,9 +68,28 @@
                 <button class="go_cart">Cart</button>
                 <!-- <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank"><i class="fab fa-facebook"></i></a>
                 <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a> -->
-
-
+              
             </div>
+            <!-- <div id="g_id_onload"
+                data-client_id="848599037536-2qfs9feovnsi0bf2fs6brch8jvqrcj44.apps.googleusercontent.com"
+                data-context="use"
+                data-ux_mode="popup"
+                data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+                </div>
+            <div class="g_id_signin"
+                data-type="standard"
+                data-shape="rectangular"
+                data-theme="outline"
+                data-text="signin_with"
+                data-size="medium"
+                data-locale="en"
+                data-logo_alignment="left">
+            </div> -->
+
+
+
+
         </div>
     </nav>
 
@@ -111,9 +134,9 @@
                     <span><bold>HOURS.</bold></span><br>
                     
                     <div class="foot_hr">
-                    Monday - Friday<br>
+                    MON - FRI<br>
                     11am - 8pm<br>  
-                    Satday - Sunday<br>
+                    SAT - SUN<br>
                     12 - 6pm<br>                    
                     </div>
                 </div>
@@ -136,8 +159,64 @@
     </section>
 	
     <script type="module" src="index.js"></script>
-    <script type="module" src="./pages/login.js"></script>    
-    <script type="module" src="./pages/shop.js"></script>
+    <!-- <script src="https://apis.google.com/js/platform.js" async defer></script> -->
+    
+    <!-- <script type="module" src="./pages/login.js"></script>     -->
+    <!-- <script type="module" src="./pages/shop.js"></script> -->
+    <script>
+        // function onSignIn(googleUser) {
+        // var profile = googleUser.getBasicProfile();
+        // console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+        // console.log('Name: ' + profile.getName());
+        // console.log('Image URL: ' + profile.getImageUrl());
+        // console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+        // }
+
+
+        function decodeJwtResponse(token) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+      };
+      function handleCredentialResponse(response) {
+         // decodeJwtResponse() is a custom function defined by you
+         // to decode the credential response.
+         const responsePayload = decodeJwtResponse(response.credential);
+    
+         console.log("ID: " + responsePayload.sub);
+         console.log('Full Name: ' + responsePayload.name);
+         console.log('Given Name: ' + responsePayload.given_name);
+         console.log('Family Name: ' + responsePayload.family_name);
+         console.log("Image URL: " + responsePayload.picture);
+         console.log("Email: " + responsePayload.email);
+
+         const data = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+            body: JSON.stringify(responsePayload)
+        };
+
+        fetch('/test_log', data)
+        .then((res) => res.json())
+        .then(result => {console.log(result)})
+
+      }
+
+
+
+
+        
+
+
+
+    </script>
     
 
     

@@ -1,18 +1,11 @@
 export default class {
-
     
-    // check_out_items_container = document.querySelector('.check_out_items_container');
     online_main = document.getElementById('online_main');
-    // user_checkout_submit_button_container = document.querySelector('.user_checkout_submit_button_container');
-
+    
     constructor (user_id, item_attribute, check_out_cart) {
       
         this.setReadyCart(check_out_cart)
         // user_checkout_ready_cart = check_out_cart;
-
-       
-
-
         this.online_main.addEventListener('click', (e) => {
             console.log("set item box click_test");
             console.log(e.target)

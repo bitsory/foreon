@@ -12,9 +12,10 @@ require('dotenv').config()
 
 const Clover = require("clover-ecomm-sdk");
 const session = require('express-session');
+const JSEncrypt = require('nodejs-jsencrypt').default;
 // import session from 'express-session';
 // const session = require("express-session");
-
+const CryptoJS = require("crypto-js");
 
 
 
@@ -35,7 +36,7 @@ app.use(session({
     saveUninitialized: true,
     HttpOnly:true,
     // cookie: { maxAge: 360000 } // 5 minute
-    cookie: { maxAge: 3600000 }
+    cookie: { maxAge: 3600000, sameSite: 'strict' }
 
 }))
 
@@ -45,12 +46,13 @@ const uuid4 = require('uuid');
 
 
 
+
 app.get('/',(req,res) => {
     console.log("home home home");
     // res.sendFile(__dirname + "/public/index.html");
     if (req.session.loginData) {
         console.log("login data exist");        
-		res.render('index.ejs', {post : req.session.loginData.id});
+		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
         console.log("login data nothing");
 		res.sendFile(__dirname + "/public/index.html");
@@ -64,66 +66,356 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(express.static('public'));
 
 
+app.post('/sign_in', function (req,res) {
+    // res.sendFile(__dirname + "/public/login.html");
+    console.log(`req.body: ${req.body}`);
+    console.log(`req.originalUrl: ${req}`);
+    console.log(req.url);
+    // const sess = req.session;
+    
+    // const con = makeConnect();
+    const aid = req.body.aid;
+    const bpw = req.body.bpw;
 
-app.get('/crypto', (req,res) => {
+    const decrypt = new JSEncrypt();
+    
+    decrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
+
+    const decryptedText_a = decrypt.decrypt(aid);
+    const decryptedText_b = decrypt.decrypt(bpw);
+    // console.log(decryptedText_a)
+    console.log(decryptedText_b)
+
+    const sign_in_id = decrypt.decrypt(aid);
+    const sign_in_pw = decrypt.decrypt(bpw);
+    const redirect_path = req.body.c_path;
+    // const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
+    console.log(redirect_path);
+    
+    const date = getDate();  
     const crypto = require('crypto');
-    const CIPHER_ALGORITHM = 'aes-256-ctr';
+    // const buf = crypto.randomBytes(64);
 
-    const createKey = () => {
-        let str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$%&/()=?^"!|[]{}*+-:.;,_@#<>';
-        return str.split('').sort((a, b) => {return Math.random() - 0.5}).join('');
-    };
+    // const salt = buf.toString('base64');
+    // console.log('salt');
+    // console.log(salt);
 
-    const key = createKey();
+    
+    
+    const mysql = require('mysql');
 
-    class KeyGen {
-        constructor(key, algorithm) {
-            this.key = key;
-            this.algorithm = algorithm;
+    const con = mysql.createConnection({
+        host: '127.0.0.1',
+        port: '3306',
+        user: 'root',
+        password: '111111',
+        database: 'test1',
+        
+    });
+
+    con.connect((err) => {
+        if(err){
+        console.log('Error connecting to Db');
+        return;
+        }
+        console.log('Connection established');
+    });
+
+    con.query('SELECT salt from users where id = ?', [sign_in_id], (err, result) => { 
+        if(err){
+            res.send(err);
+            con.end();
+        } else {
+            console.log('salt')
+            console.log(result)
+            makeKey(result[0].salt).then(key => {
+                console.log('key')
+                console.log(key)
+                con.query('SELECT *  from users where id = ? and pw = ?',
+                // con.query('SELECT COALESCE(MAX(id), "false") AS id from users where id = ? and pw = ?',
+                    [sign_in_id, key], (err, result) => {
+                            if(err){
+                                res.send(err);
+                                con.end();
+                            }
+                            // else if(result[0] === 'false') {
+                            else if(result[0] === undefined) {
+                                console.log("Id & PW are not match")
+                                res.send({check : 'not match'});
+                                con.end();
+                            } else {                                         
+                                console.log(`${result}`);                        
+                                updateLastLog(result[0].id, result[0].name, result[0].clv_id);  
+                            }
+                                
+                });    
+            });
+
+
         }
 
-        cypher(str) {
-            let sha256 = crypto.createHash('sha256');
-            sha256.update(this.key);
-            let iv = crypto.randomBytes(16);
-            let cipher = crypto.createCipheriv(this.algorithm, sha256.digest(), iv);
-            let ciphertext = cipher.update(Buffer.from(str));
-            let  encrypted = Buffer.concat([iv, ciphertext, cipher.final()]).toString('base64');
-            return encrypted;
-        }
+    })
 
-        decypher(enc) {
-            let sha256 = crypto.createHash('sha256');
-            sha256.update(this.key);
-            let input = Buffer.from(enc, 'base64');
-            let iv = input.slice(0, 16);
-            let decipher = crypto.createDecipheriv(this.algorithm, sha256.digest(), iv);
-            let ciphertext = input.slice(16);
-            let plaintext = decipher.update(ciphertext) + decipher.final();
-            return plaintext;
-        }
+    function makeKey(salt) {
+        return new Promise((resolve, reject) => {
+                crypto.pbkdf2(sign_in_pw, salt, 1000, 32, 'SHA512', (err, key) => {
+                if (err){
+                    console.log(err)
+                } else {
+                    // console.log(key.toString("base64"));                    
+                    resolve(key.toString("base64"));
+                }
+            })
+        });
     }
 
-    let kg = new KeyGen(key, CIPHER_ALGORITHM);
-    let enc = kg.cypher('4111111111111111');
+    
+    
 
-    // let kg2 = new KeyGen(key, CIPHER_ALGORITHM);
-    let enc2 = kg.cypher('4242424242424242');
+    function updateLastLog(u_id, u_name, clv_id) {
+        
+        console.log(`update: ${u_id}, ${date}`);       
+        con.query('UPDATE users SET last_log = ? where id = ?', [date, u_id]);
+        let data = {id : u_id, name : u_name, clv_id : clv_id};
+        req.session.loginData = data;
+        console.log('req.session.loginData');
+        console.log(req.session.loginData);
 
-    // let kg3 = new KeyGen(key, CIPHER_ALGORITHM);
-    let enc3 = kg.cypher('Yeohae120817!');
+        res.cookie("cafe_fore_t", "test-test-test", {maxAge: 360000});
+        res.cookie("cafe_fore_tt", "test-test-test", {maxAge: 3600000});
+        res.cookie(
+            'cafefore',{
+            name : req.session.loginData.name,
+            id : req.session.loginData.id,
+            clv : req.session.loginData.clv_id,                            
+            
+        }, {maxAge: 3600000, credentials: true, authorized : true, signed: true });
+        console.log("login complete")
+        const re_path = {url : redirect_path}
+        res.send(re_path);
+           
+        con.end();
+     
+        
+    }
 
-    // let enc = kg.cypher('Yeohae120817!');
+});
 
-    console.log(enc); // 'F6NR6AeK475VsnH874uj2P9bxRCk8mO14gWqDXpAg5o='
-    console.log(kg.decypher(enc)); // '4111111111111111'
 
-    console.log(enc2); // 'F6NR6AeK475VsnH874uj2P9bxRCk8mO14gWqDXpAg5o='
-    console.log(kg.decypher(enc2)); // '4111111111111111'
+app.post('/sign_up', (req,res) => {
+    // res.sendFile(__dirname + "/public/login.html");
+    console.log(req.body);
 
-    console.log(enc3); // 'F6NR6AeK475VsnH874uj2P9bxRCk8mO14gWqDXpAg5o='
-    console.log(kg.decypher('kOWKe1qUvBtdzSvCuUCBHZkknVz46fYygTROYwU=')); // '4111111111111111'
+    // const aid = req.body.aid;
+    const bpw = req.body.bpw;
 
+    const decrypt = new JSEncrypt();
+
+    const crypto = require('crypto');
+    const buf = crypto.randomBytes(64);
+    
+    decrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
+
+    // const decryptedText_a = decrypt.decrypt(aid);
+    const decryptedText = decrypt.decrypt(bpw);
+    // console.log('decryptedText')
+    // console.log(decryptedText)
+
+    //////////////////////// password encrypt for DB///////////////////////
+
+
+    const salt = buf.toString('base64');
+    console.log('salt');
+    console.log(salt);
+
+    function makeKey() {
+        return new Promise((resolve, reject) => {
+                crypto.pbkdf2(decryptedText, salt, 1000, 32, 'SHA512', (err, key) => {
+                if (err){
+                    console.log(err)
+                } else resolve(key.toString("base64"));
+            })
+        });
+    }
+    makeKey().then(key => {
+        console.log('key')
+        console.log(key)
+        
+        let sign_up_first_name = '';
+        let sign_up_last_name = '';
+
+        if (req.body.uname.length > 1) {
+            sign_up_first_name = req.body.uname[0];
+            sign_up_last_name = req.body.uname[1];
+        } else sign_up_first_name = req.body.uname[0];           
+                
+        const sign_up_id = req.body.uemail;
+        const sign_up_pw = key;
+        // const sign_up_pw_check = req.body.sign_up_pw_check;
+        // const sign_up_name = req.body.uname;
+        const sign_up_email = req.body.uemail;
+        const sign_up_phone = req.body.uphone;
+        const redirect_path = req.body.c_path;
+        const date = getDate();
+    
+        const mysql = require('mysql');
+
+        const con = mysql.createConnection({
+            host: '127.0.0.1',
+            port: '3306',
+            user: 'root',
+            password: '111111',
+            database: 'test1',
+            
+        });
+
+        con.connect((err) => {
+            if(err){
+            console.log('Error connecting to Db');
+            return;
+            }
+            console.log('Connection established');
+        });
+
+        con.query('select COALESCE(MAX(id), "false") AS id from users where id = ?', [sign_up_id], (err, result) => {
+            console.log(result);
+            console.log("check repetition id")
+            if (result[0].id === 'false') {
+
+                console.log("check check repetition")
+
+                const options = {
+                    method: 'POST',
+                    headers: {
+                      'content-type': 'application/json',
+                      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        emailAddresses: [{emailAddress: sign_up_email}],
+                        phoneNumbers: [{phoneNumber: sign_up_phone}],
+                        firstName: sign_up_first_name,
+                        lastName: sign_up_last_name
+                      })
+                  };
+                  
+                  fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+                    .then(response => response.json())
+                    .then(response => {                
+                        console.log(response)
+                        const clv_id = response.id;
+                        con.query('INSERT INTO users (id, pw, name, clv_id, email, phone, resi_date, last_log, salt) values (?,?,?,?,?,?,?,?,?)', 
+                        [sign_up_id, sign_up_pw, sign_up_first_name, clv_id, sign_up_email, sign_up_phone, date, date, salt]);
+                    
+                        updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id);
+
+                    })
+                    .catch(err => console.error(err));
+                
+                console.log("sign up complete!!");
+                // con.end();
+                
+                // createCustomerCLV(sign_up_first_name, sign_up_last_name, sign_up_email, sign_up_phone)
+                // const re_path = {url : redirect_path}
+                // res.send({key : 'complete', url : redirect_path});
+                // res.render('sign_up.ejs' , {sign_up_name : sign_up_name});
+                //////////////////// need sign in ////////////////////////
+            
+            } else {
+                console.log('use_other_id')
+                res.send({key : 'use_other_id'})
+            }
+        })
+    })
+});
+
+function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_id ) {
+        
+    console.log(`update: ${u_id}, ${date}`);       
+    connect.query('UPDATE users SET last_log = ? where id = ?', [date, u_id]);
+    let data = {id : u_id, name : u_name, clv_id : clv_id};
+    request.session.loginData = data;
+    console.log('req.session.loginData');
+    console.log(request.session.loginData);
+
+    response.cookie("cafe_fore_t", "test-test-test", {maxAge: 360000});
+    response.cookie("cafe_fore_tt", "test-test-test", {maxAge: 3600000});
+    response.cookie(
+        'cafefore',{
+        name : request.session.loginData.name,
+        id : request.session.loginData.id,
+        clv : request.session.loginData.clv_id                    
+        
+    }, {maxAge: 3600000, credentials: true, authorized : true, signed: true});
+    console.log("login complete")
+    const re_path = {url : url}
+    response.send(re_path);
+       
+    connect.end();
+    
+}
+function createCustomerCLV(firstName, lastName, email, phone) {
+    const options = {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({
+            emailAddresses: [{emailAddress: email}],
+            phoneNumbers: [{phoneNumber: phone}],
+            firstName: firstName,
+            lastName: lastName
+          })
+      };
+      
+      fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+}
+    
+    
+app.get('/account_modal_pop', (req,res) => { 
+    const public_key = {key : process.env.RSA_PUBLIC_KEY};       
+    res.send(public_key);
+
+})
+
+
+
+
+/*
+app.post('/dtest', (req,res) => { 
+    console.log('/decrypt_test /decrypt_test /decrypt_test /decrypt_test')
+   
+    // const encryptedText = req.body.key;    
+    const aid = req.body.a;
+    const bpw = req.body.b;
+
+    var ddecrypt = new JSEncrypt();
+    
+    ddecrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
+
+    const decryptedText_a = ddecrypt.decrypt(aid);
+    const decryptedText_b = ddecrypt.decrypt(bpw);
+    console.log(decryptedText_a)
+    console.log(decryptedText_b)
+})
+*/
+
+
+app.get('/list_of_orders', (req,res) => {
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/orders?expand=customers', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
 
 })
 
@@ -552,10 +844,10 @@ app.get('/create_customer_test', (req,res) => {
           'content-type': 'application/json',
           authorization: `Bearer ${process.env.ACCESS_TOKEN}`
         },
-        body: JSON.stringify({firstName: 'Tod', lastName: 'Kim'})
+        body: JSON.stringify({firstName: 'Ted', lastName: 'Chang',})
       };
       
-      fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers', options)
+      fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
         .then(response => response.json())
         .then(response => console.log(response))
         .catch(err => console.error(err));
@@ -857,8 +1149,6 @@ app.post("/add_cart", function (req, res) {
     console.log(req.session.loginData.id)
     console.log(req.body)
     
-    console.log("get_cart end get_cart end get_cart end get_cart end get_cart end ");
-    
     const mysql = require('mysql');
 
     const con = mysql.createConnection({
@@ -873,6 +1163,7 @@ app.post("/add_cart", function (req, res) {
     con.connect((err) => {
         if(err){
         console.log('Error connecting to Db');
+        console.log(err);
         return;
         }
         console.log('Connection established');
@@ -1171,170 +1462,6 @@ app.get('/contact',(req,res) => {
 
 
 
-app.post('/sign_in', function (req,res) {
-    // res.sendFile(__dirname + "/public/login.html");
-    console.log(`req.body: ${req.body}`);
-    console.log(`req.originalUrl: ${req}`);
-    console.log(req.url);
-    // const sess = req.session;
-    
-    // const con = makeConnect();
-
-    
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    const sign_in_id = req.body.sign_in_id;
-    const sign_in_pw = req.body.sign_in_pw;
-    const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
-    console.log(redirect_path);
-
-    var date;
-    date = new Date();
-    date = date.getFullYear() + '-' +
-    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-    ('00' + date.getDate()).slice(-2) + ' ' + 
-    ('00' + date.getHours()).slice(-2) + ':' + 
-    ('00' + date.getMinutes()).slice(-2) + ':' + 
-    ('00' + date.getSeconds()).slice(-2);
-
-     
-    
-   
-    
-        
-    con.query('SELECT *  from users where id = ? and pw = ?',
-    // con.query('SELECT COALESCE(MAX(id), "false") AS id from users where id = ? and pw = ?',
-        [sign_in_id, sign_in_pw], (err, result) => {
-                if(err){
-                    res.send(err);
-                    con.end();
-                }
-                // else if(result[0] === 'false') {
-                else if(result[0] === undefined) {
-                    
-                    res.send('check your ID and PW');
-                    con.end();
-                } else {                                         
-                    console.log(`${result}`);                        
-                    updateLastLog(result[0].id, result[0].name, result[0].clv_id);  
-                }
-                    
-    });    
-    
-
-    function updateLastLog(u_id, u_name, clv_id) {
-        
-        console.log(`update: ${u_id}, ${date}`);
-        
-        // if(u_id) {
-            con.query('UPDATE users SET last_log = ? where id = ?', [date, u_id]);
-            let data = {id : u_id, name : u_name, clv_id : clv_id};
-            req.session.loginData = data;
-            console.log('req.session.loginData');
-            console.log(req.session.loginData);
-
-            res.cookie("cafe_fore_t", "test-test-test", {maxAge: 360000});
-            res.cookie("cafe_fore_tt", "test-test-test", {maxAge: 3600000});
-            res.cookie(
-                'cafefore',{
-                name : req.session.loginData.name,
-                id : req.session.loginData.id,
-                clv : req.session.loginData.clv_id                    
-                
-            }, {maxAge: 3600000, credentials: true, authorized : true, signed: true});
-            console.log("login complete")
-            res.redirect(redirect_path);
-           
-        con.end();
-     
-        
-    }
-
-});
-
-
-app.post('/sign_up', (req,res) => {
-    // res.sendFile(__dirname + "/public/login.html");
-    console.log(req.body);
-
-    // const con = makeConnect();
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    const sign_up_id = req.body.sign_up_id;
-    const sign_up_pw = req.body.sign_up_pw;
-    const sign_up_pw_check = req.body.sign_up_pw_check;
-    const sign_up_name = req.body.sign_up_name;
-    const sign_up_email = req.body.sign_up_email;
-    const sign_up_phone = req.body.sign_up_phone;
-
-    con.query('select COALESCE(MAX(id), "false") AS id from users where id = ?', [sign_up_id], (err, result) => {
-        console.log(result);
-        console.log("check repetition")
-        if (result[0].id === 'false') {
-
-            console.log("check check repetition")
-
-            if (sign_up_pw === sign_up_pw_check) {
-                var date;
-                date = new Date();
-                date = date.getFullYear() + '-' +
-                ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-                ('00' + date.getDate()).slice(-2) + ' ' + 
-                ('00' + date.getHours()).slice(-2) + ':' + 
-                ('00' + date.getMinutes()).slice(-2) + ':' + 
-                ('00' + date.getSeconds()).slice(-2);
-                
-
-                con.query('INSERT INTO users (id, pw, name, email, phone, resi_date, last_log) values (?,?,?,?,?,?,?)', 
-                    [sign_up_id, sign_up_pw, sign_up_name, sign_up_email, sign_up_phone, date, date]);
-                console.log("sign up complete!!");
-                con.end();
-
-                res.render('sign_up.ejs' , {sign_up_name : sign_up_name});
-            } else {
-                res.send('check password!!')
-            }
-        } else {
-            res.send('please use other ID')
-        }
-    })
-});
 
 app.post('/change_profile_general',(req,res) => {
     console.log(`req contact: ${req}`);
@@ -1373,7 +1500,7 @@ app.get('/get_user_billing_info', (req,res) => {
     });
 
 
-    con.query('SELECT clv_id FROM billing_info WHERE id = ?', [u_id], (err, result) => {
+    con.query('SELECT clv_id FROM users WHERE id = ?', [u_id], (err, result) => {
         if (err) {
             res.send(err);
             con.end();
@@ -1607,6 +1734,7 @@ app.post('/make_default_billing_info', (req,res) => {
     con.connect((err) => {
         if(err){
         console.log('Error connecting to Db');
+        console.log(err)
         return;
         }
         console.log('Connection established');
@@ -2304,8 +2432,8 @@ function makeConnect() {
 app.get('/shop',(req,res) => {
     console.log(`req test: ${req}`);
     console.log("shop_get  ");
-    var member = '';
-    if (req.session.loginData) {member = req.session.loginData.id;}
+    let member = '';
+    if (req.session.loginData) {member = req.session.loginData.name;}
     
     const mysql = require('mysql');
 
@@ -2368,7 +2496,7 @@ app.get('/shop',(req,res) => {
                     } else {
                         console.log(`${result}`);
                         res.render('shop_get.ejs', { 
-                            post : "Login",
+                            post : "GUEST",
                             product : result
                             // product_number : result[0].prodnum,
                             // product_name : result[0].name,
@@ -2386,7 +2514,7 @@ app.post('/get_item_info',(req,res) => {
 
     console.log('/get_item_info get_item_info get_item_info get_item_infoget_item_info')
     console.log(req.body);
-    const prodnum = req.body.buy_now_cart_prodnum;
+    const prodnum = req.body.prodnum;
     // const item_quantity = req.body.buy_now_cart_quantity;
     // const item_name = req.body.buy_now_cart_name;
 
@@ -2451,6 +2579,7 @@ app.post('/shop',(req,res) => {
     con.connect((err) => {
         if(err){
         console.log('Error connecting to Db');
+        console.log(err);
         return;
         }
         console.log('Connection established');
@@ -2498,9 +2627,21 @@ app.post('/shop',(req,res) => {
     
 });
 
+app.get('/shop/cart/:query',(req,res) => {
+    console.log(`req test: ${req}`);
+    console.log(req.params.query);
+
+    // let member_name = 'GUEST';
+
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';
+      
+    res.render('cart_order.ejs', { post : member_name });
+});
+
+
 app.get('/shop/view/item/:item_number',(req,res) => {
     console.log(`req test: ${req}`);
-    var member_name = '';
+    let member_name = 'GUEST';
 
 //     console.log(`/shop/view/item:id: ${product_number}`);
 //     if (req.session.loginData) {member_name = req.session.loginData.name;}
@@ -2553,10 +2694,11 @@ app.get('/shop/view/item/:item_number',(req,res) => {
                     con.end();
                 
                 } else {
+                    
                     console.log(result[0]);
                     res.render('shop_detail.ejs', { 
                         post : member_name,
-                        product : result
+                        product : result[0]
                         
                     })
                     
@@ -2998,12 +3140,14 @@ app.post('/user_checkout_submit', (req,res) => {
     let default_payment_method = '';
     let clv_id = '';
     let default_shipping_info = {};
+    let cardholder = '';
     // const cart_num = '';
     const date = getDate();
     const order_number = date.replace(/\s|:|\-/g,"") + "OD" + u_id.substr(0, 3);
     const cart_numbers = cart.map(element => {
         return element.cartnum;
     });
+    
         
     const items = cart.map(element => {
         return { 
@@ -3055,7 +3199,7 @@ app.post('/user_checkout_submit', (req,res) => {
 
     function getDefaultBillingInfo() {
         return new Promise((resolve, reject) => { 
-            con.query('SELECT clv_id, clv_tk FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
+            con.query('SELECT clv_id, clv_tk, cardholder FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
                 if(err){                        
                     res.send(err);
                     con.end();        
@@ -3063,6 +3207,7 @@ app.post('/user_checkout_submit', (req,res) => {
                     console.log(result);            
                     default_payment_method = result[0].clv_tk;
                     clv_id = result[0].clv_id;
+                    cardholder = result[0].cardholder;
                     resolve();
                 }
             }); 
@@ -3112,7 +3257,7 @@ app.post('/user_checkout_submit', (req,res) => {
             } else {
                 console.log('update complete Order Cart') 
                 console.log(result);
-                res.send({transaction : "complete"})
+                // res.send({status : "complete"})
                  
             }
         }); 
@@ -3184,9 +3329,27 @@ app.post('/user_checkout_submit', (req,res) => {
                         console.log(`make payment for created order ${response.id}`)
                         console.log(response)
                         if (response.status == 'paid') {
+                                                        
+                            const confirm_info = {
+                            status : "complete",
+                            name : req.session.loginData.name,
+                            order_number : order_number,
+                            email : default_shipping_info.email,
+                            recipient : default_shipping_info.recipient,
+                            phone : default_shipping_info.phone,
+                            type : response.source.brand,
+                            ending4 : response.source.last4,
+                            billing_address : default_shipping_info.address1,
+                            cardholder : cardholder,
+                            subtotal : response.amount - response.tax_amount, 
+                            tax : response.tax_amount,
+                            grandtotal : response.amount
+                            };
+                            console.log(confirm_info)
                             setOrders(response);    
                             updateOrderedCart(order_number, date, cart_numbers, u_id)
-                            ////// make empty guest cart         
+                            
+                            res.send(confirm_info)     
                                       
                         }                        
                     })
@@ -3226,6 +3389,8 @@ app.post('/guest_order_checkout', (req,res) => {
     const order_items = JSON.parse(req.body.order_items);
     console.log(req.body); 
     console.log(order_items);
+    const cardholder = req.body.card_name;
+    const recipient = req.body.recipient_first_name +' '+req.body.recipient_last_name;
     const token_id = req.body.cloverToken;
     const items = order_items.map(element => {
         return { 
@@ -3238,6 +3403,7 @@ app.post('/guest_order_checkout', (req,res) => {
         }
 
     })
+    console.log(items);
 
 
     const options = {
@@ -3253,11 +3419,12 @@ app.post('/guest_order_checkout', (req,res) => {
             address: {
               city: req.body.shipping_address_city,
               country: 'US',
-              line1: req.body.shipping_address_street,
-              postal_code: req.body.shipping_address_zip ,
+              line1: req.body.shipping_address_street_line1,
+              line2: req.body.shipping_address_street_line2,
+              postal_code: req.body.shipping_address_zip,
               state: req.body.shipping_address_state
             },
-            name: req.body.shipping_recipient,
+            name: recipient,
             phone: req.body.order_contact_phone
           },
           email: req.body.order_contact_email,
@@ -3285,12 +3452,14 @@ app.post('/guest_order_checkout', (req,res) => {
                     .then(response => response.json())
                     .then(response => {
 
+                        console.log("order paid")
+                        console.log(response)
+                
                         
 
                         //////////////////// store order info into DB
                         const u_id = 'GUEST';
-                        const amount = req.body.amount;
-                        // const cart = req.body.cart;
+                        
                         let default_payment_method = '';
                         let clv_id = '';
                         let default_shipping_info = {};
@@ -3321,40 +3490,43 @@ app.post('/guest_order_checkout', (req,res) => {
                             insert_cart_value.push(insert_cart_value_element);
                             insert_cart_value_element = [];
                         }
-                        console.log(insert_cart_value)
-                    
-                        
-                        // const clv_od_id = response.id;
-                        // const clv_cha_id =response.charge;
-                        // const clv_ref_num = response.ref_num;
-                        // const clv_transc_id = response.status_transitions.paid;
-                        // const total_od_amount = response.amount;
-                        
-                        
-                        
-
+                        console.log(insert_cart_value)  
                         con.query(insert_cart_query, [insert_cart_value], (err, result) => {
                             if(err) {
                                 console.log(err);
-                            } else {
-                                // console.log(query_str.sql); // SQL Query문 출력
+                            } else {        
+                                console.log("con.query(insert_cart_query, [insert_cart_value], (err, result)");                      
                                 console.log(result);
                             }
                         });
 
-                        
-
-                        
-
-
                         ////////////////////////////////////
                         
-                        let order_items_number = response.items.map(element => {
+                        let paid_items_number = response.items.map(element => {
                             console.log(element.description)                            
                             return element.description.substring(0, element.description.indexOf(','));
                         })
+
+                        const confirm_info = {
+                            status : "complete",
+                            paid_items_number : paid_items_number,
+                            name : recipient,
+                            order_number : order_num,
+                            email : req.body.order_contact_email,
+                            recipient : recipient,
+                            phone : req.body.order_contact_phone,
+                            type : response.source.brand,
+                            ending4 : response.source.last4,
+                            billing_address : "default_shipping_info.address1",
+                            cardholder : cardholder,
+                            subtotal : response.amount - response.tax_amount, 
+                            tax : response.tax_amount,
+                            grandtotal : response.amount
+                        };
+
+                        console.log(confirm_info)
                         
-                        res.send(order_items_number);
+                        res.send(confirm_info);
                     })
                     .catch(err => console.error(err));
 
@@ -3375,11 +3547,30 @@ app.post('/guest_order_checkout', (req,res) => {
                     console.log('set orders') 
                     console.log(result);
                     
-                    // updateOrderedCart(order_number, date, cart_numbers, u_id)
                 }
             }); 
         }
 });
+
+app.get('/order-confirmation',(req,res) => {
+    
+        res.render('test.ejs', 
+        {post : "name",
+        name : "name",
+        order_number : "order_number",
+        email : "default_shipping_info.email",
+        recipient : "default_shipping_info.recipient",
+        phone : "default_shipping_info.phone",
+        type : "response.source.brand",
+        ending4 : "response.source.last4",
+        billing_address : "default_shipping_info.address1",
+        cardholder : "cardholder",
+        subtotal : "response.amount - response.tax_amount", 
+        tax : "response.tax_amount",
+        grandtotal : "response.amount"
+        
+        })
+})
 
 function setOrders(order_number, u_id, response, date) {
     console.log('order_number');
@@ -3407,7 +3598,7 @@ function updateOrderedCart(order_num, oddate, cart_num, user_id) {
         } else {
             console.log('update complete Order Cart') 
             console.log(result);
-            res.send({transaction : "complete"})
+            res.send({status : "complete"})
              
         }
     }); 
@@ -3426,6 +3617,33 @@ function getDate() {
     ('00' + date.getSeconds()).slice(-2);
     return date;
 }
+
+app.get('/test2',(req,res) => {
+    // app.post('/shopview',(req,res) => {
+        res.render('test.ejs', 
+        {post : "name",
+        name : "name",
+        order_number : "order_number",
+        email : "default_shipping_info.email",
+        recipient : "default_shipping_info.recipient",
+        phone : "default_shipping_info.phone",
+        type : "response.source.brand",
+        ending4 : "response.source.last4",
+        billing_address : "default_shipping_info.address1",
+        cardholder : "cardholder",
+        subtotal : "response.amount - response.tax_amount", 
+        tax : "response.tax_amount",
+        grandtotal : "response.amount"
+        
+        })
+})
+
+app.post('/test_log',(req,res) => {
+    // app.post('/shopview',(req,res) => {
+       console.log(req.body)
+       res.send(req.body)
+})
+        
 
 /*
 app.post('/item_addup', (req,res) => {

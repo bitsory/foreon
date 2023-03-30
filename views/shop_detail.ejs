@@ -16,69 +16,91 @@
         }
     </style>    
     <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.polyfill.io/v3/polyfill.min.js"></script>
+    <script src="https://checkout.sandbox.dev.clover.com/sdk.js"></script>
+    <script type="text/javascript" src="/pages/jsencrypt.min.js"></script>
     
     <link rel="icon" href="/images/logo.png">
     <!-- <base href="/"> -->
     
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar_or">
-            <div class="navbar_w4">
-                <div class="navbar_logo">
-                    <a href="http://localhost:8080" class="logo_btn"></a>
-                    <!-- <a href="./cafeFORE">Cafe FORE</a> -->
-                </div>
+    <div id="modal" class="modal">
+        <div id="modal_page" class="modal_page">
+            <!-- <div id="modal_body" class="modal_body"> -->
 
-                <a href="javascript:;" class="navbar_toggleBtn">
-              
-                </a>
-        <!-- </div> -->
+            <!-- </div> -->
+        </div>          
+    </div>
+
+<nav class="navbar">
+    <div class="navbar_or">
+        <div class="navbar_w4">
+            <div class="navbar_logo">
+                <a href="http://localhost:8080" class="logo_btn"></a>
+                <!-- <a href="./cafeFORE">Cafe FORE</a> -->
             </div>
-            <ul class="navbar_nav_list">
-                <!-- <li><a href="/" data-link-T>HOME</a></li> -->
-                <li><a href="/about" data-link-T>ABOUT</a></li>
-                <li><a href="/menu" data-link-T>MENU</a></li>   
-                <li><a href="/shop">ONLINE SHOP</a></li>             
-                <li><a href="/contact" data-link-T>CONTACT</a></li>
-                <!-- <li><a href="/test">test</a></li> -->
-                
-            </ul>
-            <div class="login">
-                <a href="#"><div class="user_info"><%= post %></div></a>
-                <div class="user_profile_container">
-                    <div class="user_profile">
-                        <div class="user_profile_name"></div>
-                    </div>
-                </div>
-                
-            </div>
-            <!-- <div class="test">
-                <button class="test_btn">test_test</button>
-            </div> -->
-            <div class="navbar_icons">
-                <button class="go_cart">Cart</button>
-                <!-- <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank"><i class="fab fa-facebook"></i></a>
-                <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a> -->
 
+            <a href="javascript:;" class="navbar_toggleBtn">
+          
+            </a>
+    <!-- </div> -->
+        </div>
+        <ul class="navbar_nav_list">
+            <!-- <li><a href="/" data-link-T>HOME</a></li> -->
+            <li><a href="/about" data-link-T>ABOUT</a></li>
+            <li><a href="/menu" data-link-T>MENU</a></li>   
+            <li><a href="/shop">ONLINE SHOP</a></li>             
+            <li><a href="/contact" data-link-T>CONTACT</a></li>
+            <!-- <li><a href="/test">test</a></li> -->
+            
+        </ul>
 
+        <% if (post == "GUEST") { %>
+
+        <div class="login">
+            <button id="account_modal_pop_btn" class="account_modal_pop_btn" title="account_modal_pop">Login</button>
+
+            <!-- <button class="login_modal_pop">Login</button> -->
+            <div id="account_modal_pop_container" class="account_modal_pop_container">
+                
             </div>
         </div>
-    </nav>
-
-    <section class="main">
-        
-        <div class="modal">
-            <div class="modal_page">
-                <div class="modal_body">                    
+        <% } %>
+        <% if (post != "GUEST") { %>
+        <div class="login">
+            <div class="user_info">
+                <button class="user_info_btn"><%= post %></button>
+            </div>
+            <div class="user_profile_container">
+                <div class="user_profile">
+                    <div class="user_profile_name"></div>
                 </div>
             </div>
+            
         </div>
+        <% } %>
+
+
+        <!-- <div class="test">
+            <button class="test_btn">test_test</button>
+        </div> -->
+        <div class="navbar_icons">
+            <button class="go_cart">Cart</button>
+            <!-- <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a> -->
+
+
+        </div>
+    </div>
+</nav>
+
+<section class="main">      
         
         
-        <div class="lorem">
-            <div class="online_container">
-                <div class="online_title">
+        <div id="lorem" class="lorem">
+            <div id="online_container" class="online_container">
+                <div id="online_title" class="online_title">
                     Cafe FORE Online Shop
                     <form class="example" action="action_page.php">
                         <input type="text" placeholder="Search.." name="search">
@@ -100,52 +122,48 @@
                     </div>
                 </div>
             
-                    <div class="online_main">
-                        
-                        <div class="online_items">
-                            <% for (var i = 0 ; i < product.length ; i++) { %>
-                            <div class="online_item_pic_container">
-                                <img class="online_item_pic" src=<%= product[i].image %> >
-                            </div>
-                            <div class="online_item_number" style="display: none;">                    
-                                <%= product[i].prodnum %>                
-                            </div>
-                            <div class="online_item_name">                    
-                                <%= product[i].name %>                
-                            </div>
-                            <div class="online_item_price">                    
-                                $<%= product[i].price_sell %>
-                            </div>
-
-                            <div class="online_item_description">                    
-                                <%= product[i].content %>
-                            </div>
-
-                            <div class="online_item_quantity"> 
-                                <select name="Choose Your Quantity" id="order_quantity" >
-                                    <option value="0">Choose Your Quantity</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                    <option value="10">10</option>
-                                </select>
-                            </div>
-            
-                            <button class="add_cart_btn">Add Cart</button>
-                            <button class="buy_now_btn">BUY IT NOW</button>
-                            <br><br><br>
-
-                            <% } %>
-                            <div class="check_go_cart_container">                       
-                            </div>                    
+                <div class="online_main">  
+                    <div id="online_item_detail_container" class="online_item_detail_container"  itemid=<%= product.prodnum %> >
+                        <div id="online_item_detail_pic_container" class="online_item_detail_pic_container">
+                            <img id="online_item_detail_pic" class="online_item_detail_pic" src=<%= product.image %>>
                         </div>
-                    </div>
+                        <div id="online_item_detail_name" class="online_item_detail_name">                     
+                            <%= product.name %>                
+                        </div>
+                        <div id="online_item_detail_price" class="online_item_detail_price">                     
+                            $<%= product.price_sell %>
+                        </div>
+
+                        <div id="online_item_detail_description" class="online_item_detail_description">                    
+                            <%= product.content %>
+                        </div>
+
+                        <div id="online_item_detail_quantity" class="online_item_detail_quantity"> 
+                            <select name="Choose Your Quantity" id="order_quantity" >
+                                <option value="0">Choose Your Quantity</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                        </div>
+        
+                        <button id="add_cart_btn" class="add_cart_btn" title="Add item">Add Cart</button>
+                        <button id="buy_now_btn" class="buy_now_btn" title="Buy It Now">BUY IT NOW</button>
+                        <br><br><br>
+
+                    
+                        <div id="check_go_cart_container" class="check_go_cart_container"></div>    
+                    </div>                   
+                    
+                </div>
+                    
             </div>
         </div>     
     </section>
@@ -178,10 +196,10 @@
                     <span><bold>HOURS.</bold></span><br>
                     
                     <div class="foot_hr">
-                    Monday - Friday<br>
-                    11am - 8pm<br>  
-                    Satday - Sunday<br>
-                    12 - 6pm<br>                    
+                        MON - FRI<br>
+                        11am - 8pm<br>  
+                        SAT - SUN<br>
+                        12 - 6pm<br>                     
                     </div>
                 </div>
             </div>
@@ -205,10 +223,6 @@
     <script type="module" src="/index.js"></script>
     <script type="module" src="/pages/login.js"></script>
     <script type="module" src="/pages/shop.js"></script>
-    <!-- <script type="module" src="/pages/test.js"></script> -->
-    <!-- <script type="module" src="./public/index.js"></script> -->
-    
-
     
 </body>
 </html>

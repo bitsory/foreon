@@ -1,4 +1,4 @@
-import order_confirm from "./oder_confirm.js";
+import OrderConfirm from "./oder_confirm.js";
 
 export default class {
 
@@ -11,12 +11,12 @@ export default class {
             <div id="online_place_order_item_container" class="online_place_order_item_container">
             </div>
         </div>
-        <div class="online_place_order_item_proceed">
+        <div id="online_place_order_item_proceed" class="online_place_order_item_proceed">
             <h2>Would you like proceed your order?</h2>            
             <div class='grand_total'></div>
 
-            <button class='proceed_order_btn'>GO FOR IT</button>
-            <button class='cancel_proceed_order_btn'>No Thanks</button>
+            <button id='proceed_order_btn' class='proceed_order_btn'>GO FOR IT</button>
+            <button id='cancel_proceed_order_btn' class='cancel_proceed_order_btn'>No Thanks</button>
         </div>
         
         `
@@ -40,7 +40,7 @@ export default class {
         
 
         this.online_main.addEventListener('click', (e) =>{
-            console.log("click_test");
+            console.log("click_test  place order.js click_test  place order.js click_test  place order.js");
             console.log(e.target)
             console.log(user_id)
 
@@ -158,6 +158,9 @@ export default class {
 
                 //////////////////// if ( grand total > 0) //////////////////////////
 
+                const user = user_id == 'GUEST' ? 'GUEST' : 'member';
+                history.pushState(null, null, `/shop/checkout/${user}`); // url change
+
                 console.log("proceed_order_btn proceed_order_btn proceed_order_btn ");
                 let tmp_cart = '';
                 let check_out_cart = [];
@@ -207,7 +210,7 @@ export default class {
                         console.log(check_out_cart)
 
 
-                        const orderConfirm = new order_confirm(user_id, check_out_cart);
+                        const orderConfirm = new OrderConfirm(user_id, check_out_cart);
                         document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
                         orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
                         })
@@ -245,6 +248,8 @@ export default class {
                             })
                         }
 
+                        sessionStorage.setItem("usercheckoutcart", JSON.stringify(selected_items_number_list));
+
                         console.log("proceed_checkout_selected_order_cart");
                         console.log(proceed_checkout_selected_order_cart);
 
@@ -252,7 +257,7 @@ export default class {
                             proceed_checkout_total = proceed_checkout_total + element.quantity * element.price_sell;
                         })
 
-                        const orderConfirm = new order_confirm(user_id, proceed_checkout_selected_order_cart);
+                        const orderConfirm = new OrderConfirm(user_id, proceed_checkout_selected_order_cart);
                         document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
                         orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
                     })
@@ -314,7 +319,7 @@ export default class {
                    
                     for (let i =0 ; i < selected_items_number_list.length ; i++) {
                         tmp_order_cart.forEach(element => {
-                            console.log(element)
+                            // console.log(element)
                             if (element.c_item_no == selected_items_number_list[i]) {
                                 tmp_checked_cart.push(element)
                             }            
@@ -532,11 +537,12 @@ export default class {
 
                 const selected_items_number_list = this.checkSelectedItems();
         
-                if (user_id == 'GUEST') {            
+                if (user_id == 'GUEST') {       
+                    console.log('GUEST');     
                     /////////////item delete in guest cart 
                     console.log(`tmp_order_cart : ${tmp_order_cart}`);            
         
-                    let filtered = tmp_order_cart.filter((element) => element.c_item_no !== item_number);
+                    let filtered = tmp_order_cart.filter((element) => element.c_item_no != item_number);
         
                     console.log(filtered);
                     console.log(tmp_order_cart)
@@ -644,22 +650,8 @@ export default class {
                        */
                
                        //////////////////// grand total rerendering ////////////////////
-               
-                       
-               
+                    
             }
-
-
-
-
-
-
-
-
-
-
-
-
 
         });       
    
@@ -735,7 +727,7 @@ export default class {
 
 let user_id = '';
 let g_total = 0;
-let tmp_order_cart = {};
+let tmp_order_cart = [];
 let tmp_total = 0;
 
 

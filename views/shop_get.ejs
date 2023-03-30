@@ -14,12 +14,24 @@
             font-family: 'Jost', sans-serif;
         }
     </style>    
-    <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
+        <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.polyfill.io/v3/polyfill.min.js"></script>
+        <script src="https://checkout.sandbox.dev.clover.com/sdk.js"></script>
+        <script type="text/javascript" src="./pages/jsencrypt.min.js"></script>
     
     <link rel="icon" href="/images/logo.png">
     
 </head>
 <body>
+    
+    <div id="modal" class="modal">
+        <div id="modal_page" class="modal_page">
+            <!-- <div id="modal_body" class="modal_body"> -->
+
+            <!-- </div> -->
+        </div>          
+    </div>
+    
     <nav class="navbar">
         <div class="navbar_or">
             <div class="navbar_w4">
@@ -42,6 +54,19 @@
                 <!-- <li><a href="/test">test</a></li> -->
                 
             </ul>
+
+            <% if (post == "GUEST") { %>
+
+            <div class="login">
+                <button id="account_modal_pop_btn" class="account_modal_pop_btn" title="account_modal_pop">Login</button>
+
+                <!-- <button class="login_modal_pop">Login</button> -->
+                <div id="account_modal_pop_container" class="account_modal_pop_container">
+                    
+                </div>
+            </div>
+            <% } %>
+            <% if (post != "GUEST") { %>
             <div class="login">
                 <div class="user_info">
                     <button class="user_info_btn"><%= post %></button>
@@ -53,6 +78,9 @@
                 </div>
                 
             </div>
+            <% } %>
+
+
             <!-- <div class="test">
                 <button class="test_btn">test_test</button>
             </div> -->
@@ -68,12 +96,6 @@
 
     <section class="main">
         
-        <div class="modal">
-            <div class="modal_page">
-                <div class="modal_body">                    
-                </div>
-            </div>
-        </div>
         
         
         <div id="lorem" class="lorem">
@@ -128,67 +150,8 @@
                                 
                             <% } %>
 
-
-
-
-
                         </div>
                     </div>
-
-
-
-
-
-
-                
-                <!--  
-                <div class="online_items">
-                    <% for (var i = 0 ; i < product.length ; i++) { %>
-                    <div class="online_item_pic_container">
-                        <img class="online_item_pic" src=<%= product[i].image %> >
-                    </div>
-                    <div class="online_item_number" style="display: none;">                    
-                        <%= product[i].prodnum %>                
-                    </div>
-                    <div class="online_item_name">                    
-                        <%= product[i].name %>                
-                    </div>
-                    <div class="online_item_price">                    
-                        $<%= product[i].price_sell %>
-                    </div>
-
-                    <div class="online_item_description">                    
-                        <%= product[i].content %>
-                    </div>
-
-                    <div class="online_item_quantity"> 
-                        <select name="Choose Your Quantity" id="order_quantity" >
-                            <option value="0">Choose Your Quantity</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
-                    </div>
-    
-                    <button class="add_cart_btn">Add Cart</button>
-                    <button class="buy_now_btn">BUY IT NOW</button>
-                    <br><br><br>
-
-                    <% } %>
-                    <div class="check_go_cart_container">                       
-                    </div>                    
-                </div>
-                -->
-
-
-
             </div>
         </div>     
     </section>
@@ -221,10 +184,10 @@
                     <span><bold>HOURS.</bold></span><br>
                     
                     <div class="foot_hr">
-                    Monday - Friday<br>
-                    11am - 8pm<br>  
-                    Satday - Sunday<br>
-                    12 - 6pm<br>                    
+                        MON - FRI<br>
+                        11am - 8pm<br>  
+                        SAT - SUN<br>
+                        12 - 6pm<br>                  
                     </div>
                 </div>
             </div>
