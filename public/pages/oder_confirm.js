@@ -1,5 +1,9 @@
 import setItemBox from "./set_item_box.js";
 import orderComplete from "./order_complete.js";
+import testEX from "./cart.js";
+import * as AIF from "./acc_info_form.js";
+import * as ItemCounter from "./item_counter.js";
+
 
 export default class {
 
@@ -52,6 +56,7 @@ export default class {
                     ////////// order-confirmation page ///////////////////////
 
                     setOrderConfirmationPage(response);
+                    ItemCounter.item_counter(this.user_id);
 
 
                     }
@@ -61,6 +66,22 @@ export default class {
                 .catch(err => console.error(err));
 
             }
+
+            if(e.target && e.target.id == 'set_default_address_btn') {
+
+                
+                document.getElementById('lorem').innerHTML = AIF.addShippingInfoBox();
+                AIF.addShippingInfo();
+            }
+
+            if(e.target && e.target.id == 'set_default_payment_method_btn') {
+                document.getElementById('lorem').innerHTML = AIF.addBillingInfoBox();
+                AIF.addBillingMethodForm();
+                // exp.cloverTokenHandler(token);
+
+            }
+
+            
         })
     }
 
@@ -434,7 +455,7 @@ export default class {
                 <div class="user_checkout_billing_info_title">Payment Infomation</div>
                 <h2>Nothing have for default payment method yet</h2>
                 <h2>Would like to make default payment method?</h2>
-                <button type="button" class="set_default_payment_method_btn">Set Up</button>     
+                <button type="button" id="set_default_payment_method_btn" class="set_default_payment_method_btn" title="set payment method">Set Up</button>     
                 
                 `;
 
@@ -464,7 +485,7 @@ export default class {
                 <div class="user_checkout_shipping_info_title">Shipping Infomation</div>
                 <h2>Nothing have for default address yet</h2>
                 <h2>Would like to make default address?</h2>
-                <button type="button" class="set_default_address_btn">Set Up</button>     
+                <button type="button" id="set_default_address_btn" class="set_default_address_btn" title="set shipping address">Set Up</button>     
                 
                 `;
 
@@ -744,6 +765,7 @@ function cloverTokenHandler(token, order_info) {
         sessionStorage.removeItem("checkoutcart");
 
         setOrderConfirmationPage(response);
+        ItemCounter.item_counter('GUEST');
 
     });
        
@@ -810,8 +832,12 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4) {
     user_checkout_billing_info_cardtype.innerHTML = type;
     user_checkout_billing_info_text.innerHTML = "ending in";
     user_checkout_billing_info_cardlast4.innerHTML = last4;
-    user_checkout_billing_info_context.innerHTML = `
-        <a href="#">Change method</a>
+    user_checkout_billing_info_context.innerHTML = setPromotionBox();        
+}
+
+function setPromotionBox() {
+    return `
+    <a href="#">Change method</a>
         <div class"user_checkout_billing_info_promotion_container">
             Add a gift card or promotion code or voucher
             <form action="/promotion" method="post" id="promotion_code_form">
@@ -820,7 +846,7 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4) {
                 <input type="submit" value="Apply">
                 </span>
             </form>
-        </div>
+        </div>    
     `;
 }
 

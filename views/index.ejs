@@ -6,7 +6,7 @@
     <!-- <meta name="viewport" content="width=device-width"> -->
     <meta content="width=device-width,minimum-scale=1.0" name="viewport">
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1"> -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="http://localhost:8080/style.css">
 	<title>Cafe FORE</title>    
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jost:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -16,14 +16,16 @@
     </style>    
     <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
     <script src="https://cdn.polyfill.io/v3/polyfill.min.js"></script>
-    <script src="https://checkout.sandbox.dev.clover.com/sdk.js"></script>
+    <script src="https://checkout.sandbox.dev.clover.com/sdk.js"></script>   
+    <script type="text/javascript" src="http://localhost:8080/pages/jsencrypt.min.js"></script>    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <link rel="icon" href="/images/logo.png">
     
 </head>
 <body>
-    <div class="modal">
-        <div class="modal_page">            
+    <div id="modal" class="modal">
+        <div id="modal_page" class="modal_page">           
         </div>
     </div>
 
@@ -49,31 +51,42 @@
                 <!-- <li><a href="/test" data-link-T>test</a></li> -->
                 
             </ul>
-            <div class="login">
-                <div class="user_info">
-                    <button class="user_info_btn"><%= post %></button>
-                </div>
-                <div class="user_profile_container">
-                    <div class="user_profile">
-                        <div class="user_profile_name"></div>
+            <% if (post == "GUEST") { %>
+
+                <div in="login" class="login">
+                    <div id="login_btn" class="login_btn">
+                        <img src="http://localhost:8080/images/login.png" id="account_modal_pop_btn" class="account_modal_pop_btn" title="Sign In" width="40px">
+                    </div>
+                   
+                    <div id="account_modal_pop_container" class="account_modal_pop_container">                        
                     </div>
                 </div>
-                
-            </div>
-            <!-- <div class="test">
-                <button class="test_btn">test_test</button>
-            </div> -->
-            <div class="navbar_icons">
-                <button class="go_cart">Cart</button>
-                <!-- <a href="//www.facebook.com/Cafe-FORE-103402129218652/" target="_blank"><i class="fab fa-facebook"></i></a>
-                <a href="//www.instagram.com/cafe_fore/" target="_blank"><i class="fab fa-instagram"></i></a> -->
+                <% } %>
+                <% if (post != "GUEST") { %>
+                <div id="login" class="login">
+                    <div id="user_info" class="user_info">
+                        <img src="http://localhost:8080/images/login.png" id="user_info_btn_icon" class="user_info_btn" title="member info" width="40px">
+                        <div id="user_info_btn_id" class="user_info_btn"><%= post %></div>
+                    </div>
+                    <div id="user_profile_container" class="user_profile_container">
+                        <div id="user_profile" class="user_profile">
+                            <div id="user_profile_name" class="user_profile_name"></div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <% } %>
 
-
+            <div id="navbar_icons" class="navbar_icons">
+                    <div id="item_count" class="item_count"></div>
+                    <div id="go_cart_box" class="go_cart_box">
+                        <img src="http://localhost:8080/images/cart.png" id="go_cart" class="go_cart" title="view cart" width="38px">
+                    </div>              
             </div>
         </div>
     </nav>
 
-    <section class="main">
+    <section id="main" class="main">
         <div class="js-cta-button button-link button-link__transparent button-link__full-width button-link__blink"></div>
 
         <div class="main_background main_background__blink">
@@ -133,14 +146,15 @@
                 <div class="logo_btn foot_logo"></div><i class="fa-solid fa-angles-up"></i>
             </div>
         </div>
-        index.ejs        
+          
     </section>
+    
+    <div id="glogin_script" class="glogin_script"></div>
+    <div id="gmap_script" class="gmap_script"></div>
+    <div id="gmld_script" class="gmld_script"></div>
 	
-    <script type="module" src="index.js"></script>
-    <script type="module" src="./pages/login.js"></script>
-    <!-- <script type="module" src="./pages/shop.js"></script> -->
-    <!-- <script type="module" src="./pages/shop.js"></script> -->
-    <!-- <script type="module" src="./public/index.js"></script> -->
+    <script type="module" src="http://localhost:8080/index.js"></script>
+    
     
 
     

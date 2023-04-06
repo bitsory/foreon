@@ -1,15 +1,18 @@
-export default class Cart{
+import * as AIF from "./acc_info_form.js";
+import * as ItemCounter from "./item_counter.js";
+
+export default class Cart {
     
     // navbar = document.getElementById('navbar');
     // lorem = document.getElementById('lorem');
     
 
-    constructor(param) {
+    constructor() {
         document.title = "Cafe FORE";
         console.log("cart.js");
         
-        this.c_name = this.getCookie(param)[0];
-        this.c_id = this.getCookie(param)[1];
+        this.c_name = this.getCookie()[0];
+        this.c_id = this.getCookie()[1];
 
         /*
         this.navbar.addEventListener('click',function(e){ 
@@ -297,31 +300,43 @@ export default class Cart{
 
     u_cart = [];
 
-    initCart(uid) {
-        u_id = this.c_id;
-        const data = {u_id : uid};
-        const option = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-                // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                },
-            body: JSON.stringify(data)
-        };
-
-        fetch('/check_user_cart', option)
+    initCart() {
+        fetch("/login_check")
         .then((res) => res.json())
-        .then(result => {
-            console.log(result)
-            this.u_cart = result;
+        .then(result => {              
+            
+            if (result.id == 'GUEST') {
+                document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT; domain=localhost;path=/;';
+                this.c_id = 'GUEST'; 
+                this.c_name = 'GUEST';
+                ItemCounter.item_counter('GUEST');
 
+
+                
+            } else {
+                const data = {u_id : result.id};
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                    body: JSON.stringify(data)
+                }        
+                fetch('/check_user_cart', option)
+                .then((res) => res.json())
+                .then(response => {
+                    console.log(response)
+                    this.u_cart = response;
+                    ItemCounter.item_counter(result.id);
+                    u_id = result.id;
+                });           
+            } 
         });
     }
    
 
     getCookie() {
-
-        // console.log(`get cookie : ${document.cookie}`);
         let cook = decodeURIComponent(document.cookie).split(';');// get array
         
         var result=['GUEST', 'GUEST'];
@@ -343,43 +358,42 @@ export default class Cart{
                 var res_name = val.substring(start_name+8, end_name); 
                 var res_id = val.substring(start_id+6, end_id); 
 
-                result = [res_name, res_id];
-                // result.push(res_name);
-                // result.push(res_id);   
+                result = [res_name, res_id];          
             } 
         })
-        return result;
-        
+        return result;        
     }
    
 
     getUserProfile() {
         return `
-            <div class='user_profile_greet'>Hello</div>
-            <div class='user_profile_name'>${this.getCookie(document.cookie)[0]}</div>
-            <div class='user_profile_chage'>                
-                <button class="user_profile_change_btn">ACCOUNT</button>                               
-            </div>
-            <div class='user_purchase_history'>
-                <button class='user_purchase_history_btn'>PURCHASE HISTORY</button>
-            </div>
-            
-            <div class='user_profile_log_out'>
-                <form action="/sign_out" method="post" class="user_logout">
-                        
-                    <input type="submit" class="user_logout_btn" name="sign_out" value="SIGN OUT">
-                </form>                
+            <div id='user_profile_greet' class='user_profile_greet'>Hello</div>
+            <div id='user_profile_name' class='user_profile_name'>${this.getCookie()[0]}</div>
+            <div id='user_account_box' class='user_account_box'>
+                <div id='user_profile_change' class='user_profile_change user_account_box_el'>                
+                    <button id="user_profile_change_btn" class="user_profile_change_btn account_btn">ACCOUNT</button>                               
+                </div>
+                <div id='user_purchase_history' class='user_purchase_history user_account_box_el'>
+                    <button id='user_purchase_history_btn' class='user_purchase_history_btn account_btn'>PURCHASE HISTORY</button>
+                </div>
+                
+                <div id='user_profile_log_out' class='user_profile_log_out user_account_box_el'>
+                    <form action="/sign_out" method="post" class="user_logout user_account_box_el">
+                            
+                        <button type="submit" id="user_logout_btn" class="user_logout_btn account_btn" name="sign_out" value="SIGN OUT">SIGN OUT</button>
+                    </form>                
+                </div>
             </div>
         `
     }
 
     changeProfile() {    
-        document.querySelector('.lorem').innerHTML = mekeChangePrifileTap();    
+        document.getElementById('lorem').innerHTML = mekeChangePrifileTap();    
     }
 
     viewPurchaseHistory(u_id) {
         console.log("view purchase History")
-        document.querySelector('.lorem').innerHTML = makePurchaseHistoryContainer();
+        document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
     
         const data = {id : u_id}
     
@@ -413,7 +427,7 @@ document.addEventListener('click',function(e){
     console.log("cart click double check ")
     
         
-    if(e.target && e.target.className == 'user_profile_change_btn') {
+    if(e.target && e.target.id == 'user_profile_change_btn') {
 
         history.pushState(null, null, `/account`); // url change
         (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
@@ -428,7 +442,7 @@ document.addEventListener('click',function(e){
         
     }
 
-    if(e.target && e.target.className == 'user_purchase_history_btn') {
+    if(e.target && e.target.id == 'user_purchase_history_btn') {
 
         history.pushState(null, null, `/purchase-history`); // url change
         (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
@@ -439,20 +453,21 @@ document.addEventListener('click',function(e){
 
 
 
-    if(e.target && e.target.className == 'btn change_password_btn') {
+    if(e.target && e.target.id == 'change_password_btn') {
         document.querySelector('.change_password_container').classList.toggle('pw_active');
         // document.querySelector('.change_password_container').innerHTML = changePassword();
     }
 
-    if(e.target && e.target.className == 'btn billing_info_add_btn') {
-        document.querySelector('.billing_info_box').innerHTML = addBillingInfoBox();
-        addBillingMethodForm();
+    if(e.target && e.target.id == 'billing_info_add_btn') {
+        console.log("e.target && e.target.id == 'billing_info_add_btn'")
+        document.querySelector('.billing_info_box').innerHTML = AIF.addBillingInfoBox();
+        AIF.addBillingMethodForm();
         document.querySelector('.billing_info_add_btn_container').style.display = "none";
     }
-    if(e.target && e.target.className == 'btn shipping_info_add_btn') {
-        document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();
+    if(e.target && e.target.id == 'shipping_info_add_btn') {
+        document.querySelector('.shipping_info_box').innerHTML = AIF.addShippingInfoBox();
         document.querySelector('.shipping_info_add_btn_container').style.display = "none";
-        addShippingInfo();
+        AIF.addShippingInfo();
     }
 
 
@@ -489,37 +504,6 @@ document.addEventListener('click',function(e){
                     renderBillingInfo(result);
 
                     
-                    // console.log(result.sort(date_descending)) // 내림차순
-
-                    // function date_descending(a, b) {
-                    // var dateA = new Date(a['indate']).getTime();
-                    // var dateB = new Date(b['indate']).getTime();
-                    // return dateA < dateB ? 1 : -1;
-                    // }
-
-                    // let data = result.filter(element => {
-                    //     return element.inuse === 'y';
-                    // })
-
-                    // if (data.length >0) {
-
-                    //     let sorted_res = (data.sort(date_descending)).filter(element => {
-                    //         return element.default_payment !== 'default';
-                    //     });                    
-
-                    //     const default_payment = data.filter(element => {             
-                    //         return element.default_payment === 'default';
-                    //     });
-                        
-                    //     console.log(default_payment)
-                    //     setBillingInfo(default_payment[0].bi_number, default_payment[0].cardholder, default_payment[0].type, default_payment[0].last4, "default");
-
-                    //     sorted_res.forEach(element => {
-                    //         setBillingInfo(element.bi_number, element.cardholder, element.type, element.last4, "n");
-
-                    //     }) 
-                    // }
-                    
                 }
             })
 
@@ -540,12 +524,6 @@ document.addEventListener('click',function(e){
             });
         }
     }
-
-    // if(e.target && e.target == 'billing_info_delete_btn') {
-    //     console.log("'billing_info_delete_btn' 'billing_info_delete_btn' 'billing_info_delete_btn'")
-    //     let str = e.target.className;
-    //     console.log(str.indexOf("BIN"));
-    // }
 
     if(e.target && e.target.value == 'make_default_billing_info') {
         let str = e.target.className;
@@ -631,7 +609,7 @@ document.addEventListener('click',function(e){
         let phone = (document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`).innerText : '';
         let email = (document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`).innerText : '';
         
-        document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();        
+        document.querySelector('.shipping_info_box').innerHTML = AIF.addShippingInfoBox();        
         document.querySelector('.shipping_info_add_btn_container').style.display = "none";
         
         document.querySelector('.input_recipient').value = recipient;
@@ -737,69 +715,69 @@ function changeProfile() {
 
 function mekeChangePrifileTap() {
     return `
-    <div class="change_profile_form_container">
+    <div id="change_profile_form_container" class="change_profile_form_container">
 
-        <ul class="tabs">
+        <ul id="tabs" class="tabs">
             <li class="tab-link current" data-tab="tab-1">General Infomation</li>
             <li class="tab-link" data-tab="tab-2">Billing Infomation</li>
             <li class="tab-link" data-tab="tab-3">Shipping Infomation</li>
         </ul>
-        <div class="change_profile_form">
+        <div id="change_profile_form" class="change_profile_form">
 
             <div id="tab-1" class="tab-content current change_profile_general_info">general_info            
                 <form action="/change_profile_general" class="change_profile_general_info_form" method="post">
-                    <div class="form-tag">Name</div>
+                    <div align="left" class="form-tag input_general_info_tag">Name</div>
                     <div class="form-row general_name">
                         <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_name">
-                                <input type="text" name="general_first_name" class="input_general_first_name" placeholder="First">
+                                <input type="text" name="general_first_name" class="input_general_first_name input_general_info_name" placeholder="First">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_name">
-                                <input type="text" name="general_last_name" class="input_general_last_name" placeholder="Last">
+                                <input type="text" name="general_last_name" class="input_general_last_name input_general_info_name" placeholder="Last">
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-tag">Phone</div>
+                    <div class="form-tag input_general_info_tag">Mobile number</div>
                     <div class="form-row">
                         <div id="change_profile_general" class="field change_profile_general_phone">
-                        <input type="text" name="general_phone" class="input_general_phone" placeholder="### ### ####">
+                        <input type="text" name="general_phone" class="input_general_phone input_general_info" placeholder="### ### ####">
                         </div>
                     </div>
 
-                    <div class="form-tag">Email</div>
+                    <div class="form-tag input_general_info_tag">Email</div>
                     <div class="form-row">
                         <div id="change_profile_general" class="field change_profile_general_email">
-                        <input type="text" name="general_email" class="input_general_email" >
+                        <input type="text" name="general_email" class="input_general_email input_general_info" >
                         </div>
                     </div>
 
-                    <div class="form-tag">Address</div>
+                    <div class="form-tag input_general_info_tag">Address</div>
                     <div class="form-row">
                         <div id="change_profile_general" class="field change_profile_general_address">
-                        <input type="text" name="general_address_street_line1" class="input_general_address_street_line1" placeholder="Address Street Line 1">
+                        <input type="text" name="general_address_street_line1" class="input_general_address_street_line1 input_general_info" placeholder="Address Street Line 1">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div id="change_profile_general" class="field change_profile_general_address">
-                        <input type="text" name="general_address_street_line2" class="input_general_address_street_line2" placeholder="Address Street Line 2">
+                        <input type="text" name="general_address_street_line2" class="input_general_address_street_line2 input_general_info" placeholder="Address Street Line 2">
                         </div>
                     </div>
 
                     <div class="general_info_csz">
-                        <div class="form-row csz">
+                        <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_address">
-                            <input type="text" name="general_address_city" class="input_general_address_city" placeholder="City">
+                            <input type="text" name="general_address_city" class="input_general_address_city input_general_info_csz" placeholder="City">
                             </div>
                         </div>
 
-                        <div class="form-row csz">
+                        <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_address">
-                                <select name="general_address_state" id="change_profile_general" >
+                                <select name="general_address_state" id="change_profile_general" class="change_profile_general input_general_info_csz select_state_box">
                                 <option value="AL">Alabama</option>
                                 <option value="AK">Alaska</option>
                                 <option value="AZ">Arizona</option>
@@ -856,14 +834,17 @@ function mekeChangePrifileTap() {
                             </div>
                         </div>
 
-                        <div class="form-row csz">
-                            <div id="change_profile_general" class="field change_profile_general_addressp">
-                            <input type="text" name="general_address_zip" class="input_general_address_zip" placeholder="Zip Code">
+                        <div class="form-row">
+                            <div id="change_profile_general" class="field change_profile_general_address">
+                            <input type="text" name="general_address_zip" class="input_general_address_zip input_general_info_csz" placeholder="Zip Code">
                             </div>
                         </div>
                     </div>
 
-                    <input type="checkbox" name="default_address" value="default" checked> make default shipping address <br>
+                    <div class="change_profile_general_default_address input_general_info_tag">
+                    <input type="checkbox" id="change_profile_general_default_address_checkbox" name="default_address" value="default" checked>
+                    <label for="change_profile_general_default_address_checkbox">make default shipping address</label>
+                    </div>
 
 
 
@@ -904,24 +885,24 @@ function mekeChangePrifileTap() {
 
             <div id="tab-2" class="tab-content change_profile_billing_info_container">
                 Billing Infomation
-                <div class="change_profile_billing_info">
-                    <div class="billing_info_container">
-                        <div class="billing_info_box"></div>         
+                <div id="change_profile_billing_info" class="change_profile_billing_info">
+                    <div id="billing_info_container" class="billing_info_container">
+                        <div id="billing_info_box" class="billing_info_box"></div>         
                     </div>
-                    <div class="billing_info_add_btn_container">
-                        <button class="btn billing_info_add_btn">+ Add Billing Infomation</button>
+                    <div id="billing_info_add_btn_container" class="billing_info_add_btn_container" >
+                        <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
                     </div>
                 </div>
             </div>
 
             <div id="tab-3" class="tab-content change_profile_shipping_info_container">
-                Shippinging Infomation
-                <div class="change_profile_shipping_info">
-                    <div class="shipping_info_container">
-                        <div class="shipping_info_box"></div> 
+                Shipping Infomation
+                <div id="change_profile_shipping_info" class="change_profile_shipping_info">
+                    <div id="shipping_info_container" class="shipping_info_container">
+                        <div id="shipping_info_box" class="shipping_info_box"></div> 
                     </div>
-                    <div class="shipping_info_add_btn_container">
-                        <button class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
+                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container">
+                        <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
                     </div>
                 </div>
             </div>
@@ -930,208 +911,6 @@ function mekeChangePrifileTap() {
     `;
 }
 
-function changeProfileGeneral() {
-
-    return `    
-    <div id="tab-1" class="tab-content current change_profile_general_info">
-        general_info
-        <form action="/change_profile_general" class="change_profile_general_info_form" method="post">
-            <div class="form-tag">Name</div>
-            <div class="form-row general_name">
-                <div class="form-row">
-                    <div id="change_profile_general" class="field change_profile_general_name">
-                        <input type="text" name="general_first_name" class="input_general_first_name" placeholder="First">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="change_profile_general" class="field change_profile_general_name">
-                        <input type="text" name="general_last_name" class="input_general_last_name" placeholder="Last">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-tag">Phone</div>
-            <div class="form-row">
-                <div id="change_profile_general" class="field change_profile_general_phone">
-                <input type="text" name="general_phone" class="input_general_phone" placeholder="### ### ####">
-                </div>
-            </div>
-
-            <div class="form-tag">Email</div>
-            <div class="form-row">
-                <div id="change_profile_general" class="field change_profile_general_email">
-                <input type="text" name="general_email" class="input_general_email" >
-                </div>
-            </div>
-
-            <div class="form-tag">Address</div>
-            <div class="form-row">
-                <div id="change_profile_general" class="field change_profile_general_address">
-                <input type="text" name="general_address_street_line1" class="input_general_address_street_line1" placeholder="Address Street Line 1">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div id="change_profile_general" class="field change_profile_general_address">
-                <input type="text" name="general_address_street_line2" class="input_general_address_street_line2" placeholder="Address Street Line 2">
-                </div>
-            </div>
-
-            <div class="general_info_csz">
-                <div class="form-row csz">
-                    <div id="change_profile_general" class="field change_profile_general_address">
-                    <input type="text" name="general_address_city" class="input_general_address_city" placeholder="City">
-                    </div>
-                </div>
-
-                <div class="form-row csz">
-                    <div id="change_profile_general" class="field change_profile_general_address">
-                        <select name="general_address_state" id="change_profile_general" >
-                        <option value="AL">Alabama</option>
-                        <option value="AK">Alaska</option>
-                        <option value="AZ">Arizona</option>
-                        <option value="AR">Arkansas</option>
-                        <option value="CA">California</option>
-                        <option value="CO">Colorado</option>
-                        <option value="CT">Connecticut</option>
-                        <option value="DE">Delaware</option>
-                        <option value="DC">District Of Columbia</option>
-                        <option value="FL">Florida</option>
-                        <option value="GA">Georgia</option>
-                        <option value="HI">Hawaii</option>
-                        <option value="ID">Idaho</option>
-                        <option value="IL">Illinois</option>
-                        <option value="IN">Indiana</option>
-                        <option value="IA">Iowa</option>
-                        <option value="KS">Kansas</option>
-                        <option value="KY">Kentucky</option>
-                        <option value="LA">Louisiana</option>
-                        <option value="ME">Maine</option>
-                        <option value="MD">Maryland</option>
-                        <option value="MA">Massachusetts</option>
-                        <option value="MI">Michigan</option>
-                        <option value="MN">Minnesota</option>
-                        <option value="MS">Mississippi</option>
-                        <option value="MO">Missouri</option>
-                        <option value="MT">Montana</option>
-                        <option value="NE">Nebraska</option>
-                        <option value="NV">Nevada</option>
-                        <option value="NH">New Hampshire</option>
-                        <option value="NJ">New Jersey</option>
-                        <option value="NM">New Mexico</option>
-                        <option value="NY">New York</option>
-                        <option value="NC">North Carolina</option>
-                        <option value="ND">North Dakota</option>
-                        <option value="OH">Ohio</option>
-                        <option value="OK">Oklahoma</option>
-                        <option value="OR">Oregon</option>
-                        <option value="PA">Pennsylvania</option>
-                        <option value="RI">Rhode Island</option>
-                        <option value="SC">South Carolina</option>
-                        <option value="SD">South Dakota</option>
-                        <option value="TN">Tennessee</option>
-                        <option value="TX">Texas</option>
-                        <option value="UT">Utah</option>
-                        <option value="VT">Vermont</option>
-                        <option value="VA">Virginia</option>
-                        <option value="WA">Washington</option>
-                        <option value="WV">West Virginia</option>
-                        <option value="WI">Wisconsin</option>
-                        <option value="WY">Wyoming</option>
-                        </select>
-                    
-                    </div>
-                </div>
-
-                <div class="form-row csz">
-                    <div id="change_profile_general" class="field change_profile_general_addressp">
-                    <input type="text" name="general_address_zip" class="input_general_address_zip" placeholder="Zip Code">
-                    </div>
-                </div>
-            </div>
-
-            <input type="checkbox" name="default_address" value="default" checked> make default shipping address <br>
-
-
-
-            <button type="button" class="btn change_password_btn">Change Password</button>
-            <div class="form-tag">Change Password</div>
-            <div class="change_password_container">
-                <div class="form-row">
-                    <div id="change_profile_general" class="field change_profile_general_current_password">
-                    <input type="password" name="general_current_password" class="input_general_current_password" placeholder="Current password">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="change_profile_general" class="field change_profile_general_new_password">
-                    <input type="password" name="general_new_password" class="input_general_new_password" placeholder="New password">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="change_profile_general" class="field change_profile_general_new_password_confirm">
-                    <input type="password" name="general_new_password_confirm" class="input_general_new_password_cofirm" placeholder="Confirm New password">
-                    </div>
-                </div>
-            
-            
-            
-            </div>
-    
-            <div class="button-container">
-                <input type="submit" value="Submit">
-            </div> 
-
-
-
-        </form>
-
-        
-    
-    
-    
-    `;
-
-}
-
-function changeProfileBilling() {
-
-    return `    
-    <div id="tab-2" class="tab-content change_profile_billing_info_container">
-        Billing Infomation
-        <div class="change_profile_billing_info">
-            <div class="billing_info_container">
-                <div class="billing_info_box"></div>         
-            </div>
-            <div class="billing_info_add_btn_container">
-                <button class="btn billing_info_add_btn">+ Add Billing Infomation</button>
-            </div>
-        </div>
-    </div>
-    `;
-
-}
-
-function changeProfileShipping() {
-
-    return `    
-    <div id="tab-3" class="tab-content change_profile_shipping_info_container">
-        Shippinging Infomation
-        <div class="change_profile_shipping_info">
-            <div class="shipping_info_container">
-                <div class="shipping_info_box"></div> 
-            </div>
-            <div class="shipping_info_add_btn_container">
-                <button class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
-            </div>
-        </div>
-    </div>   
-    
-    `;
-
-}
 
 function addBillingInfoBox() {
     return `
@@ -1664,144 +1443,6 @@ function renderShippingInfo(result) {
 }
 
 
-
-
-
-function addShippingInfoBox() {
-    return `
-        <div class="change_profile_shipping_form_container">
-            <form id= "change_profile_shipping_info_form" class="change_profile_shipping_info_form" method="post">
-                <div class="form-row">
-                    <div id="recipient" class="field recipient">
-                    <input type="text" name="shipping_recipient" class="input_recipient" placeholder="Recipient" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="shipping_address" class="field shipping_address">
-                    <input type="text" name="shipping_address_street_line1" class="input_shipping_address_line1" placeholder="Shipping Address Street Line 1" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="shipping_address" class="field shipping_address">
-                    <input type="text" name="shipping_address_street_line2" class="input_shipping_address_line2" placeholder="Shipping Address Street Line 2">
-                    </div>
-                </div>
-
-                <div class="shipping_info_csz">
-                    <div class="form-row csz">
-                        <div id="shipping_address" class="field shipping_addres_city">
-                        <input type="text" name="shipping_address_city" class="input_shipping_address_city" placeholder="City" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row csz">
-                        <div id="shipping_address" class="field shipping_address_state">
-                            <select name="shipping_address_state" id="change_profile_state" >
-                            <option value="AL">Alabama</option>
-                            <option value="AK">Alaska</option>
-                            <option value="AZ">Arizona</option>
-                            <option value="AR">Arkansas</option>
-                            <option value="CA">California</option>
-                            <option value="CO">Colorado</option>
-                            <option value="CT">Connecticut</option>
-                            <option value="DE">Delaware</option>
-                            <option value="DC">District Of Columbia</option>
-                            <option value="FL">Florida</option>
-                            <option value="GA">Georgia</option>
-                            <option value="HI">Hawaii</option>
-                            <option value="ID">Idaho</option>
-                            <option value="IL">Illinois</option>
-                            <option value="IN">Indiana</option>
-                            <option value="IA">Iowa</option>
-                            <option value="KS">Kansas</option>
-                            <option value="KY">Kentucky</option>
-                            <option value="LA">Louisiana</option>
-                            <option value="ME">Maine</option>
-                            <option value="MD">Maryland</option>
-                            <option value="MA">Massachusetts</option>
-                            <option value="MI">Michigan</option>
-                            <option value="MN">Minnesota</option>
-                            <option value="MS">Mississippi</option>
-                            <option value="MO">Missouri</option>
-                            <option value="MT">Montana</option>
-                            <option value="NE">Nebraska</option>
-                            <option value="NV">Nevada</option>
-                            <option value="NH">New Hampshire</option>
-                            <option value="NJ">New Jersey</option>
-                            <option value="NM">New Mexico</option>
-                            <option value="NY">New York</option>
-                            <option value="NC">North Carolina</option>
-                            <option value="ND">North Dakota</option>
-                            <option value="OH">Ohio</option>
-                            <option value="OK">Oklahoma</option>
-                            <option value="OR">Oregon</option>
-                            <option value="PA">Pennsylvania</option>
-                            <option value="RI">Rhode Island</option>
-                            <option value="SC">South Carolina</option>
-                            <option value="SD">South Dakota</option>
-                            <option value="TN">Tennessee</option>
-                            <option value="TX">Texas</option>
-                            <option value="UT">Utah</option>
-                            <option value="VT">Vermont</option>
-                            <option value="VA">Virginia</option>
-                            <option value="WA">Washington</option>
-                            <option value="WV">West Virginia</option>
-                            <option value="WI">Wisconsin</option>
-                            <option value="WY">Wyoming</option>
-                            </select>
-                        
-                        </div>
-                    </div>
-
-                    <div class="form-row csz">
-                        <div id="shipping_address" class="field shipping_address_zip">
-                        <input type="text" name="shipping_address_zip" class="input_shipping_address_zip" placeholder="Zip Code" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="shipping_address" class="field shipping_address_phone">
-                    <input type="text" name="shipping_address_phone" class="input_shipping_address_phone" placeholder="Phone">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="shipping_address" class="field shipping_address_email">
-                    <input type="text" name="shipping_address_email" class="input_shipping_address_email" placeholder="Email">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div id="shipping_address" class="field shipping_option">
-                    <input type="text" name="shipping_address_option" class="input_shipping_address_option" placeholder="Shipping Option">
-                    </div>
-                </div>            
-                
-                <input type="checkbox" name="default_address" value="default" checked> make default shipping address <br>
-                
-            
-                <div id="change_shipping_info_btn_container" class="button-container">
-                    <input type="submit" value="Submit" class="add_shipping_info_btn">
-                    <button type="button" class="add_shipping_info_cancel_btn" value="add_shipping_info_cancel">Cancel</button>
-                </div>
-                
-
-            </form>
-        </div>
-
-
-
-
-    `;
-}
-
-function addShippingInfo() {
-    document.getElementById('change_profile_shipping_info_form').action = '/add_profile_shipping';
-    
-}
 
 function editShippingInfo() {
     document.getElementById('change_shipping_info_btn_container').insertAdjacentHTML = `

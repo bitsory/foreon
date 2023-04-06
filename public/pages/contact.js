@@ -1,4 +1,3 @@
-
 export default class {
     constructor() {
         document.title = "Cafe FORE";
@@ -8,41 +7,44 @@ export default class {
     }
 
     gmap() {
-        // if(this.gmCheck()) {
-        //     var $gmp = document.querySelector('.gmp');
-        //     $gmp.remove();
-        // }
-            console.log("gmap loaded");
-            var script = document.createElement('script');
-            script.setAttribute('class', 'gmp'); 
-            script.type = 'text/javascript';
-            script.src = "cafefore/pages/gmap.js";
-            document.body.appendChild(script);
+     
+    const gmap_script = document.getElementById('gmap_script');
 
-            var $gmp = document.querySelector('.gmp');
-            $gmp.remove();
+    while (gmap_script.hasChildNodes()) {
+        gmap_script.removeChild(gmap_script.firstChild);
+    }
+
+    console.log("gmap loaded");
+    var script = document.createElement('script');
+    script.setAttribute('class', 'gmp'); 
+    script.type = 'text/javascript';
+    script.src = "pages/gmap.js";
+    gmap_script.appendChild(script);
         
     }
 
     gmLoad() {
-        // if(this.gmCheck()) {
-        //     var $gmp = document.querySelector('.gmp');
-        //     $gmp.remove();
+        const gmld_script = document.getElementById('gmld_script');
+
+        while (gmld_script.hasChildNodes()) {
+            gmld_script.removeChild(gmld_script.firstChild);
+        }
+    
+
+        console.log("gmLoad loaded");
+        var script = document.createElement('script');
+        script.setAttribute('class', 'gmp'); 
+        script.type = 'text/javascript';
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmfFYREUjt0w1Tzuz-WAd3Y-dNW19j7BI&callback=myMap&';
+        gmld_script.appendChild(script);
+        // if (gmap_flag == false) {
+        //     document.body.appendChild(script);        
+        //     gmap_flag = true;
         // }
-            console.log("gmLoad loaded");
-            var script = document.createElement('script');
-            script.setAttribute('class', 'gmp'); 
-            script.type = 'text/javascript';
-            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCppB7-BJTjRkekYoOWKJhFK3LrxA5ZxP4&callback=myMap&';
-            document.body.appendChild(script);
-            console.log("gmLoad loaded done");
-        
-            var $gmp = document.querySelector('.gmp');
-            $gmp.remove();
-        
         
     }
 
+    /*
     gmCheck() {
         // var gmap = document.querySelector('#googleMap');
         // gmap.remove();
@@ -67,6 +69,7 @@ export default class {
         var gmap = document.querySelector('#googleMap');
         gmap.remove();
     }
+    */
 
     sendmail() {
         var script = document.createElement('script');
@@ -154,4 +157,6 @@ export default class {
    
     
 }
+
+// let gmap_flag = false;
 

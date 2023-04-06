@@ -1,21 +1,13 @@
 const express = require('express');
-// import express from 'express';
 const app = express();
 const bodyParser = require('body-parser');
-// import bodyParser from 'body-parser';
 const cookieParser = require('cookie-parser');
-// import cookieParser from 'cookie-parser';
-
-// const axios = require('axios');
-require('dotenv').config()
-// import dotenv from "dotenv";
-
 const Clover = require("clover-ecomm-sdk");
 const session = require('express-session');
 const JSEncrypt = require('nodejs-jsencrypt').default;
-// import session from 'express-session';
-// const session = require("express-session");
 const CryptoJS = require("crypto-js");
+const db = require('./public/service/db.js');
+require('dotenv').config();
 
 
 
@@ -66,6 +58,101 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(express.static('public'));
 
 
+app.get('/login_check', (req,res) => {
+    console.log("/login_check  /login_check /login_check /login_check/login_check   ");
+    // const data = '';
+    console.log(req.session.loginData)
+    console.log(req.session)
+    console.log(req.sessionID)
+    const data = req.session.loginData ? req.session.loginData : {id : 'GUEST'};    
+    res.send(data);
+})
+
+app.get('/account_modal_pop', (req,res) => { 
+    const public_key = {key : process.env.RSA_PUBLIC_KEY};       
+    res.send(public_key);
+})
+
+app.post("/sign_out", function (req, res) {
+    req.session.destroy(() => {
+        res.clearCookie('loginData');
+        res.redirect('/');
+    });
+});
+
+
+
+app.get('/home',(req,res) => {
+    console.log(`req home: ${req}`);
+    if (req.session.loginData) {
+		res.render('index.ejs', {post : req.session.loginData.name});	
+    } else {
+		res.sendFile(__dirname + "/public/index.html");
+	}    
+});
+
+app.get('/about',(req,res) => {    
+    console.log(`req about: ${req}`);
+    if (req.session.loginData) {
+		res.render('index.ejs', {post : req.session.loginData.name});
+	} else {
+		res.sendFile(__dirname + "/public/index.html");
+	}
+});
+
+app.get('/menu',(req,res) => {
+    console.log(`req menu: ${req}`);
+    if (req.session.loginData) {
+		res.render('index.ejs', {post : req.session.loginData.name});
+	} else {
+		res.sendFile(__dirname + "/public/index.html");
+	}    
+});
+
+app.get('/contact',(req,res) => {
+    console.log(`req contact: ${req}`);
+    if (req.session.loginData) {
+		res.render('index.ejs', {post : req.session.loginData.name});
+	} else {
+		res.sendFile(__dirname + "/public/index.html");
+	}    
+});
+
+
+app.get('/shop',(req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });   
+});
+
+app.get('/shop/cart/:query',(req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });
+});
+
+app.get('/shop/order/:query',(req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });
+});
+
+app.get('/shop/view/item/:item_number',(req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
+app.get('/shop/checkout/:id', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
+app.get('/shop/checkout/:id/item_num=:item_no', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
+
+
+
+
 app.post('/sign_in', function (req,res) {
     // res.sendFile(__dirname + "/public/login.html");
     console.log(`req.body: ${req.body}`);
@@ -83,7 +170,7 @@ app.post('/sign_in', function (req,res) {
 
     const decryptedText_a = decrypt.decrypt(aid);
     const decryptedText_b = decrypt.decrypt(bpw);
-    // console.log(decryptedText_a)
+    console.log(decryptedText_a)
     console.log(decryptedText_b)
 
     const sign_in_id = decrypt.decrypt(aid);
@@ -101,62 +188,39 @@ app.post('/sign_in', function (req,res) {
     // console.log(salt);
 
     
-    
-    const mysql = require('mysql');
+    db.getConnection((con)=>{
+        con.query('SELECT salt from users where id = ?', [sign_in_id], (err, result) => { 
+            if(err) next(err);
 
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    con.query('SELECT salt from users where id = ?', [sign_in_id], (err, result) => { 
-        if(err){
-            res.send(err);
-            con.end();
-        } else {
             console.log('salt')
             console.log(result)
-            makeKey(result[0].salt).then(key => {
-                console.log('key')
-                console.log(key)
-                con.query('SELECT *  from users where id = ? and pw = ?',
-                // con.query('SELECT COALESCE(MAX(id), "false") AS id from users where id = ? and pw = ?',
-                    [sign_in_id, key], (err, result) => {
-                            if(err){
-                                res.send(err);
-                                con.end();
-                            }
-                            // else if(result[0] === 'false') {
-                            else if(result[0] === undefined) {
-                                console.log("Id & PW are not match")
-                                res.send({check : 'not match'});
-                                con.end();
-                            } else {                                         
-                                console.log(`${result}`);                        
-                                updateLastLog(result[0].id, result[0].name, result[0].clv_id);  
-                            }
-                                
-                });    
-            });
-
-
-        }
-
+            if (result.length == 1) {
+                makeKey(sign_in_pw, result[0].salt).then(key => {
+                    console.log('key')
+                    console.log(key)
+                    con.query('SELECT *  from users where id = ? and pw = ?',
+                    // con.query('SELECT COALESCE(MAX(id), "false") AS id from users where id = ? and pw = ?',
+                        [sign_in_id, key], (err, result) => {
+                        if(err){
+                            res.send(err);
+                            // con.end();
+                        }
+                        // else if(result[0] === 'false') {
+                        else if(result[0] == undefined) {
+                            console.log("Id & PW are not match")
+                            res.send({check : 'not match'});
+                            // con.end();
+                        } else {                                         
+                            console.log(`${result}`);  
+                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id );
+                        }                                
+                    });    
+                });
+            } else res.send({check : "not exist"});
+        }); con.release();
     })
 
-    function makeKey(salt) {
+    function makeKey(sign_in_pw, salt) {
         return new Promise((resolve, reject) => {
                 crypto.pbkdf2(sign_in_pw, salt, 1000, 32, 'SHA512', (err, key) => {
                 if (err){
@@ -167,46 +231,15 @@ app.post('/sign_in', function (req,res) {
                 }
             })
         });
-    }
-
-    
-    
-
-    function updateLastLog(u_id, u_name, clv_id) {
-        
-        console.log(`update: ${u_id}, ${date}`);       
-        con.query('UPDATE users SET last_log = ? where id = ?', [date, u_id]);
-        let data = {id : u_id, name : u_name, clv_id : clv_id};
-        req.session.loginData = data;
-        console.log('req.session.loginData');
-        console.log(req.session.loginData);
-
-        res.cookie("cafe_fore_t", "test-test-test", {maxAge: 360000});
-        res.cookie("cafe_fore_tt", "test-test-test", {maxAge: 3600000});
-        res.cookie(
-            'cafefore',{
-            name : req.session.loginData.name,
-            id : req.session.loginData.id,
-            clv : req.session.loginData.clv_id,                            
-            
-        }, {maxAge: 3600000, credentials: true, authorized : true, signed: true });
-        console.log("login complete")
-        const re_path = {url : redirect_path}
-        res.send(re_path);
-           
-        con.end();
-     
-        
-    }
-
+    } 
 });
 
 
 app.post('/sign_up', (req,res) => {
-    // res.sendFile(__dirname + "/public/login.html");
+
     console.log(req.body);
 
-    // const aid = req.body.aid;
+    const aid = req.body.uemail;
     const bpw = req.body.bpw;
 
     const decrypt = new JSEncrypt();
@@ -216,10 +249,9 @@ app.post('/sign_up', (req,res) => {
     
     decrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
 
-    // const decryptedText_a = decrypt.decrypt(aid);
-    const decryptedText = decrypt.decrypt(bpw);
-    // console.log('decryptedText')
-    // console.log(decryptedText)
+    const decryptedaid = decrypt.decrypt(aid);
+    const decryptedbpw = decrypt.decrypt(bpw);
+   
 
     //////////////////////// password encrypt for DB///////////////////////
 
@@ -230,14 +262,15 @@ app.post('/sign_up', (req,res) => {
 
     function makeKey() {
         return new Promise((resolve, reject) => {
-                crypto.pbkdf2(decryptedText, salt, 1000, 32, 'SHA512', (err, key) => {
+                crypto.pbkdf2(decryptedbpw, salt, 1000, 32, 'SHA512', (err, key) => {
                 if (err){
                     console.log(err)
                 } else resolve(key.toString("base64"));
             })
         });
     }
-    makeKey().then(key => {
+
+    makeKey(decryptedbpw, salt).then(key => {
         console.log('key')
         console.log(key)
         
@@ -249,83 +282,62 @@ app.post('/sign_up', (req,res) => {
             sign_up_last_name = req.body.uname[1];
         } else sign_up_first_name = req.body.uname[0];           
                 
-        const sign_up_id = req.body.uemail;
+        const sign_up_id = decryptedaid;
         const sign_up_pw = key;
-        // const sign_up_pw_check = req.body.sign_up_pw_check;
-        // const sign_up_name = req.body.uname;
-        const sign_up_email = req.body.uemail;
+     
+        const sign_up_email = decryptedaid;
         const sign_up_phone = req.body.uphone;
-        const redirect_path = req.body.c_path;
-        const date = getDate();
-    
-        const mysql = require('mysql');
+        const redirect_path = req.body.c_path; ///// need to update the welcome page 
+        const date = getDate();    
 
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
+        db.getConnection((con)=>{
+            con.query('select COALESCE(MAX(id), "false") AS id from users where id = ?', [sign_up_id], (err, result) => {
+                if(err) next(err); 
 
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established');
-        });
+        
+                console.log(result);
+                console.log("check repetition id")
+                if (result[0].id === 'false') {
 
-        con.query('select COALESCE(MAX(id), "false") AS id from users where id = ?', [sign_up_id], (err, result) => {
-            console.log(result);
-            console.log("check repetition id")
-            if (result[0].id === 'false') {
+                    console.log("check check repetition")
 
-                console.log("check check repetition")
-
-                const options = {
-                    method: 'POST',
-                    headers: {
-                      'content-type': 'application/json',
-                      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                    },
-                    body: JSON.stringify({
-                        emailAddresses: [{emailAddress: sign_up_email}],
-                        phoneNumbers: [{phoneNumber: sign_up_phone}],
-                        firstName: sign_up_first_name,
-                        lastName: sign_up_last_name
-                      })
-                  };
-                  
-                  fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
-                    .then(response => response.json())
-                    .then(response => {                
-                        console.log(response)
-                        const clv_id = response.id;
-                        con.query('INSERT INTO users (id, pw, name, clv_id, email, phone, resi_date, last_log, salt) values (?,?,?,?,?,?,?,?,?)', 
-                        [sign_up_id, sign_up_pw, sign_up_first_name, clv_id, sign_up_email, sign_up_phone, date, date, salt]);
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({
+                            emailAddresses: [{emailAddress: sign_up_email}],
+                            phoneNumbers: [{phoneNumber: sign_up_phone}],
+                            firstName: sign_up_first_name,
+                            lastName: sign_up_last_name
+                        })
+                    };
                     
-                        updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id);
+                    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+                        .then(response => response.json())
+                        .then(response => {                
+                            console.log(response)
+                            const clv_id = response.id;
+                            con.query('INSERT INTO users (id, pw, name, clv_id, email, phone, resi_date, last_log, salt) values (?,?,?,?,?,?,?,?,?)', 
+                            [sign_up_id, sign_up_pw, sign_up_first_name, clv_id, sign_up_email, sign_up_phone, date, date, salt]);
+                        
 
-                    })
-                    .catch(err => console.error(err));
+                            updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id);
+
+                        })
+                        .catch(err => console.error(err));
+                    
+                    console.log("sign up complete!!");                 
                 
-                console.log("sign up complete!!");
-                // con.end();
-                
-                // createCustomerCLV(sign_up_first_name, sign_up_last_name, sign_up_email, sign_up_phone)
-                // const re_path = {url : redirect_path}
-                // res.send({key : 'complete', url : redirect_path});
-                // res.render('sign_up.ejs' , {sign_up_name : sign_up_name});
-                //////////////////// need sign in ////////////////////////
-            
-            } else {
-                console.log('use_other_id')
-                res.send({key : 'use_other_id'})
-            }
-        })
-    })
+                } else {
+                    console.log('use_other_id')
+                    res.send({key : 'use_other_id'})
+                }
+            }); con.release();
+        });
+    });
 });
 
 function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_id ) {
@@ -348,11 +360,12 @@ function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_
     }, {maxAge: 3600000, credentials: true, authorized : true, signed: true});
     console.log("login complete")
     const re_path = {url : url}
-    response.send(re_path);
-       
-    connect.end();
+    response.send(re_path);  
+    // connect.release();     
+    // connect.end();
     
 }
+
 function createCustomerCLV(firstName, lastName, email, phone) {
     const options = {
         method: 'POST',
@@ -373,15 +386,139 @@ function createCustomerCLV(firstName, lastName, email, phone) {
         .then(response => console.log(response))
         .catch(err => console.error(err));
 }
+
+
+app.post('/g_sign_in', function (req,res) {
+    console.log("google sign in google sign in google sign in ")
+    console.log(req.body);
+
+    const aid = req.body.aid;
+    const bpw = req.body.bpw;
+    const name = req.body.name;
+    const first_name = req.body.first_name;
+    const last_name = req.body.last_name;
+    const redirect_path = req.body.c_path;
+    const date = getDate();
+
+    const decrypt = new JSEncrypt();
+
+    const crypto = require('crypto');
+    const buf = crypto.randomBytes(64);    
+    
+    decrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
+
+    const g_loginid = decrypt.decrypt(aid);
+    const decryptedbpw = decrypt.decrypt(bpw);
+ 
+
+    ///////////////////// DB sign up check //////////////////////////////////
+
+    db.getConnection((con)=>{
+        con.query('SELECT * FROM users WHERE id = ? and description = "google"', [g_loginid], (err, result) => {
+            if(err) next(err);
+
+            else if(result[0] === undefined) {
+            ////// sign up/////////////////   
+                const signup_salt = buf.toString('base64');            
+                makeKey(decryptedbpw, signup_salt).then(key => {
+                    console.log('key')
+                    console.log(key)
+                    const sign_up_pw = key;
+
+                    const options = {
+                    method: 'POST',
+                    headers: {
+                    'content-type': 'application/json',
+                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        emailAddresses: [{emailAddress: g_loginid}],
+                        // phoneNumbers: [{phoneNumber: sign_up_phone}],
+                        firstName: first_name,
+                        lastName: last_name
+                        })
+                    };
+                
+                    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+                    .then(response => response.json())
+                    .then(response => {                
+                        console.log(response)
+                        const clv_id = response.id;
+                        con.query('INSERT INTO users (id, pw, name, clv_id, email, phone, resi_date, last_log, salt, description) values (?,?,?,?,?,?,?,?,?,?)', 
+                        [g_loginid, sign_up_pw, name, clv_id, g_loginid, "", date, date, signup_salt, "google"]);
+
+                        updateLastLog(con, g_loginid, name, req, res, date, redirect_path, clv_id);
+                    })
+                })
+                
+            } else if (result.length == 1){
+                //////////////////////////// log in////////////////////////
+                const login_salt = result[0].salt;
+                console.log("login_salt for google id")
+                console.log(login_salt)
+                makeKey(decryptedbpw, login_salt).then(key => {
+
+                    con.query('SELECT *  from users where id = ? and pw = ?',[g_loginid, key], (err, result) => {                                       
+                        if(err){
+                            res.send(err);                            
+                        }             
+                        else if(result[0] === undefined) {
+                            console.log("Id & PW are not match")
+                            res.send({check : 'not match'});
+                            
+                        } else {                                         
+                            console.log(`${result}`);                        
+                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id);
+                        }
+                    })
+                })
+            } else console.log("call admin to check double google ID in user DB ")
+        }); con.release();        
+
+    });
+
+    function makeKey(decryptedbpw, salt) {
+        return new Promise((resolve, reject) => {
+                crypto.pbkdf2(decryptedbpw, salt, 1000, 32, 'SHA512', (err, key) => {
+                if (err){
+                    console.log(err)
+                } else resolve(key.toString("base64"));
+            })
+        });
+    }
+
+});
+
+
+app.post('/item_counter', (req,res) => {
+    console.log(`req test: ${req.body}`);
+    console.log("item_counter item_counter item_counter item_counter");
+    
+    const u_id = req.body.id;
+    console.log(u_id);
+    console.log(req.session.loginData.id);
+
+    if (req.session.loginData && req.session.loginData.id == u_id) {     
+        db.getConnection((con)=>{
+            con.query('SELECT * FROM cart WHERE u_id = ? and result="n"', [u_id], (err, result) => {
+                if(err){
+                    res.send(err);
+                    con.end();      
+                } else {
+                    console.log(result); 
+                    res.send(result);
+                }               
+            }); 
+            con.release();
+        });  
+    }
+});
     
     
-app.get('/account_modal_pop', (req,res) => { 
-    const public_key = {key : process.env.RSA_PUBLIC_KEY};       
-    res.send(public_key);
-
-})
 
 
+/////////////////////////////////////////////// clover API test//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /*
@@ -580,16 +717,7 @@ const options = {
       
 
 
-app.get('/login_check', (req,res) => {
-    console.log("/login_check  /login_check /login_check /login_check/login_check   ");
-    let data = '';
-    console.log(req.session.loginData)
-    console.log(req.session)
-    console.log(req.sessionID)
-    req.session.loginData ? data = req.session.loginData : data = {id : 'GUEST'};
-    
-    res.send(data);
-})
+
 
 
 
@@ -887,12 +1015,12 @@ app.get('/create_order_test', (req,res) => {
               state: 'Nevada',
               country:"US"
             },
-            name: 'Kim',
+            name: 'Jongho Kim',
             phone: '4702636495'
           },
           currency: 'usd',
           email: 'rangdad@gmail.com',
-          customer: 'W29TP8XFK9BH6'
+        //   customer: 'W29TP8XFK9BH6'
         })
       };
       
@@ -909,7 +1037,8 @@ app.get('/create_order_test', (req,res) => {
                   'content-type': 'application/json',
                   authorization: `Bearer ${process.env.ACCESS_TOKEN}`
                 },
-                body: JSON.stringify({"source":"clv_1TSTSk1pBwk66yF3NoDwwH9f",
+                body: JSON.stringify({"source":"clv_1TSTSavUDzP5gBJFbMrPe2wK",
+                // body: JSON.stringify({"source":"clv_1TSTSk1pBwk66yF3NoDwwH9f",
                 "email":"rangdad@gmail.com",
                 "stored_credentials":{
                     "sequence": "SUBSEQUENT",
@@ -1047,15 +1176,6 @@ app.get('/submit_payment_test', (req,res) => {
 
 
 
-// app.get('/test', (req,res) => {
-//     console.log("test test etst test test test etst  ");
-//     res.send("app.get('/test', (req,res)")
-
-
-// })
-
-
-
 
 
 // app.get('/shop/view/item/:item_no',(req,res) => {
@@ -1135,40 +1255,18 @@ app.get('/submit_payment_test', (req,res) => {
 // });
 
 
-
-// app.use(express.json()); // for parsing application/json
-// app.use(bodyParser.urlencoded({extended : true}));
-
-// app.use(express.static('public'));
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 app.post("/add_cart", function (req, res) {
-    console.log("get_cart get_cart get_cart");
+    console.log("/add_cart /add_cart /add_cart");
     console.log(req.session.loginData.id)
     console.log(req.body)
     
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        console.log(err);
-        return;
-        }
-        console.log('Connection established');
-    });
-
     const u_id = req.session.loginData.id;
     // const u_name = req.body.c_name;
     const prodnum = req.body.c_item_no;
@@ -1176,28 +1274,25 @@ app.post("/add_cart", function (req, res) {
 
     let date = getDate();
 
-    var cartnum = date.replace(/\s|:|\-/g,"") + "CT" + u_id.substr(0, 3);
+    let cartnum = date.replace(/\s|:|\-/g,"") + "CT" + u_id.substr(0, 3);
 
     console.log(date);
     console.log(cartnum);
     console.log(prodnum);
     // check the same item in cart   
 
-    con.query('SELECT cartnum, quantity from cart where u_id = ? and prodnum = ? and result = "n"',
-    //con.query('SELECT COALESCE(MAX(cartnum), "false") AS cartnum from cart where u_id = ? and prodnum = ?',
-        [u_id, prodnum], (err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();
-            } else {        
-                if (result[0] != undefined) { // add up item quantity
+    db.getConnection((con)=>{
+        con.query('SELECT cartnum, quantity from cart where u_id = ? and prodnum = ? and result = "n"', [u_id, prodnum], (err, result) => { 
+            if(err) res.send(err);
+            else {
+                if (result[0] != undefined) { // overwrite item quantity
                     console.log(result[0]);
                     console.log(result[0].quantity);
                     console.log(result[0].cartnum);
-                    con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`cartnum` = ?)', [quantity, date, result[0].cartnum], (err, result) => {
+                    con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`cartnum` = ? and u_id = ? and prodnum = ? and result = "n")', [quantity, date, result[0].cartnum, u_id, prodnum], (err, result) => {
                         if(err){                        
                             res.send(err);
-                            con.end();
+                            // con.end();
                         } else {
                             console.log(result);        
                             viewAddedItem();
@@ -1209,7 +1304,7 @@ app.post("/add_cart", function (req, res) {
                     [cartnum, u_id, prodnum, quantity, date, date], (err, result) => {
                         if(err){                        
                             res.send(err);
-                            con.end();
+                            // con.end();
                         } else {
                             console.log(result);        
                             viewAddedItem();
@@ -1217,21 +1312,24 @@ app.post("/add_cart", function (req, res) {
                     })
                 }
             }
+        }); con.release();
     });
 
     function viewAddedItem() {
-        con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n" and cart.prodnum = ?', [u_id, prodnum]
-        ,(err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();
-            
-            } else {
-                console.log("result");
-                console.log(result);
-                
-                res.send(result);
-            }
+        db.getConnection((con)=>{
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n" and cart.prodnum = ?', [u_id, prodnum]
+            ,(err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();            
+                } else {
+                    console.log("result");
+                    console.log(result);
+                    
+                    res.send(result);
+                }
+            });
+            con.release();
         });
     }
 
@@ -1316,20 +1414,9 @@ app.post("/shop/order", function (req, res) {
     
     console.log("/shop/order/shop/order/shop/order/shop/order");
     console.log(req.body);
-    
-    
-    console.log("req.params.item_number");
-    console.log(req.params.item_number);
-
-    var date;
-    date = new Date();
-    date = date.getFullYear() + '-' +
-    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-    ('00' + date.getDate()).slice(-2) + ' ' + 
-    ('00' + date.getHours()).slice(-2) + ':' + 
-    ('00' + date.getMinutes()).slice(-2) + ':' + 
-    ('00' + date.getSeconds()).slice(-2);
-    
+    const u_id = req.body[0].u_cart.length ? req.body[0].u_cart[0].u_id : 'GUEST';
+        
+    /*
     const mysql = require('mysql');
 
     const con = mysql.createConnection({
@@ -1348,118 +1435,47 @@ app.post("/shop/order", function (req, res) {
         }
         console.log('Connection established /shop/order');
     });
+    */
 
-    if (req.session.loginData) {
-        console.log(req.session.loginData.id);
-        const user_id = req.session.loginData.id;
-    
-    // user cart check out
-        con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [user_id]
-            ,(err, result) => {
+    db.getConnection((con)=>{
+        if (req.session.loginData && req.session.loginData.id == u_id) {
+            console.log(req.session.loginData.id);
+            const user_id = req.session.loginData.id;    
+                // user cart check out        
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [user_id]
+            ,(err, result) => {       
                 if(err){                        
                     res.send(err);
-                    con.end();
-                
+                    // con.end();                
                 } else {
                     console.log("result");
-                    console.log(result);
-                    
+                    console.log(result);                    
                     res.send(result);
                 }
-        });
-    } else {
-    console.log("guest cart check out")
-    //guest cart check out
-        const product_number = req.body.map(item => {
-            return item.c_item_no;
-        })
-            
-        con.query('SELECT * from product where prodnum in (?)', [product_number]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();
+            });
+        } else {
+            console.log("guest cart check out")
+            //guest cart check out
+            const product_number = req.body.map(item => {
+                return item.c_item_no;
+            })
                 
-                } else {
-                    console.log("result");
-                    console.log(result);
+            con.query('SELECT * from product where prodnum in (?)', [product_number]
+                ,(err, result) => {
+                    if(err){                        
+                        res.send(err);
+                        // con.end();
                     
-                    res.send(result);
-                }
-        });
-    }
-    
-
-
-
-
-});
-
-
-
-
-
-app.post("/sign_out", function (req, res) {
-    req.session.destroy(() => {
-        res.clearCookie('loginData');
-        res.redirect('/');
+                    } else {
+                        console.log("result");
+                        console.log(result);                        
+                        res.send(result);
+                    }
+            });
+        } 
+        con.release();
     });
 });
-
-
-
-app.get('/home',(req,res) => {
-    console.log(`req home: ${req}`);
-    if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData.name});	
-    } else {
-		res.sendFile(__dirname + "/public/index.html");
-	}
-    
-});
-
-app.get('/about',(req,res) => {
-    // res.sendFile(__dirname + "/public/index.html")
-    console.log(`req about: ${req}`);
-    if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData.name});
-	} else {
-		res.sendFile(__dirname + "/public/index.html");
-	}
-});
-
-app.get('/menu',(req,res) => {
-    console.log(`req menu: ${req}`);
-    if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData.name});
-	} else {
-		res.sendFile(__dirname + "/public/index.html");
-	}
-    
-});
-
-// app.get('/test',(req,res) => {
-//     console.log(`req menu: ${req}`);
-//     if (req.session.loginData) {
-// 		res.render('index.ejs', {post : req.session.loginData.name});
-// 	} else {
-// 		res.sendFile(__dirname + "/public/index.html");
-// 	}
-    
-// });
-
-
-
-app.get('/contact',(req,res) => {
-    console.log(`req contact: ${req}`);
-    if (req.session.loginData) {
-		res.render('index.ejs', {post : req.session.loginData.name});
-	} else {
-		res.sendFile(__dirname + "/public/index.html");
-	}
-    
-});
-
 
 
 
@@ -1476,72 +1492,48 @@ app.get('/get_user_billing_info', (req,res) => {
 
     console.log('/get_user_billing_info /get_user_billing_info /get_user_billing_info')
     const u_id = req.session.loginData.id;
-    console.log(u_id);
-
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    // console.log(con);
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    con.query('SELECT clv_id FROM users WHERE id = ?', [u_id], (err, result) => {
-        if (err) {
-            res.send(err);
-            con.end();
-        } else {
-            console.log(result);
-            const options = {
-                method: 'GET',
-                headers: {
-                  accept: 'application/json',
-                  authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                }
-              };
-        
-            fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
-            .then(response => response.json())
-            .then(response => { 
-                console.log(response);
-                let res_data = response.cards.elements.map(element => {
-                    return element.id;
-                })
-                console.log(res_data);
-                // console.log(response.cards.elements);        
-                // response.cards.elements.forEach(element => {console.log(element)}
-                con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
-                    if (err) {
-                        res.send(err);
-                        con.end();
-                    } else {
-                        console.log(result);
-                        res.send(result);
+    console.log(u_id);    
+   
+    db.getConnection((con)=>{       
+        con.query('SELECT clv_id FROM users WHERE id = ?', [u_id], (err, result) => {
+            if (err) {
+                res.send(err);
+                // con.end();
+            } else {
+                console.log(result);
+                const options = {
+                    method: 'GET',
+                    headers: {
+                    accept: 'application/json',
+                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
                     }
+                };
+            
+                fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
+                .then(response => response.json())
+                .then(response => {
+                    console.log("card response")
+                     
+                    console.log(response);
+                    let res_data = response.cards.elements.map(element => {
+                        return element.id;
+                    })
+                    console.log(res_data);                    
+                    con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
+                        if (err) {
+                            res.send(err);
+                            // con.end();
+                        } else {
+                            console.log(result);
+                            res.send(result);
+                        }
+                    })                    
                 })
-                
-            })
-            .catch(err => console.error(err));
-
-           
-        }
-    })
-
-
+                .catch(err => console.error(err));            
+            }
+        }); 
+        con.release();
+    });
 });
 
 app.get('/get_user_shipping_info', (req,res) => {
@@ -1549,40 +1541,17 @@ app.get('/get_user_shipping_info', (req,res) => {
     const u_id = req.session.loginData.id;
     console.log(u_id);
 
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
+    db.getConnection((con)=>{
+        con.query('SELECT * FROM shipping_info WHERE id = ?', [u_id], (err, result) => {
+            if (err) {
+                res.send(err);
+                // con.end();
+            } else {                
+                res.send(result);
+            }
+        }); 
+        con.release();
     });
-
-    
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    con.query('SELECT * FROM shipping_info WHERE id = ?', [u_id], (err, result) => {
-        if (err) {
-            res.send(err);
-            con.end();
-        } else {
-            console.log(result);
-            res.send(result);
-
-
-
-        }
-    })
 })
 
 
@@ -1647,70 +1616,52 @@ app.post('/add_payment_method', (req,res) => {
                 const email = card_email;                
                 const indate = getDate(); 
                 
-                const mysql = require('mysql');
-
-                const con = mysql.createConnection({
-                    host: '127.0.0.1',
-                    port: '3306',
-                    user: 'root',
-                    password: '111111',
-                    database: 'test1',
-                    
-                });
-
-                con.connect((err) => {
-                    if(err){
-                    console.log('Error connecting to Db');
-                    return;
-                    }
-                    console.log('Connection established');
-                });
-
                 checkDefault().then((data) => { 
                     console.log("checkDefault().then((data) =>");
                     console.log(data);
-                    addBillingInfo();
-            
+                    addBillingInfo();            
                 });
-
 
                 function checkDefault() {
                     return new Promise((resolve, reject) => {
                         if (default_check === 'default') {
-                            con.query('SELECT id from billing_info WHERE id=?', [u_id],(err, result) => {
-                                if (err) {
-                                    res.send(err);
-                                    con.end();
-                                } else if (result !== undefined) {
-                                    console.log(result)                
-                                    con.query('UPDATE billing_info SET default_payment = "n" where id =?', [u_id])
-                                    resolve();
-                                }                     
-                            })
+                            db.getConnection((con)=>{
+                                con.query('SELECT id from billing_info WHERE id=?', [u_id],(err, result) => {
+                                    if (err) {
+                                        res.send(err);
+                                        // con.end();
+                                    } else if (result !== undefined) {
+                                        console.log(result)                
+                                        con.query('UPDATE billing_info SET default_payment = "n" where id =?', [u_id])
+                                        resolve();
+                                    }                     
+                                }); 
+                                con.release();
+                            }); 
                         } else {
                             addBillingInfo();  
                         }
-                    })
+                    });
                 } 
 
                 
                 function addBillingInfo() {
-                    con.query('INSERT INTO billing_info (id, clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, email, default_payment, indate) values (?,?,?,?,?,?,?,?,?,?,?,?,?)', 
-                    [u_id, $clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, email, default_check, indate], (err, result) => {
-                        if (err) {
-                            res.send(err);
-                            con.end();
-                        } else {
-                            res.send(result);
-                        }
-                    });
+                    db.getConnection((con)=>{
+                        con.query('INSERT INTO billing_info (id, clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, email, default_payment, indate) values (?,?,?,?,?,?,?,?,?,?,?,?,?)', 
+                        [u_id, $clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, email, default_check, indate], (err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                res.send(result);
+                            }
+                        });
+                        con.release();
+                    }); 
                 }
                 
-                // response.cards.elements.forEach(element => {console.log(element)                    
-                // });
-                
-              })
-              .catch(err => console.error(err));})
+            })
+            .catch(err => console.error(err));})
             
         .catch(err => console.error(err));
 })
@@ -1721,79 +1672,61 @@ app.post('/make_default_billing_info', (req,res) => {
     let u_id = req.body.id;
     let bi_number = req.body.billing_index;
 
-    const mysql = require('mysql');
+    db.getConnection((con)=>{
+        con.query('UPDATE test1.billing_info SET default_payment="n" WHERE id = ?', [u_id], (err, result) => {
+            if (err) {
+                res.send(err);
+                // con.end();
+            } else {
+                console.log(result);  
+                con.query('UPDATE test1.billing_info SET default_payment="default" WHERE id = ? and bi_number = ?', [u_id, bi_number], (err, result) => {
+                    if (err) {
+                        res.send(err);
+                        con.end();
+                    } else {
+                        console.log(result);
+                        con.query('SELECT clv_id FROM test1.billing_info WHERE id = ?', [u_id], (err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                console.log(result);
 
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',            
-    });        
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        console.log(err)
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    con.query('UPDATE test1.billing_info SET default_payment="n" WHERE id = ?', [u_id], (err, result) => {
-        if (err) {
-            res.send(err);
-            con.end();
-        } else {
-            console.log(result);  
-            con.query('UPDATE test1.billing_info SET default_payment="default" WHERE id = ? and bi_number = ?', [u_id, bi_number], (err, result) => {
-                if (err) {
-                    res.send(err);
-                    con.end();
-                } else {
-                    console.log(result);
-                    con.query('SELECT clv_id FROM test1.billing_info WHERE id = ?', [u_id], (err, result) => {
-                        if (err) {
-                            res.send(err);
-                            con.end();
-                        } else {
-                            console.log(result);
-
-                            const options = {
-                            method: 'GET',
-                                headers: {
-                                accept: 'application/json',
-                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                                }
-                            };
-                
-                            fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
-                            .then(response => response.json())
-                            .then(response => { 
-                                console.log(response);
-                                let res_data = response.cards.elements.map(element => {
-                                    return element.id;
-                                })
-                                console.log(res_data);
-                                
-                                con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM test1.billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
-                                    if (err) {
-                                        res.send(err);
-                                        con.end();
-                                    } else {
-                                        console.log(result);
-                                        res.send(result);
+                                const options = {
+                                method: 'GET',
+                                    headers: {
+                                    accept: 'application/json',
+                                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
                                     }
+                                };
+                    
+                                fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
+                                .then(response => response.json())
+                                .then(response => { 
+                                    console.log(response);
+                                    let res_data = response.cards.elements.map(element => {
+                                        return element.id;
+                                    })
+                                    console.log(res_data);
+                                    
+                                    con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM test1.billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
+                                        if (err) {
+                                            res.send(err);
+                                            // con.end();
+                                        } else {
+                                            console.log(result);
+                                            res.send(result);
+                                        }
+                                    });                                    
                                 })
-                                
-                            })
-                            .catch(err => console.error(err));
-                        }
-                    });
-                }
-                
-            });
-        }
+                                .catch(err => console.error(err));
+                            }
+                        });
+                    }                    
+                });
+            }
+        });
+        con.release();
     });
 });
 
@@ -1812,25 +1745,6 @@ app.post('/delete_payment_method', (req,res) => {
 
     if (u_id === req.session.loginData.id) {
 
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',            
-        });        
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established');
-        });
-
-
         checkDefaultPayment().then(() => { 
             console.log("check Default payment promise");
             // console.log(data);
@@ -1841,49 +1755,51 @@ app.post('/delete_payment_method', (req,res) => {
         function checkDefaultPayment() {
             return new Promise((resolve, reject) => { 
                 if (default_payment === 'default') {
-                    con.query('select * from billing_info where id= ? and inuse="y" order by indate desc', [u_id],
-                    (err, result) => {
-                        if (err) {
-                            res.send(err);
-                            con.end();
-                        } else {
-                            console.log(result);                    
-                            // res.send(result);
-                            if (result.length > 1 && result[0].default_payment !== 'default') {
-                                const new_default_payment_bi_number = result[0].bi_number;
-                                console.log('new_default_payment')
-                                console.log(new_default_payment_bi_number)
-                                con.query('UPDATE billing_info SET default_payment="default" WHERE bi_number = ?', [new_default_payment_bi_number],
-                                (err, result) => {
-                                    if (err) {
-                                        res.send(err);
-                                        con.end();
-                                    } else {
-                                        console.log(result); 
-                                        resolve();  
-                                    }
-                                });
-                            }
-                            else if (result.length > 1 && result[0].default_payment == 'default') {
-                                const new_default_payment_bi_number = result[1].bi_number;
-                                console.log('new_default_payment')
-                                console.log(new_default_payment_bi_number)
-                                con.query('UPDATE billing_info SET default_payment="default" WHERE bi_number = ?', [new_default_payment_bi_number],
-                                (err, result) => {
-                                    if (err) {
-                                        res.send(err);
-                                        con.end();
-                                    } else {
-                                        console.log(result); 
-                                        resolve();     
-                                    }
-                                });
-                            } else if (result.length == 1) { // last default
-                                console.log('last default payment')
-                                resolve()
-                            } else res.send({ some: 'no more billing info' });
+                    db.getConnection((con)=>{
+                        con.query('select * from billing_info where id= ? and inuse="y" order by indate desc', [u_id],(err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                console.log(result);                    
+                                // res.send(result);
+                                if (result.length > 1 && result[0].default_payment !== 'default') {
+                                    const new_default_payment_bi_number = result[0].bi_number;
+                                    console.log('new_default_payment')
+                                    console.log(new_default_payment_bi_number)
+                                    con.query('UPDATE billing_info SET default_payment="default" WHERE bi_number = ?', [new_default_payment_bi_number],
+                                    (err, result) => {
+                                        if (err) {
+                                            res.send(err);
+                                            // con.end();
+                                        } else {
+                                            console.log(result); 
+                                            resolve();  
+                                        }
+                                    });
+                                }
+                                else if (result.length > 1 && result[0].default_payment == 'default') {
+                                    const new_default_payment_bi_number = result[1].bi_number;
+                                    console.log('new_default_payment')
+                                    console.log(new_default_payment_bi_number)
+                                    con.query('UPDATE billing_info SET default_payment="default" WHERE bi_number = ?', [new_default_payment_bi_number],
+                                    (err, result) => {
+                                        if (err) {
+                                            res.send(err);
+                                            // con.end();
+                                        } else {
+                                            console.log(result); 
+                                            resolve();     
+                                        }
+                                    });
+                                } else if (result.length == 1) { // last default
+                                    console.log('last default payment')
+                                    resolve();
+                                } else res.send({ some: 'no more billing info' });
 
-                        }
+                            }
+                        });
+                        con.release();
                     });
                 } else makeUpdateBillingInfo();
             }); 
@@ -1891,20 +1807,26 @@ app.post('/delete_payment_method', (req,res) => {
 
 
         
-        function makeUpdateBillingInfo() {
-            console.log("makeUpdateBillingInfo")
+        
+    } else {
+        res.send("check your ID");
+    }
 
+
+    function makeUpdateBillingInfo() {
+        console.log("makeUpdateBillingInfo")
+        db.getConnection((con)=>{
             con.query('UPDATE billing_info SET inuse = "n", default_payment = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, bi_number],
             (err, result) => {
                 if (err) {
                     res.send(err);
-                    con.end();
+                    // con.end();
                 } else {
                     console.log(result);  
                     con.query('SELECT clv_id FROM billing_info WHERE id = ?', [u_id], (err, result) => {
                         if (err) {
                             res.send(err);
-                            con.end();
+                            // con.end();
                         } else {
                             console.log(result);
 
@@ -1928,149 +1850,53 @@ app.post('/delete_payment_method', (req,res) => {
                                 con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
                                     if (err) {
                                         res.send(err);
-                                        con.end();
+                                        // con.end();
                                     } else {
                                         console.log(result);
                                         res.send(result);
                                     }
-                                })
-                                
+                                });                                    
                             })
                             .catch(err => console.error(err));
                         }
                     });
-
-
-                    // con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM billing_info WHERE id=? and inuse = "y"', [u_id],
-                    // (err, result) => {
-                    //     if (err) {
-                    //         res.send(err);
-                    //         con.end();
-                    //     } else {
-                    //         console.log("res.send(result)")
-                    //         console.log(result)
-                    //         res.send(result);  
-                    //     }              
-                        
-                    // })                  
-
                 }
             });
-        }
-
-
-
-
-
-
-       
-
-
-        // con.query('SELECT clv_id, cd_id FROM billing_info WHERE id = ? and bi_number = ?', [u_id, c_number], (err, result) => {
-        //     if (err) {
-        //         res.send(err);
-        //         con.end();
-        //     } else {
-        //         console.log(result);
-
-        //         /// insert clover api
-
-        //         console.log("delete card from DB")
-        //                 con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
-        //                 (err, result) => {
-        //                     if (err) {
-        //                         res.send(err);
-        //                         con.end();
-        //                     } else console.log(result);                    
-        //                 });
-
-        //                 res.send(result);
-        //     } 
-        
-                
-
-                ///////////// clover API fetch //////////////////
-                /*
-                const options = {
-                    method: 'DELETE',
-                    headers: {
-                      accept: 'application/json',
-                      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                    }
-                };
-                fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${result[0].clv_id}/sources/${result[0].cd_id}`, options)
-                .then(response => response.json())
-                .then(response => {
-                    console.log(response)
-                    if (response.deleted === 'true') {
-                        console.log("delete card from DB")
-                        con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
-                        (err, result) => {
-                            if (err) {
-                                res.send(err);
-                                con.end();
-                            } else console.log(result);                    
-                        });
-
-                        res.send(result);
-                    } 
-                })
-                .catch(err => console.error(err));
-                
-            }
-            */
-    
-
-    } else {
-        res.send("check your ID");
+            con.release();
+        });
     }
 
-})
+});
+
 
 
 app.post('/make_default_shipping_info', (req,res) => {
     let u_id = req.body.id;
     let sh_number = req.body.shipping_index;
 
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',            
-    });        
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    con.query('UPDATE shipping_info SET default_address="n" WHERE id = ?', [u_id], (err, result) => {
-        if (err) {
-            res.send(err);
-            con.end();
-        } else {
-            console.log(result);  
-            con.query('UPDATE shipping_info SET default_address="default" WHERE id = ? and sh_number = ?', [u_id, sh_number], (err, result) => {
-                if (err) {
-                    res.send(err);
-                    con.end();
-                } else {
-                    console.log(result);
-                    con.query('SELECT * FROM shipping_info WHERE id = ? and inuse = "y"', [u_id], (err, result) => {
-                        if (err) {
-                            res.send(err);
-                            con.end();
-                        } else res.send(result);  
-                    });
-                }
-            });
-        }
+    db.getConnection((con)=>{
+        con.query('UPDATE shipping_info SET default_address="n" WHERE id = ?', [u_id], (err, result) => {
+            if (err) {
+                res.send(err);
+                // con.end();
+            } else {
+                console.log(result);  
+                con.query('UPDATE shipping_info SET default_address="default" WHERE id = ? and sh_number = ?', [u_id, sh_number], (err, result) => {
+                    if (err) {
+                        res.send(err);
+                        // con.end();
+                    } else {
+                        console.log(result);
+                        con.query('SELECT * FROM shipping_info WHERE id = ? and inuse = "y"', [u_id], (err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else res.send(result);  
+                        });
+                    }
+                });
+            }
+        }); con.release();
     });
 });
 
@@ -2085,108 +1911,95 @@ app.post('/delete_shipping_info', (req,res) => {
     const outdate = getDate();
     console.log(req.session.loginData.id)
 
-    if (u_id === req.session.loginData.id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',            
-        });        
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established');
-        });
+    if (u_id === req.session.loginData.id) {       
 
         checkDefaultAddress().then((data) => { 
             console.log("checkDefaultAddress promise");
             console.log(data);
-            makeUpdateShippingInfo();
-            
+            makeUpdateShippingInfo();        
     
         });
 
         function checkDefaultAddress() {
             return new Promise((resolve, reject) => { 
                 if (default_address === 'default') {
-                    con.query('select * from shipping_info where id= ? and inuse="y" order by indate desc', [u_id],
-                    (err, result) => {
-                        if (err) {
-                            res.send(err);
-                            con.end();
-                        } else {
-                            console.log(result);                    
-                            // res.send(result);
-                            if (result.length > 1 && result[0].default_address !== 'default') {
-                                let new_default_address_sh_num = result[0].sh_number;
-                                console.log('new_default_address')
-                                console.log(new_default_address_sh_num)
-                                con.query('UPDATE shipping_info SET default_address="default" WHERE sh_number = ?', [new_default_address_sh_num],
-                                (err, result) => {
-                                    if (err) {
-                                        res.send(err);
-                                        con.end();
-                                    } else {
-                                        console.log(result); 
-                                        resolve();  
-                                    }
-                                });
+                    db.getConnection((con)=>{
+                        con.query('select * from shipping_info where id= ? and inuse="y" order by indate desc', [u_id],
+                        (err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                console.log(result);                    
+                                // res.send(result);
+                                if (result.length > 1 && result[0].default_address !== 'default') {
+                                    let new_default_address_sh_num = result[0].sh_number;
+                                    console.log('new_default_address')
+                                    console.log(new_default_address_sh_num)
+                                    con.query('UPDATE shipping_info SET default_address="default" WHERE sh_number = ?', [new_default_address_sh_num],
+                                    (err, result) => {
+                                        if (err) {
+                                            res.send(err);
+                                            // con.end();
+                                        } else {
+                                            console.log(result); 
+                                            resolve();  
+                                        }
+                                    });
+                                }
+                                else if (result.length > 1 && result[0].default_address == 'default') {
+                                    let new_default_address_sh_num = result[1].sh_number;
+                                    console.log('new_default_address')
+                                    console.log(new_default_address_sh_num)
+                                    con.query('UPDATE shipping_info SET default_address="default" WHERE sh_number = ?', [new_default_address_sh_num],
+                                    (err, result) => {
+                                        if (err) {
+                                            res.send(err);
+                                            // con.end();
+                                        } else {
+                                            console.log(result); 
+                                            resolve();                   
+
+                                        }
+                                    });
+                                } else if (result.length == 1) { // last default
+                                    console.log('last default')
+                                    resolve();
+                                } else res.send({ some: 'no more shipping info' });
+
                             }
-                            else if (result.length > 1 && result[0].default_address == 'default') {
-                                let new_default_address_sh_num = result[1].sh_number;
-                                console.log('new_default_address')
-                                console.log(new_default_address_sh_num)
-                                con.query('UPDATE shipping_info SET default_address="default" WHERE sh_number = ?', [new_default_address_sh_num],
-                                (err, result) => {
-                                    if (err) {
-                                        res.send(err);
-                                        con.end();
-                                    } else {
-                                        console.log(result); 
-                                        resolve();                   
-
-                                    }
-                                });
-                            } else if (result.length == 1) { // last default
-                                console.log('last default')
-                                resolve()
-                            } else res.send({ some: 'no more shipping info' });
-
-                        }
+                        });
+                        con.release();
                     });
                 } else makeUpdateShippingInfo();
             }); 
         }
 
         function makeUpdateShippingInfo() {
+            db.getConnection((con)=>{
+                con.query('UPDATE shipping_info SET inuse = "n", default_address = "n", outdate = ? WHERE id = ? and sh_number = ?', [outdate, u_id, sh_number],
+                (err, result) => {
+                    if (err) {
+                        res.send(err);
+                        // con.end();
+                    } else {
+                        console.log(result);  
+                        con.query('SELECT * FROM shipping_info WHERE id=? and inuse = "y"', [u_id],
+                        (err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                console.log("res.send(result)")
+                                console.log(result)
+                                res.send(result);  
+                            }              
+                            
+                        })                  
 
-            con.query('UPDATE shipping_info SET inuse = "n", default_address = "n", outdate = ? WHERE id = ? and sh_number = ?', [outdate, u_id, sh_number],
-            (err, result) => {
-                if (err) {
-                    res.send(err);
-                    con.end();
-                } else {
-                    console.log(result);  
-                    con.query('SELECT * FROM shipping_info WHERE id=? and inuse = "y"', [u_id],
-                    (err, result) => {
-                        if (err) {
-                            res.send(err);
-                            con.end();
-                        } else {
-                            console.log("res.send(result)")
-                            console.log(result)
-                            res.send(result);  
-                        }              
-                        
-                    })                  
-
-                }
+                    }
+                });
+                con.release();
             });
         }
     }
@@ -2213,62 +2026,43 @@ app.post('/edit_profile_shipping', (req,res) => {
     console.log(sh_number);
     console.log(default_check);
 
-
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
     checkDefault().then(() => { 
         editShippingInfo();
-
     });
 
-
     function checkDefault() {
-        return new Promise((resolve, reject) => {
-            if (default_check === 'default') {
-                console.log("default check")
-                con.query(`UPDATE shipping_info SET default_address = "n" WHERE default_address = "default" and id = ?`, [u_id], (err, result) => {
-                    if (err) {
-                        res.send(err);
-                        con.end();
-                    } else console.log(result);
-                });
+        return new Promise((resolve, reject) => {            
+            if (default_check === 'default') {                
+                console.log("default check");
+                db.getConnection((con)=>{
+                    con.query(`UPDATE shipping_info SET default_address = "n" WHERE default_address = "default" and id = ?`, [u_id], (err, result) => {
+                        if (err) {
+                            res.send(err);
+                            // con.end();
+                        } else console.log(result);
+                    });
+                    con.release();
+                });                
             } resolve();
-
         });
     }
 
     function editShippingInfo() {
-        console.log("UPDATE shipping_info SET recipient = ?, addre ")
-        con.query(`UPDATE shipping_info SET recipient = ?, address1 =?, address2 =?, city=?, state=?, zip = ?, phone = ?, email = ?, shipping_option = ?, default_address = ?, indate = ? WHERE id = ? and sh_number = ?`,
-        [recipient, address1, address2, city, state, zip, phone, email, option, default_check, indate, u_id, sh_number], (err, result) => {
-            if (err) {
-                res.send(err);
-                con.end();
-            } else {
-                console.log(result)
-                res.send(result);
-            }
-        })
+        console.log("UPDATE shipping_info SET recipient = ?, addre ");
+        db.getConnection((con)=>{
+            con.query(`UPDATE shipping_info SET recipient = ?, address1 =?, address2 =?, city=?, state=?, zip = ?, phone = ?, email = ?, shipping_option = ?, default_address = ?, indate = ? WHERE id = ? and sh_number = ?`,
+            [recipient, address1, address2, city, state, zip, phone, email, option, default_check, indate, u_id, sh_number], (err, result) => {
+                if (err) {
+                    res.send(err);
+                    // con.end();
+                } else {
+                    console.log(result)
+                    res.send(result);
+                }
+            });
+            con.release();
+        });
     }
-
 
 });
 
@@ -2293,487 +2087,271 @@ app.post('/add_profile_shipping', (req,res) => {
     const indate = getDate();
 
     console.log(u_id);
-    const mysql = require('mysql');
 
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    checkDefault().then(() => { 
-        // console.log("checkDefault().then((data) =>");
-        // console.log(data);
+    checkDefault().then(() => {         
         addShippingInfo();
-
     });
-    
-
 
     function checkDefault() {
         return new Promise((resolve, reject) => {
             if (default_check === 'default') { 
-                con.query('SELECT id from shipping_info WHERE id=?', [u_id],(err, result) => {
-                    if (err) {
-                        res.send(err);
-                        con.end();
-                    } else if (result !== undefined) { 
-                        console.log(result)                
-                        con.query('UPDATE shipping_info SET default_address = "n" where id =?', [u_id])
-                        resolve();
-                    }                     
-                })
+                db.getConnection((con)=>{
+                    con.query('SELECT id from shipping_info WHERE id=?', [u_id],(err, result) => {
+                        if (err) {
+                            res.send(err);
+                            // con.end();
+                        } else if (result !== undefined) { 
+                            console.log(result)                
+                            con.query('UPDATE shipping_info SET default_address = "n" where id =?', [u_id])
+                            resolve();
+                        }                     
+                    });
+                    con.release();
+                });
             } else {
                 addShippingInfo();  
             }
-        })
+        });
     } 
 
     function addShippingInfo() {
         console.log("add ship info")
-        con.query('INSERT INTO shipping_info (id, recipient, address1, address2, city, state, zip, phone, email, shipping_option, default_address, indate) values (?,?,?,?,?,?,?,?,?,?,?,?)', 
-            [u_id, recipient, address1, address2, city, state, zip, phone, email, option, default_check, indate], (err, result) => {
+        db.getConnection((con)=>{
+            con.query('INSERT INTO shipping_info (id, recipient, address1, address2, city, state, zip, phone, email, shipping_option, default_address, indate) values (?,?,?,?,?,?,?,?,?,?,?,?)', 
+                [u_id, recipient, address1, address2, city, state, zip, phone, email, option, default_check, indate], (err, result) => {
                 if (err) {
                     res.send(err);
-                    con.end();
+                    // con.end();
                 } else {
                     console.log(result);
-                    res.send(result);
+                    if (result.protocol41 == true) {
+                        res.redirect('http://localhost:8080/account');
+                    } else res.send("sorry... something wrong in DB SERVER.");                        
                 }
             });
-        }
-        
-
-    
-
-
-    
-
-
-    // if (req.session.loginData) {
-	// 	res.send(req.session.loginData);
-	// }
-})
-
-
-// app.get('/',(req,res)=>res.sendFile('C:/Users/Jk/Documents/web_workspace/Test/index.html'));
-
-// app.post('/shop/member/:id/cart', (req,res) => {
-//     res.send("cart");
-
-// });
-
-// app.post('/shop/cart/:id', (req,res) => {
-//     console.log("go cart ");
-//     console.log(req.rawHeaders);
-//     console.log(req.rawHeaders[0]);
-//     res.send("cart");
-//     // res.send(JSON.stringify(req));
-
-// });
-
-
-function makeConnect() {
-    console.log("make connect");
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    // con.connect((err) => {
-    //     if(err){
-    //     console.log('Error connecting to Db');
-    //     return;
-    //     }
-    //     console.log('Connection established');
-    // });
-
-    // con.query('SELECT * from users', (error, rows, fields) => {
-    //     if (error) throw error;
-    // console.log('User info is: ', rows);
-    // });
-    
-}
-
-// app.post('/testview',(req,res) => {
-//     // var product_number = parseInt(req.params.item_no);
-//     var member_name = '';
-
-//     var test = req.body;
-//     console.log("/testview/testview/testview/testview/testview")
-//     console.log(req);
-//     console.log(req.body);
-//     console.log(test);
-
-//     res.send(test)
-//     // console.log(`/shop/view/item:id: ${product_number}`);
-
-// });
-
-
-app.get('/shop',(req,res) => {
-    console.log(`req test: ${req}`);
-    console.log("shop_get  ");
-    let member = '';
-    if (req.session.loginData) {member = req.session.loginData.name;}
-    
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    var date;
-    date = new Date();
-    date = date.getFullYear() + '-' +
-    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-    ('00' + date.getDate()).slice(-2) + ' ' + 
-    ('00' + date.getHours()).slice(-2) + ':' + 
-    ('00' + date.getMinutes()).slice(-2) + ':' + 
-    ('00' + date.getSeconds()).slice(-2);
-
-     
-    
-   
-    
-        
-    con.query('SELECT * from product' , (err, result) => {
-                if(err){
-                    res.send(err);
-                    con.end();
-                // }
-                //  else if(result[0].no === 'false') {
-                //     res.send('check your ID and PW');
-                //     con.end();
-                } else {
-
-                    console.log("SELECT * from product where prodnum = ");
-                    console.log(`${result[0].prodnum}`);
-                    console.log(`${result}`);
-                    
-                    // res.send(result[0].name);
-                    if(member) {
-                        console.log(`${result}`);
-                        res.render('shop_get.ejs', { 
-                            post : member,
-                            product : result
-                            // product_number : result[0].prodnum,
-                            // product_name : result[0].name,
-                            // product_price : result[0].price_sell,
-                            // product_description : result[0].content
-                        })
-                    } else {
-                        console.log(`${result}`);
-                        res.render('shop_get.ejs', { 
-                            post : "GUEST",
-                            product : result
-                            // product_number : result[0].prodnum,
-                            // product_name : result[0].name,
-                            // product_price : result[0].price_sell,
-                            // product_description : result[0].content
-                        })
-                    }
-                }
-                    
-    });    
-    
+            con.release();
+        });
+    }    
 });
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
 
 app.post('/get_item_info',(req,res) => {
 
     console.log('/get_item_info get_item_info get_item_info get_item_infoget_item_info')
     console.log(req.body);
     const prodnum = req.body.prodnum;
-    // const item_quantity = req.body.buy_now_cart_quantity;
-    // const item_name = req.body.buy_now_cart_name;
 
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-        
-    con.query('SELECT * FROM product WHERE prodnum = ?',[prodnum], (err, result) => {
-        if(err){
-            res.send(err);
-            con.end();
-
-        } else {
-            res.send(result);            
-        }
-                    
-    });
-    con.end();    
-
+    db.getConnection((con)=>{
+        con.query('SELECT * FROM product WHERE prodnum = ?',[prodnum], (err, result) => {
+            if(err){
+                res.send(err);               
+            } else {
+                res.send(result);            
+            }                        
+        });
+        con.release();
+    });  
 })
 
 
 app.post('/shop',(req,res) => {
-    console.log(`req test: ${req}`);
-    // console.log(req);
-    if (req.session.loginData) {member = req.session.loginData.name;
-    console.log(member);
-    }
+    console.log(`req test: ${req}`);  
     console.log(req.body);
-    console.log("shop shop shop shop shop shop shop shop shop shop ");
+    console.log("shop post/ shop post/ shop post/ shop post/ shop post/ shop post/ ");
     
-    // res.send(req.body);
+    
+    db.getConnection((con)=>{
+        con.query('SELECT * from product', (err, result) => {
+            if(err){
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log("SELECT * from product where prodnum = ");
+                console.log(result);
+                console.log(`${result[0].prodnum}`);
 
-    // var member = '';
-    // if (req.session.loginData) {member = req.session.loginData.name;}
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
+                res.send(result);                
+            }                        
+        });    
+        con.release();
     });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        console.log(err);
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    // const sign_in_id = req.body.sign_in_id;
-    // const sign_in_pw = req.body.sign_in_pw;
-    // const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
-    // console.log(redirect_path);
-
-    var date;
-    date = new Date();
-    date = date.getFullYear() + '-' +
-    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-    ('00' + date.getDate()).slice(-2) + ' ' + 
-    ('00' + date.getHours()).slice(-2) + ':' + 
-    ('00' + date.getMinutes()).slice(-2) + ':' + 
-    ('00' + date.getSeconds()).slice(-2);
-
-     
-    
-   
-    
-        
-    con.query('SELECT * from product'
-        , (err, result) => {
-                if(err){
-                    res.send(err);
-                    con.end();
-          
-                } else {
-
-                    console.log("SELECT * from product where prodnum = ");
-                    console.log(result);
-                    console.log(`${result[0].prodnum}`);
-
-                    res.send(result);
-                    
-                }
-                    
-    });
-    con.end();    
-    
-    
-});
-
-app.get('/shop/cart/:query',(req,res) => {
-    console.log(`req test: ${req}`);
-    console.log(req.params.query);
-
-    // let member_name = 'GUEST';
-
-    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';
-      
-    res.render('cart_order.ejs', { post : member_name });
 });
 
 
-app.get('/shop/view/item/:item_number',(req,res) => {
-    console.log(`req test: ${req}`);
-    let member_name = 'GUEST';
-
-//     console.log(`/shop/view/item:id: ${product_number}`);
-//     if (req.session.loginData) {member_name = req.session.loginData.name;}
-    // console.log(req);
-    if (req.session.loginData) {member_name = req.session.loginData.name;
-    console.log(member_name);
-    }
-    console.log(req.body);
-    console.log("app.get('/shop/view/item/:item_number  ");
-    console.log(req.params.item_number);
-    
-    // res.send(req.body);
-
-    // var member = '';
-    // if (req.session.loginData) {member = req.session.loginData.name;}
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    const product_number = req.params.item_number
-    var date;
-    date = new Date();
-    date = date.getFullYear() + '-' +
-    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-    ('00' + date.getDate()).slice(-2) + ' ' + 
-    ('00' + date.getHours()).slice(-2) + ':' + 
-    ('00' + date.getMinutes()).slice(-2) + ':' + 
-    ('00' + date.getSeconds()).slice(-2);
-        
-    con.query('SELECT * from product where prodnum = ?', [product_number]
-        , (err, result) => {
-                if(err){
-                    res.send(err);
-                    con.end();
-                
-                } else {
-                    
-                    console.log(result[0]);
-                    res.render('shop_detail.ejs', { 
-                        post : member_name,
-                        product : result[0]
-                        
-                    })
-                    
-                }
-    });
-
-    con.end();
-});
 
 app.post('/shop/view/item/:item_number',(req,res) => {
-// app.post('/shopview',(req,res) => {
-    console.log(`req test: ${req}`);
-    // console.log(req);
-    if (req.session.loginData) {member = req.session.loginData.name;
-    console.log(member);
-    }
-    console.log(req.body);
-    console.log('/shop/view/item/:item_number');
-    console.log(req.params.item_number);
-    
-    // res.send(req.body);
-
-    // var member = '';
-    // if (req.session.loginData) {member = req.session.loginData.name;}
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
+    console.log(`/shop/view/item/:item_number : ${req.params.item_number}`);
         
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-
-    // const sign_in_id = req.body.sign_in_id;
-    // const sign_in_pw = req.body.sign_in_pw;
-    // const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
-    // console.log(redirect_path);
-    // const product_number = req.body.prodnum;
     const product_number = req.params.item_number
-    var date;
-    date = new Date();
-    date = date.getFullYear() + '-' +
-    ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-    ('00' + date.getDate()).slice(-2) + ' ' + 
-    ('00' + date.getHours()).slice(-2) + ':' + 
-    ('00' + date.getMinutes()).slice(-2) + ':' + 
-    ('00' + date.getSeconds()).slice(-2);
-        
-    con.query('SELECT * from product where prodnum = ?', [product_number]
-        , (err, result) => {
-                if(err){
-                    res.send(err);
-                    con.end();
-                
-                } else {
-                    console.log(result[0]);
-                    res.send(result[0]);
-                    
-                }
-    });
-
-    con.end();   
-    
+            
+    db.getConnection((con)=>{
+        con.query('SELECT * from product where prodnum = ?', [product_number], (err, result) => {
+            if(err){
+                res.send(err);
+                // con.end();            
+            } else {
+                console.log(result[0]);
+                res.send(result[0]);                
+            }
+        });
+        con.release();
+    });    
 });
+
+
+app.post('/overwrite_cart', (req,res) => {
+    console.log('/overwrite_cart/overwrite_cart /overwrite_cart/overwrite_cart')
+    console.log(req.body);
+
+    const u_id = req.body[0].u_cart[0].u_id == req.session.loginData.id ? req.session.loginData.id : false;
+    const overwrite_cart = req.body[0].overwrite_cart;
+    const date = getDate();
+    let cart_num = date.replace(/\s|:|\-/g,"") + "CT" + u_id.substr(0, 3);
+    let overwrite_cart_tmp = [...overwrite_cart];
+    let insert_items = [];
+    let update_items = [];
+    let update_items_prodnum = [];
+    console.log(overwrite_cart)
+    console.log(overwrite_cart_tmp)
+
+    if (u_id) {
+        db.getConnection((con)=>{
+            con.query('SELECT prodnum, cartnum FROM cart WHERE u_id = ? and result = "n"', [u_id], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();            
+                } else {
+                    console.log("result");
+                    console.log(result);
+
+                    if (result == undefined) {
+                        const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`) values ?;"
+                        let insert_cart_value = [];
+                        let insert_cart_value_element = [];                    
+                        for(let i in overwrite_cart) {
+                            insert_cart_value_element.push(cart_num);
+                            insert_cart_value_element.push(u_id);
+                            insert_cart_value_element.push(overwrite_cart[i].c_item_no);
+                            insert_cart_value_element.push(overwrite_cart[i].c_item_quantity);
+                            insert_cart_value_element.push('n');
+                            insert_cart_value_element.push(date);
+                            insert_cart_value_element.push(date);
+                            insert_cart_value.push(insert_cart_value_element);
+                            insert_cart_value_element = [];
+                        }
+                        console.log(insert_cart_value)  
+                        con.query(insert_cart_query, [insert_cart_value], (err, result) => {
+                            if(err) {
+                                console.log(err);
+                            } else {        
+                                console.log("con.query(insert_cart_query, [insert_cart_value], (err, result)");                      
+                                console.log(result);
+                            }
+                        });
+                    } else {
+                        console.log('overwrite_cart before for')
+                        console.log(overwrite_cart)
+                        console.log('overwrite_cart_tmp before for')
+                        console.log(overwrite_cart_tmp)
+                        console.log(overwrite_cart_tmp[0])
+                    
+                        for (let i in overwrite_cart) {
+                            for (let j in result) {                       
+                                if (result[j].prodnum == overwrite_cart[i].c_item_no) {
+                                    // update db
+                                    update_items.push(overwrite_cart[i]);
+                                    update_items_prodnum.push(overwrite_cart[i].c_item_no);
+                                    delete overwrite_cart_tmp[i];
+                                }
+                            }
+                        }
+
+                        insert_items = overwrite_cart_tmp.filter(element => element != null);
+                        
+                        console.log('overwrite_cart after for')
+                        console.log(overwrite_cart)
+                        console.log('overwrite_cart_tmp')
+                        console.log(overwrite_cart_tmp)
+                        console.log('insert_items')
+                        console.log(insert_items)
+                        const update_query_1 = "UPDATE cart SET quantity = (case ";
+                        let update_query_2 = '';
+                        for (let i in update_items) {
+                            update_query_2 = update_query_2 + `when test1.cart.prodnum = '${update_items[i].c_item_no}' then '${update_items[i].c_item_quantity}' `
+                        }
+                        const update_query_3 = `end), modate = '${date}' WHERE test1.cart.prodnum IN (${update_items_prodnum}) AND u_id = '${u_id}' and result="n";`
+                        const update_query = update_query_1 + update_query_2 + update_query_3;
+                        console.log(update_query)
+
+                        const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`) values ?;"
+                        let insert_cart_value = [];
+                        let insert_cart_value_element = [];                    
+                        for(let i in insert_items) {
+                            insert_cart_value_element.push(cart_num);
+                            insert_cart_value_element.push(u_id);
+                            insert_cart_value_element.push(insert_items[i].c_item_no);
+                            insert_cart_value_element.push(insert_items[i].c_item_quantity);
+                            insert_cart_value_element.push('n');
+                            insert_cart_value_element.push(date);
+                            insert_cart_value_element.push(date);
+                            insert_cart_value.push(insert_cart_value_element);
+                            insert_cart_value_element = [];
+                        }
+                        console.log("insert_cart_value") 
+                        console.log(insert_cart_value)  
+
+
+                        if (update_items.length > 0) {
+                            con.query(update_query ,(err, result) => {
+                                if(err) {
+                                    res.send(err);
+                                    console.log(err);
+                                } else {        
+                                    console.log("con.query(update_query ,(err, result) =>");                      
+                                    console.log(result);
+                                }
+                            });
+                        }
+
+                        if (insert_cart_value.length > 0) {
+                            con.query(insert_cart_query, [insert_cart_value], (err, result) => {
+                                if(err) {
+                                    res.send(err);
+                                    console.log(err);
+                                } else {        
+                                    console.log("con.query(insert_cart_query, [insert_cart_value], (err, result)");                      
+                                    console.log(result);
+                                }
+                            });
+                        }
+
+                        con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id], (err, result) => {
+                            if(err){                        
+                                res.send(err);
+                                // con.end();            
+                            } else {
+                                console.log("result");
+                                console.log(result);
+                                res.send(result)
+                            }
+                        })
+                    }
+                }
+            });
+            con.release();
+        });
+    } else res.send("ID check or login check please")
+
+
+
+
+
+})
+
 
 
 app.post('/shop/checkout/:id', (req,res) => {
@@ -2781,111 +2359,61 @@ app.post('/shop/checkout/:id', (req,res) => {
     console.log(req.body.u_id);
 
     const u_id = req.body.u_id;
-    const mysql = require('mysql');
 
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
+   
+    db.getConnection((con)=>{
+        con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id] ,(err, result) => {
+            if(err){                        
+                res.send(err);
+                // con.end();            
+            } else {
+                console.log("result");
+                console.log(result);                
+                res.send(result);
+            }
+        });
+        con.release();
     });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();
-                
-                } else {
-                    console.log("result");
-                    console.log(result);
-                    
-                    res.send(result);
-                }
-            });
-
-})
+});
 
 
 app.post(`/get_user_default_billing_info`, (req,res) => {
     console.log('/get_user_default_billing_info /get_user_default_billing_info /get_user_default_billing_info ');
     
     const u_id = req.body.u_id;
-    const mysql = require('mysql');
 
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
+    db.getConnection((con)=>{
+        con.query('SELECT cardholder, type, last4 FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log(result);            
+                res.send(result);
+            }
+        }); 
+        con.release();
     });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    con.query('SELECT cardholder, type, last4 FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
-        if(err){                        
-            res.send(err);
-            con.end();        
-        } else {
-            console.log(result);            
-            res.send(result);
-        }
-    }); 
-})
+});
 
 app.post(`/get_user_default_shipping_info`, (req,res) => {
     console.log('get_user_default_shipping_info get_user_default_shipping_info get_user_default_shipping_info ');
     
     const u_id = req.body.u_id;
-    const mysql = require('mysql');
 
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
+    db.getConnection((con)=>{
+        con.query('SELECT recipient, address1, address2, city, state, zip, phone, email, shipping_option FROM shipping_info WHERE id= ? and default_address="default" and inuse="y"',[u_id], (err, result) => {
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log(result);            
+                res.send(result);
+            }
+        }); 
+        con.release();
     });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    con.query('SELECT recipient, address1, address2, city, state, zip, phone, email, shipping_option FROM shipping_info WHERE id= ? and default_address="default" and inuse="y"',[u_id], (err, result) => {
-        if(err){                        
-            res.send(err);
-            con.end();        
-        } else {
-            console.log(result);            
-            res.send(result);
-        }
-    }); 
-
-
-})
+});
 
 
 app.post('/check_user_cart', (req,res) => {
@@ -2893,40 +2421,23 @@ app.post('/check_user_cart', (req,res) => {
     console.log(req.body.u_id);
 
     const u_id = req.body.u_id;
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
-    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();
+   
+    db.getConnection((con)=>{
+        con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id] ,(err, result) => {
+            if(err){                        
+                res.send(err);
+                con.end();
+            
+            } else {
+                // console.log("result");
+                // console.log(result);
                 
-                } else {
-                    // console.log("result");
-                    // console.log(result);
-                    
-                    res.send(result);
-                }
-            });
-
-})
+                res.send(result);
+            }
+        });
+        con.release();
+    });
+});
 
 
 
@@ -2938,52 +2449,33 @@ app.post('/item_addup_v2', (req,res) => {
     
     let date = getDate();
 
-    if (user_id == u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established /add up item');
-        });
-
-        con.query('UPDATE cart SET quantity=cart.quantity + 1, modate = ? where u_id = ? and prodnum = ?', [date, u_id, item_num]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();
-                
-                } else {
-                    console.log("result");
-                    console.log(result);
-                    con.query('select * from cart join product on cart.prodnum = product.prodnum where u_id= ? and result = "n" and cart.prodnum in (?);', [u_id, selected_number]
-                    ,(err, result) => {
-                        if(err){                        
-                            res.send(err);
-                            con.end();
-                        
-                        } else {
-                            console.log("result");
-                            console.log(result);
-                            
-                            res.send(result);
-                        }
-                    });               
-                }
+    if (user_id == u_id) {        
+        db.getConnection((con)=>{
+            con.query('UPDATE cart SET quantity=cart.quantity + 1, modate = ? where u_id = ? and prodnum = ?', [date, u_id, item_num]
+                ,(err, result) => {
+                    if(err){                        
+                        res.send(err);
+                        // con.end();                    
+                    } else {
+                        console.log("result");
+                        console.log(result);
+                        con.query('select * from cart join product on cart.prodnum = product.prodnum where u_id= ? and result = "n" and cart.prodnum in (?);', [u_id, selected_number]
+                        ,(err, result) => {
+                            if(err){                        
+                                res.send(err);
+                                // con.end();                            
+                            } else {
+                                console.log("result");
+                                console.log(result);                                
+                                res.send(result);
+                            }
+                        });               
+                    }
+            });
+            con.release();
         });
     } else res.send("check user ID");
-})
+});
 
 app.post('/item_subtract_v2', (req,res) => {
     const user_id = req.body.u_id;
@@ -2992,42 +2484,20 @@ app.post('/item_subtract_v2', (req,res) => {
     const u_id = req.session.loginData.id;
     const date = getDate();
 
-    if (user_id == u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established /subtract item');
-        });
-
-        con.query('UPDATE cart SET quantity=cart.quantity - 1, modate =? where u_id=? and prodnum=?', [date, u_id, item_num]
-            ,(err, result) => {
+    if (user_id == u_id) {        
+        db.getConnection((con)=>{
+            con.query('UPDATE cart SET quantity=cart.quantity - 1, modate =? where u_id=? and prodnum=?', [date, u_id, item_num] ,(err, result) => {
                 if(err){                        
                     res.send(err);
-                    con.end();
-                
+                    // con.end();                    
                 } else {
                     console.log("result");
                     console.log(result);
-
                     con.query('select * from cart join product on cart.prodnum = product.prodnum where u_id= ? and result = "n" and cart.prodnum in (?);', [u_id, selected_number]
                     ,(err, result) => {
                         if(err){                        
                             res.send(err);
-                            con.end();
-                        
+                            // con.end();                            
                         } else {
                             console.log("result");
                             console.log(result);                        
@@ -3035,6 +2505,8 @@ app.post('/item_subtract_v2', (req,res) => {
                         }
                     });  
                 }
+            });
+            con.release();
         });
     } else res.send("check user ID");
 })
@@ -3049,47 +2521,30 @@ app.post('/item_delete_v2', (req,res) => {
 
     // const connect = makeConnect();
 
-    if (user_id == u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established /delete item');
-        });
-
-        con.query('DELETE FROM cart WHERE u_id=? and prodnum=?', [u_id, item_num]
-            ,(err, result) => {
+    if (user_id == u_id) {      
+        db.getConnection((con)=>{
+            con.query('DELETE FROM cart WHERE u_id=? and prodnum=?', [u_id, item_num] ,(err, result) => {
                 if(err){                        
                     res.send(err);
-                    con.end();
+                    // con.end();
                 
                 } else {
                     console.log("result");
                     console.log(result);
                     con.query('select * from cart join product on cart.prodnum = product.prodnum where u_id= ? and result = "n" and cart.prodnum in (?);', [u_id, selected_number]
-                        ,(err, result) => {
-                            if(err){                        
-                                res.send(err);
-                                con.end();                        
-                            } else {
-                                console.log("result");
-                                console.log(result);                        
-                                res.send(result);
-                            }
-                        }); 
+                    ,(err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            // con.end();                        
+                        } else {
+                            console.log("result");
+                            console.log(result);                        
+                            res.send(result);
+                        }
+                    }); 
                 }
+            });
+            con.release();
         });
     }
 });
@@ -3099,35 +2554,19 @@ app.post('/check_purchase_history', (req,res) => {
     const id= req.body.id;
     const u_id = req.session.loginData.id;
 
-    if (id === u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
+    if (id == u_id) {     
+        db.getConnection((con)=>{
+            con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log(result);  
+                    res.send(result);      
+                }
+            });
+            con.release();
         });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established');
-        });
-
-        con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();        
-            } else {
-                console.log(result);  
-                res.send(result);      
-            }
-        })
     } else console.log("id Check")
 });
 
@@ -3168,26 +2607,6 @@ app.post('/user_checkout_submit', (req,res) => {
 
     ////////////////// get default payment method /////////////////////
 
-    
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-    });
-
     getDefaultShippingInfo();
 
     getDefaultBillingInfo()
@@ -3199,76 +2618,78 @@ app.post('/user_checkout_submit', (req,res) => {
 
     function getDefaultBillingInfo() {
         return new Promise((resolve, reject) => { 
-            con.query('SELECT clv_id, clv_tk, cardholder FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();        
-                } else {
-                    console.log(result);            
-                    default_payment_method = result[0].clv_tk;
-                    clv_id = result[0].clv_id;
-                    cardholder = result[0].cardholder;
-                    resolve();
-                }
-            }); 
-        }) 
+            db.getConnection((con)=>{
+                con.query('SELECT clv_id, clv_tk, cardholder FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
+                    if(err){                        
+                        res.send(err);
+                        // con.end();        
+                    } else {
+                        console.log(result);            
+                        default_payment_method = result[0].clv_tk;
+                        clv_id = result[0].clv_id;
+                        cardholder = result[0].cardholder;
+                        resolve();
+                    }
+                }); 
+                con.release();
+            });
+        });
     }
 
 
     function getDefaultShippingInfo() {
-        con.query('SELECT recipient, address1, address2, city, state, zip, phone, email, shipping_option FROM shipping_info WHERE id= ? and default_address="default" and inuse="y"',[u_id], (err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();        
-            } else {                           
-                default_shipping_info = result[0];
-                console.log("default_shipping_info");
-                console.log(default_shipping_info); 
-            }
-        }); 
-
-
-
+        db.getConnection((con)=>{
+            con.query('SELECT recipient, address1, address2, city, state, zip, phone, email, shipping_option FROM shipping_info WHERE id= ? and default_address="default" and inuse="y"',[u_id], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {                           
+                    default_shipping_info = result[0];
+                    console.log("default_shipping_info");
+                    console.log(default_shipping_info); 
+                }
+            }); 
+            con.release();
+        });
     }
 
-    function setOrders(response) {
+    function setOrders(response, confirm_info) {
         console.log('order_number');
-        console.log(order_number);       
-        con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
-        [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date], (err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();        
-            } else {
-                console.log('set orders') 
-                console.log(result);
-                
-                // updateOrderedCart(order_number, date, cart_numbers, u_id)
-            }
-        }); 
+        console.log(order_number);   
+        db.getConnection((con)=>{    
+            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
+            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log('set orders') 
+                    console.log(result);                    
+                    updateOrderedCart(order_number, date, cart_numbers, u_id, con, confirm_info)
+                }
+            }); 
+            con.release();
+        });
     }
 
-    function updateOrderedCart(order_num, oddate, cart_num, user_id) {
-        con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ? WHERE cartnum in (?) and u_id = ?'
-        ,[order_num, oddate, cart_num, user_id], (err, result) => {
-            if(err){                        
-                res.send(err);
-                con.end();        
-            } else {
-                console.log('update complete Order Cart') 
-                console.log(result);
-                // res.send({status : "complete"})
-                 
-            }
-        }); 
+    function updateOrderedCart(order_num, oddate, cart_num, user_id, con, confirm_info) {
+        // db.getConnection((con)=>{
+            con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ? WHERE cartnum in (?) and u_id = ?'
+            ,[order_num, oddate, cart_num, user_id], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log('update complete Order Cart') 
+                    console.log(result);
+                    res.send(confirm_info);
+                    // res.send({status : "complete"})                    
+                }
+            }); 
+            // con.release();
+        // });
     }
-
-
-
-
     ////////////////////////////////////// make payment ////////////////////////
-
-
     function makePayment() {
         console.log("user_checkout_submit user_checkout_submituser_checkout_submituser_checkout_submit")
 
@@ -3345,11 +2766,11 @@ app.post('/user_checkout_submit', (req,res) => {
                             tax : response.tax_amount,
                             grandtotal : response.amount
                             };
-                            console.log(confirm_info)
-                            setOrders(response);    
-                            updateOrderedCart(order_number, date, cart_numbers, u_id)
+                            console.log(confirm_info);
+                            setOrders(response, confirm_info);    
+                            // updateOrderedCart(order_number, date, cart_numbers, u_id)
                             
-                            res.send(confirm_info)     
+                            // res.send(confirm_info);     
                                       
                         }                        
                     })
@@ -3365,25 +2786,6 @@ app.post('/user_checkout_submit', (req,res) => {
 
 app.post('/guest_order_checkout', (req,res) => {
     console.log("/charge /charge /charge /charge /charge   ");
-
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established');
-});
 
     const uuid = uuid4.v4(); 
     const order_items = JSON.parse(req.body.order_items);
@@ -3414,23 +2816,70 @@ app.post('/guest_order_checkout', (req,res) => {
           authorization: `Bearer ${process.env.ACCESS_TOKEN}`
         },
         body: JSON.stringify({
-          items: items,
-          shipping: {
-            address: {
-              city: req.body.shipping_address_city,
-              country: 'US',
-              line1: req.body.shipping_address_street_line1,
-              line2: req.body.shipping_address_street_line2,
-              postal_code: req.body.shipping_address_zip,
-              state: req.body.shipping_address_state
+            items: items,
+            // shipping: {
+            //         address: {
+            //           city: req.body.shipping_address_city,
+            //           country: 'US',
+            //           line1: req.body.shipping_address_street_line1,
+            //           line2: req.body.shipping_address_street_line2,
+            //           postal_code: req.body.shipping_address_zip,
+            //           state: req.body.shipping_address_state
+            //         },
+            //         name: recipient,
+            //         phone: req.body.order_contact_phone
+            //     },
+            currency: 'usd',
+            email: req.body.order_contact_email
+          })
+        // };
+        /*
+        body: JSON.stringify({
+            items: [{          
+                amount:1800,
+                  currency:"usd",
+                  description:"Ginger Bottle 16oz",
+                  quantity:1,
+                  type:"sku",
+                  tax_rates: [{tax_rate_uuid: "Q0NVFCYTZ4KYE", name: "6%"}]             
+              }],
+            shipping: {
+              address: {
+                city: 'LAS VEGAS',
+                line1: '6594 HULME END AVE',
+                postal_code: '89139',
+                state: 'Nevada',
+                country:"US"
+              },
+              name: 'Jongho Kim',
+              phone: '4702636495'
             },
-            name: recipient,
-            phone: req.body.order_contact_phone
-          },
-          email: req.body.order_contact_email,
-          currency: 'usd'
-        })
+            currency: 'usd',
+            email: 'rangdad@gmail.com',
+            // customer: 'W29TP8XFK9BH6'
+          })
+          */
+        
+        // body: JSON.stringify({
+        //   items: items,
+        //   shipping: {
+        //     address: {
+        //       city: req.body.shipping_address_city,
+        //       country: 'US',
+        //       line1: req.body.shipping_address_street_line1,
+        //       line2: req.body.shipping_address_street_line2,
+        //       postal_code: req.body.shipping_address_zip,
+        //       state: req.body.shipping_address_state
+        //     },
+        //     name: recipient,
+        //     phone: req.body.order_contact_phone
+        //   },
+        //   email: req.body.order_contact_email,
+        //   currency: 'usd'
+        // })
+        
       };
+      console.log(options);
       
       fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
         .then(response => response.json())
@@ -3446,51 +2895,51 @@ app.post('/guest_order_checkout', (req,res) => {
                     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
                     },
                     body: JSON.stringify({ecomind: 'ecom', source: token_id})
+                   
                 };
                 
                 fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result.id}/pay`, options)
-                    .then(response => response.json())
-                    .then(response => {
+                .then(response => response.json())
+                .then(response => {
 
-                        console.log("order paid")
-                        console.log(response)
-                
-                        
+                    console.log("order paid")
+                    console.log(response)
 
-                        //////////////////// store order info into DB
-                        const u_id = 'GUEST';
-                        
-                        let default_payment_method = '';
-                        let clv_id = '';
-                        let default_shipping_info = {};
-                        
-                        const date = getDate();
-                        const cart_num = date.replace(/\s|:|\-/g,"") + "CTGUEST";
-                        const order_num = date.replace(/\s|:|\-/g,"") + "ODGUEST";
-                        const order_items = response.items;
+                    //////////////////// store order info into DB
+                    const u_id = 'GUEST';
+                    
+                    let default_payment_method = '';
+                    let clv_id = '';
+                    let default_shipping_info = {};
+                    
+                    const date = getDate();
+                    const cart_num = date.replace(/\s|:|\-/g,"") + "CTGUEST";
+                    const order_num = date.replace(/\s|:|\-/g,"") + "ODGUEST";
+                    const order_items = response.items;
 
-                        setOrders(order_num, u_id, response, date);
+                    setOrders(order_num, u_id, response, date);
 
-                        const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`,`order_number`,`oddate`) values ?;"
-                        let insert_cart_value = [];
+                    const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`,`order_number`,`oddate`) values ?;"
+                    let insert_cart_value = [];
 
-                        let insert_cart_value_element = [];
-                       
-                        for(let i in order_items) {
-                            insert_cart_value_element.push(cart_num);
-                            insert_cart_value_element.push(u_id);
-                            insert_cart_value_element.push(order_items[i].description.substring(0, order_items[i].description.indexOf(',')));
-                            insert_cart_value_element.push(order_items[i].quantity);
-                            insert_cart_value_element.push('y');
-                            insert_cart_value_element.push(date);
-                            insert_cart_value_element.push(date);
-                            insert_cart_value_element.push(order_num);
-                            insert_cart_value_element.push(date);
+                    let insert_cart_value_element = [];
+                    
+                    for(let i in order_items) {
+                        insert_cart_value_element.push(cart_num);
+                        insert_cart_value_element.push(u_id);
+                        insert_cart_value_element.push(order_items[i].description.substring(0, order_items[i].description.indexOf(',')));
+                        insert_cart_value_element.push(order_items[i].quantity);
+                        insert_cart_value_element.push('y');
+                        insert_cart_value_element.push(date);
+                        insert_cart_value_element.push(date);
+                        insert_cart_value_element.push(order_num);
+                        insert_cart_value_element.push(date);
 
-                            insert_cart_value.push(insert_cart_value_element);
-                            insert_cart_value_element = [];
-                        }
-                        console.log(insert_cart_value)  
+                        insert_cart_value.push(insert_cart_value_element);
+                        insert_cart_value_element = [];
+                    }
+                    console.log(insert_cart_value);
+                    db.getConnection((con)=>{
                         con.query(insert_cart_query, [insert_cart_value], (err, result) => {
                             if(err) {
                                 console.log(err);
@@ -3499,78 +2948,59 @@ app.post('/guest_order_checkout', (req,res) => {
                                 console.log(result);
                             }
                         });
+                        con.release();
+                    });
 
-                        ////////////////////////////////////
-                        
-                        let paid_items_number = response.items.map(element => {
-                            console.log(element.description)                            
-                            return element.description.substring(0, element.description.indexOf(','));
-                        })
-
-                        const confirm_info = {
-                            status : "complete",
-                            paid_items_number : paid_items_number,
-                            name : recipient,
-                            order_number : order_num,
-                            email : req.body.order_contact_email,
-                            recipient : recipient,
-                            phone : req.body.order_contact_phone,
-                            type : response.source.brand,
-                            ending4 : response.source.last4,
-                            billing_address : "default_shipping_info.address1",
-                            cardholder : cardholder,
-                            subtotal : response.amount - response.tax_amount, 
-                            tax : response.tax_amount,
-                            grandtotal : response.amount
-                        };
-
-                        console.log(confirm_info)
-                        
-                        res.send(confirm_info);
+                    ////////////////////////////////////
+                    
+                    let paid_items_number = response.items.map(element => {
+                        console.log(element.description)                            
+                        return element.description.substring(0, element.description.indexOf(','));
                     })
-                    .catch(err => console.error(err));
 
-            }
-        
-        })
-        .catch(err => console.error(err));
+                    const confirm_info = {
+                        status : "complete",
+                        paid_items_number : paid_items_number,
+                        name : recipient,
+                        order_number : order_num,
+                        email : req.body.order_contact_email,
+                        recipient : recipient,
+                        phone : req.body.order_contact_phone,
+                        type : response.source.brand,
+                        ending4 : response.source.last4,
+                        billing_address : "default_shipping_info.address1",
+                        cardholder : cardholder,
+                        subtotal : response.amount - response.tax_amount, 
+                        tax : response.tax_amount,
+                        grandtotal : response.amount
+                    };
+
+                    console.log(confirm_info)
+                    
+                    res.send(confirm_info);
+                }).catch(err => console.error(err));
+            }        
+        }).catch(err => console.error(err));
 
         function setOrders(order_number, u_id, response, date) {
             console.log('order_number');
             console.log(order_number);       
-            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
-            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date], (err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();        
-                } else {
-                    console.log('set orders') 
-                    console.log(result);
-                    
-                }
-            }); 
+            db.getConnection((con)=>{
+                con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
+                [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date], (err, result) => {
+                    if(err){                        
+                        res.send(err);
+                        // con.end();        
+                    } else {
+                        console.log('set orders') 
+                        console.log(result);                        
+                    }
+                }); 
+                con.release();
+            });
         }
 });
 
-app.get('/order-confirmation',(req,res) => {
-    
-        res.render('test.ejs', 
-        {post : "name",
-        name : "name",
-        order_number : "order_number",
-        email : "default_shipping_info.email",
-        recipient : "default_shipping_info.recipient",
-        phone : "default_shipping_info.phone",
-        type : "response.source.brand",
-        ending4 : "response.source.last4",
-        billing_address : "default_shipping_info.address1",
-        cardholder : "cardholder",
-        subtotal : "response.amount - response.tax_amount", 
-        tax : "response.tax_amount",
-        grandtotal : "response.amount"
-        
-        })
-})
 
 function setOrders(order_number, u_id, response, date) {
     console.log('order_number');
@@ -3618,31 +3048,60 @@ function getDate() {
     return date;
 }
 
-app.get('/test2',(req,res) => {
-    // app.post('/shopview',(req,res) => {
-        res.render('test.ejs', 
-        {post : "name",
-        name : "name",
-        order_number : "order_number",
-        email : "default_shipping_info.email",
-        recipient : "default_shipping_info.recipient",
-        phone : "default_shipping_info.phone",
-        type : "response.source.brand",
-        ending4 : "response.source.last4",
-        billing_address : "default_shipping_info.address1",
-        cardholder : "cardholder",
-        subtotal : "response.amount - response.tax_amount", 
-        tax : "response.tax_amount",
-        grandtotal : "response.amount"
-        
-        })
+
+app.get('/test',(req,res) => {
+    console.log("/test_log/test_log/test_log/test_log")
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({
+            items: [
+              {
+                tax_rates: [{tax_rate_uuid: 'Q0NVFCYTZ4KYE', name: '6%'}],
+                amount: 1800,
+                currency: 'usd',
+                description: 'Ginger Bottle 16oz',
+                quantity: 1,
+                type: 'sku'
+              }
+            ],
+            currency: 'usd',
+            email: 'rangdad@gmail.com'
+          })
+        };
+       
+      console.log(options)
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(result => {
+            console.log(result)
+        });
 })
 
-app.post('/test_log',(req,res) => {
-    // app.post('/shopview',(req,res) => {
-       console.log(req.body)
-       res.send(req.body)
-})
+
+// app.get('/order-confirmation',(req,res) => {
+    
+//         res.render('test.ejs', 
+//         {post : "name",
+//         name : "name",
+//         order_number : "order_number",
+//         email : "default_shipping_info.email",
+//         recipient : "default_shipping_info.recipient",
+//         phone : "default_shipping_info.phone",
+//         type : "response.source.brand",
+//         ending4 : "response.source.last4",
+//         billing_address : "default_shipping_info.address1",
+//         cardholder : "cardholder",
+//         subtotal : "response.amount - response.tax_amount", 
+//         tax : "response.tax_amount",
+//         grandtotal : "response.amount"
+        
+//         })
+// })
         
 
 /*

@@ -1,6 +1,7 @@
 import PlaceOrder from "./place_order.js";
 import Main from "../index.js";
 import ShopDetail from "./shop_detail.js"
+import * as ShopPageForm from "./shop_page_forms.js";
 
 
 export default class {
@@ -79,43 +80,41 @@ export default class {
     }
 
     getHtml() {  
-        
         return `
-        <div class="online_container">
-            <div class="online_title">
-                Cafe FORE Online Shop
+        <div id="online_container" class="online_container">
+            <div id="online_title" class="online_title">
+                <a href="/shop" id="online_title_label" class="online_title_label" data-link-T>Cafe FORE Online Shop</a>
                 <form class="example" action="#">
                     <input type="text" placeholder="Search.." name="search">
                     <button type="submit"><i class="fa fa-search"></i></button>
                 </form>
-                <div class="shop_category">
-                    <div class="shop_cat_wellness">
-                        <button class="shop_wellness_btn">Wellness</button>
+                <div id="shop_category_container" class="shop_category_container">
+                    <div id="shop_cat_wellness" class="shop_cat_wellness shop_category">
+                        <button id="shop_wellness_btn" class="shop_wellness_btn cate_btn">Wellness</button>
                     </div>
-                    <div class="shop_cat_dessert">
-                        <button class="shop_dessert_btn">Dessert</button>
+                    <div id="shop_cat_dessert" class="shop_cat_dessert shop_category">
+                        <button id="shop_dessert_btn" class="shop_dessert_btn cate_btn">Dessert</button>
                     </div>
-                    <div class="shop_cat_kids">
-                        <button class="shop_kids_btn">Kids</button>
+                    <div id="shop_cat_kids" class="shop_cat_kids shop_category">
+                        <button id="shop_kids_btn" class="shop_kids_btn cate_btn">Kids</button>
                     </div>
-                    <div class="shop_cat_test">
-                        <button class="shop_test_btn">Test</button>
+                    <div id="shop_cat_gift" class="shop_cat_gift shop_category">
+                        <button id="shop_gift_btn" class="shop_gift_btn cate_btn">Gift</button>
                     </div>
                 </div>
             </div>
-    
+
             <div id="online_main" class="online_main">
+                <div id="online_main_label" class="online_main_label">
                 MD's Choice items
-                
-                <div class="online_main_items">
+                </div>
+                <div id="online_main_items" class="online_main_items">
                 </div>
             </div>
-
-            <div id="test_container" class="test_container">test test
-            </div>
-
         </div>
-        `        
+        
+        `;
+        
     }
 
     setItemContainer(prodnum, image_src, item_name, item_price) {
@@ -124,17 +123,15 @@ export default class {
         ItemContainer.setAttribute('class', `online_main_item_container`);
         // ItemContainer.setAttribute('class', `online_main_item_contatiner c${prodnum}`);
         ItemContainer.setAttribute('itemid', `${prodnum}`);
-        document.querySelector('.online_main_items').appendChild(ItemContainer);
-    
-        // setItemNumber(prodnum);
+        document.querySelector('.online_main_items').appendChild(ItemContainer);    
+        
         this.setItemImageContainer(prodnum, image_src, item_name, item_price);
                          
     }
     
     setItemImageContainer(prodnum, image_src, item_name, item_price) {
         const ItemImageContainer = document.createElement('div');
-        ItemImageContainer.setAttribute('id', `online_main_item_pic_container`);
-        // ItemImageContainer.setAttribute('class', `online_main_item_pic_container c${prodnum}`);                    
+        ItemImageContainer.setAttribute('id', `online_main_item_pic_container`);                          
         ItemImageContainer.setAttribute('class', `online_main_item_pic_container`);                    
         document.querySelector(`[itemid="${prodnum}"]`).appendChild(ItemImageContainer);
         
@@ -145,6 +142,7 @@ export default class {
     
     setItemLink(prodnum, image_src, item_name, item_price) {
         const ItemLink = document.createElement('a');
+        ItemLink.setAttribute('id', `online_main_item_link`);
         ItemLink.setAttribute('class', `online_main_item_link`);  
         ItemLink.setAttribute('link_data_itemid', `${prodnum}`);
         // ItemLink.setAttribute('href', '/shop/view/item/' + prodnum);
@@ -154,36 +152,41 @@ export default class {
         this.setItemImage(prodnum, image_src);
         this.setItemPrice(prodnum, item_price);
         this.setItemName(prodnum, item_name);
-        
+        // this.setAddItemButton(prodnum);
          
     }
     
     setItemImage(prodnum, image_src) {
         const ItemImage = document.createElement('img');
+        ItemImage.setAttribute('id', `online_main_item_pic`);
         ItemImage.setAttribute('class', `online_main_item_pic`);
         ItemImage.setAttribute('src', image_src);
         document.querySelector(`[link_data_itemid="${prodnum}"]`).appendChild(ItemImage);
     }
     
-    setItemNumber(prodnum) {
-        const ItemNumber = document.createElement('div');
-        ItemNumber.setAttribute('class', `online_main_item_number`);
-        document.querySelector(`.online_main_item_contatiner.c${prodnum}`).appendChild(ItemNumber);
-        document.querySelector(`.online_main_item_number.c${prodnum}`).innerText = prodnum;
-    }
     
     setItemName(prodnum, item_name) {
         const ItemName = document.createElement('div');
-        ItemName.setAttribute('class', `online_main_item_name`);
+        ItemName.setAttribute('id', `online_main_item_name`);
+        ItemName.setAttribute('class', `online_main_item_name online_main_item_link`);
         document.querySelector(`[link_data_itemid="${prodnum}"]`).appendChild(ItemName);
         ItemName.innerText = item_name;
     }
     
     setItemPrice(prodnum, item_price) {
         const ItemPrice = document.createElement('div');
-        ItemPrice.setAttribute('class', `online_main_item_price`);
+        ItemPrice.setAttribute('id', `online_main_item_price`);
+        ItemPrice.setAttribute('class', `online_main_item_price online_main_item_link`);
         document.querySelector(`[link_data_itemid="${prodnum}"]`).appendChild(ItemPrice);
         ItemPrice.textContent = '$'+ parseFloat(item_price).toFixed(2);
+    }
+
+    setAddItemButton(prodnum) {
+        const add_item_btn = document.createElement('div');
+        add_item_btn.setAttribute('id', `add_item_btn`);
+        add_item_btn.setAttribute('class', `add_item_btn shop_add_btn`);
+        document.querySelector(`[itemid="${prodnum}"]`).appendChild(add_item_btn);
+        add_item_btn.innerText = "ADD TO CART"
     }
     
 }
@@ -192,17 +195,14 @@ export default class {
 document.addEventListener('click', function(e) {
     console.log( " shop page double up check shop page double up check shop page double up check ")
 
-    if (e.target && (e.target.className =='online_main_item_name' || e.target.className == 'online_main_item_pic' || e.target.className == 'online_main_item_price')) {
-                
+    if (e.target && (e.target.id =='online_main_item_name' || e.target.id == 'online_main_item_pic' || e.target.id == 'online_main_item_price')) {
+        console.log('shop_detail_page_flag');        
+        console.log(shop_detail_page_flag);
         let item_num = e.target.parentElement.getAttribute('link_data_itemid');
         console.log('itemid');
         console.log(item_num);
 
         history.pushState(null, null, `/shop/view/item/${item_num}`);
-
-
-        
-
        
         ///////////////////////////////////////////////////////////////
 
@@ -243,7 +243,6 @@ document.addEventListener('click', function(e) {
             
         });
     }
-
     
     if (e.target && e.target.className == 'shop_wellness_btn') {
         console.log("shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn ");

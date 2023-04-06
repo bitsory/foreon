@@ -1,3 +1,5 @@
+import * as ItemCounter from "./item_counter.js";
+
 export default class {
     
     online_main = document.getElementById('online_main');
@@ -166,7 +168,7 @@ export default class {
                         amount.value = parseFloat(g_total).toFixed(2);
                         this.setReadyCart(check_out_cart);
 
-                    } else {
+                    } else {  ///////////////////  user 
                         let selected_number = check_out_cart.map(element => {
                             return element.prodnum;
                         })
@@ -257,19 +259,21 @@ export default class {
                     const amount = document.querySelector('.payment_amount');
                     amount.value = parseFloat(g_total).toFixed(2);
                     this.setReadyCart(check_out_cart);
+                    ItemCounter.item_counter('GUEST');
 
                 } else {
                     ///// item delete in user cart 
-                    let selected_number = check_out_cart.map(element => {
+                    
+                    let selected_number_list = check_out_cart.map(element => {
                         return element.prodnum;
                     })
-                    console.log("selected_number");
-                    console.log(selected_number);
+                    console.log("selected_number_list");
+                    console.log(selected_number_list);
 
                     let data = {
                         u_id : user_id,
                         item_num : item_number,
-                        selected_num : selected_number
+                        selected_num : selected_number_list
 
                     };
         
@@ -285,12 +289,16 @@ export default class {
                     .then((res) => res.json())
                     .then(result => {                         
                         console.log(result)
+                        selected_number_list = [];
                         result.forEach(element => {
                             new_grandtotal = new_grandtotal + element.price_sell * element.quantity;
+                            selected_number_list.push(element.prodnum);                            
                         })
+                        sessionStorage.setItem("usercheckoutcart", JSON.stringify(selected_number_list));
                         document.querySelector(`.user_checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
                         this.rerenderTotal(new_grandtotal);  
-                        this.setReadyCart(result);               
+                        this.setReadyCart(result);
+                        ItemCounter.item_counter(user_id);               
                     })
                 }
                 

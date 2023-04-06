@@ -1,22 +1,32 @@
 import OrderConfirm from "./oder_confirm.js";
+import * as ItemCounter from "./item_counter.js";
 
 export default class {
 
 
     getOrder() {
         return `
-        <div class="online_place_order_container">
-            <h2>Your Order</h2>
-            
-            <div id="online_place_order_item_container" class="online_place_order_item_container">
-            </div>
-        </div>
-        <div id="online_place_order_item_proceed" class="online_place_order_item_proceed">
-            <h2>Would you like proceed your order?</h2>            
-            <div class='grand_total'></div>
+        <div id="online_place_order_page" class="online_place_order_page">
+            <div id="online_place_order_container" class="online_place_order_container">
+                
+                <h2>Your Shopping Cart</h2>
 
-            <button id='proceed_order_btn' class='proceed_order_btn'>GO FOR IT</button>
-            <button id='cancel_proceed_order_btn' class='cancel_proceed_order_btn'>No Thanks</button>
+                <div id="online_place_order_item_container" class="online_place_order_item_container">
+                </div>
+            </div>
+
+            <div id="online_place_order_item_proceed" class="online_place_order_item_proceed">
+                     
+                <div id="grand_total_label" class="grand_total_label"></div>
+                <div class='grand_total'></div>
+                <div id="grand_total_est">
+                ESTIMATED ORDER TOTAL</br>
+                Shipping and taxes will be applied at checkout
+                </div>
+
+                <button id='proceed_order_btn' class='proceed_order_btn'>Take me to Checkout</button>
+               
+            </div>
         </div>
         
         `
@@ -36,7 +46,7 @@ export default class {
         
         console.log(`user_id : ${this.user_id}`);
         console.log(this.order_list);
-        console.log(this.order_cart);
+        // console.log(this.order_cart);
         
 
         this.online_main.addEventListener('click', (e) =>{
@@ -106,7 +116,7 @@ export default class {
                         console.log("g_total")
                         console.log(g_total)
                     }
-                } else {
+                } else {  ///  user 
 
                     let data = {
                         u_id : user_id,                       
@@ -215,10 +225,12 @@ export default class {
                         orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
                         })
                 } else {  ///////////////////// user check out proceed
-                    let data = {
-                        u_id : user_id, 
+                    let u_cart = [{u_id : user_id}];
+                    
+                    let data = [{
+                        u_cart 
                         // checked_items_number_list : selected_items_number_list                      
-                    };
+                    }];
 
 
                     const options = {
@@ -582,6 +594,7 @@ export default class {
                         }
                         getGrandTotal(total_amount);
                     }
+                    ItemCounter.item_counter('GUEST');
 
                 } else {
                     ///// item delete in user cart 
@@ -625,6 +638,7 @@ export default class {
                         result.forEach(element => {tmp_total = tmp_total + element.quantity * element.price_sell;}) : false;
                         
                         document.querySelector('.online_place_order_item_grandtotal').innerText = '$$' + tmp_total.toFixed(2);
+                        ItemCounter.item_counter(user_id);
                     
                         console.log(result)
                     
@@ -678,10 +692,10 @@ export default class {
         console.log(order_list);
         console.log(order_cart);
         user_id = this.user_id;
-        const orderItemContainer_test = document.createElement('div');
-        orderItemContainer_test.setAttribute('class', `orderItemContainer_test`);
-        document.querySelector('.online_place_order_item_container').appendChild(orderItemContainer_test);
-        document.querySelector(`.orderItemContainer_test`).innerText = 'test';
+        // const orderItemContainer_test = document.createElement('div');
+        // orderItemContainer_test.setAttribute('class', `orderItemContainer_test`);
+        // document.querySelector('.online_place_order_item_container').appendChild(orderItemContainer_test);
+        // document.querySelector(`.orderItemContainer_test`).innerText = 'test';
         let total_amount = 0;
         
         if(order_list.length) { 
@@ -712,6 +726,14 @@ export default class {
             console.log(`${tmp_order_cart}`)
         
         } else {
+            
+            // const empty_cart_modal = document.createElement('div');
+            // empty_cart_modal.setAttribute('id', `empty_cart_modal`);
+            // empty_cart_modal.setAttribute('class', `empty_cart_modal`);
+            
+            // // document.querySelector('.user_info').style.display = "block";
+            // document.querySelector('.user_info').appendChild(empty_cart_modal);
+            // empty_cart_modal.innerText = "cart is empty";
 
             document.querySelector('.online_main').innerHTML = 
             `Your Cart is empty<br><br>
@@ -899,7 +921,7 @@ function getGrandTotal(amount) {
     // // const item_orderGrandTotal = 1000;
     // // const item_orderGrandTotal = parseFloat(document.querySelector(`.online_place_order_item_subtotal.o${}`).innerTextslice(1));
     // document.querySelector(`.grand_total`).appendChild(orderGrandTotal);
-    document.querySelector(`.online_place_order_item_grandtotal`).innerText = 'Total $' + amount.toFixed(2);
+    document.querySelector(`.online_place_order_item_grandtotal`).innerText = 'Subtotal $' + amount.toFixed(2);
     
 
 

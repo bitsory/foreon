@@ -1,4 +1,5 @@
 function myMap() {
+    console.log("gmap.js google map my map")
 
     var cafefore = {lat: 33.984700531945414, lng: -84.42266277698947};
     

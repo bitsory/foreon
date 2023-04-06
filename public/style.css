@@ -1,8 +1,40 @@
+:root {
+    --maincolor : rgb(98, 31, 31);
+    --subcolor : hsl(32deg 87% 97%);
+  }
+
 body {
     margin: 0px;
     /* box-sizing:border-box; */
     overflow-x:hidden; 
     
+}
+
+.btn, .cate_btn, .add_submit_btn {
+    
+    background-color: rgba(0,0,0,0);
+}
+
+.btn:hover, .cate_btn:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.btn:active {
+    border: 1px solid #000;
+}
+
+.cate_btn, .online_title_label {
+    color: var(--subcolor);
+    font-size: medium;
+}
+
+.cate_btn:active, .online_title_label:active {
+    border: 1px solid var(--subcolor)
+}
+
+input[type=checkbox] {
+    transform : scale(1.5);    
 }
 
 button {
@@ -19,6 +51,7 @@ a {
 
 a:hover {
     cursor: pointer;
+    /* transform: scale(1.1); */
   
 }
 
@@ -35,18 +68,17 @@ nav {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    background-color:hsl(32deg 87% 97%);
+    background-color : var(--subcolor);
+    padding-right: 3rem;
     
 }
-
-
 
 .navbar_w4 {
     
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color:hsl(32deg 87% 97%);
+    /* background-color : var(--subcolor); */
     /* background-color:aquamarine; */
     padding: 8px 12px;
     /* height: 100%; */
@@ -72,19 +104,28 @@ nav {
 }
 
 .logo_btn {
-    width: 300px;
+    width: 250px;
     height: 4rem;
     background: url(images/logo_600_150.png) left/cover no-repeat;
     background-size: contain;
 }
-
-.user_info_btn :hover{
+/* 
+#user_info_btn :hover{
     cursor: pointer;
     transform: scale(1.1);
+    color: none;
+}  */
+
+#user_info {
+    display: flex;
+    align-items: center;
 }
 
-.user_info_btn {
-    transform: scale(1.3);
+.user_info:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+    background-color: none;
+    
 }
 
 .change_password_container {
@@ -93,6 +134,13 @@ nav {
 
 .change_password_container.pw_active {
     display: block;
+
+}
+
+#login_btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 
 }
 
@@ -131,13 +179,13 @@ nav {
   
 .modal_body {
     position: absolute;
-    top: 30%;
+    top: 35%;
     left: 50%;
   
     width: 360px;
     /* height: 600px; */
   
-    padding: 40px;
+    /* padding: 40px; */
   
     text-align: center;
     z-index: 2;
@@ -154,7 +202,7 @@ nav {
     position: absolute;
     right: 0;
     top: 36px;
-    background: rgb(98, 31, 31);
+    background: var(--maincolor);
     border-radius: 2px;
     opacity: 1;
     z-index: 100;
@@ -164,13 +212,17 @@ nav {
     font-size: 12px;
 }
 
-.user_profile_container {
+/* //////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+/* ///////////////////////////////////////////// login modal window ///////////////////////////////////////////// */
+/* ////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+#user_profile_container {
     display: none;
-    width: 240px;
+    width: 350px;
     position: absolute;
-    right: 0;
-    top: 36px;
-    background: rgb(98, 31, 31);
+    right: 20px;
+    top: 70px;
+    background: var(--subcolor);
     border-radius: 2px;
     opacity: 1;
     z-index: 100;
@@ -179,12 +231,174 @@ nav {
     border: none;
     font-size: 12px;
 }
+
+#user_profile {
+    font-size: large;
+    font-weight: 600;
+}
+
+#login_title_box {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 1.5rem;
+}
+
+#user_profile_name {
+    margin-bottom: 1rem;
+}
+
+#login_input_box {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+#find_and_remember_container {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1rem;
+}
+
+#remember_me_box {
+    display: flex;
+}
+
+.login_input_box_el {
+    border: 0px;
+    width: 90%;
+    height: 32px;
+    font-size: 15px;
+    border: 0;
+    /* border-radius: 5px; */
+    outline: none;
+    padding-left: 10px;
+    border-bottom: 0.5px solid var(--maincolor);
+}
+
+#sign_in_form_button_container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+.sign_in_btn_group {
+    width: 100%;
+    height: 35px;
+    background-color: var(--subcolor);
+    margin: 0.1rem;
+    
+}
+
+.sign_in_btn_group:hover, .shop_add_btn:hover, .shop_detail_btn:hover, .check_go_cart_btn:hover {
+    background-color: var(--maincolor);
+    color: white;
+    cursor: pointer;
+}
+
+
+
+
+#google_login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--subcolor);
+    
+}
+
+#user_account_box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.user_account_box_el {
+    width: 100%;
+    height: 2.5rem;
+    /* color: var(--maincolor); */
+    margin-bottom: 0.4rem;
+    
+}
+
+.user_account_box_el:hover {
+    background-color: var(--maincolor);
+    color: white;
+}
+
+.account_btn {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    font-size: medium;
+    font-weight: 500;
+}
+
+.account_btn:hover {
+    background-color: var(--maincolor);
+    color: white;
+}
+
+#create_account_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#create_account_box {
+    border: 0.5px solid lightgrey;
+    width: 25rem;
+    /* height: 60vh; */
+    margin-top: 2rem;
+}
+
+#sign_up_form {
+    display: flex;
+    justify-content: center;
+}
+
+#sign_up_box {
+    text-align: left;
+    width: 100%;
+    margin-left: 4rem;
+}
+
+.sign_up_input_box {
+    
+    width: 80%;
+    height: 2rem;
+    font-size: 1rem;
+    border: 0.5px solid lightgrey;
+    border-radius: 0.3rem;
+    margin-bottom: 0.8rem;
+}
+
+#sign_up_submit_btn {
+    width: 80%;
+    height: 2.5rem;
+    background-color:rgb(98, 31, 31);
+    border-radius: 0.2rem;
+    font-size: large;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+#sign_up_form_label {
+    font-weight: 500;
+}
+
+/* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 
 
 
 .user_profile_greet, .user_profile_name, .user_profile_cart, .user_profile_log_out {
-    color: aliceblue;
+    color: black;
 }
 
 .q_btn_container {
@@ -346,7 +560,11 @@ nav {
 
 .navbar_nav_list li{
     padding: 8px 20px;
+    position: relative; display: inline-block; margin: 0.5rem; text-align: center; line-height: 30px; cursor: pointer;
 }
+
+.navbar_nav_list li::after {position: absolute; content:""; display: block; border-bottom: 3px solid #000; transition: width 250ms ease-out; left: auto; right: 0;  width: 0;}
+.navbar_nav_list li:hover::after {width: 100%; left: 0; right: auto;}
 
 /* .header_logo {
     width: 50%;
@@ -440,10 +658,28 @@ nav {
     margin-bottom: 3rem;
 
 }
-
+/* 
 .navbar_icons a {
     padding: 8px 20px;
     font-size: 1rem;
+} */
+
+
+.navbar_icons {
+    position: relative;
+}
+
+#item_count {
+    position: absolute;
+    left: 16px;
+    top: -22px;
+    color: var(--maincolor);
+    font-weight: 800;
+}
+
+#go_cart_box {
+    position: absolute;
+    top: -18px;
 }
 
 
@@ -653,8 +889,9 @@ nav {
     margin: 1rem;
 }
 
-.btn_submit:hover, .q_btn:hover {
+.btn_submit:hover, .q_btn:hover, #sign_up_submit_btn:hover, .check_out_btn:hover, #proceed_order_btn:hover {
     background-color: burlywood;
+    cursor: pointer;
 }
 
 #visit {
@@ -689,49 +926,242 @@ nav {
 }
 
 
-.shop_category {
+
+
+
+/* ///////////////////////////////////////////////              //////////////////////////////////////////////////////////////// */
+/* //////////////////////////////////////////////  online shop  ///////////////////////////////////////////*/
+/* //////////////////////////////////////////////              /////////////////////////////////////////////////////// */
+
+
+#online_title {
+    background-color: var(--maincolor);
+    color: var(--subcolor);
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    align-items: center;
+    height: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+
+
+
+#shop_category_container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.shop_category {
+    background-color: none;
+    /* margin-left: 1rem; */
+}
+
+#online_main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#online_main_label {
+    font-size: 1.5rem;
+    font-weight: 500;
 }
 
 .online_main_items {
-    display: flex;
-    justify-content: space-evenly;
+    /* display: flex;
+    justify-content: space-evenly; */
+    display: grid;
+	grid-template-columns: 18rem 18rem 18rem;
+    justify-items: center;
+    align-items: center;
+	/* grid-template-rows: 20rem 20rem; */
 }
 
-.online_main_item_contatiner {
-    display: block;
+#online_main_item_contatiner {
+    display: flex;
+    width: 16rem;
+    height: 16rem;
+    margin: 2rem 0 4rem 0;
+    flex-direction: column;
+    align-items: center;
 }
 
 .online_main_item_pic_container {
-    width: 8rem;
+    width: 14rem;
     height: auto;
 }
 
 .online_main_item_pic {
-    width: 8rem;
-    height: auto;
+    width: 12rem;
+    height: 12rem;
+    border: 0.5px solid lightgrey;
 }
 
 .online_main_item_pic_container :hover {
     cursor: pointer;
 }
 
-.online_place_order_item  {
-    width: 15rem;
+.online_main_item_link {
+    font-size: 1.1rem;    
+    font-weight: 500;
+}
+
+
+/* .online_main_item_link::after {position: absolute; content:""; display: block; border-bottom: 3px solid #000; transition: width 250ms ease-out; left: auto; right: 0;  width: 0;}
+.online_main_item_link:hover::after {width: 100%; left: 0; right: auto;} */
+
+
+.shop_add_btn {
+    width: 80%;
+    height: 3rem;
+    /* background-color:var(--subcolor); */
+    border-radius: 0.2rem;
+    border: 1px solid var(--maincolor);
+    font-size: medium;
+    font-weight: 500;
+    color: black;
+}
+
+
+
+/* /////////////////////////////////////////////// shop detail page ////////////////////////////////////////////////////////////////// */
+/* ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+
+#online_item_detail_container {
+    display: flex;
+    width: 70%;
+    justify-content: center;
+    align-items: center;
+}
+
+#online_item_detail_contents {
+    margin-left: 2.5rem;
+    text-align: left;
+}
+
+#online_item_detail_name {
+    font-size: 2rem;
+    font-weight: 500;    
+}
+
+#online_item_detail_price {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+#online_item_detail_description {
+    width: 30rem;    
+}
+
+#online_item_detail_name, #online_item_detail_shipment_info, #online_item_detail_description {
+    padding-left: 2.5rem;
+}
+
+#online_item_detail_pq_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#online_item_detail_button_container, #check_go_cart_btn_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+#order_quantity {
+    width: 4rem;
+    height: 2rem;
+    font-size: large;
+    font-weight: 500;
+    text-align: center;
+    border: 0.5px solid gray;
+}
+
+.online_item_detail_element {
+    margin: 2rem 1rem 2rem 1rem;
+}
+
+.shop_detail_btn, .check_go_cart_btn {
+    background-color: rgba(0,0,0,0);
+    border: 0.5px solid var(--maincolor);
+    width: 7rem;
+    height: 3rem;
+    font-size: medium;
+    margin: 0.5rem;
+}
+
+.check_out_btn, #proceed_order_btn {
+    background-color: var(--maincolor);
+    color: white;
+    border: 0.5px solid var(--maincolor);
+    width: 7rem;
+    height: 3rem;
+    font-size: medium;
+    margin: 0.5rem;
+}
+
+
+
+
+
+/* ///////////////////////////////////////////////////////// cart page /////////////////////////////////////////////////////////////////// */
+/* /////////////////////////////////////////////////////////// order page ////////////////////////////////////////////////////////////////// */
+
+#online_place_order_page {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+/* 
+#online_place_order_container {
+    margin: 0rem 10rem;
+} */
+
+
+#online_place_order_item_proceed {
+    padding-left: 10rem;
+    margin-top: 3rem;
+}
+
+#proceed_order_btn {
+    width: 11rem;
+}
+
+
+#online_place_order_item  {
+    width: 30rem;
     height: 10rem;
     margin-bottom: 4rem;
     display: flex;
+    padding: 1.5rem;
+    border: 0.5px solid lightgray;
 
 }
 
 .online_place_order_item_pic {
-    width: 6rem;
-    height: 6rem;
+    width: 8rem;
+    height: 8rem;
 }
 
 
-/* payment frame */
+
+
+
+
+
+
+
+
+
+
+/* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+/* /////////////////////////////////////////////////////////payment frame */
 
 .order_confirm {
     display: flex;
@@ -811,7 +1241,15 @@ nav {
     height: 44px;
   }
 
-  .input_recipient_first_name, .input_recipient_last_name,.input_card_name, .input_shipping_address_line1, .input_shipping_address_line2, .input_shipping_address, .input_shipping_option, .order_contact_phone, .order_contact_email  {
+  .input_recipient_first_name, 
+  .input_recipient_last_name,
+  .input_card_name, 
+  .input_shipping_address_line1, 
+  .input_shipping_address_line2, 
+  .input_shipping_address, 
+  .input_shipping_option, 
+  .order_contact_phone, 
+  .order_contact_email  {
     border: none;
     height: 100%;
     width: 100%;
@@ -886,6 +1324,11 @@ nav {
 
   .g_id_signin {
     width: 600px;
+  }
+
+  .navbar_icons:hover, .login_btn :hover {
+    cursor: pointer;
+    transform: scale(1.1);
   }
 
 
@@ -1129,17 +1572,27 @@ i.fa-solid.fa-angles-up {
     width: 60px;
   }
 
-.billing_info {
-    border: 0.5px solid gray;
-    margin: 1rem;
+
+/* /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+/* ////////////////////////////////////////////////// account infomation change ///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+#change_profile_form_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+#change_profile_form {
+    width: 30rem;
 }
 
 
-.shipping_info {
+.billing_info, .shipping_info {
     border: 0.5px solid gray;
     margin: 1rem;
 }
-
 
 ul.tabs{
 	margin: 0px;
@@ -1148,27 +1601,124 @@ ul.tabs{
 }
 
 ul.tabs li{
-  display: inline-block;
-	background: #898989;
+    display: inline-block;
+	background: var(--maincolor);
 	color: white;
 	padding: 10px 15px;
 	cursor: pointer;
 }
 
 ul.tabs li.current{
-	background: #e0e0e0;
+	background: var(--subcolor);
 	color: #222;
 }
 
 .tab-content{
-  display: none;
-	background: #e0e0e0;
+    display: none;
+	background: var(--subcolor);
 	padding: 12px;
 }
 
 .tab-content.current{
 	display: inherit;
 }
+
+.change_profile_general_info_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.general_name, .general_info_csz, .shipping_info_csz {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.input_general_info_name, .input_general_info, .input_general_info_csz, .input_change_profile_shipping_info, .input_change_profile_shipping_info_csz {
+    width: 18rem;
+    height: 1.8rem;
+    border: 0.5px solid lightgrey;
+    margin: 0.1rem;
+}
+
+.input_general_info_tag {
+    margin-top: 1rem;
+    text-align: left;
+    width: 60%;
+}
+
+.input_general_info_name {
+    width: 8.75rem;;
+}
+
+.input_general_info_csz, .input_change_profile_shipping_info_csz {
+    width: 5.75rem;
+}
+
+.change_profile_general_default_address {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.billing_info_box, .shipping_info_box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.billing_info, .shipping_info {
+    border: 0.5px solid gray;
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+}
+
+.change_profile_billing_info_form, .change_profile_shipping_info_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.change_profile_billing_info_row {
+    /* width: 80%; */
+    height: 1.8rem;
+    border: 0.5px solid lightgrey;
+    margin: 0.1rem;
+    margin-bottom: 0.8rem;
+}
+
+.input_change_profile_billing_info {
+    width: 98%; 
+    border: none;
+    height: 1.6rem;
+}
+
+.input_change_profile_shipping_info, .input_change_profile_shipping_info_csz {
+    margin-top: 1rem;
+}
+
+.select_state_box {
+    height: 2rem;
+}
+
+.default_shipping_address_checkbox_container, .default_payment_method_checkbox_container {
+    margin: 1rem;
+    display: flex;  
+    align-items: center;
+}
+
+.button-container {
+    margin-bottom: 1rem;
+}
+
+
+
+
+
 
 
 #purchase_history {
@@ -1211,6 +1761,25 @@ ul.tabs li.current{
 
 
 
+
+
+/* /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+/* //////////////////////////////////////////////////////////// media query ////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+
+@media screen and (max-width: 1200px) {
+
+    .navbar_nav_list li {
+        font-size: 1rem;
+        padding: 4px 10px;
+        
+    }
+
+
+}
+
+
 @media screen and (max-width: 1024px) {
 /* 
     .main_background {
@@ -1224,7 +1793,12 @@ ul.tabs li.current{
             height: 400px;
         }
     }
- */
+    */
+    .navbar_nav_list li {
+        font-size: 1rem;
+        padding: 2px 5px;
+        
+    }
 
     .footer {
         display: flex;
