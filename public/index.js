@@ -158,8 +158,9 @@ document.addEventListener('click', function(e){
         ItemCounter.item_counter('GUEST');
     }
 
-    if (e.target && e.target.className == 'go_cart') {        
-        go_cart();
+    if (e.target && e.target.id == 'view_cart') {        
+        view_cart();
+        console.log("view cart click page move")
     } 
     
 
@@ -200,7 +201,7 @@ const router = async () => {
     }
     else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
         console.log("라우터 고 카트 or go order")
-        go_cart();   
+        view_cart();   
     } else if (path_name.substring(0, 22) == '/shop/checkout/GUEST/i' || path_name.substring(0, 23) == '/shop/checkout/member/i') { // back to place order page
         console.log("라우터 개별 아이템 바이 나우")
         setCheckoutIndivItemPage();  
@@ -309,7 +310,7 @@ window.addEventListener("popstate", (e) => {
     }
     else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
         console.log("뒤로가기 카트")
-        go_cart('go_back');      
+        view_cart('go_back');      
     } else if (path_name.substring(0, 22) == '/shop/checkout/GUEST/i' || path_name.substring(0, 23) == '/shop/checkout/member/i') { // back to place order page
         console.log("뒤로가기 아이템 체크아웃")
         setCheckoutIndivItemPage('go_back');          
@@ -355,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => { // run first
 
 });
 
-function go_cart(param) {
+function view_cart(param) {
     console.log("index.js go cart index.js go cart index.js go cart index.js go cart");
     console.log(location.pathname);
     
@@ -449,6 +450,7 @@ function go_cart(param) {
                     document.querySelector(".online_main").innerHTML = place_order.getOrder();
         
                     place_order.getOrderDetail(order_list, order_cart);
+                    ItemCounter.item_counter('GUEST');
                     (param == 'go_back') ? false : history.pushState(null, null, `/shop/cart/GUEST`);
                     
                 })
@@ -482,6 +484,7 @@ function go_cart(param) {
                     document.querySelector(".online_main").innerHTML = place_order.getOrder();
         
                     place_order.getOrderDetail(order_list, order_list);
+                    ItemCounter.item_counter(user_id);
                     (param == 'go_back') ? false : history.pushState(null, null, `/shop/cart/member`);
                 })  
             } else if (order_cart.length == 0) {

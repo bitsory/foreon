@@ -26,6 +26,7 @@ export function item_counter(param) {
             console.log(result)
             let user_items_counter = result.length;
             document.getElementById('item_count').innerText = user_items_counter != 0 ?  user_items_counter : '0';
+           
         });
     }
 

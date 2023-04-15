@@ -499,7 +499,7 @@ function setAddItemHtml(item_name, order_quantity) {
     <h2>You added '${item_name}' for ${order_quantity} items.</h2>
     
     <div id="check_go_cart_btn_container" class="check_go_cart_btn_container">
-    <button id="go_cart" class="go_cart check_go_cart_btn">Go Cart</button><br>
+    <button id="go_to_cart" class="go_cart check_go_cart_btn">Go To Cart</button><br>
     <button id="check_out" class="check_out check_out_btn">Check Out</button><br>
        
     </div>
@@ -717,7 +717,7 @@ document.addEventListener('click', (e) => {
         }
     }
 
-    if(e.target && e.target.id == 'go_cart') {
+    if(e.target && e.target.id == 'go_to_cart') {
         
         var order_name = '';
         var order_cart = {};

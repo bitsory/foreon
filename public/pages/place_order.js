@@ -223,8 +223,10 @@ export default class {
                         const orderConfirm = new OrderConfirm(user_id, check_out_cart);
                         document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
                         orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
+                        ItemCounter.item_counter('GUEST');
                         })
                 } else {  ///////////////////// user check out proceed
+
                     let u_cart = [{u_id : user_id}];
                     
                     let data = [{
@@ -272,26 +274,28 @@ export default class {
                         const orderConfirm = new OrderConfirm(user_id, proceed_checkout_selected_order_cart);
                         document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
                         orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
+                        ItemCounter.item_counter(user_id);
+
                     })
                 }
             }
 
             ///////////////////////////////////////////////  plus button hit ///////////////////////////
-            if(e.target && (e.target.className) == 'online_place_order_item_plus_quantity_btn') {
+            if(e.target && (e.target.id) == 'online_place_order_item_plus_quantity_btn') {
                 console.log('online_place_order_item_plus_quantity_btn online_place_order_item_plus_quantity_btn' )
 
                 ////////////////////// rerendering item subtotal
-                let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
+                let item_number = e.target.parentElement.getAttribute('quantity-handler-itemid');
                 let item_quantity_id = document.querySelector(`[quantity-itemid="${item_number}"]`);
                 let item_quantity = parseInt(item_quantity_id.innerText);
         
                 item_quantity_id.innerText = item_quantity + 1;        
         
                 const item_new_quantity = parseInt(item_quantity_id.innerText);
-                const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).innerText.slice(1)); 
+                const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).textContent); 
         
                 const item_subtotal = parseFloat(item_new_quantity * item_price);
-                document.querySelector(`[subtotal-itemid="${item_number}"]`).innerText = '$'+item_subtotal.toFixed(2);
+                document.querySelector(`[subtotal-itemid="${item_number}"]`).innerText = `Item Total : $${item_subtotal.toFixed(2)}`;
                 /////////////////////////////////////////////////////
 
                 ////////////////////////////selected item check///////////////////////////
@@ -385,7 +389,7 @@ export default class {
                         result.forEach(element => {
                             tmp_total = tmp_total + element.quantity * element.price_sell;
                         })
-                        document.querySelector('.online_place_order_item_grandtotal').innerText = '$$' + tmp_total.toFixed(2);
+                        document.querySelector('.online_place_order_item_grandtotal').innerText = `$${tmp_total.toFixed(2)}`;
                         
                         console.log(result)})
 
@@ -396,9 +400,9 @@ export default class {
 
 
             ///////////////////////////////////// hit subtract button ////////////////////////////        
-            if(e.target && (e.target.className) == 'online_place_order_item_minus_quantity_btn') { // item quantity subtract
+            if(e.target && (e.target.id) == 'online_place_order_item_minus_quantity_btn') { // item quantity subtract
                 console.log("online_place_order_item_minus_quantity_btn");
-                let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
+                let item_number = e.target.parentElement.getAttribute('quantity-handler-itemid');
                 console.log(item_number);
                 let item_quantity_id = document.querySelector(`[quantity-itemid="${item_number}"]`);
                 let item_quantity = parseInt(item_quantity_id.innerText);
@@ -407,10 +411,10 @@ export default class {
                 if (item_quantity > 1) {
                     item_quantity_id.innerHTML = item_quantity - 1;
                     const item_new_quantity = parseInt(item_quantity_id.innerText);
-                    const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).innerText.slice(1)); 
+                    const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).textContent); 
         
                     const item_subtotal = parseFloat(item_new_quantity * item_price);
-                    document.querySelector(`[subtotal-itemid="${item_number}"]`).innerText = '$'+item_subtotal.toFixed(2);
+                    document.querySelector(`[subtotal-itemid="${item_number}"]`).innerText = `Item Total : $${item_subtotal.toFixed(2)}`;
 
                     /*
                     const selectedEls = document.querySelectorAll('.online_place_order_item_check_btn');
@@ -532,13 +536,13 @@ export default class {
             }
             
         
-            if(e.target && (e.target.className) == 'online_place_order_item_delete_btn') { // item delete
+            if(e.target && (e.target.id) == 'online_place_order_item_delete_btn') { // item delete
                 // console.log("online_place_order_item_delete_btn");
-                let item_number = e.target.parentElement.getAttribute('contents-data-itemid');
+                let item_number = e.target.parentElement.getAttribute('namebox-itemid');
                 console.log(item_number);
                 let item_quantity_id = document.querySelector(`[quantity-itemid="${item_number}"]`);
                 let item_quantity = parseInt(item_quantity_id.innerText);
-                const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).innerText.slice(1)); 
+                const item_price = parseFloat(document.querySelector(`[price-itemid="${item_number}"]`).textContent); 
                 // let item_number = (e.target.className).slice(-1);
                 // let item_quantity = parseInt(document.querySelector(`.online_place_order_item_quantity.o${item_number}`).innerText);
                 // const item_price = parseFloat(document.querySelector(`.online_place_order_item_price.o${item_number}`).innerText.slice(1)); 
@@ -637,6 +641,8 @@ export default class {
                         result.length > 0 ? 
                         result.forEach(element => {tmp_total = tmp_total + element.quantity * element.price_sell;}) : false;
                         
+                        console.log("tmp_total")
+                        console.log("tmp_total")
                         document.querySelector('.online_place_order_item_grandtotal').innerText = '$$' + tmp_total.toFixed(2);
                         ItemCounter.item_counter(user_id);
                     
@@ -786,22 +792,17 @@ function setOrderItemContentContainer(prodnum, price, name, quantity) {
     orderItemContentContainer.setAttribute('class', `online_place_order_item_content`);
     orderItemContentContainer.setAttribute('contents-data-itemid',`${prodnum}`);
     document.querySelector(`[itemid="${prodnum}"]`).appendChild(orderItemContentContainer);
-    setOrderItemName(prodnum, name)
-    setOrderItemDelete(prodnum)
-    setOrderItemPrice(prodnum, price)
-    setMinusQuantity(prodnum)
-    setOrderItemQuantity(prodnum, quantity)
-    setPlusQuantity(prodnum)
-    getSubTotal(prodnum)
-    
-    
-
+    setOrderItemNameBox(prodnum, name);
+    setOrderItemOptions(prodnum);
+    setShipmentInfo(prodnum);    
+    setOrderItemPriceBox(prodnum, price);
+    setOrderItemQuantityHandler(prodnum, quantity);    
+    getSubTotal(prodnum);
 }
-
-
 
 function setOrderItemImageContainer(prodnum, image_src) {
     const orderItemImageContainer = document.createElement('div');
+    orderItemImageContainer.setAttribute('id', `online_place_order_item_pic_container`);
     orderItemImageContainer.setAttribute('class', `online_place_order_item_pic_container`);
     orderItemImageContainer.setAttribute('image-itemid',`${prodnum}`);                    
     document.querySelector(`[itemid="${prodnum}"]`).appendChild(orderItemImageContainer);
@@ -836,64 +837,105 @@ function setOrderItemImage(prodnum, image_src) {
     document.querySelector(`[link-data-itemid="${prodnum}"]`).appendChild(orderItemImage);
 }
 
-function setOrderItemNumber(prodnum) {
-    const orderItemNumber = document.createElement('div');
-    orderItemNumber.setAttribute('class', `online_place_order_item_number`);
-    document.querySelector(`.online_place_order_item_contatiner.o${prodnum}`).appendChild(orderItemNumber);
-    document.querySelector(`.online_place_order_item_number.o${prodnum}`).innerText = prodnum;
+function setOrderItemNameBox(prodnum, item_name) {
+    const orderItemNameBox = document.createElement('div');
+    orderItemNameBox.setAttribute('id', `online_place_order_item_name_box`);
+    orderItemNameBox.setAttribute('class', `online_place_order_item_name_box`);
+    orderItemNameBox.setAttribute('namebox-itemid', `${prodnum}`);  
+    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemNameBox);
+    setOrderItemName(prodnum, item_name);
+    setOrderItemDelete(prodnum);
 }
 
 function setOrderItemName(prodnum, item_name) {
     const orderItemName = document.createElement('div');
+    orderItemName.setAttribute('id', `online_place_order_item_name`);
     orderItemName.setAttribute('class', `online_place_order_item_name`);
-    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemName);
+    document.querySelector(`[namebox-itemid="${prodnum}"]`).appendChild(orderItemName);
     orderItemName.innerText = item_name;
+}
+
+function setOrderItemDelete(prodnum) {
+    const orderItemDeleteBtn = document.createElement('button');
+    orderItemDeleteBtn.setAttribute('id', `online_place_order_item_delete_btn`);
+    orderItemDeleteBtn.setAttribute('class', `online_place_order_item_delete_btn cart_handle_btn`);
+    document.querySelector(`[namebox-itemid="${prodnum}"]`).appendChild(orderItemDeleteBtn);
+    orderItemDeleteBtn.innerText = '🗑 Remove';
+}
+
+function setOrderItemPriceBox(prodnum, item_price) {
+    const orderItemPriceBox = document.createElement('div');
+    orderItemPriceBox.setAttribute('id', `online_place_order_item_price_Box`);
+    orderItemPriceBox.setAttribute('class', `online_place_order_item_price_Box`);
+    orderItemPriceBox.setAttribute('pricebox-itemid',`${prodnum}`); 
+    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemPriceBox);
+    setOrderItemPriceLabel(prodnum);
+    setOrderItemPrice(prodnum, item_price);
+}
+function setOrderItemPriceLabel(prodnum) {
+    const orderItemPriceLabel = document.createElement('div');
+    orderItemPriceLabel.setAttribute('id', `online_place_order_item_price_label`);
+    orderItemPriceLabel.setAttribute('class', `online_place_order_item_price_label`);
+    document.querySelector(`[pricebox-itemid="${prodnum}"]`).appendChild(orderItemPriceLabel);
+    orderItemPriceLabel.innerText = 'Item Price : $';        
 }
 
 function setOrderItemPrice(prodnum, item_price) {
     const orderItemPrice = document.createElement('div');
+    orderItemPrice.setAttribute('id', `online_place_order_item_price`);
     orderItemPrice.setAttribute('class', `online_place_order_item_price`);
     orderItemPrice.setAttribute('price-itemid',`${prodnum}`);    
-    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemPrice);
-    orderItemPrice.innerText = '$'+item_price;
+    document.querySelector(`[pricebox-itemid="${prodnum}"]`).appendChild(orderItemPrice);
+    orderItemPrice.innerText = parseFloat(item_price).toFixed(2);
+}
+
+function setOrderItemQuantityHandler(prodnum, item_quantity) {
+    const orderItemQuantityHandler = document.createElement('div');
+    orderItemQuantityHandler.setAttribute('id', `online_place_order_item_quantity_handler`);
+    orderItemQuantityHandler.setAttribute('class', `online_place_order_item_quantity_handler`);
+    orderItemQuantityHandler.setAttribute('quantity-handler-itemid',`${prodnum}`);  
+    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemQuantityHandler); 
+    orderItemQuantityHandler.innerText = 'Quantity';
+    setMinusQuantity(prodnum);
+    setOrderItemQuantity(prodnum, item_quantity);
+    setPlusQuantity(prodnum);
 }
 
 function setOrderItemQuantity(prodnum, item_quantity) {
     const orderItemQuantity = document.createElement('div');
+    orderItemQuantity.setAttribute('id', `online_place_order_item_quantity`);
     orderItemQuantity.setAttribute('class', `online_place_order_item_quantity`);
     orderItemQuantity.setAttribute('quantity-itemid',`${prodnum}`);   
-    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemQuantity);    
+    document.querySelector(`[quantity-handler-itemid="${prodnum}"]`).appendChild(orderItemQuantity);    
     orderItemQuantity.innerText = item_quantity;
    
 }
 
 function setPlusQuantity(prodnum) {
     const plusQuantityBtn = document.createElement('button');
-    plusQuantityBtn.setAttribute('class', `online_place_order_item_plus_quantity_btn`);
-    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(plusQuantityBtn);
-    plusQuantityBtn.innerText = '+'; 
+    plusQuantityBtn.setAttribute('id', `online_place_order_item_plus_quantity_btn`);
+    plusQuantityBtn.setAttribute('class', `online_place_order_item_plus_quantity_btn cart_handle_btn`);
+    document.querySelector(`[quantity-handler-itemid="${prodnum}"]`).appendChild(plusQuantityBtn);
+    plusQuantityBtn.innerText = '➕'; 
 }
 
 function setMinusQuantity(prodnum) {
     const minusQuantityBtn = document.createElement('button');
-    minusQuantityBtn.setAttribute('class', `online_place_order_item_minus_quantity_btn`);
-    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(minusQuantityBtn);
-    minusQuantityBtn.innerText = '-';
+    minusQuantityBtn.setAttribute('id', `online_place_order_item_minus_quantity_btn`);
+    minusQuantityBtn.setAttribute('class', `online_place_order_item_minus_quantity_btn cart_handle_btn`);
+    document.querySelector(`[quantity-handler-itemid="${prodnum}"]`).appendChild(minusQuantityBtn);
+    minusQuantityBtn.innerText = '➖';
 }
 
-function setOrderItemDelete(prodnum) {
-    const orderItemDeleteBtn = document.createElement('button');
-    orderItemDeleteBtn.setAttribute('class', `online_place_order_item_delete_btn`);
-    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemDeleteBtn);
-    orderItemDeleteBtn.innerText = 'X';
-}
+
 
 function getSubTotal(prodnum) {
     const orderSubTotal = document.createElement('div');
+    orderSubTotal.setAttribute('id', `online_place_order_item_subtotal`);
     orderSubTotal.setAttribute('class', `online_place_order_item_subtotal`);
     orderSubTotal.setAttribute('subtotal-itemid', `${prodnum}`);
-    const item_quantity = parseInt(document.querySelector(`[quantity-itemid="${prodnum}"]`).innerText);
-    const item_price = parseFloat(document.querySelector(`[price-itemid="${prodnum}"]`).innerText.slice(1)); 
+    const item_quantity = parseInt(document.querySelector(`[quantity-itemid="${prodnum}"]`).textContent);
+    const item_price = parseFloat(document.querySelector(`[price-itemid="${prodnum}"]`).textContent); 
 
     const item_subtotal = parseFloat(item_quantity * item_price); 
     console.log(item_quantity);
@@ -901,12 +943,31 @@ function getSubTotal(prodnum) {
     console.log(item_subtotal);
 
     document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderSubTotal);
-    orderSubTotal.innerText = '$' +item_subtotal.toFixed(2);
+    orderSubTotal.innerText = `Item Total : $${item_subtotal.toFixed(2)}`;
+
+}
+
+function setShipmentInfo(prodnum) {
+    const shipmentInfo = document.createElement('div');
+    shipmentInfo.setAttribute('id', `shipmentInfo`);
+    shipmentInfo.setAttribute('class', `shipmentInfo`);
+    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(shipmentInfo);
+    shipmentInfo.innerText = `shipment infomation`;
+
+}
+
+function setOrderItemOptions(prodnum) {
+    const orderItemOptions = document.createElement('div');
+    orderItemOptions.setAttribute('id', `orderItemOptions`);
+    orderItemOptions.setAttribute('class', `orderItemOptions`);
+    document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemOptions);
+    orderItemOptions.innerText = `order item option & summary`;
 
 }
 
 function setGrandTotalContainer() {
     const orderGrandTotal = document.createElement('div');
+    orderGrandTotal.setAttribute('id', `online_place_order_item_grandtotal`);
     orderGrandTotal.setAttribute('class', `online_place_order_item_grandtotal`);
     document.querySelector(`.grand_total`).appendChild(orderGrandTotal);
     console.log("set grand total container")

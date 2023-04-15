@@ -101,6 +101,9 @@ export default class {
                     <div id="shop_cat_gift" class="shop_cat_gift shop_category">
                         <button id="shop_gift_btn" class="shop_gift_btn cate_btn">Gift</button>
                     </div>
+                    <div id="shop_cat_test" class="shop_cat_test shop_category">
+                        <button id="shop_test_btn" class="shop_test_btn cate_btn">test</button>
+                    </div>
                 </div>
             </div>
 
@@ -249,6 +252,28 @@ document.addEventListener('click', function(e) {
 
         document.querySelector('.test_container').innerText = "test";
     }  
+
+    if (e.target && e.target.id == 'shop_test_btn') {
+
+        // fetch('https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080')
+        // .then(response => response.json())
+        // .then(result => {
+        //     console.log(result);
+        //     window.location.href = response.LassoRedirectURL;
+        // });
+
+        fetch(`/test_ups`)
+        .then(response => response.json())
+        .then(response => {
+
+        console.log("response")
+        console.log(response)
+        //  response.LassoRedirectURL + `?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080&response_type=code&scope=read&type=ups_com_api`;
+        // res.redirect(`https://www.ups.com/lasso/signin`+`?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080&response_type=code&scope=read&type=ups_com_api`)
+        // !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
+})
+        .catch(err => console.error(err)); 
+    }
 
 });
 

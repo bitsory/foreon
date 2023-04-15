@@ -23,7 +23,8 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.1.2",
     "nodejs-jsencrypt": "^3.0.0-rc.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "xmlhttprequest": "^1.8.0"
   },
   "include": [
     "index.d.ts"

@@ -378,7 +378,7 @@ export default class Cart {
                 </div>
                 
                 <div id='user_profile_log_out' class='user_profile_log_out user_account_box_el'>
-                    <form action="/sign_out" method="post" class="user_logout user_account_box_el">
+                    <form action="/sign_out" method="post" class="user_logout">
                             
                         <button type="submit" id="user_logout_btn" class="user_logout_btn account_btn" name="sign_out" value="SIGN OUT">SIGN OUT</button>
                     </form>                
@@ -1540,6 +1540,8 @@ function setPurchaseHistory(result) {
 
         let total_amount = element.total_order_amount;
         let oddate = element.oddate;
+        let shipping_fee = element.shipping_fee;
+        let shipping_rate = element.shipping_rate;
         // let $purchase_history = document.querySelector(`[orderid="${order_id}"]`);
         if (document.querySelector(`[orderid="${order_id}"]`)) {
             
@@ -1677,8 +1679,8 @@ function setPurchaseHistoryItemExtrabox(cart_id, prodnum) {
     purchase_history_item_extrabox.setAttribute('extrabox_orderid', `${cart_id}${prodnum}`);
     document.querySelector(`[item_orderid="${cart_id}"]`).appendChild(purchase_history_item_extrabox);
     
-    setPurchaseHistoryItemReorder(cart_id, prodnum)
-    
+    setPurchaseHistoryItemReorder(cart_id, prodnum);
+    setPurchaseHistoryItemTrack(cart_id, 0);
 
 }
 
@@ -1686,13 +1688,20 @@ function setPurchaseHistoryItemReorder(cart_id, prodnum) {
     const purchase_history_item_reorder_btn = document.createElement('button');
     purchase_history_item_reorder_btn.setAttribute('id', `purchase_history_item_reorder_btn`);
     purchase_history_item_reorder_btn.setAttribute('class', `purchase_history_item_reorder_btn`);
-    purchase_history_item_reorder_btn.setAttribute('title', `reorder_button`);    
+    purchase_history_item_reorder_btn.setAttribute('title', `item reorder`);    
     purchase_history_item_reorder_btn.setAttribute('itemid', `${prodnum}`);
     document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_reorder_btn);
     purchase_history_item_reorder_btn.innerText = 'But It Again';
+}
 
-
-
+function setPurchaseHistoryItemTrack(cart_id, track_num) {
+    const purchase_history_item_track_btn = document.createElement('button');
+    purchase_history_item_track_btn.setAttribute('id', `purchase_history_item_track_btn`);
+    purchase_history_item_track_btn.setAttribute('class', `purchase_history_item_track_btn`);
+    purchase_history_item_track_btn.setAttribute('title', `item track`);    
+    purchase_history_item_track_btn.setAttribute('track-itemid', `${track_num}`);
+    document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_track_btn);
+    purchase_history_item_track_btn.innerText = 'Item Track';
 }
 
 

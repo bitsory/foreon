@@ -2,12 +2,13 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const Clover = require("clover-ecomm-sdk");
+// const Clover = require("clover-ecomm-sdk");
 const session = require('express-session');
 const JSEncrypt = require('nodejs-jsencrypt').default;
 const CryptoJS = require("crypto-js");
 const db = require('./public/service/db.js');
 require('dotenv').config();
+// import fetch from 'node-fetch';
 
 
 
@@ -38,10 +39,20 @@ const uuid4 = require('uuid');
 
 
 
-
 app.get('/',(req,res) => {
+    // fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
+    // .then(response => response.json())
+    // .then(response => {
+
+    //     console.log("response")
+    //     console.log(response)
+    //     res.redirect(`https://www.ups.com/lasso/signin?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com&response_type=code&scope=read&type=ups_com_api`);
+     
+    // })
+   
+
     console.log("home home home");
-    // res.sendFile(__dirname + "/public/index.html");
+  
     if (req.session.loginData) {
         console.log("login data exist");        
 		res.render('index.ejs', {post : req.session.loginData.name});
@@ -1632,7 +1643,7 @@ app.post('/add_payment_method', (req,res) => {
                                         // con.end();
                                     } else if (result !== undefined) {
                                         console.log(result)                
-                                        con.query('UPDATE billing_info SET default_payment = "n" where id =?', [u_id])
+                                        con.query('UPDATE billing_info SET default_payment = "n" where id =?', [u_id]);
                                         resolve();
                                     }                     
                                 }); 
@@ -2165,7 +2176,7 @@ app.post('/shop',(req,res) => {
     
     
     db.getConnection((con)=>{
-        con.query('SELECT * from product', (err, result) => {
+        con.query('SELECT * from product where useyn = "y"', (err, result) => {
             if(err){
                 res.send(err);
                 // con.end();        
@@ -2551,6 +2562,7 @@ app.post('/item_delete_v2', (req,res) => {
 
 app.post('/check_purchase_history', (req,res) => {
 
+    console.log('/check_purchase_history /check_purchase_history')
     const id= req.body.id;
     const u_id = req.session.loginData.id;
 
@@ -2573,9 +2585,12 @@ app.post('/check_purchase_history', (req,res) => {
 
 app.post('/user_checkout_submit', (req,res) => {
 
+    console.log(req.body);
     const u_id = req.session.loginData.id;
-    const amount = req.body.amount;
+    // const amount = req.body.amount;
     const cart = req.body.cart;
+    const shipping_rate = req.body.shipping_rate;
+    console.log(shipping_rate);
     let default_payment_method = '';
     let clv_id = '';
     let default_shipping_info = {};
@@ -2586,7 +2601,16 @@ app.post('/user_checkout_submit', (req,res) => {
     const cart_numbers = cart.map(element => {
         return element.cartnum;
     });
-    
+    console.log(cart_numbers);
+
+    const shipping_fee = {
+        amount : shipping_rate[1] * 100,
+        currency : "usd",
+        description : "UPS shipping " + shipping_rate[0],
+        quantity : 1,
+        type:"sku",
+        tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
+    }   
         
     const items = cart.map(element => {
         return { 
@@ -2598,7 +2622,8 @@ app.post('/user_checkout_submit', (req,res) => {
             tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
         }
 
-    })
+    });
+    items.push(shipping_fee);
 
     const tmp_amount_items = items.map(element => {return element.amount/100 * element.quantity ;})
     const total_order_amount = tmp_amount_items.reduce((a,b) => (a+b));
@@ -2657,15 +2682,16 @@ app.post('/user_checkout_submit', (req,res) => {
         console.log('order_number');
         console.log(order_number);   
         db.getConnection((con)=>{    
-            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
-            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date], (err, result) => {
+            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate) VALUES (?,?,?,?,?,?,?,?,?,?)',
+            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date, shipping_rate[1], shipping_rate[0]], (err, result) => {
                 if(err){                        
                     res.send(err);
                     // con.end();        
                 } else {
                     console.log('set orders') 
-                    console.log(result);                    
-                    updateOrderedCart(order_number, date, cart_numbers, u_id, con, confirm_info)
+                    console.log(result);      
+                    // setShippingFee(cart_numbers[0], u_id, order_number, con);          
+                    updateOrderedCart(order_number, date, cart_numbers, u_id, con, confirm_info);
                 }
             }); 
             con.release();
@@ -2688,6 +2714,19 @@ app.post('/user_checkout_submit', (req,res) => {
             }); 
             // con.release();
         // });
+    }
+
+    function setShippingFee(cart_num, user_id, order_num, con) {
+        con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, result, indate, modate, order_number, oddate) VALUES (?,?,?,?,?,?,?,?,?)'
+        ,[cart_num, user_id, 0, 1, 'y', date, date, order_num, date], (err, result) => {
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log('update complete Order Cart') 
+                console.log(result);
+            } 
+        });
     }
     ////////////////////////////////////// make payment ////////////////////////
     function makePayment() {
@@ -2756,6 +2795,7 @@ app.post('/user_checkout_submit', (req,res) => {
                             name : req.session.loginData.name,
                             order_number : order_number,
                             email : default_shipping_info.email,
+                            shipping_address : default_shipping_info.address1 + ' ' + default_shipping_info.address2 + ', ' + default_shipping_info.city + ', ' + default_shipping_info.state + ' ' + default_shipping_info.zip,
                             recipient : default_shipping_info.recipient,
                             phone : default_shipping_info.phone,
                             type : response.source.brand,
@@ -2788,12 +2828,24 @@ app.post('/guest_order_checkout', (req,res) => {
     console.log("/charge /charge /charge /charge /charge   ");
 
     const uuid = uuid4.v4(); 
-    const order_items = JSON.parse(req.body.order_items);
+    
     console.log(req.body); 
+    const order_items = JSON.parse(req.body.order_items);
+    const shipping_rate = JSON.parse(req.body.shipping_rate);
     console.log(order_items);
+    console.log(shipping_rate);
     const cardholder = req.body.card_name;
     const recipient = req.body.recipient_first_name +' '+req.body.recipient_last_name;
+    const shipping_address = req.body.shipping_address_street_line1 + ' ' + req.body.shipping_address_street_line2 + ', ' + req.body.shipping_address_city + ', ' + req.body.shipping_address_state + ' ' + req.body.shipping_address_zip;
     const token_id = req.body.cloverToken;
+    const shipping_fee = {
+        amount : shipping_rate[1] * 100,
+        currency : "usd",
+        description : "UPS shipping " + shipping_rate[0],
+        quantity : 1,
+        type:"sku",
+        tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
+    }
     const items = order_items.map(element => {
         return { 
             amount : element.c_item_price * 100,
@@ -2804,8 +2856,26 @@ app.post('/guest_order_checkout', (req,res) => {
             tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
         }
 
-    })
+    });
+
+    const ups_ship_info = {
+        Name: recipient,
+        AttentionName: '',
+        Phone: {Number: req.body.order_contact_phone},
+        Address: {
+        AddressLine: req.body.shipping_address_street_line1 + ' '+ req.body.shipping_address_street_line2,
+        City: req.body.shipping_address_city,
+        StateProvinceCode: req.body.shipping_address_state,
+        PostalCode: req.body.shipping_address_zip,
+        CountryCode: 'US'
+        },
+        Residential: ' '
+    }
+
+
+    items.push(shipping_fee);
     console.log(items);
+    console.log(shipping_address);
 
 
     const options = {
@@ -2816,68 +2886,11 @@ app.post('/guest_order_checkout', (req,res) => {
           authorization: `Bearer ${process.env.ACCESS_TOKEN}`
         },
         body: JSON.stringify({
-            items: items,
-            // shipping: {
-            //         address: {
-            //           city: req.body.shipping_address_city,
-            //           country: 'US',
-            //           line1: req.body.shipping_address_street_line1,
-            //           line2: req.body.shipping_address_street_line2,
-            //           postal_code: req.body.shipping_address_zip,
-            //           state: req.body.shipping_address_state
-            //         },
-            //         name: recipient,
-            //         phone: req.body.order_contact_phone
-            //     },
+            items: items,           
             currency: 'usd',
             email: req.body.order_contact_email
           })
-        // };
-        /*
-        body: JSON.stringify({
-            items: [{          
-                amount:1800,
-                  currency:"usd",
-                  description:"Ginger Bottle 16oz",
-                  quantity:1,
-                  type:"sku",
-                  tax_rates: [{tax_rate_uuid: "Q0NVFCYTZ4KYE", name: "6%"}]             
-              }],
-            shipping: {
-              address: {
-                city: 'LAS VEGAS',
-                line1: '6594 HULME END AVE',
-                postal_code: '89139',
-                state: 'Nevada',
-                country:"US"
-              },
-              name: 'Jongho Kim',
-              phone: '4702636495'
-            },
-            currency: 'usd',
-            email: 'rangdad@gmail.com',
-            // customer: 'W29TP8XFK9BH6'
-          })
-          */
-        
-        // body: JSON.stringify({
-        //   items: items,
-        //   shipping: {
-        //     address: {
-        //       city: req.body.shipping_address_city,
-        //       country: 'US',
-        //       line1: req.body.shipping_address_street_line1,
-        //       line2: req.body.shipping_address_street_line2,
-        //       postal_code: req.body.shipping_address_zip,
-        //       state: req.body.shipping_address_state
-        //     },
-        //     name: recipient,
-        //     phone: req.body.order_contact_phone
-        //   },
-        //   email: req.body.order_contact_email,
-        //   currency: 'usd'
-        // })
-        
+                
       };
       console.log(options);
       
@@ -2905,6 +2918,8 @@ app.post('/guest_order_checkout', (req,res) => {
                     console.log("order paid")
                     console.log(response)
 
+                    
+
                     //////////////////// store order info into DB
                     const u_id = 'GUEST';
                     
@@ -2915,7 +2930,9 @@ app.post('/guest_order_checkout', (req,res) => {
                     const date = getDate();
                     const cart_num = date.replace(/\s|:|\-/g,"") + "CTGUEST";
                     const order_num = date.replace(/\s|:|\-/g,"") + "ODGUEST";
-                    const order_items = response.items;
+                    const order_items = response.items.slice(0,-1);
+                    console.log(order_items)
+        
 
                     setOrders(order_num, u_id, response, date);
 
@@ -2953,7 +2970,7 @@ app.post('/guest_order_checkout', (req,res) => {
 
                     ////////////////////////////////////
                     
-                    let paid_items_number = response.items.map(element => {
+                    let paid_items_number = order_items.map(element => {
                         console.log(element.description)                            
                         return element.description.substring(0, element.description.indexOf(','));
                     })
@@ -2965,6 +2982,7 @@ app.post('/guest_order_checkout', (req,res) => {
                         order_number : order_num,
                         email : req.body.order_contact_email,
                         recipient : recipient,
+                        shipping_address : shipping_address,
                         phone : req.body.order_contact_phone,
                         type : response.source.brand,
                         ending4 : response.source.last4,
@@ -2986,8 +3004,8 @@ app.post('/guest_order_checkout', (req,res) => {
             console.log('order_number');
             console.log(order_number);       
             db.getConnection((con)=>{
-                con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
-                [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date], (err, result) => {
+                con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date, shipping_rate[1], shipping_rate[0]], (err, result) => {
                     if(err){                        
                         res.send(err);
                         // con.end();        
@@ -3000,6 +3018,407 @@ app.post('/guest_order_checkout', (req,res) => {
             });
         }
 });
+
+app.post('/get_shipping_rate', (req, res) => {
+
+    console.log("//get_shipping_rate/get_shipping_rate/get_shipping_rate/get_shipping_rate");
+    const shipto = req.body;
+    const weight = String(req.body.weight);
+    
+    console.log(shipto);
+    console.log(weight);
+    
+
+    const data = {
+        RateRequest: {
+            Request: {
+                TransactionReference: {
+                    CustomerContext: 'CustomerContext',
+                    TransactionIdentifier: 'TransactionIdentifier'
+                }
+                },
+            Shipment: {
+                Shipper: {
+                    Name: 'cafe FORE',
+                    ShipperNumber: 'B98W48',
+                    Address: {
+                    AddressLine: [
+                        '4400 Roswell Rd'
+                    ],
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                    }
+                },
+                ShipTo: {
+                    Name: req.body.recipient,
+                    Address: {
+                    AddressLine: [
+                        req.body.address                      
+                    ],
+                    City: req.body.city,
+                    StateProvinceCode: req.body.state,
+                    PostalCode: req.body.zip,
+                    CountryCode: 'US'
+                    }
+                },
+                ShipFrom: {
+                    Name: 'cafe FORE',
+                    ShipperNumber: 'B98W48',
+                    Address: {
+                    AddressLine: [
+                        '4400 Roswell Rd'
+                    ],
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                    }
+                },
+                PaymentDetails: {
+                    ShipmentCharge: {
+                    Type: '01',
+                    BillShipper: {
+                        AccountNumber: 'B98W48'
+                    }
+                    }
+                },
+                Service: {
+                    Code: '12',
+                    Description: '3 Day Select '
+                },
+                NumOfPieces: '1',
+                Package: {                    
+                    PackagingType: {
+                    Code: '02',
+                    Description: 'Packaging'
+                    },
+                    Dimensions: {
+                    UnitOfMeasurement: {
+                        Code: 'IN',
+                        Description: 'Inches'
+                    },
+                    Length: '10',
+                    Width: '10',
+                    Height: '10'
+                    },
+                    PackageWeight: {
+                    UnitOfMeasurement: {
+                        Code: 'LBS',
+                        Description: 'Pounds'
+                    },
+                    Weight: weight
+                    }
+                },
+                DeliveryTimeInformation: {
+                    PackageBillType: '03',
+                    Pickup: {
+                      Date: '20230412',
+                      Time: '1000'
+                    }
+                }
+            }
+        }
+    }
+
+    const query = new URLSearchParams({
+        additionalinfo: 'timeintransit'
+    }).toString();
+    
+    const version = 'v1';
+    const requestoption = 'Shop';
+
+    const options = 
+        {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            transId: 'test01trs',
+            transactionSrc: 'testing',
+            Authorization: `Bearer ${process.env.UPS_API_KEY}`
+            // Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgxMjQwNDE2LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODEyNTQ4MTYsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODEyNDA0MTYsImp0aSI6ImRmNjYxNThmLTBmYTEtNDU0OC04OTczLTczNTUyOGQxMzBhZSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.asOY41WovUTGTv_3VEjY_IWteO88lAvQBUBmvI5jGPiV4psfg5LfQa6J-1Ok3ahf_35homGR6yvgPt-89TXJPAVKiW-IjrneFJajmVsr2WUjpbzrgYZowmPce4EQyHCwfau9rriILPkOF2phLdvtcEMt277HxhTBbHY3t3ADMY6vOnkgjPOw0alMaxqGFQ-UxneesVk24QsL2nqnt8r0mPV3BF163ZeFINbzeWknL_j1RhIryheJ4v0H7_4amkeVS1f4DvvpUeAId4mJ4sP2FYIhpX4l3yVpHkhThwB54ZQ3If9DAAy25JXteFmn8GI3V-HxODlMGjAOUEVNs6Ujhmzj3c_mCI0nFgNZ1dleiKywM5cppHo3g_Cf9lURkdQkrr5s8Piqnqn3lCuhuqj13gx_TH9uWDFsbkUi6vtKfCeS8KEoA2wCRCZI0NwLwET96ZCeCNS6QXKixx7XoP7JRB8O_te3CW-jHocXAb7g_UqaSQsLbpPwwezp92DI1s8pd5CUdMndxj1No_1ZMPApPKBbME-mJkp1RUqqHvERs2tEddhFPR692oHYXLLnsDZY5eekVoNYrrCcywi-hemPEpR0wVJLNlgXIRoP4weqOYDCZy1h3XDfx2NzWqgSzOulQPArFteC7VSVK5x_GUUNXvz3M9PF4tCmbsccL4_If3E'
+        },
+        body: JSON.stringify(data)
+        }
+        fetch(`https://onlinetools.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
+        
+    // fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        res.send(response)
+    });
+
+});
+
+
+
+/*
+app.post('/get_rate', (req, res) => {
+
+    console.log("//get_shipping_rate/get_shipping_rate/get_shipping_rate/get_shipping_rate");
+    const shipto = req.body;
+    const weight = String(req.body.weight);
+    
+    console.log(shipto);
+    
+
+    const data = {
+        RateRequest: {
+            Request: {
+                TransactionReference: {
+                    CustomerContext: 'CustomerContext',
+                    TransactionIdentifier: 'TransactionIdentifier'
+                }
+                },
+            Shipment: {
+                Shipper: {
+                    Name: 'cafe FORE',
+                    ShipperNumber: 'B98W48',
+                    Address: {
+                    AddressLine: [
+                        '4400 Roswell Rd'
+                    ],
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                    }
+                },
+                ShipTo: {
+                    Name: 'req.body.recipient',
+                    Address: {
+                    AddressLine: [
+                        '2742 Pearl Ridge Trce'                    
+                    ],
+                    City: 'Buford',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30519',
+                    CountryCode: 'US'
+                    }
+                },
+                ShipFrom: {
+                    Name: 'cafe FORE',
+                    ShipperNumber: 'B98W48',
+                    Address: {
+                    AddressLine: [
+                        '4400 Roswell Rd'
+                    ],
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                    }
+                },
+                PaymentDetails: {
+                    ShipmentCharge: {
+                    Type: '01',
+                    BillShipper: {
+                        AccountNumber: 'B98W48'
+                    }
+                    }
+                },             
+
+                Service: {
+                    Code: '13',
+                    Description: 'Next Day Air Saver'
+                },
+
+                NumOfPieces: '1',
+                Package: {
+                    // SimpleRate: {
+                    // Description: 'SimpleRateDescription',
+                    // Code: 'XS'
+                    // },
+                    PackagingType: {
+                    Code: '02',
+                    Description: 'Packaging'
+                    },
+                    Dimensions: {
+                    UnitOfMeasurement: {
+                        Code: 'IN',
+                        Description: 'Inches'
+                    },
+                    Length: '5',
+                    Width: '5',
+                    Height: '5'
+                    },
+                    PackageWeight: {
+                    UnitOfMeasurement: {
+                        Code: 'LBS',
+                        Description: 'Pounds'
+                    },
+                    Weight: '10'
+                    }
+                },
+                DeliveryTimeInformation: {
+                    PackageBillType: '03',
+                    Pickup: {
+                      Date: '20230412',
+                      Time: '1000'
+                    }
+                }
+            }
+        }
+    }
+
+    const query = new URLSearchParams({
+        additionalinfo: 'timeintransit'
+    }).toString();
+    
+    const version = 'v1';
+    const requestoption = 'Shop';
+
+    const options = 
+        {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            transId: 'test01trs',
+            transactionSrc: 'testing',
+            Authorization: `Bearer ${process.env.UPS_API_KEY}`
+            // Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgxMjQwNDE2LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODEyNTQ4MTYsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODEyNDA0MTYsImp0aSI6ImRmNjYxNThmLTBmYTEtNDU0OC04OTczLTczNTUyOGQxMzBhZSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.asOY41WovUTGTv_3VEjY_IWteO88lAvQBUBmvI5jGPiV4psfg5LfQa6J-1Ok3ahf_35homGR6yvgPt-89TXJPAVKiW-IjrneFJajmVsr2WUjpbzrgYZowmPce4EQyHCwfau9rriILPkOF2phLdvtcEMt277HxhTBbHY3t3ADMY6vOnkgjPOw0alMaxqGFQ-UxneesVk24QsL2nqnt8r0mPV3BF163ZeFINbzeWknL_j1RhIryheJ4v0H7_4amkeVS1f4DvvpUeAId4mJ4sP2FYIhpX4l3yVpHkhThwB54ZQ3If9DAAy25JXteFmn8GI3V-HxODlMGjAOUEVNs6Ujhmzj3c_mCI0nFgNZ1dleiKywM5cppHo3g_Cf9lURkdQkrr5s8Piqnqn3lCuhuqj13gx_TH9uWDFsbkUi6vtKfCeS8KEoA2wCRCZI0NwLwET96ZCeCNS6QXKixx7XoP7JRB8O_te3CW-jHocXAb7g_UqaSQsLbpPwwezp92DI1s8pd5CUdMndxj1No_1ZMPApPKBbME-mJkp1RUqqHvERs2tEddhFPR692oHYXLLnsDZY5eekVoNYrrCcywi-hemPEpR0wVJLNlgXIRoP4weqOYDCZy1h3XDfx2NzWqgSzOulQPArFteC7VSVK5x_GUUNXvz3M9PF4tCmbsccL4_If3E'
+        },
+        body: JSON.stringify(data)
+        }
+        // fetch(`https://onlinetools.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
+        
+    fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        res.send(response)
+    });
+})
+*/
+
+function setUPSShipment(shipto, rate) {
+
+    let service_code = {};
+    console.log(shipto);
+    if (rate == "flat") service_code = { Code: '03', Description: 'ground' }
+    else if (rate == "ground") service_code = { Code: '03', Description: 'ground' };
+    else if (rate == "3days") service_code = 13;
+    else if (rate == "nextday") service_code = 12;
+
+
+    const ship = {
+        ShipmentRequest: {
+            Request: {
+            SubVersion: '1801',
+            RequestOption: 'nonvalidate',
+            TransactionReference: {CustomerContext: 'test'}
+            },
+            Shipment: {
+            Description: 'Ship WS test',
+            Shipper: {
+                Name: 'cafe FORE LLC',
+                AttentionName: '',
+                TaxIdentificationNumber: '883952894',
+                Phone: {
+                Number: '4702636495',
+                Extension: ' '
+                },
+                ShipperNumber: 'B98W48',
+                FaxNumber: '',
+                Address: {
+                    AddressLine: '4400 Roswell RD Ste 126',
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                }
+            },
+            ShipTo: shipto,
+            ShipFrom: {
+                Name: 'cafe FORE LLC',
+                AttentionName: '',
+                Phone: {Number: '4702636495'},
+                FaxNumber: '',
+                Address: {
+                    AddressLine: '4400 Roswell RD Ste 126',
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                }
+            },
+            PaymentInformation: {
+                ShipmentCharge: {
+                Type: '01',
+                BillShipper: {AccountNumber: 'B98W48'}
+                }
+            },
+            Service: {
+                Code: '03',
+                Description: 'ground'
+            },
+            Package: {
+                Description: 'Nails',
+                Packaging: {
+                    Code: '02',
+                    Description: 'Nails'
+                },
+                Dimensions: {
+                    UnitOfMeasurement: {
+                        Code: 'IN',
+                        Description: 'Inches'
+                },
+                Length: '10',
+                Width: '30',
+                Height: '45'
+                },
+                PackageWeight: {
+                UnitOfMeasurement: {
+                    Code: 'LBS',
+                    Description: 'Pounds'
+                },
+                Weight: '15'
+                }
+            }
+            },
+            LabelSpecification: {
+            LabelImageFormat: {
+                Code: 'GIF',
+                Description: 'GIF'
+            },
+            HTTPUserAgent: 'Mozilla/4.5'
+            }
+        }
+    }
+
+    const options = {
+    method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        transId: 'string',
+        transactionSrc: 'testing',
+        Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
+      },
+      body: JSON.stringify(ship)
+    }
+
+    const query = new URLSearchParams({
+        additionaladdressvalidation: 'Alpharetta'
+      }).toString();
+    
+      const version = 'v1';
+    //   fetch(`https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`, options)
+      
+    fetch(`https://wwwcie.ups.com/api/shipments/${version}/ship?${query}`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        // console.log(response.ShipmentResults.)
+        res.send(response)
+    });
+
+
+}
 
 
 function setOrders(order_number, u_id, response, date) {
@@ -3048,38 +3467,1141 @@ function getDate() {
     return date;
 }
 
+app.post('/order-confirm-test', (req, res) => { 
 
-app.get('/test',(req,res) => {
-    console.log("/test_log/test_log/test_log/test_log")
+    const confirm_info = {
+        status : "complete",
+        paid_items_number : "paid_items_number",
+        name : "recipient",
+        order_number : "order_num",
+        email : "req.body.order_contact_email",
+        recipient : "recipient",
+        address : "req.body.address",
+        phone : "req.body.order_contact_phone",
+        type : "response.source.brand",
+        ending4 : "response.source.last4",
+        billing_address : "default_shipping_info.address1",
+        cardholder : "cardholder",
+        subtotal : "response.amount - response.tax_amount", 
+        tax : "response.tax_amount",
+        grandtotal : "response.amount"
+    };
+
+    res.send(confirm_info)
+
+
+});
+
+
+app.get('/test_ups_toke', (req, res) => {
+    const formData = {
+        grant_type: 'client_credentials'
+      };
+
+    const options = {
+    method: 'POST',
+    headers: {
+        Authorization: 'Basic ' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
+        'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body : new URLSearchParams(formData).toString()
+    // body: 'grant_type=authorization_code&code=SGUySE1tU0MtVTJGc2RHVmtYMS9PWmxKYW13SG1jMWdiQTlBTlI0NVRhWWRKUC9KYktaM0FNdzA0QmlIdVVydllrOVVLNkZ4aCt4N0NFMVBVcnBQYzNYdDF0eGJVanc9PQ=='
+    }
+
+    fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        res.send(response)
+    });
+
+
+
+
+});
+
+app.post('/test_ups_ship', (req, res) => {
+
+    const ship = {
+        ShipmentRequest: {
+            Request: {
+            SubVersion: '1801',
+            RequestOption: 'nonvalidate',
+            TransactionReference: {CustomerContext: 'test'}
+            },
+            Shipment: {
+                Description: 'cafe FORE shipping',
+                Shipper: {
+                    Name: 'cafe FORE LLC',
+                    AttentionName: '',
+                    TaxIdentificationNumber: '883952894',
+                    Phone: {
+                    Number: '4702636495',
+                    Extension: ' '
+                    },
+                    ShipperNumber: 'B98W48',
+                    FaxNumber: '',
+                    Address: {
+                        AddressLine: '4400 Roswell RD Ste 126',
+                        City: 'Marietta',
+                        StateProvinceCode: 'GA',
+                        PostalCode: '30062',
+                        CountryCode: 'US'
+                    }
+                },
+                ShipTo: {
+                    Name: 'Joe Kim',
+                    AttentionName: '',
+                    Phone: {Number: '4702636495'},
+                    Address: {
+                    AddressLine: '6594 Hulme End Ave',
+                    City: 'Las Vegas',
+                    StateProvinceCode: 'NV',
+                    PostalCode: '89139',
+                    CountryCode: 'US'
+                    },
+                    Residential: ' '
+                },
+                ShipFrom: {
+                    Name: 'cafe FORE LLC',
+                    AttentionName: '',
+                    Phone: {Number: '4702636495'},
+                    FaxNumber: '',
+                    Address: {
+                        AddressLine: '4400 Roswell RD Ste 126',
+                        City: 'Marietta',
+                        StateProvinceCode: 'GA',
+                        PostalCode: '30062',
+                        CountryCode: 'US'
+                    }
+                },
+                PaymentInformation: {
+                    ShipmentCharge: {
+                    Type: '01',
+                    BillShipper: {AccountNumber: 'B98W48'}
+                    }
+                },
+                Service: {
+                    Code: '03',
+                    Description: 'GROUND'
+                },
+                // Package: [                    
+                //     {                        
+                //       PackageWeight: {
+                //         Weight: '10',
+                //         UnitOfMeasurement: {
+                //           Description: 'desc',
+                //           Code: 'LBS'
+                //         }
+                //       },
+                //       Dimensions: {
+                //         Height: '2',
+                //         Width: '2',
+                //         Length: '02',
+                //         UnitOfMeasurement: {
+                //           Description: 'desc',
+                //           Code: 'IN'
+                //         }
+                //       },
+                //       Packaging: {
+                //         Description: 'desc',
+                //         Code: '02'
+                //       },
+                //       Description: 'moon lamp'
+                //     },        
+                //     {
+                //       PackageWeight: {
+                //         Weight: '10',
+                //         UnitOfMeasurement: {
+                //           Description: 'desc',
+                //           Code: 'LBS'
+                //         }
+                //       },
+                //       Dimensions: {
+                //         Height: '2',
+                //         Width: '2',
+                //         Length: '02',
+                //         UnitOfMeasurement: {
+                //           Description: 'desc',
+                //           Code: 'IN'
+                //         }
+                //       },
+                //       Packaging: {
+                //         Description: 'desc',
+                //         Code: '02'
+                //       },
+                //       Description: 'ginger'
+                //     },        
+                //     {
+                //       Description: 'play mat',
+                //       Packaging: {
+                //         Code: '02',
+                //         Description: 'desc'
+                //       },
+                //       Dimensions: {
+                //         UnitOfMeasurement: {
+                //           Code: 'IN',
+                //           Description: 'desc'
+                //         },
+                //         Length: '02',
+                //         Width: '2',
+                //         Height: '2'
+                //       },
+                //       PackageWeight: {
+                //         UnitOfMeasurement: {
+                //           Code: 'LBS',
+                //           Description: 'desc'
+                //         },
+                //         Weight: '5'
+                //       }
+                //     }
+                //   ],
+            Package: 
+            {
+                SimpleRate: {
+                    Description: 'SimpleRateDescription',
+                    Code: 'XS'
+                  },
+                Description: 'Nails',
+                Packaging: {
+                Code: '02',
+                Description: 'Nails'
+                },
+                Dimensions: {
+                UnitOfMeasurement: {
+                    Code: 'IN',
+                    Description: 'Inches'
+                },
+                Length: '50',
+                Width: '50',
+                Height: '50'
+                },
+                PackageWeight: {
+                UnitOfMeasurement: {
+                    Code: 'LBS',
+                    Description: 'Pounds'
+                },
+                Weight: '15'
+                }
+            }
+            },
+            LabelSpecification: {
+            LabelImageFormat: {
+                Code: 'GIF',
+                Description: 'GIF'
+            },
+            HTTPUserAgent: 'Mozilla/4.5'
+            }
+        }
+    }
+
+    const ShipmentRequest = 
+    {
+        Request: {
+          RequestOption: 'nonvalidate',
+          SubVersion: '1701',
+          TransactionReference: {
+            CustomerContext: 'cafeforeco',
+            TransactionIdentifier: 'cafeforeid'
+          }
+        },
+
+        Shipment: {
+          Package: [
+            {
+              PackageWeight: {
+                Weight: '50',
+                UnitOfMeasurement: {
+                  Description: 'desc',
+                  Code: 'LBS'
+                }
+              },
+              Dimensions: {
+                Height: '2',
+                Width: '2',
+                Length: '02',
+                UnitOfMeasurement: {
+                  Description: 'desc',
+                  Code: 'IN'
+                }
+              },
+              Packaging: {
+                Description: 'desc',
+                Code: '02'
+              },
+              Description: 'moon lamp'
+            },
+
+            {
+              PackageWeight: {
+                Weight: '10',
+                UnitOfMeasurement: {
+                  Description: 'desc',
+                  Code: 'LBS'
+                }
+              },
+              Dimensions: {
+                Height: '2',
+                Width: '2',
+                Length: '02',
+                UnitOfMeasurement: {
+                  Description: 'desc',
+                  Code: 'IN'
+                }
+              },
+              Packaging: {
+                Description: 'desc',
+                Code: '02'
+              },
+              Description: 'ginger'
+            },
+
+            {
+              Description: 'play mat',
+              Packaging: {
+                Code: '02',
+                Description: 'desc'
+              },
+              Dimensions: {
+                UnitOfMeasurement: {
+                  Code: 'IN',
+                  Description: 'desc'
+                },
+                Length: '02',
+                Width: '2',
+                Height: '2'
+              },
+              PackageWeight: {
+                UnitOfMeasurement: {
+                  Code: 'LBS',
+                  Description: 'desc'
+                },
+                Weight: '5'
+              }
+            }
+          ],
+          Description: 'UPS Premier',
+          Shipper: {
+            Name: 'cafe FORE LLC',
+            AttentionName: 'GA',
+            CompanyDisplayableName: 'cafe FORE LLC',
+            TaxIdentificationNumber: '883952894',
+            Phone: {
+              Number: '1234567890',
+              Extension: '12'
+            },
+            ShipperNumber: '',
+            FaxNumber: '2134',
+            EMailAddress: 'cafefore@cafefore.com',
+            Address: {
+                AddressLine: '4400 Roswell Rd',
+                City: 'Marietta',
+                StateProvinceCode: 'GA',
+                PostalCode: '30062',
+                CountryCode: 'US'
+            }
+          },
+          ShipTo: {
+            Name: 'Joe Kim',
+            AttentionName: 'GA',
+            CompanyDisplayableName: 'GA',
+            TaxIdentificationNumber: '',
+            Phone: {
+              Number: '1234567890',
+              Extension: '12'
+            },
+            FaxNumber: '1234',
+            EMailAddress: 'test@cafefore.com',
+            Address: {
+              AddressLine: '2742 Pearl Ridge Trce',
+              City: 'Buford',
+              StateProvinceCode: 'GA',
+              PostalCode: '30519',
+              CountryCode: 'US',
+              ResidentialAddressIndicator: 'Y'
+            }
+          },
+          ShipFrom: {
+            Name: 'cafe FORE LLC',
+            AttentionName: 'GA',
+            CompanyDisplayableName: 'cafe FORE LLC',
+            TaxIdentificationNumber: '883952894',
+            Phone: {
+              Number: '1234567890',
+              Extension: '12'
+            },
+            FaxNumber: '5555555555',
+            Address: {
+              AddressLine: '4400 Roswell Rd',
+              City: 'Marietta',
+              StateProvinceCode: 'GA',
+              PostalCode: '30062',
+              CountryCode: 'US'
+            },
+            EMailAddress: 'cafefore@cafefore.com'
+          },
+          PaymentInformation: {
+            ShipmentCharge: {
+              Type: '01',
+              BillShipper: {AccountNumber: 'B98W48'}
+            }
+          },
+          Service: {
+            Code: '12',
+            Description: '3 Day Select'
+          }
+        },
+        LabelSpecification: {
+          LabelImageFormat: {
+            Code: 'ZPL',
+            Description: 'desc'
+          },
+          HTTPUserAgent: 'Mozilla/4.5',
+          LabelStockSize: {Height: '6', Width: '4'}
+        }
+    }
+    
+  
+
+    const options = {
+    method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        transId: 'cafeforetrs',
+        transactionSrc: 'testing',
+        Authorization: `Bearer ${process.env.UPS_API_KEY}`
+      },
+      body: JSON.stringify(ship)
+    }
+
+    const query = new URLSearchParams({
+        additionaladdressvalidation: 'Alpharetta'
+      }).toString();
+    
+      const version = 'v1';
+    //   fetch(`https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`, options)
+    // `https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`
+      
+    fetch(`https://wwwcie.ups.com/api/shipments/${version}/ship?${query}`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        // console.log(response.ShipmentResults.)
+        res.send(response)
+    });
+
+
+
+
+});
+
+app.get('/test_ups_cancel', (req, res) => {
+    const query = new URLSearchParams({
+        trackingnumber: '1ZB98W480330445025'
+      }).toString();
+      
+      const version = 'v1';
+      const shipmentidentificationnumber = '1ZB98W480330445025';
+
+      const options = 
+      {
+        method: 'DELETE',
+        headers: {
+          transId: 'string',
+          transactionSrc: 'testing',
+          Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
+        }
+      }
+
+      fetch(`https://onlinetools.ups.com/api/shipments/${version}/void/cancel/${shipmentidentificationnumber}?${query}`, options)
+      .then(response => response.json())
+      .then(response => {
+          console.log("response")
+          console.log(response)
+          // console.log(response.ShipmentResults.)
+          res.send(response)
+      });
+  
+
+
+})
+
+
+app.get('/test_ups_track', (req, res) => {
+
+    const query = new URLSearchParams({
+        locale: 'en_US',
+        returnSignature: 'false'
+      }).toString();
+
+    const inquiryNumber = '1ZB98W480330445025';
+
+    const options = 
+    {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          transId: 'string',
+          transactionSrc: 'testing',
+          Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
+        }
+
+    }
+
+    fetch(`https://onlinetools.ups.com/api/track/v1/details/${inquiryNumber}?${query}`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        // console.log(response.ShipmentResults.)
+        res.send(response)
+    });
+
+
+
+});
+
+
+
+
+
+app.get('/test_ups_rating', (req, res) => {
+//  fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
+//     .then(response => response.json())
+//     .then(response => {
+
+//         console.log("response")
+//         console.log(response)
+//         res.redirect(`https://www.ups.com/lasso/signin?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com&response_type=code&scope=read&type=ups_com_api`);
+//     });
+
+const data = {
+        RateRequest: {
+            Request: {
+                TransactionReference: {
+                    CustomerContext: 'CustomerContext',
+                    TransactionIdentifier: 'TransactionIdentifier'
+                }
+                },
+            Shipment: {
+                Shipper: {
+                    Name: 'cafe FORE',
+                    ShipperNumber: 'B98W48',
+                    Address: {
+                    AddressLine: [
+                        '4400 Roswell Rd'
+                    ],
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                    }
+                },
+                ShipTo: {
+                    Name: 'sbMuscle',
+                    Address: {
+                    AddressLine: [
+                        '17420 Mt. Herrmann St.'
+                       
+                    ],
+                    City: 'Fountain Valley',
+                    StateProvinceCode: 'CA',
+                    PostalCode: '92708',
+                    CountryCode: 'US'
+                    }
+                },
+                ShipFrom: {
+                    Name: 'cafe FORE',
+                    ShipperNumber: 'B98W48',
+                    Address: {
+                    AddressLine: [
+                        '4400 Roswell Rd'
+                    ],
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                    }
+                },
+                PaymentDetails: {
+                    ShipmentCharge: {
+                    Type: '01',
+                    BillShipper: {
+                        AccountNumber: 'B98W48'
+                    }
+                    }
+                },
+                Service: {
+                    Code: '03',
+                    Description: 'Ground'
+                },
+                NumOfPieces: '1',
+                Package: {
+                    // SimpleRate: {
+                    // Description: 'SimpleRateDescription',
+                    // Code: 'XS'
+                    // },
+                    PackagingType: {
+                    Code: '02',
+                    Description: 'Packaging'
+                    },
+                    Dimensions: {
+                    UnitOfMeasurement: {
+                        Code: 'IN',
+                        Description: 'Inches'
+                    },
+                    Length: '5',
+                    Width: '5',
+                    Height: '5'
+                    },
+                    PackageWeight: {
+                    UnitOfMeasurement: {
+                        Code: 'LBS',
+                        Description: 'Pounds'
+                    },
+                    Weight: '10'
+                    }
+                },
+                DeliveryTimeInformation: {
+                    PackageBillType: '03',
+                    Pickup: {
+                      Date: '20230412',
+                      Time: '1000'
+                    }
+                }
+            }
+        }
+}
+
+const query = new URLSearchParams({
+    additionalinfo: 'timeintransit'
+  }).toString();
+  
+  const version = 'v1';
+  const requestoption = 'Rate';
+
+const options = 
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        transId: 'test01trs',
+        transactionSrc: 'testing',
+        Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
+        // Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgxMjQwNDE2LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODEyNTQ4MTYsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODEyNDA0MTYsImp0aSI6ImRmNjYxNThmLTBmYTEtNDU0OC04OTczLTczNTUyOGQxMzBhZSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.asOY41WovUTGTv_3VEjY_IWteO88lAvQBUBmvI5jGPiV4psfg5LfQa6J-1Ok3ahf_35homGR6yvgPt-89TXJPAVKiW-IjrneFJajmVsr2WUjpbzrgYZowmPce4EQyHCwfau9rriILPkOF2phLdvtcEMt277HxhTBbHY3t3ADMY6vOnkgjPOw0alMaxqGFQ-UxneesVk24QsL2nqnt8r0mPV3BF163ZeFINbzeWknL_j1RhIryheJ4v0H7_4amkeVS1f4DvvpUeAId4mJ4sP2FYIhpX4l3yVpHkhThwB54ZQ3If9DAAy25JXteFmn8GI3V-HxODlMGjAOUEVNs6Ujhmzj3c_mCI0nFgNZ1dleiKywM5cppHo3g_Cf9lURkdQkrr5s8Piqnqn3lCuhuqj13gx_TH9uWDFsbkUi6vtKfCeS8KEoA2wCRCZI0NwLwET96ZCeCNS6QXKixx7XoP7JRB8O_te3CW-jHocXAb7g_UqaSQsLbpPwwezp92DI1s8pd5CUdMndxj1No_1ZMPApPKBbME-mJkp1RUqqHvERs2tEddhFPR692oHYXLLnsDZY5eekVoNYrrCcywi-hemPEpR0wVJLNlgXIRoP4weqOYDCZy1h3XDfx2NzWqgSzOulQPArFteC7VSVK5x_GUUNXvz3M9PF4tCmbsccL4_If3E'
+      },
+      body: JSON.stringify(data)
+    }
+    // fetch(`https://onlinetools.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
+    
+fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
+.then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        res.send(response)
+    });
+
+
+
+});
+
+    
+
+app.get('/test_shipment',(req,res) => {
+    console.log("/test_log/test_log/test_log/test_log");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_/test_lost_log/test_log/log/test_lg");
+    
+    const ship = {
+        ShipmentRequest: {
+            Request: {
+            SubVersion: '1801',
+            RequestOption: 'nonvalidate',
+            TransactionReference: {CustomerContext: ''}
+            },
+            Shipment: {
+            Description: 'Ship WS test',
+            Shipper: {
+                Name: 'ShipperName',
+                AttentionName: 'ShipperZs Attn Name',
+                TaxIdentificationNumber: '123456',
+                Phone: {
+                Number: '1115554758',
+                Extension: ' '
+                },
+                ShipperNumber: ' ',
+                FaxNumber: '8002222222',
+                Address: {
+                AddressLine: '2311 York Rd',
+                City: 'Timonium',
+                StateProvinceCode: 'MD',
+                PostalCode: '21093',
+                CountryCode: 'US'
+                }
+            },
+            ShipTo: {
+                Name: 'Happy Dog Pet Supply',
+                AttentionName: '1160b_74',
+                Phone: {Number: '9225377171'},
+                Address: {
+                AddressLine: '123 Main St',
+                City: 'timonium',
+                StateProvinceCode: 'MD',
+                PostalCode: '21030',
+                CountryCode: 'US'
+                },
+                Residential: ' '
+            },
+            ShipFrom: {
+                Name: 'T and T Designs',
+                AttentionName: '1160b_74',
+                Phone: {Number: '1234567890'},
+                FaxNumber: '1234567890',
+                Address: {
+                AddressLine: '2311 York Rd',
+                City: 'Alpharetta',
+                StateProvinceCode: 'GA',
+                PostalCode: '30005',
+                CountryCode: 'US'
+                }
+            },
+            PaymentInformation: {
+                ShipmentCharge: {
+                Type: '01',
+                BillShipper: {AccountNumber: ' '}
+                }
+            },
+            Service: {
+                Code: '03',
+                Description: 'Express'
+            },
+            Package: {
+                Description: ' ',
+                Packaging: {
+                Code: '02',
+                Description: 'Nails'
+                },
+                Dimensions: {
+                UnitOfMeasurement: {
+                    Code: 'IN',
+                    Description: 'Inches'
+                },
+                Length: '10',
+                Width: '30',
+                Height: '45'
+                },
+                PackageWeight: {
+                UnitOfMeasurement: {
+                    Code: 'LBS',
+                    Description: 'Pounds'
+                },
+                Weight: '5'
+                }
+            }
+            },
+            LabelSpecification: {
+            LabelImageFormat: {
+                Code: 'GIF',
+                Description: 'GIF'
+            },
+            HTTPUserAgent: 'Mozilla/4.5'
+            }
+        }
+    }
+
+
     const options = {
         method: 'POST',
         headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            'Authorization': 'Basic Rm1mblFEdVYtVTJGc2RHVmtYMTltZnRUMFFjRENWQU1lZEd2Z2hwb2ZKQ3B3YVN5d3FpNkoxOU9tWE1ZYkZORWhHUExDREV6d2hqMCtVOEFMNzZIbjJHUjJuTElCN3c9PQ',
+            'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify({
-            items: [
-              {
-                tax_rates: [{tax_rate_uuid: 'Q0NVFCYTZ4KYE', name: '6%'}],
-                amount: 1800,
-                currency: 'usd',
-                description: 'Ginger Bottle 16oz',
-                quantity: 1,
-                type: 'sku'
+        body: 'grant_type=authorization_code&code=[Auth-Code]'
+    }
+
+    fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        res.send(response);
+    });
+});
+
+app.get('/test_rate',(req,res) => {
+    console.log("/test_ship /test_ship /test_ship /test_ship");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+   
+    const data = {
+        "accountNumber": {
+          "value": "740561073"
+        },
+        "requestedShipment": {
+          "shipper": {
+            "address": {
+              "postalCode": 30062,
+              "countryCode": "US"
+            }
+          },
+          "recipient": {
+            "address": {
+              "postalCode": 89139,
+              "countryCode": "US"
+            }
+          },
+          "pickupType": "DROPOFF_AT_FEDEX_LOCATION",
+          "rateRequestType": [
+            "ACCOUNT",
+            "LIST"
+          ],
+          "requestedPackageLineItems": [
+            {
+              "weight": {
+                "units": "LB",
+                "value": 15
               }
+            }
+          ]
+        }
+      }
+    const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-locale' : 'en_US',          
+          Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJDWFMiXSwiUGF5bG9hZCI6eyJjbGllbnRJZGVudGl0eSI6eyJjbGllbnRLZXkiOiJsNzg0MDA5ODBkZWNiYTQ1ODdiMDMxZDY0ZDA0ZWViYmY2In0sImF1dGhlbnRpY2F0aW9uUmVhbG0iOiJDTUFDIiwiYWRkaXRpb25hbElkZW50aXR5Ijp7InRpbWVTdGFtcCI6IjA4LUFwci0yMDIzIDEwOjQ4OjU3IEVTVCIsImdyYW50X3R5cGUiOiJjbGllbnRfY3JlZGVudGlhbHMiLCJhcGltb2RlIjoiU2FuZGJveCIsImN4c0lzcyI6Imh0dHBzOi8vY3hzYXV0aHNlcnZlci1zdGFnaW5nLmFwcC5wYWFzLmZlZGV4LmNvbS90b2tlbi9vYXV0aDIifSwicGVyc29uYVR5cGUiOiJEaXJlY3RJbnRlZ3JhdG9yX0IyQiJ9LCJleHAiOjE2ODA5NzI1MzcsImp0aSI6IjFiZTllNDJjLWEwN2MtNDU1Yi04YmZlLTJjZTJiMWUzNzU2MCJ9.AL1opn8_KXV-1xN8XyOj3_Rf1oRDdpPp0szRdUWBDD5ZCHLrwLYhytUl1v2zYMaYCr_d1dIaVGNLBV8rfILSuxKttXZrLX4uQosWY29hg6uBdckCkdQnkzMz_U0VMD0Y0aalJFobFjPOtNdqh7lEPvHG64lHdLKrjAE95p0oKAhvP2wB92kzfqVxSz_megbzF63THkaiUi0gcKNOvNEHEH8LEVvrTMougBuQoS04Qe4waktnvLHKq_WyJRcb0te3kwAQjB89PfeLsR6EoRbZQ3UaBuIPD_hjSmNcFlDe6iSejLFR0aVKTjaSyTqKsrrK4opcsUyCQ6QOu7pts1GrJPmXx36cT3DIAvPUMoPa3W8J5mvjwm84Febgkm84PiE_7VznRcL8TRE7KiyRL7Oz9kXQ8M7ueXE4gtR76pHZxr5THZiikXT4FDfREtKgadyrECi46gn1UT7sVSZ9ixKLEhuq9RbWp0f2y37KMDleqeEzIhuJHNaOLY5L00vbepCQEDNRVKVFfgq_cPnJDS_rNuZIk5ZiHdvqZTH-TqyWD2Mre-WfHTOsEK0Eg2KKWTtTCDDixkef0Bn2ALHdvU8ED_WrzvtJTyrihfRKQ7Ax5UNZGsqESBaUT54hhrhX9vivVLxnzK7j0R9mrouVJU9tKza5vDCwY1UGXUkADuShdnY'
+        },
+        body: JSON.stringify({data})
+    }
+          
+
+      fetch(`https://apis-sandbox.fedex.com/rate/v1/rates/quotes`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        res.send(response);
+    });
+
+});
+   
+app.get('/test_fedex_ship',(req,res) => {
+    console.log("/test_fedex_ship /test_fedex_ship /test_fedex_ship");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+    
+
+    const data = 
+{
+    "requestedShipment": {
+      "shipper": {
+        "contact": {
+          "personName": "cafe FORE",
+          "phoneNumber": 4702636495
+        },
+        "address": {
+          "streetLines": [
+            "4400 Roswell Rd"
+          ],
+          "city": "Marietta",
+          "stateOrProvinceCode": "GA",
+          "postalCode": 30062,
+          "countryCode": "US"
+        }
+      },
+      "recipients": [
+        {
+          "contact": {
+            "personName": "Joe Kim",
+            "phoneNumber": 4702636499
+          },
+          "address": {
+            "streetLines": [
+              "6594 Hulme end ave"
             ],
-            currency: 'usd',
-            email: 'rangdad@gmail.com'
-          })
-        };
-       
-      console.log(options)
-      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+            "city": "Las Vegas",
+            "stateOrProvinceCode": "NV",
+            "postalCode": 89139,
+            "countryCode": "US"
+          }
+        }
+      ],
+      "shipDatestamp": "2023-04-06",
+      "pickupType": "CONTACT_FEDEX_TO_SCHEDULE",
+      "serviceType": "FEDEX_GROUND",
+      "packagingType": "YOUR_PACKAGING",
+      "shippingChargesPayment": {
+        "paymentType": "SENDER",
+        "payor": {
+          "responsibleParty": {
+            "accountNumber": {
+              "value": "740561073"
+            }
+          }
+        }
+      },
+      "shipmentSpecialServices": {
+        "specialServiceTypes": [
+          "RETURN_SHIPMENT"
+        ],
+        "returnShipmentDetail": {
+          "returnType": "FEDEX_TAG"
+        }
+      },
+      "blockInsightVisibility": false,
+      "pickupDetail": {
+        "readyPickupDateTime": "2023-04-06T09:00:00Z",
+        "latestPickupDateTime": "2023-04-06T14:00:00Z"
+      },
+      "requestedPackageLineItems": [
+        {
+          "itemDescription": "Item description",
+          "weight": {
+            "units": "LB",
+            "value": 10
+          }
+        }
+      ]
+    },
+    "accountNumber": {
+      "value": "740561073"
+    }
+  }
+
+    const options = {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-locale' : 'en_US',          
+        Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJDWFMiXSwiUGF5bG9hZCI6eyJjbGllbnRJZGVudGl0eSI6eyJjbGllbnRLZXkiOiJsNzg0MDA5ODBkZWNiYTQ1ODdiMDMxZDY0ZDA0ZWViYmY2In0sImF1dGhlbnRpY2F0aW9uUmVhbG0iOiJDTUFDIiwiYWRkaXRpb25hbElkZW50aXR5Ijp7InRpbWVTdGFtcCI6IjA4LUFwci0yMDIzIDEwOjQ4OjU3IEVTVCIsImdyYW50X3R5cGUiOiJjbGllbnRfY3JlZGVudGlhbHMiLCJhcGltb2RlIjoiU2FuZGJveCIsImN4c0lzcyI6Imh0dHBzOi8vY3hzYXV0aHNlcnZlci1zdGFnaW5nLmFwcC5wYWFzLmZlZGV4LmNvbS90b2tlbi9vYXV0aDIifSwicGVyc29uYVR5cGUiOiJEaXJlY3RJbnRlZ3JhdG9yX0IyQiJ9LCJleHAiOjE2ODA5NzI1MzcsImp0aSI6IjFiZTllNDJjLWEwN2MtNDU1Yi04YmZlLTJjZTJiMWUzNzU2MCJ9.AL1opn8_KXV-1xN8XyOj3_Rf1oRDdpPp0szRdUWBDD5ZCHLrwLYhytUl1v2zYMaYCr_d1dIaVGNLBV8rfILSuxKttXZrLX4uQosWY29hg6uBdckCkdQnkzMz_U0VMD0Y0aalJFobFjPOtNdqh7lEPvHG64lHdLKrjAE95p0oKAhvP2wB92kzfqVxSz_megbzF63THkaiUi0gcKNOvNEHEH8LEVvrTMougBuQoS04Qe4waktnvLHKq_WyJRcb0te3kwAQjB89PfeLsR6EoRbZQ3UaBuIPD_hjSmNcFlDe6iSejLFR0aVKTjaSyTqKsrrK4opcsUyCQ6QOu7pts1GrJPmXx36cT3DIAvPUMoPa3W8J5mvjwm84Febgkm84PiE_7VznRcL8TRE7KiyRL7Oz9kXQ8M7ueXE4gtR76pHZxr5THZiikXT4FDfREtKgadyrECi46gn1UT7sVSZ9ixKLEhuq9RbWp0f2y37KMDleqeEzIhuJHNaOLY5L00vbepCQEDNRVKVFfgq_cPnJDS_rNuZIk5ZiHdvqZTH-TqyWD2Mre-WfHTOsEK0Eg2KKWTtTCDDixkef0Bn2ALHdvU8ED_WrzvtJTyrihfRKQ7Ax5UNZGsqESBaUT54hhrhX9vivVLxnzK7j0R9mrouVJU9tKza5vDCwY1UGXUkADuShdnY'
+        },
+        body: JSON.stringify({data})
+    }
+        
+
+    fetch(`https://apis-sandbox.fedex.com/ship/v1/shipments/packages/validate`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        res.send(response);
+    });
+})
+
+app.get('/test_upst',(req,res) => {
+    console.log("/test_log/test_log/test_log/test_log");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+    const formData = {
+        grant_type: 'client_credentials'
+      };
+
+    //   const resp = fetch(
+    //     `https://wwwcie.ups.com/api/security/v1/oauth/token`,
+    //     {
+    //       method: 'POST',
+    //       headers: {
+    //         'Content-Type': 'application/x-www-form-urlencoded',
+    //         'x-merchant-id': 'string',
+    //         Authorization: 'Basic ' + btoa('<zohola>:<Yeohae120817!>')
+    //       },
+    //       body: new URLSearchParams(formData).toString()
+    //     }
+    //   );
+      
+    //   const data = resp.text();
+    //   console.log(data);
+
+      const input = 
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+        //   Authorization: 'Basic PHpvaG9sYT46PFllb2hhZTEyMDgxNyE+'
+          Authorization: 'Basic ' + Buffer.from('<Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11>:<Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB>').toString('base64')
+        },
+        body: JSON.stringify({grant_type: 'client_credentials'})
+      }
+      console.log(input);
+      fetch(`https://wwwcie.ups.com/api/security/v1/oauth/token`, input)
+      .then(response => response.json())
+      .then(response => {
+          console.log("response")
+          console.log(response)
+          res.send(response);
+      });
+      
+
+
+
+});
+
+app.get('/test_get_ups',(req,res) => {
+    console.log("/test_log/test_log/test_log/test_log");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+
+    fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
         .then(response => response.json())
-        .then(result => {
-            console.log(result)
+        .then(response => {
+
+            console.log("response")
+            console.log(response)
+            res.redirect(`https://www.ups.com/lasso/signin?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com&response_type=code&scope=read&type=ups_com_api`);
         });
+
+
+
+});
+   
+app.get('/test_ups_token',(req,res) => {
+    console.log("/test_log/test_log/test_log/test_log");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+    
+    const options = 
+    {
+    method: 'POST',
+    headers: {
+        Authorization: 'Basic ' + Buffer.from('<zohola>:<Yeohae120817!>').toString('base64'),
+        'x-merchant-id': 'GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: 'grant_type=authorization_code&code=[SG82Q2kxZkEtVTJGc2RHVmtYMTljdk93aE5zZ2JIclpLMWh3cUFIenl4ZnZyS29ZVm9oWXlOdjB2aVFrbDVZcm15U2VVUGErdDZ4Y0orOWhZYUdqcENMUi85bmJONWc9PQ==]'
+    }
+
+    fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
+    .then(response => response.json())
+      .then(response => {
+          console.log("response")
+          console.log(response)
+          res.send(response);
+      });
+
+});
+
+app.get('/test_utttu',(req,res) => {
+    console.log("/test_log/test_log/test_log/test_log");
+    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+   
+    
+
+  const version = 'v1';
+  const requestoption = 'Rate';
+  
+    const options = 
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        transId: '20230407trs',
+        transactionSrc: 'testing',
+        Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgwOTI5MzY0LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODA5NDM3NjQsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODA5MjkzNjQsImp0aSI6IjBhY2Q4ZTEzLTUxMWYtNDQ5ZC05ZDc3LWU5ZTcwNDJlYzljOSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.12xip3sX3xlAewFcuT21t79UykiOiKmEe5Yjz_c9mrm4ru6Tu52StWmgXGFB8f3q6ny6ILKpAXwrYPHDSfjbFYbQ4ZfVF0kvEsnPGR5QnrTbfOjxNiX27FQWpreYWhnevW4_JjH016szrQzOJZVcsiXoKEjYFbSWkMfe53pduoCFua67JUqXqoUawC7M2hHv3DEelL7iY6d5nM_IHesvm_Up8_ONt3AZfcaLd2hxORHFv_i_cibNaTSk5nJBNW1wfKEKHlsRwUsiDN_on5AkjsqH2_CuSriDI8gWTzxxKVnXCMK4DkwL0WfKw3ulaQQBzAQsuAQf28_LPJODaqi_Pl3ZRnfJoR17YdpHspZfyp3Ba3oKvCE80C3WGi34Jrub0iqvH0aRCmT7n67bEVnmZIg4WUG7IxctqNcwyOSw0ORSrK8F-OgNXN5vD2m87WAjkV2Hag4VK-IswMP2B_2uTyKHKh0H8pX-FYBcV-pmsFLnWenLmbCFGLiy1DenqPIHj0qhxXDka-oD_L-dKpvcc2JPwYmPputdWssyABk8U8AoVTp_6k3majVSs5TlfoJkz_4ZrG0bS8dxeLxfXxu1vyfyeD4CmFjDmW1bbtyWJxXuJ3e4Zye4l8yQxiHXpSLai2jIcMRzkpr1dmTnvpMFI3-h5eHVs8mjFafBD6is7T4'
+      },
+      body: JSON.stringify({
+        RateRequest: {
+          Request: {
+            TransactionReference: {
+              CustomerContext: 'CustomerContext',
+              TransactionIdentifier: 'TransactionIdentifier'
+            }
+          },
+          Shipment: {
+            Shipper: {
+              Name: 'cafe fore',
+              ShipperNumber: 'B98W48',
+              Address: {
+                AddressLine: '4400 Roswell Rd',
+                City: 'Roswell',
+                StateProvinceCode: 'GA',
+                PostalCode: '30062',
+                CountryCode: 'US'
+              }
+            },
+            ShipTo: {
+              Name: 'Jay Kim',
+              Address: {
+                AddressLine: '6594 hulme end ave',
+                City: 'Las Vegas',
+                StateProvinceCode: 'NV',
+                PostalCode: '89139',
+                CountryCode: 'US'
+              }
+            },
+            ShipFrom: {
+              Name: 'cafe fore',
+              Address: {
+                AddressLine: '4400 Roswell Rd',
+                City: 'Roswell',
+                StateProvinceCode: 'GA',
+                PostalCode: '30062',
+                CountryCode: 'US'
+              }
+            },
+            PaymentDetails: {
+              ShipmentCharge: {
+                Type: '01',
+                BillShipper: {
+                  AccountNumber: 'B98W48'
+                }
+              }
+            },
+            Service: {
+              Code: '03',
+              Description: 'Ground'
+            },
+            NumOfPieces: '5',
+            Package: [
+              {
+                SimpleRate: {
+                  Description: 'SimpleRateDescription',
+                  Code: 'XS'
+                },
+                PackagingType: {
+                  Code: '02',
+                  Description: 'Packaging'
+                },
+                Dimensions: {
+                  UnitOfMeasurement: {
+                    Code: 'IN',
+                    Description: 'Inches'
+                  },
+                  Length: '10',
+                  Width: '10',
+                  Height: '10'
+                },
+                PackageWeight: {
+                  UnitOfMeasurement: {
+                    Code: 'LBS',
+                    Description: 'Pounds'
+                  },
+                  Weight: '15'
+                }
+              }
+            ]
+          }
+        }
+      })
+    }
+
+    fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?Rate`, options)
+    .then(response => response.json())
+    .then(response => { 
+        console.log(response);
+        // console.log(response.RateResponse.response.ResponseStatus[0]);
+        // console.log(response.RateResponse.response.Alert[0]);
+        // console.log(response.RateResponse.response.TransactionReference[0]);
+        // console.log("response.RateResponse.RatedShipment");
+        // console.log(response.RateResponse.RatedShipment.Service[0]);
+        // console.log(response.RateResponse.RatedShipment.RatedShipmentAlert[0]);
+        // console.log(response.RateResponse.RatedShipment.TotalCharges[0]);
+        res.send(response);
+    });
+  
+  
+
+
 })
 
 

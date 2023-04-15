@@ -2,24 +2,20 @@ export default class {
     constructor() {
         document.title = "Cafe FORE";
         console.log("contact page");
-        this.name='';
-
     }
 
     gmap() {
-     
-    const gmap_script = document.getElementById('gmap_script');
+        const gmap_script = document.getElementById('gmap_script');
+        while (gmap_script.hasChildNodes()) {
+            gmap_script.removeChild(gmap_script.firstChild);
+        }
 
-    while (gmap_script.hasChildNodes()) {
-        gmap_script.removeChild(gmap_script.firstChild);
-    }
-
-    console.log("gmap loaded");
-    var script = document.createElement('script');
-    script.setAttribute('class', 'gmp'); 
-    script.type = 'text/javascript';
-    script.src = "pages/gmap.js";
-    gmap_script.appendChild(script);
+        console.log("gmap loaded");
+        var script = document.createElement('script');
+        script.setAttribute('class', 'gmp'); 
+        script.type = 'text/javascript';
+        script.src = "pages/gmap.js";
+        gmap_script.appendChild(script);
         
     }
 
@@ -44,35 +40,8 @@ export default class {
         
     }
 
-    /*
-    gmCheck() {
-        // var gmap = document.querySelector('#googleMap');
-        // gmap.remove();
-        console.log("gmcheck");
-
-        const allScripts = document.getElementsByTagName( 'script' );
-        
-        for(var i = 0; i < allScripts.length; i++){
-
-            console.log(allScripts[i].src.indexOf('key='));
-
-            if(allScripts[i].src.indexOf('key=') >= 0) {
-                console.log("gmcheck true");
-                return true;
-            }                    
-        }
-        return false;
-    }
-
-    gmRemove() {
-        console.log("gmremove");
-        var gmap = document.querySelector('#googleMap');
-        gmap.remove();
-    }
-    */
-
     sendmail() {
-        var script = document.createElement('script');
+        let script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = '#';
         document.body.appendChild(script);
