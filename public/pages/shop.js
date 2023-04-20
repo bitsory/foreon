@@ -261,8 +261,19 @@ document.addEventListener('click', function(e) {
         //     console.log(result);
         //     window.location.href = response.LassoRedirectURL;
         // });
+        console.log("sho[p teset sho[p teset sho[p tesetsho[p teset ")
+        const send_data = { post : "item detail view"};
+        const data = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+               
+                },
+            body: JSON.stringify(send_data)
+        };
+        console.log(data);
 
-        fetch(`/test_ups`)
+        fetch(`/test_ups_ship`, data)
         .then(response => response.json())
         .then(response => {
 

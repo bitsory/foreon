@@ -3,6 +3,7 @@ import orderComplete from "./order_complete.js";
 import * as AIF from "./acc_info_form.js";
 import * as ItemCounter from "./item_counter.js";
 
+
 export default class {
 
     online_main = document.getElementById('online_main');
@@ -493,6 +494,7 @@ export default class {
             <button class="guest_test_submit">guest_test_submit</button>
             <button class="check_guest_cart">check_guest_cart</button>
             <button class="crypto_test">crypto_test</button>
+            <button class="make_item_test">make_item_test</button>
         </div>
         `;
     }
@@ -624,164 +626,182 @@ export default class {
         console.log(check_out_cart)
         console.log(checked_order_list)
 
-        let guest_total_amount = 0;
-        let guest_total_item_weight = 0;
-        
-        if(checked_order_list.length) { 
-            checked_order_list.forEach(element => {
-                
-                let price = element.price_sell;
-                let quantity = (this.user_id == "GUEST") ? 
-                    (check_out_cart.filter(item => {
-                    return item.c_item_name == element.name})[0].c_item_quantity) : element.quantity;
-                let item_weight = element.weight;
+        // let key = {};
+        const send_data = {u_id : 'getkey'};
 
-                // setOrderItemContainer(element.prodnum, element.price_sell, element.name, quantity, element.image);
-                
-                guest_total_amount = guest_total_amount + (price * quantity);
-                console.log(`total_amount : ${guest_total_amount}`);
-                guest_total_item_weight = guest_total_item_weight + (quantity * item_weight);
-                console.log('guest_total_item_weight');
-                console.log(guest_total_item_weight);
-            });
-            // g_total = total_amount;
-            // tmp_order_cart = check_out_cart;
-    
-            // if (total_amount !=0) this.check_out_box.getGrandTotal(total_amount);  // initial render grand total      
-        
-        }//////////////////////////////
-
-        this.check_out_box.setItemTotalWeight('GUEST', guest_total_item_weight);
-
-
-        this.check_out_box.setTotal('GUEST', guest_total_amount);
+        const data = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
                
-
-        check_out_cart.forEach(element => {
-            this.check_out_box.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "check_out_items_container", "check_out_item")
-            // check_out_amount = check_out_amount + (element.c_item_price * element.c_item_price);
-            // console.log(check_out_amount);
-        })
-
-        const item_count = check_out_cart.length;
-        const shipping_fee = 9.90;
-        // const total_before_tax = guest_total_amount + shipping_fee;
-        const total_before_tax = this.check_out_box.getTotal() + shipping_fee;
-        const estimated_tax = (total_before_tax)* 0.06;
-        const order_total = total_before_tax + estimated_tax;
-        document.getElementById('checkout_submit_summary_items_count').innerText = item_count;
-        document.getElementById('checkout_submit_summary_items_value').innerText = guest_total_amount.toFixed(2);
-        document.getElementById('checkout_submit_summary_shipping_value').innerText = shipping_fee.toFixed(2);  
-        document.getElementById('checkout_submit_summary_before_tax_value').innerText = total_before_tax.toFixed(2);                       
-        document.getElementById('checkout_submit_summary_Estimated_tax_value').innerText = estimated_tax.toFixed(2);
-        document.getElementById('checkout_submit_summary_order_total_value').innerText = order_total.toFixed(2);
-
-
-   
-        const order_info = this.order_info;   
-        const order_items = sessionStorage.getItem("checkoutcart"); 
-        console.log(order_items);  
-        const clover = new Clover('3de85b3b5c3bbea456e24e24596245fd');
-    
-        const elements = clover.elements();
-               
-
-        const styles = {
-            body: {
-                fontfamily: 'Jost, sans-serif', fontSize: '10px',
-            },
-            input: {
-                fontSize: '14px', border: '0.5px solid #DEE0E1', height: '2rem'
-            },
+                },
+            body: JSON.stringify(send_data)
         };
-        
-        const cardNumber = elements.create('CARD_NUMBER', styles);        
-        const cardDate = elements.create('CARD_DATE', styles);
-        const cardCvv = elements.create('CARD_CVV', styles);
-        const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
+        console.log(data);
+
+        fetch(`/get_api_key`, data)
+        .then((res) => res.json())
+        .then(result => {
+            const key = result;
+
+            let guest_total_amount = 0;
+            let guest_total_item_weight = 0;
             
-        cardNumber.mount('#card-number');
-        // cardName.mount('#card-name');
-        cardDate.mount('#card-date');
-        cardCvv.mount('#card-cvv');
-        cardPostalCode.mount('#card-postal-code');
-
-        const cardResponse = document.getElementById('card-response');
-        const displayCardNumberError = document.getElementById('card-number-errors');
-        const displayCardDateError = document.getElementById('card-date-errors');
-        const displayCardCvvError = document.getElementById('card-cvv-errors');
-        const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
-        // const guest_checkout_submit_btn = document.getElementById('guest_checkout_submit_button');
-        const payment_form = document.getElementById('payment-form');
-        // const amount = document.querySelector('.payment_amount');
-       
-
-        // amount.value = parseFloat(order_total).toFixed(2);
-      
-        // Handle real-time validation errors from the card element
-        cardNumber.addEventListener('change', function(event) {
-            console.log(`cardNumber changed ${JSON.stringify(event)}`);
-            displayCardNumberError.textContent = '';
-        });
-
-        cardNumber.addEventListener('blur', function(event) {
-            console.log(`cardNumber blur ${JSON.stringify(event)}`);
-        });
-
-        cardDate.addEventListener('change', function(event) {
-            console.log(`cardDate changed ${JSON.stringify(event)}`);
-            displayCardDateError.textContent = '';
-        });
-
-        cardDate.addEventListener('blur', function(event) {
-            console.log(`cardDate blur ${JSON.stringify(event)}`);
-        });
-
-        cardCvv.addEventListener('change', function(event) {
-            console.log(`cardCvv changed ${JSON.stringify(event)}`);
-            displayCardCvvError.textContent = '';
-        });
-
-        cardCvv.addEventListener('blur', function(event) {
-            console.log(`cardCvv blur ${JSON.stringify(event)}`);
-        });
-
-        cardPostalCode.addEventListener('change', function(event) {
-            console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
-            displayCardPostalCodeError.textContent = '';
-        });
-
-        cardPostalCode.addEventListener('blur', function(event) {
-            console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
-        });
-       
-        payment_form.addEventListener('submit', (event) => { 
-            const shipping_rate = JSON.stringify(this.check_out_box.checkShippingRate());    
-            console.log(shipping_rate);                
-            event.preventDefault();
-            // Use the iframe's tokenization method with the user-entered card details
-            clover.createToken()
-                .then(function(result) {
-                if (result.errors) {                    
-                    Object.entries(result.errors).forEach(element => {
-                        console.log(element);
-                        element[0] == 'CARD_NUMBER' ? displayCardNumberError.textContent = element[1] : false;
-                        element[0] == 'CARD_DATE' ? displayCardDateError.textContent = element[1] : false;
-                        element[0] == 'CARD_CVV' ? displayCardCvvError.textContent = element[1] : false;
-                        element[0] == 'CARD_POSTAL_CODE' ? displayCardPostalCodeError.textContent = element[1] : false;
-                    });
+            if(checked_order_list.length) { 
+                checked_order_list.forEach(element => {
                     
-                } else {
-                document.getElementById('guest_checkout_submit_button').setAttribute('disabled', 'true');
-                turnOffDisplay();
-                const order_items = sessionStorage.getItem("checkoutcart");                               
+                    let price = element.price_sell;
+                    let quantity = (this.user_id == "GUEST") ? 
+                        (check_out_cart.filter(item => {
+                        return item.c_item_name == element.name})[0].c_item_quantity) : element.quantity;
+                    let item_weight = element.weight;
+
+                    // setOrderItemContainer(element.prodnum, element.price_sell, element.name, quantity, element.image);
+                    
+                    guest_total_amount = guest_total_amount + (price * quantity);
+                    console.log(`total_amount : ${guest_total_amount}`);
+                    guest_total_item_weight = guest_total_item_weight + (quantity * item_weight);
+                    console.log('guest_total_item_weight');
+                    console.log(guest_total_item_weight);
+                });
+                // g_total = total_amount;
+                // tmp_order_cart = check_out_cart;
+        
+                // if (total_amount !=0) this.check_out_box.getGrandTotal(total_amount);  // initial render grand total      
+            
+            }//////////////////////////////
+
+            this.check_out_box.setItemTotalWeight('GUEST', guest_total_item_weight);
+
+
+            this.check_out_box.setTotal('GUEST', guest_total_amount);
                 
-                cloverTokenHandler(result.token, order_items, shipping_rate);
+
+            check_out_cart.forEach(element => {
+                this.check_out_box.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "check_out_items_container", "check_out_item")
+                // check_out_amount = check_out_amount + (element.c_item_price * element.c_item_price);
+                // console.log(check_out_amount);
+            })
+
+            const item_count = check_out_cart.length;
+            const shipping_fee = 9.90;
+            // const total_before_tax = guest_total_amount + shipping_fee;
+            const total_before_tax = this.check_out_box.getTotal() + shipping_fee;
+            const estimated_tax = (total_before_tax)* 0.06;
+            const order_total = total_before_tax + estimated_tax;
+            document.getElementById('checkout_submit_summary_items_count').innerText = item_count;
+            document.getElementById('checkout_submit_summary_items_value').innerText = guest_total_amount.toFixed(2);
+            document.getElementById('checkout_submit_summary_shipping_value').innerText = shipping_fee.toFixed(2);  
+            document.getElementById('checkout_submit_summary_before_tax_value').innerText = total_before_tax.toFixed(2);                       
+            document.getElementById('checkout_submit_summary_Estimated_tax_value').innerText = estimated_tax.toFixed(2);
+            document.getElementById('checkout_submit_summary_order_total_value').innerText = order_total.toFixed(2);
+
+
+    
+            const order_info = this.order_info;   
+            const order_items = sessionStorage.getItem("checkoutcart"); 
+            console.log(order_items);  
+            const clover = new Clover(key.key);
+        
+            const elements = clover.elements();
                 
-                }
+
+            const styles = {
+                body: {
+                    fontfamily: 'Jost, sans-serif', fontSize: '10px',
+                },
+                input: {
+                    fontSize: '14px', border: '0.5px solid #DEE0E1', height: '2rem'
+                },
+            };
+            
+            const cardNumber = elements.create('CARD_NUMBER', styles);        
+            const cardDate = elements.create('CARD_DATE', styles);
+            const cardCvv = elements.create('CARD_CVV', styles);
+            const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
+                
+            cardNumber.mount('#card-number');
+            // cardName.mount('#card-name');
+            cardDate.mount('#card-date');
+            cardCvv.mount('#card-cvv');
+            cardPostalCode.mount('#card-postal-code');
+
+            const cardResponse = document.getElementById('card-response');
+            const displayCardNumberError = document.getElementById('card-number-errors');
+            const displayCardDateError = document.getElementById('card-date-errors');
+            const displayCardCvvError = document.getElementById('card-cvv-errors');
+            const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
+            // const guest_checkout_submit_btn = document.getElementById('guest_checkout_submit_button');
+            const payment_form = document.getElementById('payment-form');
+            // const amount = document.querySelector('.payment_amount');
+        
+
+            // amount.value = parseFloat(order_total).toFixed(2);
+        
+            // Handle real-time validation errors from the card element
+            cardNumber.addEventListener('change', function(event) {
+                console.log(`cardNumber changed ${JSON.stringify(event)}`);
+                displayCardNumberError.textContent = '';
             });
-        });      
-        // });
+
+            cardNumber.addEventListener('blur', function(event) {
+                console.log(`cardNumber blur ${JSON.stringify(event)}`);
+            });
+
+            cardDate.addEventListener('change', function(event) {
+                console.log(`cardDate changed ${JSON.stringify(event)}`);
+                displayCardDateError.textContent = '';
+            });
+
+            cardDate.addEventListener('blur', function(event) {
+                console.log(`cardDate blur ${JSON.stringify(event)}`);
+            });
+
+            cardCvv.addEventListener('change', function(event) {
+                console.log(`cardCvv changed ${JSON.stringify(event)}`);
+                displayCardCvvError.textContent = '';
+            });
+
+            cardCvv.addEventListener('blur', function(event) {
+                console.log(`cardCvv blur ${JSON.stringify(event)}`);
+            });
+
+            cardPostalCode.addEventListener('change', function(event) {
+                console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
+                displayCardPostalCodeError.textContent = '';
+            });
+
+            cardPostalCode.addEventListener('blur', function(event) {
+                console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
+            });
+        
+            payment_form.addEventListener('submit', (event) => { 
+                const shipping_rate = JSON.stringify(this.check_out_box.checkShippingRate());    
+                console.log(shipping_rate);                
+                event.preventDefault();
+                // Use the iframe's tokenization method with the user-entered card details
+                clover.createToken()
+                    .then(function(result) {
+                    if (result.errors) {                    
+                        Object.entries(result.errors).forEach(element => {
+                            console.log(element);
+                            element[0] == 'CARD_NUMBER' ? displayCardNumberError.textContent = element[1] : false;
+                            element[0] == 'CARD_DATE' ? displayCardDateError.textContent = element[1] : false;
+                            element[0] == 'CARD_CVV' ? displayCardCvvError.textContent = element[1] : false;
+                            element[0] == 'CARD_POSTAL_CODE' ? displayCardPostalCodeError.textContent = element[1] : false;
+                        });
+                        
+                    } else {
+                    document.getElementById('guest_checkout_submit_button').setAttribute('disabled', 'true');
+                    turnOffDisplay();
+                    const order_items = sessionStorage.getItem("checkoutcart");                               
+                    
+                    cloverTokenHandler(result.token, order_items, shipping_rate);
+                    
+                    }
+                });
+            });      
+        });
     } 
 
     getShippingRate(param) {
@@ -1547,18 +1567,29 @@ document.addEventListener('click',function(e){
             // ItemCounter.item_counter('GUEST');
     
         });
-
-        // window.document.body.style.position= "fixed";
-        // Spinner.show();
-        // fetch('/test')
-        // .then(response => response.json())
-        // .then(response => {
-        //     console.log(response)
-        //     // window.location.href = response.url;
-        // })
-        // .catch(err => console.error(err)); 
-
         
+    }
+
+
+    if(e.target && e.target.className == 'make_item_test') {
+
+        const payload = {test : "test"}
+        fetch('/make_item_test', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: payload,
+          })
+          .then(res => res.json())
+          .then(response => {
+    
+    
+            console.log("/test_order_checkout complete")
+            console.log(response)
+            
+         
+        });
     }
 
     

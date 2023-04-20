@@ -7,7 +7,8 @@ const session = require('express-session');
 const JSEncrypt = require('nodejs-jsencrypt').default;
 const CryptoJS = require("crypto-js");
 const db = require('./public/service/db.js');
-require('dotenv').config();
+const schedule = require('node-schedule');
+require('dotenv').config({ override: true });
 // import fetch from 'node-fetch';
 
 
@@ -18,6 +19,44 @@ require('dotenv').config();
 app.listen(process.env.PORT, function() {
     console.log('listening on 8080');
     // console.log(session);
+    schedule.scheduleJob('0 0 */3 * * *', function(){
+        console.log(new Date() + ' scheduler running!');
+        const formData = {
+            grant_type: 'client_credentials'
+          };
+    
+        const options = {
+        method: 'POST',
+        headers: {
+            Authorization: 'Basic ' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
+            'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body : new URLSearchParams(formData).toString()
+        // body : 'grant_type=authorization_code&code=Wjg1RjZNSFotVTJGc2RHVmtYMSt2UnJhalVzVDBoTWRROEQ2dTdrdThGNXB6aTExcEpaeXBVenlmRTRRYURCUTJ5QmdaNFVzVU5WOCttRm82YlhkN0pZcW9zS3ZDNVE9PQ=='
+        }
+        fetch('https://wwwcie.ups.com/security/v1/oauth/token?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com', options)
+        // fetch('https://wwwcie.ups.com/api/security/v1/oauth/token', options)
+        .then(response => 
+            response.json())
+        .then(response => {
+            console.log("response")
+            console.log(response)            
+            require("dotenv").config({ path: ".env2" });            
+    
+            process.env.UPS_AUTH_TOKEN = response.access_token;
+            updateEnv(envItems);    
+            // res.send(response)
+        });
+    
+        const fs = require('fs');
+        const envItems = ['UPS_AUTH_TOKEN'];
+    
+        function updateEnv(items = [], eol = '\n'){
+            const envContents = items.map(item => `${item}=${process.env[item]}`).join(eol)
+            fs.writeFileSync('.env2', envContents);
+          } 
+    });
 });
 
 app.set('view engine', 'ejs');
@@ -38,6 +77,36 @@ app.use(cookieParser("secret"));
 const uuid4 = require('uuid');
 
 
+// const axios = require('axios');
+
+// // Config Set Up
+// const targetEnv = 'https://sandbox.dev.clover.com'; // Pointing to Sandbox Environment
+// // const targetEnv = 'https://www.clover.com'; // Pointing to Prod Environment
+
+// const appID = 'DRXJ3XYX3VZXT'; // Input your app ID here
+// const appSecret = '6b39c8ef-a361-95b9-e24e-7cb7c1fe551a'; // Input your app secret here
+
+// app.get('/', (req, res) => authenticate(req, res));
+
+// // Steps 1 & 2 - Request merchant authorization to receive authorization code
+// const authenticate = async (req, res) => {
+//   const url = `${targetEnv}/oauth/authorize?client_id=${appID}`;
+
+//   /* If there is no code parameter in the query string of the current url
+//   redirect user for authentication. If there isn't then request API token */
+//   !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
+// }
+
+// // Steps 3 & 4 - Request and serve up API token using the received authorization code
+// const requestAPIToken = async (res, query) => {
+//   const url = `${targetEnv}/oauth/token?client_id=${appID}&client_secret=${appSecret}&code=${query.code}`;
+
+//   // Request
+//   await axios.get(url)
+//     .then(({ data }) => res.send(data))
+//     .catch(err => res.send(err.message));
+// }
+
 
 app.get('/',(req,res) => {
     // fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
@@ -53,7 +122,9 @@ app.get('/',(req,res) => {
 
     console.log("home home home");
   
-    if (req.session.loginData) {
+    if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
+        res.render('admin.ejs', {post : "ADMIN"});
+    }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
         console.log("login data exist");        
 		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
@@ -61,6 +132,7 @@ app.get('/',(req,res) => {
 		res.sendFile(__dirname + "/public/index.html");
 	}
 });
+
 
 
 app.use(express.json()); // for parsing application/json
@@ -83,6 +155,15 @@ app.get('/account_modal_pop', (req,res) => {
     const public_key = {key : process.env.RSA_PUBLIC_KEY};       
     res.send(public_key);
 })
+
+app.post('/get_api_key', (req,res) => { 
+    if (req.body.u_id == 'getkey') {
+        const key = {key : process.env.API_KEY};       
+        res.send(key);
+    }
+})
+
+
 
 app.post("/sign_out", function (req, res) {
     req.session.destroy(() => {
@@ -222,8 +303,9 @@ app.post('/sign_in', function (req,res) {
                             res.send({check : 'not match'});
                             // con.end();
                         } else {                                         
-                            console.log(`${result}`);  
-                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id );
+                            console.log(`${result}`);                              
+                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id,);
+                            
                         }                                
                     });    
                 });
@@ -371,7 +453,10 @@ function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_
     }, {maxAge: 3600000, credentials: true, authorized : true, signed: true});
     console.log("login complete")
     const re_path = {url : url}
-    response.send(re_path);  
+    if (u_id == "cafeforeadmin") {
+        response.render('admin.ejs', {post : "ADMIN"})
+    }
+    else response.send(re_path);  
     // connect.release();     
     // connect.end();
     
@@ -531,25 +616,94 @@ app.post('/item_counter', (req,res) => {
 /////////////////////////////////////////////// clover API test//////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+app.post('/test_apikey', (req,res) => { 
 
-/*
-app.post('/dtest', (req,res) => { 
-    console.log('/decrypt_test /decrypt_test /decrypt_test /decrypt_test')
-   
-    // const encryptedText = req.body.key;    
-    const aid = req.body.a;
-    const bpw = req.body.b;
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: 'Bearer 760328e0-a9c6-bdac-d792-163b9ab1d1f8'
+        }
+      };
 
-    var ddecrypt = new JSEncrypt();
-    
-    ddecrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
+    fetch('https://scl-sandbox.dev.clover.com/pakms/apikey', options)
+    .then(response => response.json())
+    .then(response => console.log(response))
+    .catch(err => console.error(err));
 
-    const decryptedText_a = ddecrypt.decrypt(aid);
-    const decryptedText_b = ddecrypt.decrypt(bpw);
-    console.log(decryptedText_a)
-    console.log(decryptedText_b)
-})
+});
+
+
+app.post('/make_item_test', (req,res) => { 
+
+ /*        
+    const options = {
+        method: 'POST',
+        headers: {accept: 'application/json', 'content-type': 'application/json', authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+        body: JSON.stringify({
+          items: [
+            {
+              tax_rates: [{tax_rate_uuid: 'Q0NVFCYTZ4KYE', name: 'Jongho Kim'}],
+              inventory_id: 'DBWAF4CD2PVAE',
+              quantity: 3,
+              type: 'sku',
+              amount: 1800
+            }
+          ],
+        //   shipping: {
+        //     address: {
+        //       city: 'Buford',
+        //       country: 'US',
+        //       line1: '2742 Pearl Ridge Trce',
+        //       postal_code: '30519',
+        //       state: 'GA'
+        //     },
+        //     name: 'Jongho Kim'
+        //   },
+          currency: 'USD',
+          email: 'rangdad@gmail.com',
+        //   customer: 'ZGDVQHPESCMV6'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
 */
+        
+        
+    const options = {
+    method: 'POST',
+    headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+    body: JSON.stringify({
+        hidden: 'false',
+        available: 'true',
+        autoManage: 'false',
+        defaultTaxRates: 'true',
+        isRevenue: 'true',
+        taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
+        id: '00051',
+        name: 'Fish-shaped Bun',
+        sku: 'ea',
+        price: 1000,
+        priceType: 'PER_UNIT',
+        unitName: 'ea',
+        priceWithoutVat: 9899
+    })
+    };
+
+fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+  
+  
+})
+
 
 
 app.get('/list_of_orders', (req,res) => {
@@ -779,9 +933,9 @@ app.get('/create_item', (req,res) => {
           available: 'true',
           autoManage: 'false',
           defaultTaxRates: 'true',
-          isRevenue: 'false',
-          name: 'Ginger Bottle 16 oz.',
-          price: 19.08,
+          isRevenue: 'true',
+          name: 'Floating Moon Lamp',
+          price: 9899,
           priceType: 'PER_UNIT'
           
         })
@@ -805,7 +959,7 @@ app.get('/get_single_customer', (req,res) => {
         }
       };
 
-    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/W29TP8XFK9BH6?expand=cards`, options)
+    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/ZGDVQHPESCMV6?expand=cards`, options)
       .then(response => response.json())
       .then(response => { 
         console.log(response);
@@ -934,7 +1088,7 @@ app.get('/pay_order_test', (req,res) => {
           'content-type': 'application/json',
           authorization: `Bearer ${process.env.ACCESS_TOKEN}`
         },
-        body: JSON.stringify({"source":"DYSFDV5WVK3S4",
+        body: JSON.stringify({"source":"ZGDVQHPESCMV6",
         "email":"rangdad@gmail.com",
         "stored_credentials":{
         "sequence": "SUBSEQUENT",
@@ -942,7 +1096,7 @@ app.get('/pay_order_test', (req,res) => {
         "initiator": "CARDHOLDER"}})
       };
       
-      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/SNTNPYRTFNQY6/pay`, options)
+      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/NZQ8GJPSF4BXW/pay`, options)
         .then(response => response.json())
         .then(response => console.log(response))
         .catch(err => console.error(err));
@@ -1081,33 +1235,66 @@ app.get('/create_order_test', (req,res) => {
 
 app.get('/refund_test', (req,res) => {
     console.log("/refund_test  /refund_test /refund_test /refund_test");
-
     const options = {
         method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        headers: {accept: 'application/json', 
+        'content-type': 'application/json',
+        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
         },
-        body: JSON.stringify({"charge":"AK9X4V4EDFNJA"})
+        body: JSON.stringify({
+          "items":[{"parent":"2TXDF6YD2BW3J","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
+        })
       };
-      
-      fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+
+    fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
         .then(response => response.json())
         .then(response => console.log(response))
         .catch(err => console.error(err));
+
+
+    // const options = {
+    //     method: 'POST',
+    //     headers: {accept: 'application/json', 
+    //     'content-type': 'application/json',
+    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({
+    //       "items":[{"parent":"2TXDF6YD2BW3J,","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
+    //     })
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+        
 
     // const options = {
     //     method: 'POST',
     //     headers: {
     //       accept: 'application/json',
     //       'content-type': 'application/json',
-    //       authorization: 'Bearer 0aaf8e95-31c5-5813-b2eb-d6adb8c1f05c'
+    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({charge: 'W13C2STW0HPHC', amount:3380})
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+
+    // const options = {
+    //     method: 'POST',
+    //     headers: {
+    //       accept: 'application/json',
+    //       'content-type': 'application/json',
+    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
     //     },
         
     //   };
       
-    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/CK6DE4PEJ6MYT/returns', options)
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/CNCW19RF9DE24/returns', options)
     //     .then(response => response.json())
     //     .then(response => console.log(response))
     //     .catch(err => console.error(err));
@@ -1567,7 +1754,7 @@ app.get('/get_user_shipping_info', (req,res) => {
 
 
 app.post('/add_payment_method', (req,res) => {
-    console.log('/change_profile_billing /change_profile_billing /change_profile_billing')
+    console.log('/add_payment_method /add_payment_method /add_payment_method')
     const body = req.body;
     console.log(body);
     const clv_id = req.session.loginData.clv_id; 
@@ -2387,6 +2574,176 @@ app.post('/shop/checkout/:id', (req,res) => {
     });
 });
 
+app.post('/cancel_order', (req,res) => {
+    console.log('/cancal_order cancal_order cancal_order ')
+    console.log(req.body);
+    const order_num = req.body.order_number;
+    // const prodnum = req.body
+
+    const u_id = req.body.user_id;
+    db.getConnection((con)=>{
+        con.query('SELECT clv_charge_id from orders WHERE shipment = "n" and order_number = ? and u_id = ?', [order_num, u_id] ,(err, result) => {
+        // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log(result);
+              
+                const options = {
+                    method: 'POST',
+                    headers: {
+                      accept: 'application/json',
+                      'content-type': 'application/json',
+                      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                    },
+                    body: JSON.stringify({charge: result[0].clv_charge_id})
+                  };
+                  
+                fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+                .then(response => response.json())
+                .then(response => {
+                    console.log(response)
+                    makeFullRefundFlag(order_num, con);  
+                    makeAllItemsRefundFlag(order_num, con);
+                    checkPurchaseHistory(u_id, con, res);
+                })
+                .catch(err => console.error(err));
+
+                // res.send(result);
+            } 
+        });             
+    })
+});
+
+
+app.post('/cancel_order_item', (req,res) => {
+    console.log('/cancal_order cancal_order cancal_order ')
+    console.log(req.body);
+    const cartnum = req.body.cart_number;
+    const ordernum = req.body.order_number;
+    const prodnum = req.body.prodnum;
+
+    const u_id = req.body.user_id;
+    db.getConnection((con)=>{
+        con.query('SELECT cartnum, shipping_fee FROM orders join cart on cart.order_number = orders.order_number WHERE refund = "n" and orders.order_number = ? and orders.u_id = ?', [ordernum, u_id] ,(err, result) => {
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log(result);
+                const shipping_fee = result[0].shipping_fee;
+                if (result.length > 1) {
+
+                    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum = ? and u_id = ? and product.prodnum = ?', [cartnum, u_id, prodnum] ,(err, result) => {
+                    // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log(result);
+                            const amount = result[0].price_sell * 100 * result[0].quantity * 1.06;
+                            const item_num = result[0].prodnum;
+
+                            const options = {
+                                method: 'POST',
+                                headers: {accept: 'application/json', 
+                                'content-type': 'application/json',
+                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                                },
+                                body: JSON.stringify({
+                                "items":[{"parent":result[0].item_code,"amount":amount,"description":result[0].name,"quantity":result[0].quantity,"type":"sku"}]
+                                })
+                            };
+                        
+                            fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                            .then(response => response.json())
+                            .then(response => {                      
+                                                    
+                                console.log(response);
+                                con.query('UPDATE cart SET refund = "y" where cartnum = ? and prodnum = ?', [cartnum, item_num] ,(err, result) => { 
+                                    if(err){                        
+                                        res.send(err);
+                                        // con.end();        
+                                    } else {
+                                        console.log(result);
+                                        checkPurchaseHistory(u_id, con, res);
+                                    }
+                                });                    
+                            })
+                            .catch(err => console.error(err));
+                            // res.send(result);
+                        } 
+                    });
+                } else if (result.length == 1) {
+                    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where refund = "n" and result = "y" and cartnum = ? and u_id = ? and product.prodnum = ?', [cartnum, u_id, prodnum] ,(err, result) => {
+                        // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log(result);
+                            const amount = ((result[0].price_sell * 100 * result[0].quantity) + (shipping_fee * 100)) * 1.06;
+                            const item_num = result[0].prodnum;
+
+                            const options = {
+                                method: 'POST',
+                                headers: {accept: 'application/json', 
+                                'content-type': 'application/json',
+                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                                },
+                                body: JSON.stringify({
+                                "items":[{"parent":result[0].item_code,"amount":amount,"description":result[0].name,"quantity":result[0].quantity,"type":"sku"}]
+                                })
+                            };
+                        
+                            fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                            .then(response => response.json())
+                            .then(response => {                      
+                                                    
+                                console.log(response);
+                                makeFullRefundFlag(ordernum, con);
+                                con.query('UPDATE cart SET refund = "y" where cartnum = ? and prodnum = ?', [cartnum, item_num] ,(err, result) => { 
+                                    if(err){                        
+                                        res.send(err);
+                                        // con.end();        
+                                    } else {
+                                        console.log(result);
+                                        checkPurchaseHistory(u_id, con, res);
+                                    }
+                                });                    
+                            })
+                            .catch(err => console.error(err));                                
+                        } 
+                    });
+                }
+            }
+        })
+        con.release();             
+    })
+});
+
+function makeAllItemsRefundFlag(ordernum, con) { 
+    con.query('UPDATE cart SET refund = "y" where order_number = ?', [ordernum] ,(err, result) => { 
+        if(err){                        
+            res.send(err);
+            // con.end();        
+        } else {
+            console.log(result);
+        }
+    });
+}
+
+function makeFullRefundFlag(ordernum, con) {    
+    con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [ordernum] ,(err, result) => { 
+        if(err){                        
+            res.send(err);
+            // con.end();        
+        } else {
+            console.log(result);
+        }
+    })
+}
 
 app.post(`/get_user_default_billing_info`, (req,res) => {
     console.log('/get_user_default_billing_info /get_user_default_billing_info /get_user_default_billing_info ');
@@ -2568,19 +2925,32 @@ app.post('/check_purchase_history', (req,res) => {
 
     if (id == u_id) {     
         db.getConnection((con)=>{
-            con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    // con.end();        
-                } else {
-                    console.log(result);  
-                    res.send(result);      
-                }
-            });
+            checkPurchaseHistory(u_id, con, res);
+            // con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
+            //     if(err){                        
+            //         res.send(err);
+            //         // con.end();        
+            //     } else {
+            //         console.log(result);  
+            //         res.send(result);      
+            //     }
+            // });
             con.release();
         });
     } else console.log("id Check")
 });
+
+function checkPurchaseHistory(u_id, con, res) {
+    con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
+        if(err){                        
+            res.send(err);
+            // con.end();        
+        } else {
+            // console.log(result);  
+            res.send(result);      
+        }
+    });
+}
 
 
 app.post('/user_checkout_submit', (req,res) => {
@@ -2589,6 +2959,7 @@ app.post('/user_checkout_submit', (req,res) => {
     const u_id = req.session.loginData.id;
     // const amount = req.body.amount;
     const cart = req.body.cart;
+    console.log(cart);
     const shipping_rate = req.body.shipping_rate;
     console.log(shipping_rate);
     let default_payment_method = '';
@@ -2619,6 +2990,7 @@ app.post('/user_checkout_submit', (req,res) => {
             description : element.content.substring(0,120),
             quantity : element.quantity,
             type:"sku",
+            inventory_id: element.item_code,
             tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
         }
 
@@ -2628,7 +3000,7 @@ app.post('/user_checkout_submit', (req,res) => {
     const tmp_amount_items = items.map(element => {return element.amount/100 * element.quantity ;})
     const total_order_amount = tmp_amount_items.reduce((a,b) => (a+b));
     console.log(total_order_amount);    
-    
+    console.log(items);
 
     ////////////////// get default payment method /////////////////////
 
@@ -2678,7 +3050,7 @@ app.post('/user_checkout_submit', (req,res) => {
         });
     }
 
-    function setOrders(response, confirm_info) {
+    function setOrders(response, confirm_info, default_shipping_info) {
         console.log('order_number');
         console.log(order_number);   
         db.getConnection((con)=>{    
@@ -2691,17 +3063,18 @@ app.post('/user_checkout_submit', (req,res) => {
                     console.log('set orders') 
                     console.log(result);      
                     // setShippingFee(cart_numbers[0], u_id, order_number, con);          
-                    updateOrderedCart(order_number, date, cart_numbers, u_id, con, confirm_info);
+                    setUPSShippingInfo(order_number, default_shipping_info, con);
+                    updateOrderedCart(order_number, date, response.id, cart_numbers, u_id, con, confirm_info);
                 }
             }); 
             con.release();
         });
     }
 
-    function updateOrderedCart(order_num, oddate, cart_num, user_id, con, confirm_info) {
+    function updateOrderedCart(order_num, oddate, clv_order_id, cart_num, user_id, con, confirm_info) {
         // db.getConnection((con)=>{
-            con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ? WHERE cartnum in (?) and u_id = ?'
-            ,[order_num, oddate, cart_num, user_id], (err, result) => {
+            con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ?, clv_order_id = ? WHERE cartnum in (?) and u_id = ?'
+            ,[order_num, oddate, clv_order_id, cart_num, user_id], (err, result) => {
                 if(err){                        
                     res.send(err);
                     // con.end();        
@@ -2716,17 +3089,18 @@ app.post('/user_checkout_submit', (req,res) => {
         // });
     }
 
-    function setShippingFee(cart_num, user_id, order_num, con) {
-        con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, result, indate, modate, order_number, oddate) VALUES (?,?,?,?,?,?,?,?,?)'
-        ,[cart_num, user_id, 0, 1, 'y', date, date, order_num, date], (err, result) => {
+    function setUPSShippingInfo(order_number, default_shipping_info, con) {       
+        con.query('INSERT INTO test1.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+        [order_number, u_id, default_shipping_info.recipient, default_shipping_info.address1, default_shipping_info.address2, default_shipping_info.city, default_shipping_info.state, default_shipping_info.zip, default_shipping_info.phone, default_shipping_info.email, date], (err, result) => {
             if(err){                        
                 res.send(err);
                 // con.end();        
             } else {
-                console.log('update complete Order Cart') 
-                console.log(result);
-            } 
+                console.log('setUser UPS Shipping Info') 
+                console.log(result);                        
+            }
         });
+           
     }
     ////////////////////////////////////// make payment ////////////////////////
     function makePayment() {
@@ -2741,22 +3115,22 @@ app.post('/user_checkout_submit', (req,res) => {
             },
             body: JSON.stringify({
             items: items,
-            shipping: {
-                address: {
-                city: default_shipping_info.city,
-                line1: default_shipping_info.address1,
-                line2: default_shipping_info.address2,
-                postal_code: default_shipping_info.zip,
-                state: default_shipping_info.state,
-                country:"US"
-                },
-                name: default_shipping_info.recipient,
-                phone: default_shipping_info.phone,
-                email: default_shipping_info.email
-            },
+            // shipping: {
+            //     address: {
+            //     city: default_shipping_info.city,
+            //     line1: default_shipping_info.address1,
+            //     line2: default_shipping_info.address2,
+            //     postal_code: default_shipping_info.zip,
+            //     state: default_shipping_info.state,
+            //     country:"US"
+            //     },
+            //     name: default_shipping_info.recipient,
+            //     phone: default_shipping_info.phone,
+            //     email: default_shipping_info.email
+            // },
             currency: 'usd',
             email: default_shipping_info.email,
-            customer: clv_id
+            // customer: clv_id
             })
         };
         console.log("options");
@@ -2807,7 +3181,7 @@ app.post('/user_checkout_submit', (req,res) => {
                             grandtotal : response.amount
                             };
                             console.log(confirm_info);
-                            setOrders(response, confirm_info);    
+                            setOrders(response, confirm_info, default_shipping_info);    
                             // updateOrderedCart(order_number, date, cart_numbers, u_id)
                             
                             // res.send(confirm_info);     
@@ -2832,6 +3206,7 @@ app.post('/guest_order_checkout', (req,res) => {
     console.log(req.body); 
     const order_items = JSON.parse(req.body.order_items);
     const shipping_rate = JSON.parse(req.body.shipping_rate);
+    console.log("order_items");
     console.log(order_items);
     console.log(shipping_rate);
     const cardholder = req.body.card_name;
@@ -2853,6 +3228,7 @@ app.post('/guest_order_checkout', (req,res) => {
             description : element.c_item_no + "," + element.c_item_name,
             quantity : element.c_item_quantity,
             type:"sku",
+            inventory_id: element.c_item_code,
             tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
         }
 
@@ -2897,6 +3273,7 @@ app.post('/guest_order_checkout', (req,res) => {
       fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
         .then(response => response.json())
         .then(result => {
+            console.log("make order")            
             console.log(result)
             
             if (result.status == 'created') {
@@ -2918,7 +3295,7 @@ app.post('/guest_order_checkout', (req,res) => {
                     console.log("order paid")
                     console.log(response)
 
-                    
+                    // setUPSShipment(ups_ship_info, shipping_rate[0]);
 
                     //////////////////// store order info into DB
                     const u_id = 'GUEST';
@@ -2931,12 +3308,14 @@ app.post('/guest_order_checkout', (req,res) => {
                     const cart_num = date.replace(/\s|:|\-/g,"") + "CTGUEST";
                     const order_num = date.replace(/\s|:|\-/g,"") + "ODGUEST";
                     const order_items = response.items.slice(0,-1);
+                    const clv_order_id = response.id;
                     console.log(order_items)
         
 
                     setOrders(order_num, u_id, response, date);
+                    setGuestShippingInfo(order_num, date);
 
-                    const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`,`order_number`,`oddate`) values ?;"
+                    const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`,`order_number`,`oddate`, `clv_order_id`) values ?;"
                     let insert_cart_value = [];
 
                     let insert_cart_value_element = [];
@@ -2951,6 +3330,8 @@ app.post('/guest_order_checkout', (req,res) => {
                         insert_cart_value_element.push(date);
                         insert_cart_value_element.push(order_num);
                         insert_cart_value_element.push(date);
+                        insert_cart_value_element.push(clv_order_id);
+                       
 
                         insert_cart_value.push(insert_cart_value_element);
                         insert_cart_value_element = [];
@@ -2993,9 +3374,9 @@ app.post('/guest_order_checkout', (req,res) => {
                         grandtotal : response.amount
                     };
 
-                    console.log(confirm_info)
-                    
+                    console.log(confirm_info)                    
                     res.send(confirm_info);
+
                 }).catch(err => console.error(err));
             }        
         }).catch(err => console.error(err));
@@ -3017,10 +3398,27 @@ app.post('/guest_order_checkout', (req,res) => {
                 con.release();
             });
         }
+
+        function setGuestShippingInfo(order_number, date) {
+            console.log('setGuestShippingInfo');
+            db.getConnection((con)=>{
+                con.query('INSERT INTO test1.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                [order_number, "GUEST", recipient, req.body.shipping_address_street_line1, req.body.shipping_address_street_line2, req.body.shipping_address_city, req.body.shipping_address_state, req.body.shipping_address_zip, req.body.order_contact_phone, req.body.order_contact_email, date], (err, result) => {
+                    if(err){                        
+                        res.send(err);
+                        // con.end();        
+                    } else {
+                        console.log('setGuestShippingInfo') 
+                        console.log(result);                        
+                    }
+                });
+                con.release();
+            });
+        }
 });
 
 app.post('/get_shipping_rate', (req, res) => {
-
+    
     console.log("//get_shipping_rate/get_shipping_rate/get_shipping_rate/get_shipping_rate");
     const shipto = req.body;
     const weight = String(req.body.weight);
@@ -3085,8 +3483,8 @@ app.post('/get_shipping_rate', (req, res) => {
                     }
                 },
                 Service: {
-                    Code: '12',
-                    Description: '3 Day Select '
+                    Code: '03',
+                    Description: 'Ground '
                 },
                 NumOfPieces: '1',
                 Package: {                    
@@ -3114,13 +3512,15 @@ app.post('/get_shipping_rate', (req, res) => {
                 DeliveryTimeInformation: {
                     PackageBillType: '03',
                     Pickup: {
-                      Date: '20230412',
-                      Time: '1000'
+                    Date: '20230418',
+                    Time: '1000'
                     }
                 }
             }
         }
     }
+
+    require("dotenv").config({ path: ".env2" });
 
     const query = new URLSearchParams({
         additionalinfo: 'timeintransit'
@@ -3136,7 +3536,7 @@ app.post('/get_shipping_rate', (req, res) => {
             'Content-Type': 'application/json',
             transId: 'test01trs',
             transactionSrc: 'testing',
-            Authorization: `Bearer ${process.env.UPS_API_KEY}`
+            Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
             // Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgxMjQwNDE2LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODEyNTQ4MTYsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODEyNDA0MTYsImp0aSI6ImRmNjYxNThmLTBmYTEtNDU0OC04OTczLTczNTUyOGQxMzBhZSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.asOY41WovUTGTv_3VEjY_IWteO88lAvQBUBmvI5jGPiV4psfg5LfQa6J-1Ok3ahf_35homGR6yvgPt-89TXJPAVKiW-IjrneFJajmVsr2WUjpbzrgYZowmPce4EQyHCwfau9rriILPkOF2phLdvtcEMt277HxhTBbHY3t3ADMY6vOnkgjPOw0alMaxqGFQ-UxneesVk24QsL2nqnt8r0mPV3BF163ZeFINbzeWknL_j1RhIryheJ4v0H7_4amkeVS1f4DvvpUeAId4mJ4sP2FYIhpX4l3yVpHkhThwB54ZQ3If9DAAy25JXteFmn8GI3V-HxODlMGjAOUEVNs6Ujhmzj3c_mCI0nFgNZ1dleiKywM5cppHo3g_Cf9lURkdQkrr5s8Piqnqn3lCuhuqj13gx_TH9uWDFsbkUi6vtKfCeS8KEoA2wCRCZI0NwLwET96ZCeCNS6QXKixx7XoP7JRB8O_te3CW-jHocXAb7g_UqaSQsLbpPwwezp92DI1s8pd5CUdMndxj1No_1ZMPApPKBbME-mJkp1RUqqHvERs2tEddhFPR692oHYXLLnsDZY5eekVoNYrrCcywi-hemPEpR0wVJLNlgXIRoP4weqOYDCZy1h3XDfx2NzWqgSzOulQPArFteC7VSVK5x_GUUNXvz3M9PF4tCmbsccL4_If3E'
         },
         body: JSON.stringify(data)
@@ -3149,171 +3549,192 @@ app.post('/get_shipping_rate', (req, res) => {
         console.log("response")
         console.log(response)
         res.send(response)
+    });    
+
+});
+
+
+app.post('/get_admin_check_orders',(req, res) => {
+    
+    console.log("/get_admin_check_orders /get_admin_check_orders /get_admin_check_orders");
+
+    db.getConnection((con)=>{
+        con.query('select * from orders where shipment = "n"', (err, result) => { 
+            if (err) {
+                res.send(err);
+                // con.end();
+            } else {
+                console.log(result); 
+                res.send(result);
+            }
+        }); 
+        con.release();
     });
 
 });
 
 
-
-/*
-app.post('/get_rate', (req, res) => {
-
-    console.log("//get_shipping_rate/get_shipping_rate/get_shipping_rate/get_shipping_rate");
-    const shipto = req.body;
-    const weight = String(req.body.weight);
+app.post('/get_admin_check_orders_shipment',(req, res) => {
     
-    console.log(shipto);
-    
-
-    const data = {
-        RateRequest: {
-            Request: {
-                TransactionReference: {
-                    CustomerContext: 'CustomerContext',
-                    TransactionIdentifier: 'TransactionIdentifier'
-                }
-                },
-            Shipment: {
-                Shipper: {
-                    Name: 'cafe FORE',
-                    ShipperNumber: 'B98W48',
-                    Address: {
-                    AddressLine: [
-                        '4400 Roswell Rd'
-                    ],
-                    City: 'Marietta',
-                    StateProvinceCode: 'GA',
-                    PostalCode: '30062',
-                    CountryCode: 'US'
-                    }
-                },
-                ShipTo: {
-                    Name: 'req.body.recipient',
-                    Address: {
-                    AddressLine: [
-                        '2742 Pearl Ridge Trce'                    
-                    ],
-                    City: 'Buford',
-                    StateProvinceCode: 'GA',
-                    PostalCode: '30519',
-                    CountryCode: 'US'
-                    }
-                },
-                ShipFrom: {
-                    Name: 'cafe FORE',
-                    ShipperNumber: 'B98W48',
-                    Address: {
-                    AddressLine: [
-                        '4400 Roswell Rd'
-                    ],
-                    City: 'Marietta',
-                    StateProvinceCode: 'GA',
-                    PostalCode: '30062',
-                    CountryCode: 'US'
-                    }
-                },
-                PaymentDetails: {
-                    ShipmentCharge: {
-                    Type: '01',
-                    BillShipper: {
-                        AccountNumber: 'B98W48'
-                    }
-                    }
-                },             
-
-                Service: {
-                    Code: '13',
-                    Description: 'Next Day Air Saver'
-                },
-
-                NumOfPieces: '1',
-                Package: {
-                    // SimpleRate: {
-                    // Description: 'SimpleRateDescription',
-                    // Code: 'XS'
-                    // },
-                    PackagingType: {
-                    Code: '02',
-                    Description: 'Packaging'
-                    },
-                    Dimensions: {
-                    UnitOfMeasurement: {
-                        Code: 'IN',
-                        Description: 'Inches'
-                    },
-                    Length: '5',
-                    Width: '5',
-                    Height: '5'
-                    },
-                    PackageWeight: {
-                    UnitOfMeasurement: {
-                        Code: 'LBS',
-                        Description: 'Pounds'
-                    },
-                    Weight: '10'
-                    }
-                },
-                DeliveryTimeInformation: {
-                    PackageBillType: '03',
-                    Pickup: {
-                      Date: '20230412',
-                      Time: '1000'
-                    }
-                }
-            }
-        }
-    }
-
-    const query = new URLSearchParams({
-        additionalinfo: 'timeintransit'
-    }).toString();
-    
-    const version = 'v1';
-    const requestoption = 'Shop';
-
-    const options = 
-        {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            transId: 'test01trs',
-            transactionSrc: 'testing',
-            Authorization: `Bearer ${process.env.UPS_API_KEY}`
-            // Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgxMjQwNDE2LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODEyNTQ4MTYsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODEyNDA0MTYsImp0aSI6ImRmNjYxNThmLTBmYTEtNDU0OC04OTczLTczNTUyOGQxMzBhZSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.asOY41WovUTGTv_3VEjY_IWteO88lAvQBUBmvI5jGPiV4psfg5LfQa6J-1Ok3ahf_35homGR6yvgPt-89TXJPAVKiW-IjrneFJajmVsr2WUjpbzrgYZowmPce4EQyHCwfau9rriILPkOF2phLdvtcEMt277HxhTBbHY3t3ADMY6vOnkgjPOw0alMaxqGFQ-UxneesVk24QsL2nqnt8r0mPV3BF163ZeFINbzeWknL_j1RhIryheJ4v0H7_4amkeVS1f4DvvpUeAId4mJ4sP2FYIhpX4l3yVpHkhThwB54ZQ3If9DAAy25JXteFmn8GI3V-HxODlMGjAOUEVNs6Ujhmzj3c_mCI0nFgNZ1dleiKywM5cppHo3g_Cf9lURkdQkrr5s8Piqnqn3lCuhuqj13gx_TH9uWDFsbkUi6vtKfCeS8KEoA2wCRCZI0NwLwET96ZCeCNS6QXKixx7XoP7JRB8O_te3CW-jHocXAb7g_UqaSQsLbpPwwezp92DI1s8pd5CUdMndxj1No_1ZMPApPKBbME-mJkp1RUqqHvERs2tEddhFPR692oHYXLLnsDZY5eekVoNYrrCcywi-hemPEpR0wVJLNlgXIRoP4weqOYDCZy1h3XDfx2NzWqgSzOulQPArFteC7VSVK5x_GUUNXvz3M9PF4tCmbsccL4_If3E'
-        },
-        body: JSON.stringify(data)
-        }
-        // fetch(`https://onlinetools.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
-        
-    fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?${query}`, options)
-    .then(response => response.json())
-    .then(response => {
-        console.log("response")
-        console.log(response)
-        res.send(response)
-    });
-})
-*/
-
-function setUPSShipment(shipto, rate) {
-
+    console.log("/get_admin_check_orders_shipment /get_admin_check_orders_shipment /get_admin_check_orders_shipment");
+    console.log(req.body);
+    const order_id = req.body.order_id;
+    let order_items = [];
+    let ups_ship_info = {};
+    let total_weight = 0;
     let service_code = {};
-    console.log(shipto);
-    if (rate == "flat") service_code = { Code: '03', Description: 'ground' }
-    else if (rate == "ground") service_code = { Code: '03', Description: 'ground' };
-    else if (rate == "3days") service_code = 13;
-    else if (rate == "nextday") service_code = 12;
+    let cart_num = [];
 
 
+    setOrderShipment().then(data => {
+        console.log("data");
+        console.log(data)
+        setUPSShipment(ups_ship_info, service_code, order_items, res, order_id, cart_num);
+    });
+
+    function setOrderShipment() {
+        return new Promise((resolve, reject) => {
+            db.getConnection((con)=>{
+                con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number = ? and shipment = "n"', [order_id], (err, result) => {
+                    if (err) {
+                        res.send(err);
+                        // con.end();
+                    } else {
+                        console.log("order_items"); 
+                        console.log(result); 
+                        result.forEach (element => {
+                            console.log(element);
+                            total_weight = total_weight + (element.quantity * element.weight);
+                            cart_num.push(element.cartnum);
+
+                        })
+                        console.log(cart_num);
+                        console.log(total_weight);
+                        const item_name = result[0].name;
+
+                        if (result[0].shipping_rate == "flat") {
+                            service_code = { Code: '03', Description: 'Ground' }
+                            order_items = {
+
+                                SimpleRate: {
+                                        Description: 'SimpleRateDescription',
+                                        Code: 'XS'
+                                    },
+                                Description: item_name,
+                                Packaging: {
+                                    Code: '02',
+                                    Description: item_name
+                                },
+                                Dimensions: {
+                                    UnitOfMeasurement: {
+                                        Code: 'IN',
+                                        Description: 'Inches'
+                                },
+                                Length: '10',
+                                Width: '10',
+                                Height: '10'
+                                },
+                                PackageWeight: {
+                                UnitOfMeasurement: {
+                                    Code: 'LBS',
+                                    Description: 'Pounds'
+                                },
+                                Weight: String(total_weight)
+                                }
+                            }
+                        } else {
+                            if (result[0].shipping_rate == "ground") service_code = { Code: '03', Description: 'Ground' };
+                            else if (result[0].shipping_rate == "3days") service_code = { Code: '12', Description: '3 Day Select' };
+                            else if (result[0].shipping_rate == "nextday") service_code = { Code: '13', Description: 'Next Day Air Saver' };
+                            
+                            order_items = 
+                            {                            
+                                Description: item_name,
+                                Packaging: {
+                                Code: '02',
+                                Description: item_name
+                                },
+                                Dimensions: {
+                                UnitOfMeasurement: {
+                                    Code: 'IN',
+                                    Description: 'Inches'
+                                },
+                                Length: '10',
+                                Width: '10',
+                                Height: '10'
+                                },
+                                PackageWeight: {
+                                UnitOfMeasurement: {
+                                    Code: 'LBS',
+                                    Description: 'Pounds'
+                                },
+                                Weight: String(total_weight)
+                                }
+                            }
+                        }
+
+                        con.query('select * from ups_ship_info WHERE order_number= ?', [order_id], (err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                console.log("shipping_info");
+                                console.log(result);
+                                ups_ship_info = {
+                                    Name: result[0].recipient,
+                                    AttentionName: '',
+                                    Phone: {Number: result[0].phone},
+                                    Address: {
+                                    AddressLine: result[0].address1,
+
+                                    City: result[0].city,
+                                    StateProvinceCode: result[0].state,
+                                    PostalCode: result[0].zip,
+                                    CountryCode: 'US'
+                                    },
+                                    Residential: ' '
+                                }
+                                console.log(ups_ship_info);
+                                resolve(ups_ship_info);
+                            } 
+                        });
+                    } 
+                });
+                
+                con.release();                
+            }); 
+        });
+    }
+    
+});
+
+
+
+function setUPSShipment(shipto, service_code, items, res, order_id, cart_num) {
+
+    // let service_code = {};
+    // console.log(shipto);
+    // if (rate == "flat") service_code = { Code: 'XS', Description: 'SimpleRateDescription' }
+    // else if (rate == "ground") service_code = { Code: '03', Description: 'Ground' };
+    // else if (rate == "3days") service_code = { Code: '12', Description: '3 Day Select' };
+    // else if (rate == "nextday") service_code = { Code: '13', Description: 'Next Day Air Saver' };
+    console.log("ups shipment")
+    console.log(shipto)
+    console.log(service_code)
+    console.log(items)
+    // SimpleRate: {
+    //             Description: 'SimpleRateDescription',
+    //             Code: 'XS'
+    //             },
     const ship = {
         ShipmentRequest: {
             Request: {
             SubVersion: '1801',
             RequestOption: 'nonvalidate',
-            TransactionReference: {CustomerContext: 'test'}
+            TransactionReference: {CustomerContext: 'cafefore'}
             },
             Shipment: {
-            Description: 'Ship WS test',
+            Description: 'cafefore shipping',
             Shipper: {
                 Name: 'cafe FORE LLC',
                 AttentionName: '',
@@ -3352,33 +3773,31 @@ function setUPSShipment(shipto, rate) {
                 BillShipper: {AccountNumber: 'B98W48'}
                 }
             },
-            Service: {
-                Code: '03',
-                Description: 'ground'
-            },
-            Package: {
-                Description: 'Nails',
-                Packaging: {
-                    Code: '02',
-                    Description: 'Nails'
-                },
-                Dimensions: {
-                    UnitOfMeasurement: {
-                        Code: 'IN',
-                        Description: 'Inches'
-                },
-                Length: '10',
-                Width: '30',
-                Height: '45'
-                },
-                PackageWeight: {
-                UnitOfMeasurement: {
-                    Code: 'LBS',
-                    Description: 'Pounds'
-                },
-                Weight: '15'
-                }
-            }
+            Service: service_code,
+            Package: items
+            // {
+            //     Description: 'Nails',
+            //     Packaging: {
+            //         Code: '02',
+            //         Description: 'Nails'
+            //     },
+            //     Dimensions: {
+            //         UnitOfMeasurement: {
+            //             Code: 'IN',
+            //             Description: 'Inches'
+            //     },
+            //     Length: '50',
+            //     Width: '50',
+            //     Height: '50'
+            //     },
+            //     PackageWeight: {
+            //     UnitOfMeasurement: {
+            //         Code: 'LBS',
+            //         Description: 'Pounds'
+            //     },
+            //     Weight: '15'
+            //     }
+            // }
             },
             LabelSpecification: {
             LabelImageFormat: {
@@ -3390,16 +3809,20 @@ function setUPSShipment(shipto, rate) {
         }
     }
 
+    require("dotenv").config({ path: ".env2" }); 
+
     const options = {
     method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        transId: 'string',
-        transactionSrc: 'testing',
-        Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
+        transId: 'cafeforetrid',
+        transactionSrc: 'cafeforetrsrc',
+        Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
       },
       body: JSON.stringify(ship)
     }
+
+    console.log(ship);
 
     const query = new URLSearchParams({
         additionaladdressvalidation: 'Alpharetta'
@@ -3412,9 +3835,42 @@ function setUPSShipment(shipto, rate) {
     .then(response => response.json())
     .then(response => {
         console.log("response")
-        console.log(response)
-        // console.log(response.ShipmentResults.)
-        res.send(response)
+        console.log(response)  
+               
+        const track_number = response.ShipmentResponse.ShipmentResults.ShipmentIdentificationNumber;
+        console.log(track_number)
+
+        updateShipingTrackNumber().then((data) => {
+            res.send(response);
+        });
+
+        function updateShipingTrackNumber() {
+            return new Promise((resolve, reject) => {        
+            db.getConnection((con)=>{
+                    con.query('UPDATE orders SET shipment = "y", track_number = ? where order_number = ?', [track_number, order_id], (err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log('update set shipment & track number'); 
+                            console.log(result);   
+                            con.query('UPDATE cart SET result = "y", track_number = ? where order_number = ? and cartnum in (?)', [track_number, order_id, cart_num], (err, result) => {
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log('update set shipment & track number'); 
+                                    console.log(result);                              
+                                    resolve(result);                     
+                                }
+                            });
+                        }
+                    });
+                    con.release();
+                });
+            });
+        }       
+
     });
 
 
@@ -3493,6 +3949,8 @@ app.post('/order-confirm-test', (req, res) => {
 });
 
 
+
+
 app.get('/test_ups_toke', (req, res) => {
     const formData = {
         grant_type: 'client_credentials'
@@ -3506,19 +3964,150 @@ app.get('/test_ups_toke', (req, res) => {
         'Content-Type': 'application/x-www-form-urlencoded'
     },
     body : new URLSearchParams(formData).toString()
-    // body: 'grant_type=authorization_code&code=SGUySE1tU0MtVTJGc2RHVmtYMS9PWmxKYW13SG1jMWdiQTlBTlI0NVRhWWRKUC9KYktaM0FNdzA0QmlIdVVydllrOVVLNkZ4aCt4N0NFMVBVcnBQYzNYdDF0eGJVanc9PQ=='
+    // body : 'grant_type=authorization_code&code=Wjg1RjZNSFotVTJGc2RHVmtYMSt2UnJhalVzVDBoTWRROEQ2dTdrdThGNXB6aTExcEpaeXBVenlmRTRRYURCUTJ5QmdaNFVzVU5WOCttRm82YlhkN0pZcW9zS3ZDNVE9PQ=='
+    }
+    fetch('https://wwwcie.ups.com/security/v1/oauth/token?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com', options)
+    // fetch('https://wwwcie.ups.com/api/security/v1/oauth/token', options)
+    .then(response => 
+        response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)
+        // process.env['UPS_API_KEY'] = 'test';
+        // process.env['UPS_API_KEY2'] = 'test';
+        require("dotenv").config({ path: ".env2" });    
+      
+
+        process.env.UPS_AUTH_TOKEN = response.access_token;
+        updateEnv(envItems);
+
+        res.send(response)
+    });
+
+    const fs = require('fs');
+    const envItems = ['UPS_AUTH_TOKEN'];
+
+    function updateEnv(items = [], eol = '\n'){
+        const envContents = items.map(item => `${item}=${process.env[item]}`).join(eol)
+        fs.writeFileSync('.env2', envContents);
+      } 
+
+});
+
+
+app.get('/test_ups_token', (req, res) => {
+
+    // const options = 
+    // {
+    // method: 'POST',
+    // headers: {
+    //     Authorization: 'Basic ' + Buffer.from('<zohola>:<Yeohae120817!>').toString('base64'),
+    //     'x-merchant-id': 'GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19',
+    //     'Content-Type': 'application/x-www-form-urlencoded'
+    // },
+    // body: 'grant_type=authorization_code&code=[SG82Q2kxZkEtVTJGc2RHVmtYMTljdk93aE5zZ2JIclpLMWh3cUFIenl4ZnZyS29ZVm9oWXlOdjB2aVFrbDVZcm15U2VVUGErdDZ4Y0orOWhZYUdqcENMUi85bmJONWc9PQ==]'
+    // }
+
+    // fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
+    // .then(response => response.json())
+    //   .then(response => {
+    //       console.log("response")
+    //       console.log(response)
+    //       res.send(response);
+    //   });
+
+    const formData = {
+        grant_type: 'client_credentials'
+      };
+
+    const options = {
+    method: 'POST',
+    headers: {
+        Authorization: 'Basic ' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
+        'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+
+    // headers: {
+    //     Authorization: 'Basic ' + Buffer.from('pCzllAA1qfZV84RQGazP6na9nRViTSp31ERBfBR4gvX94zVJ:yWO4aUy8rxbtHbXomonhBnuMiNu4hvcrGCMJEf5GDSc6xt2bP34g3DLWQi6K61QO').toString('base64'),
+    //     'x-merchant-id': 'pCzllAA1qfZV84RQGazP6na9nRViTSp31ERBfBR4gvX94zVJ',
+    //     'Content-Type': 'application/x-www-form-urlencoded'
+    // },
+    body : new URLSearchParams(formData).toString()
+    // body : 'grant_type=authorization_code&code=Wjg1RjZNSFotVTJGc2RHVmtYMSt2UnJhalVzVDBoTWRROEQ2dTdrdThGNXB6aTExcEpaeXBVenlmRTRRYURCUTJ5QmdaNFVzVU5WOCttRm82YlhkN0pZcW9zS3ZDNVE9PQ=='
+    }
+    // fetch('https://wwwcie.ups.com/security/v1/oauth/token?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com', options)
+    fetch('https://onlinetools.ups.com/api/security/v1/oauth/token', options)
+    .then(response => {
+        console.log(response);    
+        response.json()})
+    .then(response => {
+        console.log("response")
+        console.log(response) 
+
+        res.send(response)
+    });
+
+
+});
+
+app.post('/test_ups_ref', (req, res) => {
+    console.log("/test_ups_ref /test_ups_ref /test_ups_ref/test_ups_ref")
+
+    console.log(process.env.TEST);
+    process.env.TEST = 'test';
+    console.log(process.env.TEST);
+    const buf = Buffer.from('BASIC=basic')
+    const dotenv = require('dotenv')
+    // require('dotenv').config({ override: true });
+    const config = dotenv.parse(buf) // will return an object
+    console.log(typeof config, config)
+    require("dotenv").config({ path: ".env2" });
+
+    const fs = require('fs');
+    const envItems = ['UPS_AUTH_TOKEN'];
+
+    function updateEnv(items = [], eol = '\n'){
+        const envContents = items.map(item => `${item}=${process.env[item]}`).join(eol)
+        fs.writeFileSync('.env2', envContents);
+      } 
+
+    process.env.UPS_AUTH_TOKEN = 'test89';
+    updateEnv(envItems);
+
+    /*
+    const formData = {
+        grant_type: 'refresh_token',
+        refresh_token: 'eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODE2Njc5NjgsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxNjgyMzY4LCJpYXQiOjE2ODE2Njc5NjgsImp0aSI6Ijk2Mjk0Y2FjLWI0N2YtNGI3Zi1iZWFjLTE5YTdiN2FhNTMyZSJ9.1d77dbPCzqYLcMB7MwZt2vrdS8ALKnpnaVNHPqOKo5PuLrmEH-MgcYOYsW3i6Y8LZBVWQMZ7jIR_gXDMJJuHC0Pi46Pkh1m5FWeZvS8dERLeYoTl70-wbck_YWZol0qN1gnZctkBYla9ZMz2giD5RK2OFSETvoaNDJryB67sMhHxUqkTYeJfMgRNwIzT7xAo7_3z-7l9oN3kxLWeW7cEmtZq-soZbNwJRqzAGQzpxjKQl_djd8yjdlO5Maxw6Kx0-n9rDv79MUBzsl9lBWDRc12yDF7xULU7b3GOYYZVSARmcdLTltYI_qQ09KPIjzuylP5JyUpjxZjJHRHDAW8S4oH8GxWXtoUAcIlTopWwOyC99VDz1RJl5Dm493Pw-ciEQkUThkVYtmqPpvhun_CSnq7F2_qAe6G4utX8X9-13_dWgLOSz4fOnBnH7cyCATJS3pms3XNz4ojOytVILVh6TlkXF_X0pCRCcEhItTCPHhKiRDbHtUgPZoFsnogodlY8-rJFYU2HGDnNmL-1phlUzFOnUN1OZydEIJTX2h4Itl8coDBrH6rk1IpnXJVcHIT0i-5tBVKiPk9KWBd4dULbUuQczpzim6-GOxQDF9NpeoEReAsA41-Sl7j6VDd75juRxo_PFZrhhTj-vIcx4xHexqs7TzvGNtg84PNLH3XoqYM'
+      };
+
+      const test = new URLSearchParams(formData).toString();
+      console.log(test);
+
+    const options = {
+    method: 'POST',
+    headers: {
+        Authorization: 'Basic' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
+        'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+        'Content-Type': 'application/x-www-form-urlencoded'
+        },
+    body : test    
     }
 
-    fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
-    .then(response => response.json())
+    console.log(options)
+
+    fetch(`https://wwwcie.ups.com/api/security/v1/oauth/refresh`, options)
+    .then(response => {console.log(response)
+        console.log(response.Response.urlList)
+        console.log(response.Response.urlList[0])
+        response.json()})
     .then(response => {
         console.log("response")
         console.log(response)
         res.send(response)
     });
-
-
-
+    */
+    
 
 });
 
@@ -3584,9 +4173,10 @@ app.post('/test_ups_ship', (req, res) => {
                     }
                 },
                 Service: {
-                    Code: '03',
-                    Description: 'GROUND'
+                    Code: '13',
+                    Description: '3 day'
                 },
+
                 // Package: [                    
                 //     {                        
                 //       PackageWeight: {
@@ -3663,7 +4253,7 @@ app.post('/test_ups_ship', (req, res) => {
                 SimpleRate: {
                     Description: 'SimpleRateDescription',
                     Code: 'XS'
-                  },
+                },
                 Description: 'Nails',
                 Packaging: {
                 Code: '02',
@@ -3674,16 +4264,16 @@ app.post('/test_ups_ship', (req, res) => {
                     Code: 'IN',
                     Description: 'Inches'
                 },
-                Length: '50',
-                Width: '50',
-                Height: '50'
+                Length: '10',
+                Width: '10',
+                Height: '10'
                 },
                 PackageWeight: {
                 UnitOfMeasurement: {
                     Code: 'LBS',
                     Description: 'Pounds'
                 },
-                Weight: '15'
+                Weight: '10'
                 }
             }
             },
@@ -3849,8 +4439,8 @@ app.post('/test_ups_ship', (req, res) => {
             }
           },
           Service: {
-            Code: '12',
-            Description: '3 Day Select'
+            Code: '03',
+            Description: 'GROUND'
           }
         },
         LabelSpecification: {
@@ -3863,7 +4453,7 @@ app.post('/test_ups_ship', (req, res) => {
         }
     }
     
-  
+    require("dotenv").config({ path: ".env2" });
 
     const options = {
     method: 'POST',
@@ -3871,7 +4461,7 @@ app.post('/test_ups_ship', (req, res) => {
         'Content-Type': 'application/json',
         transId: 'cafeforetrs',
         transactionSrc: 'testing',
-        Authorization: `Bearer ${process.env.UPS_API_KEY}`
+        Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
       },
       body: JSON.stringify(ship)
     }
@@ -3881,8 +4471,7 @@ app.post('/test_ups_ship', (req, res) => {
       }).toString();
     
       const version = 'v1';
-    //   fetch(`https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`, options)
-    // `https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`
+    //   fetch(`https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`, options)    
       
     fetch(`https://wwwcie.ups.com/api/shipments/${version}/ship?${query}`, options)
     .then(response => response.json())
@@ -3899,12 +4488,14 @@ app.post('/test_ups_ship', (req, res) => {
 });
 
 app.get('/test_ups_cancel', (req, res) => {
+
+    require("dotenv").config({ path: ".env2" });
     const query = new URLSearchParams({
-        trackingnumber: '1ZB98W480330445025'
+        trackingnumber: '1ZB98W480329218998'
       }).toString();
       
       const version = 'v1';
-      const shipmentidentificationnumber = '1ZB98W480330445025';
+      const shipmentidentificationnumber = '1ZB98W480329218998';
 
       const options = 
       {
@@ -3912,7 +4503,7 @@ app.get('/test_ups_cancel', (req, res) => {
         headers: {
           transId: 'string',
           transactionSrc: 'testing',
-          Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
+          Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
         }
       }
 
@@ -3937,7 +4528,11 @@ app.get('/test_ups_track', (req, res) => {
         returnSignature: 'false'
       }).toString();
 
-    const inquiryNumber = '1ZB98W480330445025';
+      require("dotenv").config({ path: ".env2" });    
+      
+
+        
+    const inquiryNumber = '1ZB98W480323972157';
 
     const options = 
     {
@@ -3946,7 +4541,7 @@ app.get('/test_ups_track', (req, res) => {
           'Content-Type': 'application/json',
           transId: 'string',
           transactionSrc: 'testing',
-          Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
+          Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
         }
 
     }
@@ -3963,6 +4558,21 @@ app.get('/test_ups_track', (req, res) => {
 
 
 });
+
+app.get('/test_ups_valid', (req, res) => {
+
+    fetch(`https://wwwcie.ups.com/api/security/v1/oauth/validate-client?client_id=pCzllAA1qfZV84RQGazP6na9nRViTSp31ERBfBR4gvX94zVJ&redirect_uri=https://www.thecafefore.com`)
+    // fetch(`https://onlinetools.ups.com/api/security/v1/oauth/validate-client?client_id=pCzllAA1qfZV84RQGazP6na9nRViTSp31ERBfBR4gvX94zVJ&redirect_uri=https://www.thecafefore.com`)
+    //  fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
+        .then(response => response.json())
+        .then(response => {
+    
+            console.log("response")
+            console.log(response)
+            res.redirect(`https://www.ups.com/lasso/signin?client_id=pCzllAA1qfZV84RQGazP6na9nRViTSp31ERBfBR4gvX94zVJ&redirect_uri=https://www.thecafefore.com&response_type=code&scope=read&type=ups_com_api`);
+        });
+});
+    
 
 
 
@@ -4442,7 +5052,12 @@ app.get('/test_upst',(req,res) => {
 app.get('/test_get_ups',(req,res) => {
     console.log("/test_log/test_log/test_log/test_log");
     console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
+    const query = new URLSearchParams({
+        client_id: 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+        redirect_uri: 'https://www.thecafefore.com'
+      }).toString();
 
+    //   fetch(`https://onlinetools.ups.com/api/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
     fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
         .then(response => response.json())
         .then(response => {
@@ -4456,6 +5071,7 @@ app.get('/test_get_ups',(req,res) => {
 
 });
    
+/*
 app.get('/test_ups_token',(req,res) => {
     console.log("/test_log/test_log/test_log/test_log");
     console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
@@ -4480,6 +5096,7 @@ app.get('/test_ups_token',(req,res) => {
       });
 
 });
+*/
 
 app.get('/test_utttu',(req,res) => {
     console.log("/test_log/test_log/test_log/test_log");
@@ -4602,236 +5219,4 @@ app.get('/test_utttu',(req,res) => {
   
 
 
-})
-
-
-// app.get('/order-confirmation',(req,res) => {
-    
-//         res.render('test.ejs', 
-//         {post : "name",
-//         name : "name",
-//         order_number : "order_number",
-//         email : "default_shipping_info.email",
-//         recipient : "default_shipping_info.recipient",
-//         phone : "default_shipping_info.phone",
-//         type : "response.source.brand",
-//         ending4 : "response.source.last4",
-//         billing_address : "default_shipping_info.address1",
-//         cardholder : "cardholder",
-//         subtotal : "response.amount - response.tax_amount", 
-//         tax : "response.tax_amount",
-//         grandtotal : "response.amount"
-        
-//         })
-// })
-        
-
-/*
-app.post('/item_addup', (req,res) => {
-    let user_id = req.body.u_id;
-    let item_num = req.body.item_num;
-    let u_id = req.session.loginData.id;
-    let date = getDate();
-
-    if (user_id == u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established /add up item');
-        });
-
-        con.query('UPDATE cart SET quantity=cart.quantity + 1, modate = ? where u_id = ? and prodnum = ?', [date, u_id, item_num]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();
-                
-                } else {
-                    console.log("result");
-                    console.log(result);
-                    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id]
-                    ,(err, result) => {
-                        if(err){                        
-                            res.send(err);
-                            con.end();
-                        
-                        } else {
-                            console.log("result");
-                            console.log(result);
-                            
-                            res.send(result);
-                        }
-                    });               
-                }
-        });
-    } else res.send("check user ID");
-})
-
-
-app.post('/item_subtract', (req,res) => {
-    let user_id = req.body.u_id;
-    let item_num = req.body.item_num;
-    let u_id = req.session.loginData.id;
-    let date = getDate();
-
-    if (user_id == u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established /subtract item');
-        });
-
-        con.query('UPDATE cart SET quantity=cart.quantity - 1, modate =? where u_id=? and prodnum=?', [date, u_id, item_num]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();
-                
-                } else {
-                    console.log("result");
-                    console.log(result);
-
-                    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id]
-                    ,(err, result) => {
-                        if(err){                        
-                            res.send(err);
-                            con.end();
-                        
-                        } else {
-                            console.log("result");
-                            console.log(result);                        
-                            res.send(result);
-                        }
-                    });  
-                }
-        });
-    } else res.send("check user ID");
-})
-
-
-app.post('/item_delete', (req,res) => {
-    let user_id = req.body.u_id;
-    let item_num = req.body.item_num;
-    let u_id = req.session.loginData.id;
-
-    console.log('/item_delete /item_delete /item_delete /item_delete/item_delete')
-
-    // const connect = makeConnect();
-
-    if (user_id == u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established /delete item');
-        });
-
-        con.query('DELETE FROM cart WHERE u_id=? and prodnum=?', [u_id, item_num]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();
-                
-                } else {
-                    console.log("result");
-                    console.log(result);
-                    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where u_id = ? and result = "n"', [u_id]
-                        ,(err, result) => {
-                            if(err){                        
-                                res.send(err);
-                                con.end();                        
-                            } else {
-                                console.log("result");
-                                console.log(result);                        
-                                res.send(result);
-                            }
-                        }); 
-                }
-        });
-    }
-})
-
-/*
-app.post('/checked_item', (req,res) => {
-    let user_id = req.body.u_id;
-    let item_list = req.body.checked_items_number_list;
-    let u_id = req.session.loginData.id;
-
-    if (user_id == u_id) {
-        const mysql = require('mysql');
-
-        const con = mysql.createConnection({
-            host: '127.0.0.1',
-            port: '3306',
-            user: 'root',
-            password: '111111',
-            database: 'test1',
-            
-        });
-
-        con.connect((err) => {
-            if(err){
-            console.log('Error connecting to Db');
-            return;
-            }
-            console.log('Connection established /delete item');
-        });
-
-        con.query('SELECT * from cart join product on cart.prodnum = product.prodnum WHERE prodnum IN (?) and u_id = ? and result = "n"', [u_id]
-            ,(err, result) => {
-                if(err){                        
-                    res.send(err);
-                    con.end();                        
-                } else {
-                    console.log("result");
-                    console.log(result);                        
-                    res.send(result);
-                }
-            }); 
-
-
-    }
-
-
-
-
-})
-*/
+});

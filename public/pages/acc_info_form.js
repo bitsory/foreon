@@ -202,98 +202,114 @@ export function addBillingInfoBox() {
 
 export function addBillingMethodForm() {
    
-    // const order_info = this.order_info;        
-    const clover = new Clover('3de85b3b5c3bbea456e24e24596245fd');
+    const send_data = {u_id : 'getkey'};
 
-    const elements = clover.elements();
-           
-
-    const styles = {
-        body: {
-            fontfamily: 'Jost, sans-serif',
-        //   fontFamily: 'Roboto, Open Sans, sans-serif',
-          fontSize: '10px',
-        },
-        input: {
-          fontSize: '11px', padding: '5px', height: '1.65rem', width: '98%'
-        },
+    const data = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'            
+            },
+        body: JSON.stringify(send_data)
     };
-    
-    const cardNumber = elements.create('CARD_NUMBER', styles);
-    // const cardName = elements.create('CARD_NAME', styles);
-    const cardDate = elements.create('CARD_DATE', styles);
-    const cardCvv = elements.create('CARD_CVV', styles);
-    const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
+    console.log(data);
+
+    fetch(`/get_api_key`, data)
+    .then((res) => res.json())
+    .then(result => {
+        const key = result;
         
-    cardNumber.mount('#card-number');
-    // cardName.mount('#card-name');
-    cardDate.mount('#card-date');
-    cardCvv.mount('#card-cvv');
-    cardPostalCode.mount('#card-postal-code');
+        const clover = new Clover(key.key);
 
-    const cardResponse = document.getElementById('card-response');
-    const displayCardNumberError = document.getElementById('card-number-errors');
-    const displayCardDateError = document.getElementById('card-date-errors');
-    const displayCardCvvError = document.getElementById('card-cvv-errors');
-    const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
-    const payment_form = document.getElementById('change_profile_billing_info_form');
-    
-    // Handle real-time validation errors from the card element
-    cardNumber.addEventListener('change', function(event) {
-    console.log(`cardNumber changed ${JSON.stringify(event)}`);
-    });
+        const elements = clover.elements();
+            
 
-    cardNumber.addEventListener('blur', function(event) {
-    console.log(`cardNumber blur ${JSON.stringify(event)}`);
-    });
+        const styles = {
+            body: {
+                fontfamily: 'Jost, sans-serif',
+            //   fontFamily: 'Roboto, Open Sans, sans-serif',
+            fontSize: '10px',
+            },
+            input: {
+            fontSize: '11px', padding: '5px', height: '1.65rem', width: '98%'
+            },
+        };
+        
+        const cardNumber = elements.create('CARD_NUMBER', styles);
+        // const cardName = elements.create('CARD_NAME', styles);
+        const cardDate = elements.create('CARD_DATE', styles);
+        const cardCvv = elements.create('CARD_CVV', styles);
+        const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
+            
+        cardNumber.mount('#card-number');
+        // cardName.mount('#card-name');
+        cardDate.mount('#card-date');
+        cardCvv.mount('#card-cvv');
+        cardPostalCode.mount('#card-postal-code');
 
-    cardDate.addEventListener('change', function(event) {
-    console.log(`cardDate changed ${JSON.stringify(event)}`);
-    });
-
-    cardDate.addEventListener('blur', function(event) {
-        console.log(`cardDate blur ${JSON.stringify(event)}`);
-    });
-
-    cardCvv.addEventListener('change', function(event) {
-        console.log(`cardCvv changed ${JSON.stringify(event)}`);
-    });
-
-    cardCvv.addEventListener('blur', function(event) {
-        console.log(`cardCvv blur ${JSON.stringify(event)}`);
-    });
-
-    cardPostalCode.addEventListener('change', function(event) {
-        console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
-    });
-
-    cardPostalCode.addEventListener('blur', function(event) {
-        console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
-    });
-
-    payment_form.addEventListener('submit', function(event) {
-        console.log("payment_form.addEventListener('submit', function(event)")
-        event.preventDefault();
-        // Use the iframe's tokenization method with the user-entered card details
-        clover.createToken()
-            .then(function(result) {
-            if (result.errors) {
-            Object.values(result.errors).forEach(function (value) {
-                displayError.textContent = value;
-            });
-            } else {
-                var form = document.getElementById('change_profile_billing_info_form');
-                var hiddenInput = document.createElement('input');
-                hiddenInput.setAttribute('type', 'hidden');
-                hiddenInput.setAttribute('name', 'cloverToken');
-                hiddenInput.setAttribute('value', result.token);
-                form.appendChild(hiddenInput);
-                form.submit();
-
-            // cloverTokenHandler(result.token);
-            }
+        const cardResponse = document.getElementById('card-response');
+        const displayCardNumberError = document.getElementById('card-number-errors');
+        const displayCardDateError = document.getElementById('card-date-errors');
+        const displayCardCvvError = document.getElementById('card-cvv-errors');
+        const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
+        const payment_form = document.getElementById('change_profile_billing_info_form');
+        
+        // Handle real-time validation errors from the card element
+        cardNumber.addEventListener('change', function(event) {
+        console.log(`cardNumber changed ${JSON.stringify(event)}`);
         });
-    });        
+
+        cardNumber.addEventListener('blur', function(event) {
+        console.log(`cardNumber blur ${JSON.stringify(event)}`);
+        });
+
+        cardDate.addEventListener('change', function(event) {
+        console.log(`cardDate changed ${JSON.stringify(event)}`);
+        });
+
+        cardDate.addEventListener('blur', function(event) {
+            console.log(`cardDate blur ${JSON.stringify(event)}`);
+        });
+
+        cardCvv.addEventListener('change', function(event) {
+            console.log(`cardCvv changed ${JSON.stringify(event)}`);
+        });
+
+        cardCvv.addEventListener('blur', function(event) {
+            console.log(`cardCvv blur ${JSON.stringify(event)}`);
+        });
+
+        cardPostalCode.addEventListener('change', function(event) {
+            console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
+        });
+
+        cardPostalCode.addEventListener('blur', function(event) {
+            console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
+        });
+
+        payment_form.addEventListener('submit', function(event) {
+            console.log("payment_form.addEventListener('submit', function(event)")
+            event.preventDefault();
+            // Use the iframe's tokenization method with the user-entered card details
+            clover.createToken()
+                .then(function(result) {
+                if (result.errors) {
+                Object.values(result.errors).forEach(function (value) {
+                    displayError.textContent = value;
+                });
+                } else {
+                    var form = document.getElementById('change_profile_billing_info_form');
+                    var hiddenInput = document.createElement('input');
+                    hiddenInput.setAttribute('type', 'hidden');
+                    hiddenInput.setAttribute('name', 'cloverToken');
+                    hiddenInput.setAttribute('value', result.token);
+                    form.appendChild(hiddenInput);
+                    form.submit();
+
+                // cloverTokenHandler(result.token);
+                }
+            });
+        });        
+    });
 } 
 
 export function cloverTokenHandler(token) {

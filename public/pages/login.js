@@ -162,8 +162,8 @@ export default class {
             .then(result => {
                 console.log(result)
                 if (result.check == "not match") {
-                    document.getElementById('sign_in_form_extra').innerText = 
-                    "ID and Password not matched...<br>please check your ID and Password";
+                    document.getElementById('sign_in_form_extra').innerHTML = 
+                    "ID and Password not matched...<br/>please check your ID and Password";
                 } else if (result.check == "not exist") {
                     document.getElementById('sign_in_form_extra').innerText = 
                     "please check your ID";
@@ -332,16 +332,16 @@ export default class {
         return `
             <div id="track_my_order_form_container" class="track_my_order_form_container">
                 <div id="track_my_order" class="track_my_order">
-                    <div class="track_my_order_title">CHECK ORDER</div>
-                    <div class="track_my_order_subtitle">See your order even if you are not a registered user. 
+                    <div id="track_my_order_title" class="track_my_order_title">CHECK ORDER</div>
+                    <div id="track_my_order_subtitle" class="track_my_order_subtitle">See your order even if you are not a registered user.<br> 
                     Enter the order number and the billing address ZIP code.</div>
                     <form id="track_my_order_form">
-                        Order Number    
-                        <input type="text">
-                        Order Email
-                        <input type="text">
-                        Billing ZIP Code
-                        <input type="text">
+                        Order Number *    
+                        <input type="text" id="track_my_order_number" class="track_my_order_number track_my_order_input" required>
+                        Order Email *
+                        <input type="text" id="track_my_order_email" class="track_my_order_email track_my_order_input" required>
+                        Billing ZIP Code *
+                        <input type="text" id="track_my_order_zip" class="track_my_order_zip track_my_order_input" required>
                         <button type="button" id="track_my_order_check_btn" class="track_my_order_check_btn" title="check order status">
                         CHECK STATUS
                         </button>

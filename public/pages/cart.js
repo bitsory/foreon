@@ -297,6 +297,7 @@ export default class Cart {
     c_item_price = 0;
     c_item_quantity = 0;
     c_item_image = '';
+    c_item_code = '';
 
     u_cart = [];
 
@@ -703,6 +704,67 @@ document.addEventListener('click',function(e){
             renderShippingInfo(result);
         });
     }
+
+    
+
+    if(e.target && e.target.id == 'purchase_history_order_cancel_btn') {
+        console.log(e.target.parentElement.getAttribute('head_orderid'));
+
+        const send_data = {
+            user_id : u_id,
+            order_number : e.target.parentElement.getAttribute('head_orderid')     
+            }
+        const option = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'                
+                },
+            body: JSON.stringify(send_data)
+        };
+        console.log(option);
+
+        fetch('/cancel_order', option)
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result);
+            viewPurchaseHistory(u_id);
+
+        });
+
+    }
+
+    if(e.target && e.target.id == 'purchase_history_item_track_btn') {
+        console.log(e.target.getAttribute('track-itemid'));
+
+    }
+    
+    if (e.target && e.target.id == 'purchase_history_item_order_cancel_btn') {
+        console.log(e.target.getAttribute('cart-itemid'));
+        // const cart_number = e.target.getAttribute('cart-itemid');
+        // const user_id = u_id;
+        const send_data = {
+            user_id : u_id,
+            cart_number : e.target.getAttribute('cart-itemid'), 
+            order_number : e.target.getAttribute('order-itemid'),
+            prodnum : e.target.getAttribute('itemid')
+            }
+        const option = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'                
+                },
+            body: JSON.stringify(send_data)
+        };
+        console.log(option);
+
+        fetch('/cancel_order_item', option)
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result);
+            viewPurchaseHistory(u_id);
+
+        });
+    }
 });
 
 
@@ -970,11 +1032,11 @@ function addBillingInfoBox() {
 }
 
 
-
+/*
 function addBillingMethodForm() {
    
     // const order_info = this.order_info;        
-    const clover = new Clover('3de85b3b5c3bbea456e24e24596245fd');
+    const clover = new Clover('6127b4cab8b38737e9de59b6cda53c25');
 
     const elements = clover.elements();
            
@@ -1070,6 +1132,7 @@ function cloverTokenHandler(token) {
     form.appendChild(hiddenInput);
     form.submit();
 }
+*/
 
 ////////////////////////////set billing info functions /////////////////////////////
 
@@ -1521,7 +1584,7 @@ function makePurchaseHistoryContainer() {
     return `
     <div id="purchase_history_container" class="purchase_history_container">
         <div id="purchase_history_page" class="purchase_history_page">
-            <div id="purchase_history_title" class="purchase_history_title">Your Orders</div>
+            <div id="purchase_history_title" class="purchase_history_title">Purchase History</div>
             <div id="purchase_history_box" class="purchase_history_box">
             </div>
         </div>   
@@ -1531,21 +1594,26 @@ function makePurchaseHistoryContainer() {
 
 function setPurchaseHistory(result) {
     result.forEach(element => {
-        let order_id = element.order_number;
+        const order_id = element.order_number;
         let cart_id = element.cartnum;
         let prodnum = element.prodnum;
         let image_src = element.image;
         let item_name = element.name;
+        const price = element.price_sell;
+        const quantity = element.quantity;
         let item_description = element.content;
 
         let total_amount = element.total_order_amount;
         let oddate = element.oddate;
+        let track_number = element.track_number;
         let shipping_fee = element.shipping_fee;
         let shipping_rate = element.shipping_rate;
+        let refund = element.refund;
+        let full_refunded = element.full_refunded;
         // let $purchase_history = document.querySelector(`[orderid="${order_id}"]`);
         if (document.querySelector(`[orderid="${order_id}"]`)) {
             
-            setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, item_description);
+            setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, price, quantity, item_description, track_number, refund);
 
         } else {
             const purchase_history = document.createElement('div');
@@ -1553,8 +1621,8 @@ function setPurchaseHistory(result) {
             purchase_history.setAttribute('class', `purchase_history`);
             purchase_history.setAttribute('orderid', `${order_id}`);
             document.getElementById('purchase_history_box').appendChild(purchase_history);
-            setPurchaseHistoryHead(order_id, oddate, total_amount);
-            setPurchaseHistoryMain(order_id, cart_id, prodnum, image_src, item_name, item_description);
+            setPurchaseHistoryHead(order_id, oddate, total_amount, full_refunded);
+            setPurchaseHistoryMain(order_id, cart_id, prodnum, image_src, item_name, price, quantity, item_description, track_number, refund);
 
 
         } 
@@ -1562,16 +1630,17 @@ function setPurchaseHistory(result) {
 
 }
 
-function setPurchaseHistoryHead(order_id, oddate, total_amount) {
+function setPurchaseHistoryHead(order_id, oddate, total_amount, full_refunded) {
     const purchase_history_head = document.createElement('div');
     purchase_history_head.setAttribute('id', `purchase_history_head`);
     purchase_history_head.setAttribute('class', `purchase_history_head`);
     purchase_history_head.setAttribute('head_orderid', `${order_id}`);
     document.querySelector(`[orderid="${order_id}"]`).appendChild(purchase_history_head);
-    purchase_history_head.innerText = order_id;
+    // purchase_history_head.innerText = order_id;
     
-    setPurchaseHistoryHeadOrderdate(order_id, oddate)
-    setPurchaseHistoryHeadOrderTotal(order_id, total_amount)
+    setPurchaseHistoryHeadOrderdate(order_id, oddate);
+    setPurchaseHistoryHeadOrderTotal(order_id, total_amount);
+    setCancelOrder(order_id, full_refunded);
 }
 
 function setPurchaseHistoryHeadOrderdate(order_id, oddate) {
@@ -1592,32 +1661,44 @@ function setPurchaseHistoryHeadOrderTotal(order_id, total_amount) {
     purchase_history_head_order_total.innerText = '$' + parseFloat(total_amount).toFixed(2);
 }
 
+function setCancelOrder(order_id, full_refunded) {
+    const purchase_history_order_cancel_btn = document.createElement('button');
+    purchase_history_order_cancel_btn.setAttribute('id', `purchase_history_order_cancel_btn`);
+    purchase_history_order_cancel_btn.setAttribute('class', `purchase_history_order_cancel_btn`);
+    purchase_history_order_cancel_btn.setAttribute('title', `cancel this order`);        
+    document.querySelector(`[head_orderid="${order_id}"]`).appendChild(purchase_history_order_cancel_btn);
+    purchase_history_order_cancel_btn.innerText = 'Cancel This Order';
+    if (full_refunded == 'y') {
+        purchase_history_order_cancel_btn.innerText = 'This Order has canceled';
+        purchase_history_order_cancel_btn.setAttribute('disabled', 'true'); 
+    }
+}
 
 
 
 
-function setPurchaseHistoryMain(order_id, cart_id, prodnum, image_src, item_name, item_description) {
+function setPurchaseHistoryMain(order_id, cart_id, prodnum, image_src, item_name, price, quantity, item_description, track_number, refund) {
     const purchase_history_main = document.createElement('div');
     purchase_history_main.setAttribute('id', `purchase_history_main`);
     purchase_history_main.setAttribute('class', `purchase_history_main`);
     purchase_history_main.setAttribute('main_orderid', `${order_id}`);
     document.querySelector(`[orderid="${order_id}"]`).appendChild(purchase_history_main);
 
-    setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, item_description);
+    setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, price, quantity, item_description, track_number, refund);
 
 }
 
-function setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, item_description) {
+function setPurchaseHistoryItem(order_id, cart_id, prodnum, image_src, item_name, price, quantity, item_description, track_number, refund) {
     const purchase_history_item = document.createElement('div');
     purchase_history_item.setAttribute('id', `purchase_history_item`);
     purchase_history_item.setAttribute('class', `purchase_history_item`);
     purchase_history_item.setAttribute('item_orderid', `${cart_id}`);
     document.querySelector(`[main_orderid="${order_id}"]`).appendChild(purchase_history_item);
-    purchase_history_item.innerText = cart_id;
+    //  purchase_history_item.innerText = cart_id;
 
     setPurchaseHistoryItemImagebox(cart_id, prodnum, image_src);
-    setPurchaseHistoryItemContentbox(cart_id, prodnum, item_name, item_description);
-    setPurchaseHistoryItemExtrabox(cart_id, prodnum);
+    setPurchaseHistoryItemContentbox(cart_id, prodnum, item_name, price, quantity, item_description);
+    setPurchaseHistoryItemExtrabox(cart_id, prodnum, track_number, order_id, refund);
 }
 
 function setPurchaseHistoryItemImagebox(cart_id, prodnum, image_src) {
@@ -1639,15 +1720,16 @@ function setPurchaseHistoryItemImage(cart_id, prodnum, image_src) {
 }
 
 
-function setPurchaseHistoryItemContentbox(cart_id, prodnum, item_name, item_description) {
+function setPurchaseHistoryItemContentbox(cart_id, prodnum, item_name, price, quantity, item_description) {
     const purchase_history_item_contentbox = document.createElement('div');
     purchase_history_item_contentbox.setAttribute('id', `purchase_history_item_contentbox`);
     purchase_history_item_contentbox.setAttribute('class', `purchase_history_item_contentbox`);
     purchase_history_item_contentbox.setAttribute('contentbox_orderid', `${cart_id}${prodnum}`);
     document.querySelector(`[item_orderid="${cart_id}"]`).appendChild(purchase_history_item_contentbox);
     
-    setPurchaseHistoryItemName(cart_id, prodnum, item_name)
-    setPurchaseHistoryItemDescription(cart_id, prodnum, item_description)
+    setPurchaseHistoryItemName(cart_id, prodnum, item_name);
+    setPurchaseHistoryItemPQBox(cart_id, prodnum, price, quantity);
+    setPurchaseHistoryItemDescription(cart_id, prodnum, item_description);
     
 
 }
@@ -1662,6 +1744,50 @@ function setPurchaseHistoryItemName(cart_id, prodnum, item_name) {
 
 }
 
+function setPurchaseHistoryItemPQBox(cart_id, prodnum, price, quantity) {
+    const purchase_history_item_pq_box = document.createElement('div');
+    purchase_history_item_pq_box.setAttribute('id', `purchase_history_item_pq`);
+    purchase_history_item_pq_box.setAttribute('class', `purchase_history_item_pq`);
+    purchase_history_item_pq_box.setAttribute('item_pqbox_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[contentbox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_pq_box);
+    // setPurchaseHistoryItemPQBox.innerText = `$${price}`;
+    setPurchaseHistoryItemPrice(cart_id, prodnum, price);
+    setPurchaseHistoryItemQuantity(cart_id, prodnum, quantity);
+    setPurchaseHistoryItemSubtotal(cart_id, prodnum, price, quantity);
+
+}
+
+function setPurchaseHistoryItemPrice(cart_id, prodnum, price) {
+    const purchase_history_item_price = document.createElement('div');
+    purchase_history_item_price.setAttribute('id', `purchase_history_item_price`);
+    purchase_history_item_price.setAttribute('class', `purchase_history_item_price`);
+    // purchase_history_item_name.setAttribute('item_name_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[item_pqbox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_price);
+    purchase_history_item_price.innerText = `$${parseFloat(price).toFixed(2)}`;
+
+}
+
+function setPurchaseHistoryItemQuantity(cart_id, prodnum, quantity) {
+    const purchase_history_item_quantity = document.createElement('div');
+    purchase_history_item_quantity.setAttribute('id', `purchase_history_item_quantity`);
+    purchase_history_item_quantity.setAttribute('class', `purchase_history_item_quantity`);
+    // purchase_history_item_name.setAttribute('item_name_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[item_pqbox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_quantity);
+    purchase_history_item_quantity.innerText = `\u00a0x ${quantity} EA`;
+
+}
+
+function setPurchaseHistoryItemSubtotal(cart_id, prodnum, price, quantity) {
+    const item_subtotal = price * quantity;
+    const purchase_history_item_subtotal = document.createElement('div');
+    purchase_history_item_subtotal.setAttribute('id', `purchase_history_item_subtotal`);
+    purchase_history_item_subtotal.setAttribute('class', `purchase_history_item_subtotal`);
+    // purchase_history_item_name.setAttribute('item_name_orderid', `${cart_id}${prodnum}`);
+    document.querySelector(`[item_pqbox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_subtotal);
+    purchase_history_item_subtotal.innerText ='\u00a0\u00a0'+`Item Subtotal $${parseFloat(item_subtotal).toFixed(2)}`;
+
+}
+
 function setPurchaseHistoryItemDescription(cart_id, prodnum, item_description) {
     const purchase_history_item_description = document.createElement('div');
     purchase_history_item_description.setAttribute('id', `purchase_history_item_description`);
@@ -1672,7 +1798,7 @@ function setPurchaseHistoryItemDescription(cart_id, prodnum, item_description) {
 
 }
 
-function setPurchaseHistoryItemExtrabox(cart_id, prodnum) {
+function setPurchaseHistoryItemExtrabox(cart_id, prodnum, track_number, order_id, refund) {
     const purchase_history_item_extrabox = document.createElement('div');
     purchase_history_item_extrabox.setAttribute('id', `purchase_history_item_extrabox`);
     purchase_history_item_extrabox.setAttribute('class', `purchase_history_item_extrabox`);
@@ -1680,7 +1806,8 @@ function setPurchaseHistoryItemExtrabox(cart_id, prodnum) {
     document.querySelector(`[item_orderid="${cart_id}"]`).appendChild(purchase_history_item_extrabox);
     
     setPurchaseHistoryItemReorder(cart_id, prodnum);
-    setPurchaseHistoryItemTrack(cart_id, 0);
+    setPurchaseHistoryItemTrack(cart_id, prodnum, track_number);
+    setCancelOrderItem(cart_id, prodnum, order_id, refund);
 
 }
 
@@ -1694,14 +1821,30 @@ function setPurchaseHistoryItemReorder(cart_id, prodnum) {
     purchase_history_item_reorder_btn.innerText = 'But It Again';
 }
 
-function setPurchaseHistoryItemTrack(cart_id, track_num) {
+function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {
     const purchase_history_item_track_btn = document.createElement('button');
     purchase_history_item_track_btn.setAttribute('id', `purchase_history_item_track_btn`);
     purchase_history_item_track_btn.setAttribute('class', `purchase_history_item_track_btn`);
     purchase_history_item_track_btn.setAttribute('title', `item track`);    
-    purchase_history_item_track_btn.setAttribute('track-itemid', `${track_num}`);
+    purchase_history_item_track_btn.setAttribute('track-itemid', `${track_number}`);
     document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_track_btn);
     purchase_history_item_track_btn.innerText = 'Item Track';
+}
+
+function setCancelOrderItem(cart_id, prodnum, order_id, refund) {
+    const purchase_history_item_order_cancel_btn = document.createElement('button');
+    purchase_history_item_order_cancel_btn.setAttribute('id', `purchase_history_item_order_cancel_btn`);
+    purchase_history_item_order_cancel_btn.setAttribute('class', `purchase_history_item_order_cancel_btn`);
+    purchase_history_item_order_cancel_btn.setAttribute('title', `cancel this order`);    
+    purchase_history_item_order_cancel_btn.setAttribute('cart-itemid', `${cart_id}`);
+    purchase_history_item_order_cancel_btn.setAttribute('order-itemid', `${order_id}`);
+    purchase_history_item_order_cancel_btn.setAttribute('itemid', `${prodnum}`);
+    document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_order_cancel_btn);
+    purchase_history_item_order_cancel_btn.innerText = 'Cancel Order This Item';
+    if (refund == 'y') {
+        purchase_history_item_order_cancel_btn.innerText = 'Item order Canceled';
+        purchase_history_item_order_cancel_btn.setAttribute('disabled', 'true'); 
+    }
 }
 
 

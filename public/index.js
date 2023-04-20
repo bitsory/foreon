@@ -9,9 +9,9 @@ import Shop from "./pages/shop.js";
 import PlaceOrder from "./pages/place_order.js";
 import ShopDetail from "./pages/shop_detail.js";
 import OrderConfirm from "./pages/oder_confirm.js";
+import Admin from "./pages/admin.js";
 import * as ItemCounter from "./pages/item_counter.js";
 import * as ShopPageForm from "./pages/shop_page_forms.js";
-
 
 
 const toggleBtn = document.querySelector('.navbar_toggleBtn');
@@ -162,6 +162,13 @@ document.addEventListener('click', function(e){
         view_cart();
         console.log("view cart click page move")
     } 
+
+    // if (e.target && e.target.id == 'admin_btn') {        
+    //     // view_cart();
+    //     const admin_page = new Admin();
+    //     document.getElementById('lorem').innerHTML = admin_page.getHtml();
+    //     console.log("admin page")
+    // } 
     
 
 });
@@ -235,7 +242,7 @@ const router = async () => {
         console.log("match :", match);
 
         let page = new match.route.view1();   
-        document.querySelector(".lorem").innerHTML = await page.getHtml(); 
+        document.getElementById("lorem").innerHTML = await page.getHtml(); 
         
         
         
@@ -780,6 +787,7 @@ function setCheckoutIndivItemPage(param) {
                         c_item_no : buy_now_checkout_cart[0].prodnum,
                         c_item_price : buy_now_checkout_cart[0].price_sell,
                         c_item_quantity : order_quantity,
+                        c_item_code : buy_now_checkout_cart[0].item_code,
                         c_name : "GUEST"
                     }];
     

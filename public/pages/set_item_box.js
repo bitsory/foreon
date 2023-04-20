@@ -953,9 +953,14 @@ export default class {
     }
     
     setItemTotalWeight(param, weight) {
-        if(param == 'GUEST') {this.guest_item_total_weight = weight;}
-        else {this.user_item_total_weight = weight;}
-        console.log(this.item_total_weight);
+        if(param == 'GUEST') {
+            this.guest_item_total_weight = weight; 
+            console.log(this.guest_item_total_weight);
+        } else {
+            this.user_item_total_weight = weight; 
+            console.log(this.user_item_total_weight);
+        }
+        
 
     }
 
