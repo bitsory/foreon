@@ -68,6 +68,39 @@ export default class {
 
             }
 
+            if(e.target && e.target.id == 'same_shipping_billing_address_checkbtn') {
+
+                const address1 = document.getElementById("input_shipping_address_line1").value;
+                const address2 = document.getElementById("input_shipping_address_line2").value;
+                const city = document.getElementById("input_shipping_address_city").value;
+                const state = document.getElementById("shipping_address_state").value;
+                const zip = document.getElementById("input_shipping_address_zip").value;
+                const phone = document.getElementById("input_shipping_contact_phone").value;
+                const email = document.getElementById("input_shipping_contact_email").value;
+
+                if (document.getElementById("same_shipping_billing_address_checkbtn").checked == true) {
+                                       
+                    document.getElementById("input_billing_address_line1").value = address1;
+                    document.getElementById("input_billing_address_line2").value = address2;
+                    document.getElementById("input_billing_address_city").value = city;
+                    document.getElementById("input_billing_address_state").value = state;
+                    document.getElementById("input_billing_address_zip").value = zip;
+                    document.getElementById("input_billing_contact_phone").value = phone;
+                    document.getElementById("input_billing_contact_email").value = email;
+                
+                } else {
+                    document.getElementById("input_billing_address_line1").value = '';
+                    document.getElementById("input_billing_address_line2").value = '';
+                    document.getElementById("input_billing_address_city").value = '';
+                    document.getElementById("input_billing_address_state").value = '';
+                    document.getElementById("input_billing_address_zip").value = '';
+                    document.getElementById("input_billing_contact_phone").value = '';
+                    document.getElementById("input_billing_contact_email").value = '';
+                }
+
+            }
+            
+
             if(e.target && e.target.id == 'set_default_address_btn') {
 
                 
@@ -351,9 +384,18 @@ export default class {
                                 </div>
                             </div>
 
+                            <div class="guest_checkout_shipping_info_form_row" style="margin-bottom:1rem">
+                                <div id="same_shipping_billing_address_checkbox" class="same_shipping_billing_address_checkbox">
+                                <input type="checkbox" name="same_shipping_billing_address" id="same_shipping_billing_address_checkbtn" class="same_shipping_billing_address_checkbtn input_shipping_checkbox">
+                                <label for="same_shipping_billing_address_checkbtn">Same with Billing Address</label>
+                                </div>
+                            </div>
+
                             <div id="guest_checkout_shipping_info_next_box" class="guest_checkout_shipping_info_next_box">
                                 <button type="button" id="guest_checkout_shipping_info_next_btn" class="guest_checkout_shipping_info_next_btn" title="next">NEXT</button>
                             </div>
+
+                            
                         </div> 
 
                         <div id="shipping_method_container" class="shipping_method_container">
@@ -382,6 +424,108 @@ export default class {
                         </div>
                         
                         <div class="billing_info">
+
+                        <div class="order_info_title">Billing Address</div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="shipping_address" class="field shipping_address_line1">
+                                <input type="text" name="billing_address_street_line1" id="input_billing_address_line1" class="input_shipping_address_line1 guest_checkout_input_shipping" placeholder="Billing Address Street Line 1" required>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="shipping_address" class="field shipping_address_line2">
+                                <input type="text" name="billing_address_street_line2" id="input_billing_address_line2" class="input_shipping_address_line2 guest_checkout_input_shipping" placeholder="Billing Address Street Line 2">
+                                </div>
+                            </div>
+
+                            <div class="shipping_info_csz">
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    <div id="shipping_address" class="field shipping_addres_city">
+                                    <input type="text" name="billing_address_city" id="input_billing_address_city" class="input_shipping_address_city guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="City" required>
+                                    </div>
+                                </div>
+
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    
+                                    <div id="shipping_address" class="field shipping_address_state">
+                                        <select name="billing_address_state" id="input_billing_address_state" class="input_shipping_address guest_checkout_input_shipping guest_checkout_input_shipping_csz" >
+                                        <option value="AL">Alabama</option>
+                                        <option value="AK">Alaska</option>
+                                        <option value="AZ">Arizona</option>
+                                        <option value="AR">Arkansas</option>
+                                        <option value="CA">California</option>
+                                        <option value="CO">Colorado</option>
+                                        <option value="CT">Connecticut</option>
+                                        <option value="DE">Delaware</option>
+                                        <option value="DC">District Of Columbia</option>
+                                        <option value="FL">Florida</option>
+                                        <option value="GA">Georgia</option>
+                                        <option value="HI">Hawaii</option>
+                                        <option value="ID">Idaho</option>
+                                        <option value="IL">Illinois</option>
+                                        <option value="IN">Indiana</option>
+                                        <option value="IA">Iowa</option>
+                                        <option value="KS">Kansas</option>
+                                        <option value="KY">Kentucky</option>
+                                        <option value="LA">Louisiana</option>
+                                        <option value="ME">Maine</option>
+                                        <option value="MD">Maryland</option>
+                                        <option value="MA">Massachusetts</option>
+                                        <option value="MI">Michigan</option>
+                                        <option value="MN">Minnesota</option>
+                                        <option value="MS">Mississippi</option>
+                                        <option value="MO">Missouri</option>
+                                        <option value="MT">Montana</option>
+                                        <option value="NE">Nebraska</option>
+                                        <option value="NV">Nevada</option>
+                                        <option value="NH">New Hampshire</option>
+                                        <option value="NJ">New Jersey</option>
+                                        <option value="NM">New Mexico</option>
+                                        <option value="NY">New York</option>
+                                        <option value="NC">North Carolina</option>
+                                        <option value="ND">North Dakota</option>
+                                        <option value="OH">Ohio</option>
+                                        <option value="OK">Oklahoma</option>
+                                        <option value="OR">Oregon</option>
+                                        <option value="PA">Pennsylvania</option>
+                                        <option value="RI">Rhode Island</option>
+                                        <option value="SC">South Carolina</option>
+                                        <option value="SD">South Dakota</option>
+                                        <option value="TN">Tennessee</option>
+                                        <option value="TX">Texas</option>
+                                        <option value="UT">Utah</option>
+                                        <option value="VT">Vermont</option>
+                                        <option value="VA">Virginia</option>
+                                        <option value="WA">Washington</option>
+                                        <option value="WV">West Virginia</option>
+                                        <option value="WI">Wisconsin</option>
+                                        <option value="WY">Wyoming</option>
+                                        </select>
+                                    
+                                    </div>
+                                </div>
+
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    <div id="shipping_address" class="field shipping_address_zip">
+                                    <input type="text" name="billing_address_zip" id="input_billing_address_zip" class="input_shipping_address_zip guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="Zip Code" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="order_contact_phone" class="field order_contact_phone">
+                                <input type="text" name="billing_address_contact_phone" id="input_billing_contact_phone" class="order_contact_phone guest_checkout_input_shipping" placeholder="Phone" required>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row" style="margin-bottom:1rem">
+                                <div id="order_contact_email" class="field order_contact_email">
+                                <input type="text" name="billing_address_contact_email" id="input_billing_contact_email" class="order_contact_email guest_checkout_input_shipping" placeholder="Email" required>
+                                </div>
+                            </div>                         
+
+
                             <div class="order_info_title">Payment Infomation</div>                            
 
                             <div class="form-row top-row">
@@ -410,6 +554,8 @@ export default class {
                                 <div class="input-errors" id="card-postal-code-errors" role="alert"></div>
                             </div>
                             <div id="card-response" role="alert"></div>
+
+                            
                         </div>
                 
                     </form>

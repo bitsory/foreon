@@ -686,13 +686,13 @@ app.post('/make_item_test', (req,res) => {
         defaultTaxRates: 'true',
         isRevenue: 'true',
         taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
-        id: '00051',
-        name: 'Fish-shaped Bun',
+        id: '00001',
+        name: 'UPS Shipping',
         sku: 'ea',
-        price: 1000,
+        price: 990,
         priceType: 'PER_UNIT',
         unitName: 'ea',
-        priceWithoutVat: 9899
+        priceWithoutVat: 990
     })
     };
 
@@ -927,24 +927,31 @@ app.get('/create_item', (req,res) => {
     
     const options = {
         method: 'POST',
-        headers: {'content-type': 'application/json', authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+        headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
         body: JSON.stringify({
-          hidden: 'false',
-          available: 'true',
-          autoManage: 'false',
-          defaultTaxRates: 'true',
-          isRevenue: 'true',
-          name: 'Floating Moon Lamp',
-          price: 9899,
-          priceType: 'PER_UNIT'
-          
+            hidden: 'false',
+            available: 'true',
+            autoManage: 'false',
+            defaultTaxRates: 'true',
+            isRevenue: 'true',
+            taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
+            id: '00001',
+            name: 'UPS Shipping',
+            sku: 'ea',
+            price: 990,
+            priceType: 'PER_UNIT',
+            unitName: 'ea',
+            priceWithoutVat: 990
         })
-      };
+        };
+    
+    fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err));
       
-      fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/items`, options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
 })
 
 app.get('/get_single_customer', (req,res) => {
@@ -1235,21 +1242,21 @@ app.get('/create_order_test', (req,res) => {
 
 app.get('/refund_test', (req,res) => {
     console.log("/refund_test  /refund_test /refund_test /refund_test");
-    const options = {
-        method: 'POST',
-        headers: {accept: 'application/json', 
-        'content-type': 'application/json',
-        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        },
-        body: JSON.stringify({
-          "items":[{"parent":"2TXDF6YD2BW3J","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
-        })
-      };
+    // const options = {
+    //     method: 'POST',
+    //     headers: {accept: 'application/json', 
+    //     'content-type': 'application/json',
+    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({
+    //       "items":[{"parent":"2TXDF6YD2BW3J","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
+    //     })
+    //   };
 
-    fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
+    // fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
 
 
     // const options = {
@@ -1269,20 +1276,21 @@ app.get('/refund_test', (req,res) => {
     //     .catch(err => console.error(err));
         
 
-    // const options = {
-    //     method: 'POST',
-    //     headers: {
-    //       accept: 'application/json',
-    //       'content-type': 'application/json',
-    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-    //     },
-    //     body: JSON.stringify({charge: 'W13C2STW0HPHC', amount:3380})
-    //   };
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({charge: '651JCRHYRPAWT'})
+      };
       
-    //   fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
-    //     .then(response => response.json())
-    //     .then(response => console.log(response))
-    //     .catch(err => console.error(err));
+      fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
 
     // const options = {
     //     method: 'POST',
@@ -1294,7 +1302,7 @@ app.get('/refund_test', (req,res) => {
         
     //   };
       
-    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/CNCW19RF9DE24/returns', options)
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/QQFTV1JD0AJDE/returns', options)
     //     .then(response => response.json())
     //     .then(response => console.log(response))
     //     .catch(err => console.error(err));
@@ -1760,8 +1768,15 @@ app.post('/add_payment_method', (req,res) => {
     const clv_id = req.session.loginData.clv_id; 
     const c_num = req.body.cardnumber;
     const card_holder = req.body.card_name;
-    const card_email = req.body.card_email;
+    const card_email = req.body.billing_address_email;
     const default_check = req.body.default_payment;
+
+    const address1 = req.body.billing_address_street_line1;
+    const address2 = req.body.billing_address_street_line2;
+    const city = req.body.billing_address_city;
+    const state = req.body.billing_address_state;
+    const address_zip = req.body.billing_address_zip;
+    const phone = req.body.billing_address_phone;
 
     console.log(clv_id);
     console.log(c_num);
@@ -1845,8 +1860,8 @@ app.post('/add_payment_method', (req,res) => {
                 
                 function addBillingInfo() {
                     db.getConnection((con)=>{
-                        con.query('INSERT INTO billing_info (id, clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, email, default_payment, indate) values (?,?,?,?,?,?,?,?,?,?,?,?,?)', 
-                        [u_id, $clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, email, default_check, indate], (err, result) => {
+                        con.query('INSERT INTO billing_info (id, clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, default_payment, indate, address1, address2, city, state, address_zip, phone, email) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', 
+                        [u_id, $clv_id, cd_id, clv_tk, cardholder, first6, last4, exp, zip, type, default_check, indate, address1, address2, city, state, address_zip, phone, email], (err, result) => {
                             if (err) {
                                 res.send(err);
                                 // con.end();
@@ -2574,176 +2589,7 @@ app.post('/shop/checkout/:id', (req,res) => {
     });
 });
 
-app.post('/cancel_order', (req,res) => {
-    console.log('/cancal_order cancal_order cancal_order ')
-    console.log(req.body);
-    const order_num = req.body.order_number;
-    // const prodnum = req.body
 
-    const u_id = req.body.user_id;
-    db.getConnection((con)=>{
-        con.query('SELECT clv_charge_id from orders WHERE shipment = "n" and order_number = ? and u_id = ?', [order_num, u_id] ,(err, result) => {
-        // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
-            if(err){                        
-                res.send(err);
-                // con.end();        
-            } else {
-                console.log(result);
-              
-                const options = {
-                    method: 'POST',
-                    headers: {
-                      accept: 'application/json',
-                      'content-type': 'application/json',
-                      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                    },
-                    body: JSON.stringify({charge: result[0].clv_charge_id})
-                  };
-                  
-                fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
-                .then(response => response.json())
-                .then(response => {
-                    console.log(response)
-                    makeFullRefundFlag(order_num, con);  
-                    makeAllItemsRefundFlag(order_num, con);
-                    checkPurchaseHistory(u_id, con, res);
-                })
-                .catch(err => console.error(err));
-
-                // res.send(result);
-            } 
-        });             
-    })
-});
-
-
-app.post('/cancel_order_item', (req,res) => {
-    console.log('/cancal_order cancal_order cancal_order ')
-    console.log(req.body);
-    const cartnum = req.body.cart_number;
-    const ordernum = req.body.order_number;
-    const prodnum = req.body.prodnum;
-
-    const u_id = req.body.user_id;
-    db.getConnection((con)=>{
-        con.query('SELECT cartnum, shipping_fee FROM orders join cart on cart.order_number = orders.order_number WHERE refund = "n" and orders.order_number = ? and orders.u_id = ?', [ordernum, u_id] ,(err, result) => {
-            if(err){                        
-                res.send(err);
-                // con.end();        
-            } else {
-                console.log(result);
-                const shipping_fee = result[0].shipping_fee;
-                if (result.length > 1) {
-
-                    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum = ? and u_id = ? and product.prodnum = ?', [cartnum, u_id, prodnum] ,(err, result) => {
-                    // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
-                        if(err){                        
-                            res.send(err);
-                            // con.end();        
-                        } else {
-                            console.log(result);
-                            const amount = result[0].price_sell * 100 * result[0].quantity * 1.06;
-                            const item_num = result[0].prodnum;
-
-                            const options = {
-                                method: 'POST',
-                                headers: {accept: 'application/json', 
-                                'content-type': 'application/json',
-                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                                },
-                                body: JSON.stringify({
-                                "items":[{"parent":result[0].item_code,"amount":amount,"description":result[0].name,"quantity":result[0].quantity,"type":"sku"}]
-                                })
-                            };
-                        
-                            fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
-                            .then(response => response.json())
-                            .then(response => {                      
-                                                    
-                                console.log(response);
-                                con.query('UPDATE cart SET refund = "y" where cartnum = ? and prodnum = ?', [cartnum, item_num] ,(err, result) => { 
-                                    if(err){                        
-                                        res.send(err);
-                                        // con.end();        
-                                    } else {
-                                        console.log(result);
-                                        checkPurchaseHistory(u_id, con, res);
-                                    }
-                                });                    
-                            })
-                            .catch(err => console.error(err));
-                            // res.send(result);
-                        } 
-                    });
-                } else if (result.length == 1) {
-                    con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where refund = "n" and result = "y" and cartnum = ? and u_id = ? and product.prodnum = ?', [cartnum, u_id, prodnum] ,(err, result) => {
-                        // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
-                        if(err){                        
-                            res.send(err);
-                            // con.end();        
-                        } else {
-                            console.log(result);
-                            const amount = ((result[0].price_sell * 100 * result[0].quantity) + (shipping_fee * 100)) * 1.06;
-                            const item_num = result[0].prodnum;
-
-                            const options = {
-                                method: 'POST',
-                                headers: {accept: 'application/json', 
-                                'content-type': 'application/json',
-                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                                },
-                                body: JSON.stringify({
-                                "items":[{"parent":result[0].item_code,"amount":amount,"description":result[0].name,"quantity":result[0].quantity,"type":"sku"}]
-                                })
-                            };
-                        
-                            fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
-                            .then(response => response.json())
-                            .then(response => {                      
-                                                    
-                                console.log(response);
-                                makeFullRefundFlag(ordernum, con);
-                                con.query('UPDATE cart SET refund = "y" where cartnum = ? and prodnum = ?', [cartnum, item_num] ,(err, result) => { 
-                                    if(err){                        
-                                        res.send(err);
-                                        // con.end();        
-                                    } else {
-                                        console.log(result);
-                                        checkPurchaseHistory(u_id, con, res);
-                                    }
-                                });                    
-                            })
-                            .catch(err => console.error(err));                                
-                        } 
-                    });
-                }
-            }
-        })
-        con.release();             
-    })
-});
-
-function makeAllItemsRefundFlag(ordernum, con) { 
-    con.query('UPDATE cart SET refund = "y" where order_number = ?', [ordernum] ,(err, result) => { 
-        if(err){                        
-            res.send(err);
-            // con.end();        
-        } else {
-            console.log(result);
-        }
-    });
-}
-
-function makeFullRefundFlag(ordernum, con) {    
-    con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [ordernum] ,(err, result) => { 
-        if(err){                        
-            res.send(err);
-            // con.end();        
-        } else {
-            console.log(result);
-        }
-    })
-}
 
 app.post(`/get_user_default_billing_info`, (req,res) => {
     console.log('/get_user_default_billing_info /get_user_default_billing_info /get_user_default_billing_info ');
@@ -2917,40 +2763,422 @@ app.post('/item_delete_v2', (req,res) => {
     }
 });
 
+app.post('/cancel_order', (req,res) => {
+    console.log('/cancal_order cancal_order cancal_order ')
+    console.log(req.body);
+    const order_num = req.body.order_number;
+    // const prodnum = req.body
+
+    const u_id = req.body.user_id;
+    db.getConnection((con)=>{
+        con.query('SELECT * FROM cart JOIN orders on cart.order_number = orders.order_number WHERE refund = "n" and cart.order_number = ? and cart.u_id = ?', [order_num, u_id] ,(err, result_param) => {
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log("result_param");
+                console.log(result_param);
+                const left_over = result_param.map(element => {
+                    return element;
+                })
+                const cart_nums = result_param.map(element => {
+                    return element.cartnum;
+                })
+                const item_nums = result_param.map(element => {
+                    return element.prodnum;
+                })
+                const shipping_fee = result_param[0].shipping_fee;
+                const order_items_count = result_param[0].order_items_count;
+                if (result_param.length == order_items_count) {
+                    console.log("result_param.length == order_items_count");
+
+                    con.query('SELECT clv_charge_id from orders WHERE shipment = "n" and order_number = ? and u_id = ?', [order_num, u_id] ,(err, result) => {        
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log(result);
+                        
+                            const options = {
+                                method: 'POST',
+                                headers: {
+                                accept: 'application/json',
+                                'content-type': 'application/json',
+                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                                },
+                                body: JSON.stringify({charge: result[0].clv_charge_id})
+                            };
+                            
+                            fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+                            .then(response => response.json())
+                            .then(response => {
+
+                                if (response.status == 'succeeded') {
+                                    console.log(response)
+                                    con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [order_num] ,(err, result) => { 
+                                        if(err){                        
+                                            res.send(err);                                               
+                                        } else {
+                                            console.log(result);
+                                            makeAllItemsRefundFlag(order_num, con);
+                                            (u_id == 'GUEST') ? checkGuestPurchaseHistory(order_num, con, res) : checkPurchaseHistory(u_id, con, res);
+                                        }
+                                    });
+                                    
+                                }
+                            })
+                            .catch(err => console.error(err));
+                        } 
+                    });   
+                } else {
+                    console.log("cancel order left over items")
+                    const cancel_order_flag = true;
+                    cancelOrderItems(left_over, u_id, order_num, cart_nums, item_nums, con, res, cancel_order_flag);                  
+                    
+                }
+            }
+        });
+        con.release();         
+    })
+});
+
+
+app.post('/cancel_order_item', (req,res) => {
+    console.log('/cancal_order item cancal_order item cancal_order item')
+    console.log(req.body);
+    const cartnum = req.body.cart_number;
+    const ordernum = req.body.order_number;
+    const prodnum = req.body.prodnum;
+    const u_id = req.body.user_id;
+    db.getConnection((con)=>{
+        con.query('SELECT cartnum, orders.clv_order_id, shipping_fee FROM orders join cart on cart.order_number = orders.order_number WHERE refund = "n" and orders.order_number = ? and orders.u_id = ?', [ordernum, u_id] ,(err, result_param) => {
+            if(err){                        
+                res.send(err);            
+            } else {
+                console.log(result_param);
+                cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res);           
+            }
+        });
+        con.release();             
+    });
+});
+
+function getUPSLineItemID(order_num) {
+    // let ups_line_id = '';
+    return new Promise((resolve, reject) => { 
+        const options = {
+            method: 'GET',
+            headers: {
+            accept: 'application/json',
+            authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            }
+        };
+        
+        fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/orders/${order_num}/line_items`, options)
+        .then(response => response.json())
+        .then(response => {
+            console.log(response);
+            const ups_info = response.elements.filter(element => {
+                return element.name.substr(0, 3) == "UPS" ? true : false;
+            });
+            console.log("ups_info");
+            console.log(ups_info);
+            const shipping_fee = {
+                parent : ups_info[0].id,
+                amount : ups_info[0].price * 1.06,
+                description : "UPS Shipping",
+                quantity : 1,
+                type:"sku"       
+            }
+            resolve(shipping_fee);
+            
+        })
+        .catch(err => console.error(err));
+    })
+
+}
+
+function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, cancel_order_flag) {
+    
+    // return new Promise((resolve, reject) => { 
+    console.log("cancelOrderItems(result_param,");
+    console.log(result_param);
+    console.log(result_param.length);
+    getUPSLineItemID(result_param[0].clv_order_id).then(data => {
+        const shipping_fee = data;        
+        console.log(shipping_fee)      
+
+        if (result_param.length > 1) {            
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum in (?) and u_id = ? and product.prodnum in (?)', [cartnum, u_id, prodnum] ,(err, result) => {
+            // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log(result); 
+                    const items = result.map(element => {
+                        return { 
+                            parent : element.item_code,
+                            amount : element.price_sell * 100 * element.quantity * 1.06,
+                            description : element.name,
+                            quantity : element.quantity,
+                            type:"sku"                            
+                        }                
+                    });
+
+                    if (cancel_order_flag && cancel_order_flag == true) {
+                        items.push(shipping_fee);
+                    }                  
+                    
+                    console.log(items);
+
+                    const options = {
+                        method: 'POST',
+                        headers: {accept: 'application/json', 
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({
+                        "items":items
+                        })
+                    };
+                
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    .then(response => response.json())
+                    .then(response => {                      
+                                            
+                        console.log(response);                       
+                        
+                        if (response.status == 'returned') {                            
+
+                            const returned_amount = response.items.map(element => {
+                                return element.amount / 100;                        
+                            });
+
+                            const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
+                            let update_query_2 = '';
+                            for (let i in returned_amount) {
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                            }                           
+                            const update_query = update_query_1 + update_query_2;
+                            console.log(update_query)
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log("returned items DB updated"); 
+                                    makeFullRefundFlag(ordernum, con);
+                                    (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);
+                                } 
+                            });   
+                        } else res.send("error : refund occur error");            
+                    })
+                    .catch(err => console.error(err));                   
+                } 
+            });
+        
+        } else if (result_param.length == 1) {
+            console.log("else if (result_param.length == 1)");
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum in (?) and u_id = ? and product.prodnum in (?)', [cartnum, u_id, prodnum] ,(err, result) => {           
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log(result);
+                    const items = result.map(element => {
+                        return { 
+                            parent : element.item_code,
+                            amount : element.price_sell * 100 * element.quantity * 1.06,
+                            description : element.name,
+                            quantity : element.quantity,
+                            type:"sku"                            
+                        }                
+                    });
+
+                    items.push(shipping_fee);
+                    console.log("items");
+                    console.log(items);
+
+                    
+                    const refunded = result.filter(element => {
+                        return element.refund == 'y';
+                    });
+                    const last_refund = result.filter(element => {
+                        return element.refund == 'n';
+                    });
+                    console.log("refunded")
+                    console.log(refunded)
+
+                    let refunded_amount = 0;
+                    refunded.forEach(element => {
+                        refunded_amount = refunded_amount + element.refund_amount;                    
+                    })
+
+                    const last_refund_amount = result[0].total_order_amount - refunded_amount;
+
+
+                    // const amount = ((result[0].price_sell * 100 * result[0].quantity) + (shipping_fee * 100)) * 1.06;
+                    // const item_num = result[0].prodnum;
+
+                    const options = {
+                        method: 'POST',
+                        headers: {accept: 'application/json', 
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({"items":items})
+                    };
+                
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    .then(response => response.json())
+                    .then(response => {                      
+                                            
+                        console.log(response);
+                        
+                        if (response.status == 'returned') {
+                            
+
+                            const returned_amount = response.items.map(element => {
+                                return element.amount / 100;                        
+                            });
+
+                            const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
+                            let update_query_2 = '';
+                            for (let i in returned_amount) {
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                            }                           
+                            const update_query = update_query_1 + update_query_2;
+                            console.log(update_query)
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            // con.query('UPDATE cart SET refund = "y", refund_amount = ? where cartnum = ? and prodnum = ?', [amount_returned, cartnum, last_refund[0].prodnum] ,(err, result) => { 
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log(result);
+                                    makeFullRefundFlag(ordernum, con);
+                                    (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);                                    
+                                } 
+                            });   
+                        } else res.send("error : refund occur error");              
+                    })
+                    .catch(err => console.error(err));                                
+                } 
+            });
+        } 
+    });
+}
+
+function makeAllItemsRefundFlag(ordernum, con) { 
+    con.query('UPDATE cart SET refund = "y" where order_number = ?', [ordernum] ,(err, result) => { 
+        if(err){                        
+            res.send(err);
+            // con.end();        
+        } else {
+            console.log(result);
+        }
+    });
+}
+
+function makeFullRefundFlag(ordernum, con) { 
+    console.log("makeFullRefundFlag(ordernum, con) ")   
+    console.log(ordernum);
+    con.query('SELECT * FROM cart WHERE order_number = ?', [ordernum], (err, result) => {
+        if(err){                        
+            res.send(err);
+            // con.end();        
+        } else {
+            console.log(result);
+            const cart_count = result.length;
+            const refunded = (result.filter(element => {
+                return element.refund == 'y';
+            })).length;
+            console.log("cart_count")
+            console.log(cart_count)
+            console.log("refunded")
+            console.log(refunded)
+
+            if (cart_count == refunded) {
+                con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [ordernum] ,(err, result) => { 
+                    if(err){                        
+                        res.send(err);
+                        // con.end();        
+                    } else {
+                        console.log(result);
+                    }
+                });
+            }
+        }
+    });    
+}
+
+
 app.post('/check_purchase_history', (req,res) => {
 
     console.log('/check_purchase_history /check_purchase_history')
-    const id= req.body.id;
-    const u_id = req.session.loginData.id;
+    const u_id = req.session.loginData ? req.session.loginData.id : false;
+    const id= req.body.id;    
+    const order_number = req.body.order_number;
 
-    if (id == u_id) {     
-        db.getConnection((con)=>{
-            checkPurchaseHistory(u_id, con, res);
-            // con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
-            //     if(err){                        
-            //         res.send(err);
-            //         // con.end();        
-            //     } else {
-            //         console.log(result);  
-            //         res.send(result);      
-            //     }
-            // });
-            con.release();
-        });
-    } else console.log("id Check")
+    db.getConnection((con)=>{
+        if (id == u_id) {         
+            checkPurchaseHistory(u_id, con, res); 
+        } else if (!u_id && id == 'GUEST') {
+            console.log(" guest purchase history")
+            checkGuestPurchaseHistory(order_number, con, res);
+        } else console.log("id Check")
+    });
+    
 });
 
 function checkPurchaseHistory(u_id, con, res) {
     con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
         if(err){                        
-            res.send(err);
-            // con.end();        
-        } else {
-            // console.log(result);  
+            res.send(err);                 
+        } else {           
             res.send(result);      
         }
     });
+    
 }
+
+function checkGuestPurchaseHistory(order_number, con, res) {
+    con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (?) ORDER BY oddate DESC',[order_number],(err, result) => {
+        if(err){                        
+            res.send(err);                
+        } else {            
+            res.send(result);      
+        }
+    });
+    
+}
+
+app.post('/track_my_order', (req,res) => {
+    console.log('/track_my_order track_my_order')
+    console.log(req.body)
+
+    const order_number = req.body.order_number;
+    const order_email = req.body.email;
+    const order_zip = req.body.zip;
+    db.getConnection((con)=>{
+        con.query('SELECT * FROM orders WHERE order_number = ? and order_email = ? and billing_zip = ?',[order_number, order_email, order_zip], (err, result) => {
+            if(err){                        
+                res.send(err);                       
+            } else {
+                console.log(result);  
+                if (result.length == 0) {
+                    res.send({"result" : "nothing"});
+                } else {
+                    checkGuestPurchaseHistory(order_number, con, res);
+                }                      
+            }            
+        });
+        con.release();
+    });
+});
+
 
 
 app.post('/user_checkout_submit', (req,res) => {
@@ -2966,6 +3194,8 @@ app.post('/user_checkout_submit', (req,res) => {
     let clv_id = '';
     let default_shipping_info = {};
     let cardholder = '';
+    let billing_email = '';
+    let billing_address = {};
     // const cart_num = '';
     const date = getDate();
     const order_number = date.replace(/\s|:|\-/g,"") + "OD" + u_id.substr(0, 3);
@@ -2980,6 +3210,7 @@ app.post('/user_checkout_submit', (req,res) => {
         description : "UPS shipping " + shipping_rate[0],
         quantity : 1,
         type:"sku",
+        // inventory_id: "6NRHHEKXEQV9Y",
         tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
     }   
         
@@ -3016,7 +3247,7 @@ app.post('/user_checkout_submit', (req,res) => {
     function getDefaultBillingInfo() {
         return new Promise((resolve, reject) => { 
             db.getConnection((con)=>{
-                con.query('SELECT clv_id, clv_tk, cardholder FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
+                con.query('SELECT * FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
                     if(err){                        
                         res.send(err);
                         // con.end();        
@@ -3025,6 +3256,15 @@ app.post('/user_checkout_submit', (req,res) => {
                         default_payment_method = result[0].clv_tk;
                         clv_id = result[0].clv_id;
                         cardholder = result[0].cardholder;
+                        billing_email = result[0].email;
+                        billing_phone = result[0].phone;
+                        billing_address = {
+                            address1 : result[0].address1,
+                            address2 : result[0].address2,
+                            city : result[0].city,
+                            state : result[0].state,
+                            zip : result[0].address_zip                           
+                        }
                         resolve();
                     }
                 }); 
@@ -3050,12 +3290,12 @@ app.post('/user_checkout_submit', (req,res) => {
         });
     }
 
-    function setOrders(response, confirm_info, default_shipping_info) {
+    function setOrders(response, confirm_info, default_shipping_info, billing_email, billing_phone, billing_zip, order_items_count) {
         console.log('order_number');
         console.log(order_number);   
         db.getConnection((con)=>{    
-            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate) VALUES (?,?,?,?,?,?,?,?,?,?)',
-            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date, shipping_rate[1], shipping_rate[0]], (err, result) => {
+            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate, order_email, order_phone, billing_zip, order_items_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date, shipping_rate[1], shipping_rate[0], billing_email, billing_phone, billing_zip, order_items_count], (err, result) => {
                 if(err){                        
                     res.send(err);
                     // con.end();        
@@ -3150,7 +3390,7 @@ app.post('/user_checkout_submit', (req,res) => {
                     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
                     },
                     body: JSON.stringify({"source":default_payment_method,
-                    "email":"rangdad@gmail.com",
+                    "email":billing_email,
                     "stored_credentials":{
                         "sequence": "SUBSEQUENT",
                         "is_scheduled": false,
@@ -3163,25 +3403,32 @@ app.post('/user_checkout_submit', (req,res) => {
                         console.log(`make payment for created order ${response.id}`)
                         console.log(response)
                         if (response.status == 'paid') {
-                                                        
+                                                    
+                            const order_items = response.items.filter(element => {
+                                return element.inventory_id ? true : false                        
+                            }); // cut off shipping fee
+        
+                            const order_items_count = order_items.length;
+
                             const confirm_info = {
                             status : "complete",
                             name : req.session.loginData.name,
                             order_number : order_number,
                             email : default_shipping_info.email,
+                            billing_email : billing_email,
                             shipping_address : default_shipping_info.address1 + ' ' + default_shipping_info.address2 + ', ' + default_shipping_info.city + ', ' + default_shipping_info.state + ' ' + default_shipping_info.zip,
                             recipient : default_shipping_info.recipient,
                             phone : default_shipping_info.phone,
                             type : response.source.brand,
                             ending4 : response.source.last4,
-                            billing_address : default_shipping_info.address1,
+                            billing_address : billing_address.address1 + ' ' + billing_address.address2 + ', ' + billing_address.city + ', ' + billing_address.state + ' ' + billing_address.zip,
                             cardholder : cardholder,
                             subtotal : response.amount - response.tax_amount, 
                             tax : response.tax_amount,
                             grandtotal : response.amount
                             };
                             console.log(confirm_info);
-                            setOrders(response, confirm_info, default_shipping_info);    
+                            setOrders(response, confirm_info, default_shipping_info, billing_email, billing_phone, billing_address.zip, order_items_count);    
                             // updateOrderedCart(order_number, date, cart_numbers, u_id)
                             
                             // res.send(confirm_info);     
@@ -3213,12 +3460,22 @@ app.post('/guest_order_checkout', (req,res) => {
     const recipient = req.body.recipient_first_name +' '+req.body.recipient_last_name;
     const shipping_address = req.body.shipping_address_street_line1 + ' ' + req.body.shipping_address_street_line2 + ', ' + req.body.shipping_address_city + ', ' + req.body.shipping_address_state + ' ' + req.body.shipping_address_zip;
     const token_id = req.body.cloverToken;
+    const billing_address = {
+        address1 : req.body.billing_address_street_line1,
+        address2 : req.body.billing_address_street_line2,
+        city : req.body.billing_address_city,
+        state : req.body.billing_address_state,
+        zip : req.body.billing_address_zip,
+    };
+    const billing_email = req.body.billing_address_contact_email;
+    const billing_phone = req.body.billing_address_contact_phone;
     const shipping_fee = {
         amount : shipping_rate[1] * 100,
         currency : "usd",
         description : "UPS shipping " + shipping_rate[0],
         quantity : 1,
         type:"sku",
+        // inventory_id: "6NRHHEKXEQV9Y",
         tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
     }
     const items = order_items.map(element => {
@@ -3264,157 +3521,190 @@ app.post('/guest_order_checkout', (req,res) => {
         body: JSON.stringify({
             items: items,           
             currency: 'usd',
-            email: req.body.order_contact_email
+            email: billing_email
           })
                 
       };
       console.log(options);
       
       fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
-        .then(response => response.json())
-        .then(result => {
-            console.log("make order")            
-            console.log(result)
-            
-            if (result.status == 'created') {
-                const options = {
-                    method: 'POST',
-                    headers: {
-                    accept: 'application/json',
-                    'content-type': 'application/json',
-                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                    },
-                    body: JSON.stringify({ecomind: 'ecom', source: token_id})
-                   
-                };
+    .then(response => response.json())
+    .then(result => {
+        console.log("make order")            
+        console.log(result)
+        
+        if (result.status == 'created') {
+            const options = {
+                method: 'POST',
+                headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                },
+                body: JSON.stringify({ecomind: 'ecom', source: token_id})
                 
-                fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result.id}/pay`, options)
-                .then(response => response.json())
-                .then(response => {
-
+            };
+            
+            fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result.id}/pay`, options)
+            .then(response => response.json())
+            .then(response => {
+                if (response.status == 'paid') {
+                    
                     console.log("order paid")
                     console.log(response)
 
-                    // setUPSShipment(ups_ship_info, shipping_rate[0]);
-
                     //////////////////// store order info into DB
-                    const u_id = 'GUEST';
-                    
-                    let default_payment_method = '';
-                    let clv_id = '';
-                    let default_shipping_info = {};
-                    
+                    const u_id = 'GUEST';                    
+
+                    const billing_zip = response.source.address_zip;
                     const date = getDate();
                     const cart_num = date.replace(/\s|:|\-/g,"") + "CTGUEST";
                     const order_num = date.replace(/\s|:|\-/g,"") + "ODGUEST";
-                    const order_items = response.items.slice(0,-1);
-                    const clv_order_id = response.id;
-                    console.log(order_items)
-        
 
-                    setOrders(order_num, u_id, response, date);
+                    const order_items = response.items.filter(element => {
+                        return element.inventory_id ? true : false                        
+                    }); // cut off shipping fee
+
+                    const order_items_count = order_items.length;
+                    
+                    const item_codes = order_items.map(element => {
+                        return element.inventory_id})
+                    const clv_order_id = response.id;
+
+                    const cartnum = item_codes.map(element => {
+                        return date.replace(/\s|:|\-/g,"") + "CT" + element + "GUEST";                        
+                    })
+                    console.log(order_items)
+                    console.log(item_codes)        
+                    
+                    setOrders(order_num, u_id, response, date, billing_email, billing_phone, billing_zip, order_items_count);
                     setGuestShippingInfo(order_num, date);
 
-                    const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`,`order_number`,`oddate`, `clv_order_id`) values ?;"
-                    let insert_cart_value = [];
-
-                    let insert_cart_value_element = [];
-                    
-                    for(let i in order_items) {
-                        insert_cart_value_element.push(cart_num);
-                        insert_cart_value_element.push(u_id);
-                        insert_cart_value_element.push(order_items[i].description.substring(0, order_items[i].description.indexOf(',')));
-                        insert_cart_value_element.push(order_items[i].quantity);
-                        insert_cart_value_element.push('y');
-                        insert_cart_value_element.push(date);
-                        insert_cart_value_element.push(date);
-                        insert_cart_value_element.push(order_num);
-                        insert_cart_value_element.push(date);
-                        insert_cart_value_element.push(clv_order_id);
-                       
-
-                        insert_cart_value.push(insert_cart_value_element);
-                        insert_cart_value_element = [];
-                    }
-                    console.log(insert_cart_value);
                     db.getConnection((con)=>{
-                        con.query(insert_cart_query, [insert_cart_value], (err, result) => {
-                            if(err) {
-                                console.log(err);
-                            } else {        
-                                console.log("con.query(insert_cart_query, [insert_cart_value], (err, result)");                      
-                                console.log(result);
+                        con.query('SELECT * FROM product WHERE item_code in (?)', [item_codes], (err, result_items) => {
+                            if(err){                        
+                                res.send(err);                         
+                            } else {
+                                console.log('getProductNumber') 
+                                console.log(result_items);
+                                const insert_cart_query = "INSERT INTO `cart` (`cartnum`,`u_id`,`prodnum`,`quantity`,`result`,`indate`,`modate`,`order_number`,`oddate`, `clv_order_id`) values ?;"
+                                let insert_cart_value = [];
+
+                                let insert_cart_value_element = [];
+                                
+                                for(let i in order_items) {
+                                    insert_cart_value_element.push(cartnum[i]);
+                                    insert_cart_value_element.push(u_id);
+                                    insert_cart_value_element.push(result_items[i].prodnum);
+                                    // insert_cart_value_element.push(order_items[i].description.substring(0, order_items[i].description.indexOf(',')));
+                                    insert_cart_value_element.push(order_items[i].quantity);
+                                    insert_cart_value_element.push('y');
+                                    insert_cart_value_element.push(date);
+                                    insert_cart_value_element.push(date);
+                                    insert_cart_value_element.push(order_num);
+                                    insert_cart_value_element.push(date);
+                                    insert_cart_value_element.push(clv_order_id);                                    
+
+                                    insert_cart_value.push(insert_cart_value_element);
+                                    insert_cart_value_element = [];
+                                }
+                                console.log(insert_cart_value);
+                                
+                                con.query(insert_cart_query, [insert_cart_value], (err, result) => {
+                                    if(err) {
+                                        console.log(err);
+                                    } else {        
+                                        console.log("con.query(insert_cart_query, [insert_cart_value], (err, result)");                      
+                                        console.log(result);                                        
+                                    }
+                                });
+
+                                let paid_items_numbers = result_items.map(element => {                                                             
+                                    return element.prodnum;
+                                })            
+
+                                const confirm_info = {
+                                    status : "complete",
+                                    paid_items_number : paid_items_numbers,
+                                    name : recipient,
+                                    order_number : order_num,
+                                    email : req.body.order_contact_email,
+                                    billing_email : billing_email,
+                                    recipient : recipient,
+                                    shipping_address : shipping_address,
+                                    phone : req.body.order_contact_phone,
+                                    type : response.source.brand,
+                                    ending4 : response.source.last4,
+                                    billing_address : billing_address.address1 + ' ' + billing_address.address2 + ', ' + billing_address.city + ', ' + billing_address.state + ' ' + billing_address.zip,
+                                    cardholder : cardholder,
+                                    subtotal : response.amount - response.tax_amount, 
+                                    tax : response.tax_amount,
+                                    grandtotal : response.amount
+                                };
+
+                                console.log(confirm_info)                    
+                                res.send(confirm_info);
                             }
                         });
                         con.release();
                     });
+                }
+            }).catch(err => console.error(err));
+        }        
+    })
+    .catch(err => console.error(err));
 
-                    ////////////////////////////////////
-                    
-                    let paid_items_number = order_items.map(element => {
-                        console.log(element.description)                            
-                        return element.description.substring(0, element.description.indexOf(','));
-                    })
 
-                    const confirm_info = {
-                        status : "complete",
-                        paid_items_number : paid_items_number,
-                        name : recipient,
-                        order_number : order_num,
-                        email : req.body.order_contact_email,
-                        recipient : recipient,
-                        shipping_address : shipping_address,
-                        phone : req.body.order_contact_phone,
-                        type : response.source.brand,
-                        ending4 : response.source.last4,
-                        billing_address : "default_shipping_info.address1",
-                        cardholder : cardholder,
-                        subtotal : response.amount - response.tax_amount, 
-                        tax : response.tax_amount,
-                        grandtotal : response.amount
-                    };
 
-                    console.log(confirm_info)                    
-                    res.send(confirm_info);
+    function setOrders(order_number, u_id, response, date, billing_email, billing_phone, billing_zip, order_items_count) {
+        console.log('order_number');
+        console.log(order_number);       
+        db.getConnection((con)=>{
+            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate, order_email, order_phone, billing_zip, order_items_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date, shipping_rate[1], shipping_rate[0], billing_email, billing_phone, billing_zip, order_items_count], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log('set orders') 
+                    console.log(result);                        
+                }
+            }); 
+            con.release();
+        });
+    }
 
-                }).catch(err => console.error(err));
-            }        
-        }).catch(err => console.error(err));
-
-        function setOrders(order_number, u_id, response, date) {
-            console.log('order_number');
-            console.log(order_number);       
-            db.getConnection((con)=>{
-                con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date, shipping_rate[1], shipping_rate[0]], (err, result) => {
-                    if(err){                        
-                        res.send(err);
-                        // con.end();        
-                    } else {
-                        console.log('set orders') 
-                        console.log(result);                        
-                    }
-                }); 
-                con.release();
+    function setGuestShippingInfo(order_number, date) {
+        console.log('setGuestShippingInfo');
+        db.getConnection((con)=>{
+            con.query('INSERT INTO test1.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+            [order_number, "GUEST", recipient, req.body.shipping_address_street_line1, req.body.shipping_address_street_line2, req.body.shipping_address_city, req.body.shipping_address_state, req.body.shipping_address_zip, req.body.order_contact_phone, req.body.order_contact_email, date], (err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log('setGuestShippingInfo') 
+                    console.log(result);                        
+                }
             });
-        }
+            con.release();
+        });
+    }
 
-        function setGuestShippingInfo(order_number, date) {
-            console.log('setGuestShippingInfo');
-            db.getConnection((con)=>{
-                con.query('INSERT INTO test1.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-                [order_number, "GUEST", recipient, req.body.shipping_address_street_line1, req.body.shipping_address_street_line2, req.body.shipping_address_city, req.body.shipping_address_state, req.body.shipping_address_zip, req.body.order_contact_phone, req.body.order_contact_email, date], (err, result) => {
-                    if(err){                        
-                        res.send(err);
-                        // con.end();        
-                    } else {
-                        console.log('setGuestShippingInfo') 
-                        console.log(result);                        
-                    }
-                });
-                con.release();
+    function getProductNumber(item_code) {
+        db.getConnection((con)=>{
+            con.query('SELECT * FROM product WHERE item_code = ?', [item_code], (err, result) => {
+                if(err){                        
+                    res.send(err);                         
+                } else {
+                    console.log('getProductNumber') 
+                    console.log(result);                        
+                }
             });
-        }
+            con.release();
+        });
+
+    }
 });
 
 app.post('/get_shipping_rate', (req, res) => {
@@ -3536,8 +3826,7 @@ app.post('/get_shipping_rate', (req, res) => {
             'Content-Type': 'application/json',
             transId: 'test01trs',
             transactionSrc: 'testing',
-            Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
-            // Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgxMjQwNDE2LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODEyNTQ4MTYsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODEyNDA0MTYsImp0aSI6ImRmNjYxNThmLTBmYTEtNDU0OC04OTczLTczNTUyOGQxMzBhZSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.asOY41WovUTGTv_3VEjY_IWteO88lAvQBUBmvI5jGPiV4psfg5LfQa6J-1Ok3ahf_35homGR6yvgPt-89TXJPAVKiW-IjrneFJajmVsr2WUjpbzrgYZowmPce4EQyHCwfau9rriILPkOF2phLdvtcEMt277HxhTBbHY3t3ADMY6vOnkgjPOw0alMaxqGFQ-UxneesVk24QsL2nqnt8r0mPV3BF163ZeFINbzeWknL_j1RhIryheJ4v0H7_4amkeVS1f4DvvpUeAId4mJ4sP2FYIhpX4l3yVpHkhThwB54ZQ3If9DAAy25JXteFmn8GI3V-HxODlMGjAOUEVNs6Ujhmzj3c_mCI0nFgNZ1dleiKywM5cppHo3g_Cf9lURkdQkrr5s8Piqnqn3lCuhuqj13gx_TH9uWDFsbkUi6vtKfCeS8KEoA2wCRCZI0NwLwET96ZCeCNS6QXKixx7XoP7JRB8O_te3CW-jHocXAb7g_UqaSQsLbpPwwezp92DI1s8pd5CUdMndxj1No_1ZMPApPKBbME-mJkp1RUqqHvERs2tEddhFPR692oHYXLLnsDZY5eekVoNYrrCcywi-hemPEpR0wVJLNlgXIRoP4weqOYDCZy1h3XDfx2NzWqgSzOulQPArFteC7VSVK5x_GUUNXvz3M9PF4tCmbsccL4_If3E'
+            Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`            
         },
         body: JSON.stringify(data)
         }

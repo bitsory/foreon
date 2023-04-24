@@ -72,7 +72,7 @@ export default class {
     setConfirmInfo(param) {
         document.getElementById('order_confirm_thanks_name').textContent = param.name;
         document.getElementById('order_confirm_thanks_order_no').textContent = param.order_number;
-        document.getElementById('order_confirm_info_email').textContent = param.email;
+        document.getElementById('order_confirm_info_email').textContent = param.billing_email;
 
         document.getElementById('order_confirm_info_shipping_detail_address').textContent = param.shipping_address;
         document.getElementById('order_confirm_info_shipping_detail_recipient').textContent = param.recipient;

@@ -1,5 +1,6 @@
 import * as AIF from "./acc_info_form.js";
 import * as ItemCounter from "./item_counter.js";
+import * as PurchaseHistory from "./purchase_history_form.js";
 
 export default class Cart {
     
@@ -392,29 +393,29 @@ export default class Cart {
         document.getElementById('lorem').innerHTML = mekeChangePrifileTap();    
     }
 
-    viewPurchaseHistory(u_id) {
-        console.log("view purchase History")
-        document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
+    // viewPurchaseHistory2(u_id) {
+    //     console.log("view purchase History")
+    //     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
     
-        const data = {id : u_id}
+    //     const data = {id : u_id}
     
-        const option = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'                
-                },
-            body: JSON.stringify(data)
-        };
-        console.log(option);
+    //     const option = {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'                
+    //             },
+    //         body: JSON.stringify(data)
+    //     };
+    //     console.log(option);
 
-        fetch('/check_purchase_history', option)
-        .then((res) => res.json())
-        .then(result => {
-            console.log(result)
-            setPurchaseHistory(result);
+    //     fetch('/check_purchase_history', option)
+    //     .then((res) => res.json())
+    //     .then(result => {
+    //         console.log(result)
+    //         setPurchaseHistory(result);
 
-        });
-    }
+    //     });
+    // }
     
 
 }
@@ -447,7 +448,7 @@ document.addEventListener('click',function(e){
 
         history.pushState(null, null, `/purchase-history`); // url change
         (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
-        viewPurchaseHistory(u_id);
+        viewPurchaseHistory({user_id:u_id});
         
 
     }
@@ -709,9 +710,9 @@ document.addEventListener('click',function(e){
 
     if(e.target && e.target.id == 'purchase_history_order_cancel_btn') {
         console.log(e.target.parentElement.getAttribute('head_orderid'));
-
+        const user_id = u_id ? u_id : 'GUEST';
         const send_data = {
-            user_id : u_id,
+            user_id : user_id,
             order_number : e.target.parentElement.getAttribute('head_orderid')     
             }
         const option = {
@@ -727,7 +728,15 @@ document.addEventListener('click',function(e){
         .then((res) => res.json())
         .then(result => {
             console.log(result);
-            viewPurchaseHistory(u_id);
+
+            const lorem = document.getElementById('lorem');
+            while (lorem.hasChildNodes()) {	
+                lorem.removeChild(lorem.firstChild);
+            }
+
+            document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
+            setPurchaseHistory(result);
+            // viewPurchaseHistory(send_data);
 
         });
 
@@ -742,8 +751,10 @@ document.addEventListener('click',function(e){
         console.log(e.target.getAttribute('cart-itemid'));
         // const cart_number = e.target.getAttribute('cart-itemid');
         // const user_id = u_id;
+        const user_id = u_id ? u_id : 'GUEST';
+        // const order_number = ;
         const send_data = {
-            user_id : u_id,
+            user_id : user_id,
             cart_number : e.target.getAttribute('cart-itemid'), 
             order_number : e.target.getAttribute('order-itemid'),
             prodnum : e.target.getAttribute('itemid')
@@ -761,8 +772,14 @@ document.addEventListener('click',function(e){
         .then((res) => res.json())
         .then(result => {
             console.log(result);
-            viewPurchaseHistory(u_id);
-
+          
+            const lorem = document.getElementById('lorem');
+            while (lorem.hasChildNodes()) {	
+                lorem.removeChild(lorem.firstChild);
+            }
+            document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
+            setPurchaseHistory(result);
+          
         });
     }
 });
@@ -1032,107 +1049,6 @@ function addBillingInfoBox() {
 }
 
 
-/*
-function addBillingMethodForm() {
-   
-    // const order_info = this.order_info;        
-    const clover = new Clover('6127b4cab8b38737e9de59b6cda53c25');
-
-    const elements = clover.elements();
-           
-
-    const styles = {
-        body: {
-            fontfamily: 'Jost, sans-serif',
-        //   fontFamily: 'Roboto, Open Sans, sans-serif',
-          fontSize: '10px',
-        },
-        input: {
-          fontSize: '16px',
-        },
-    };
-    
-    const cardNumber = elements.create('CARD_NUMBER', styles);
-    // const cardName = elements.create('CARD_NAME', styles);
-    const cardDate = elements.create('CARD_DATE', styles);
-    const cardCvv = elements.create('CARD_CVV', styles);
-    const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
-        
-    cardNumber.mount('#card-number');
-    // cardName.mount('#card-name');
-    cardDate.mount('#card-date');
-    cardCvv.mount('#card-cvv');
-    cardPostalCode.mount('#card-postal-code');
-
-    const cardResponse = document.getElementById('card-response');
-    const displayCardNumberError = document.getElementById('card-number-errors');
-    const displayCardDateError = document.getElementById('card-date-errors');
-    const displayCardCvvError = document.getElementById('card-cvv-errors');
-    const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
-    const payment_form = document.getElementById('payment-form');
-    
-    // Handle real-time validation errors from the card element
-    cardNumber.addEventListener('change', function(event) {
-    console.log(`cardNumber changed ${JSON.stringify(event)}`);
-    });
-
-    cardNumber.addEventListener('blur', function(event) {
-    console.log(`cardNumber blur ${JSON.stringify(event)}`);
-    });
-
-    cardDate.addEventListener('change', function(event) {
-    console.log(`cardDate changed ${JSON.stringify(event)}`);
-    });
-
-    cardDate.addEventListener('blur', function(event) {
-        console.log(`cardDate blur ${JSON.stringify(event)}`);
-    });
-
-    cardCvv.addEventListener('change', function(event) {
-        console.log(`cardCvv changed ${JSON.stringify(event)}`);
-    });
-
-    cardCvv.addEventListener('blur', function(event) {
-        console.log(`cardCvv blur ${JSON.stringify(event)}`);
-    });
-
-    cardPostalCode.addEventListener('change', function(event) {
-        console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
-    });
-
-    cardPostalCode.addEventListener('blur', function(event) {
-        console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
-    });
-
-    payment_form.addEventListener('submit', function(event) {
-        console.log("payment_form.addEventListener('submit', function(event)")
-        event.preventDefault();
-        // Use the iframe's tokenization method with the user-entered card details
-        clover.createToken()
-            .then(function(result) {
-            if (result.errors) {
-            Object.values(result.errors).forEach(function (value) {
-                displayError.textContent = value;
-            });
-            } else {
-            cloverTokenHandler(result.token);
-            }
-        });
-    });        
-} 
-
-function cloverTokenHandler(token) {
-    console.log(token)
-    // Insert the token ID into the form so it gets submitted to the server
-    var form = document.getElementById('payment-form');
-    var hiddenInput = document.createElement('input');
-    hiddenInput.setAttribute('type', 'hidden');
-    hiddenInput.setAttribute('name', 'cloverToken');
-    hiddenInput.setAttribute('value', token);
-    form.appendChild(hiddenInput);
-    form.submit();
-}
-*/
 
 ////////////////////////////set billing info functions /////////////////////////////
 
@@ -1552,12 +1468,15 @@ function changePassword() {
     `;
 }
 
-function viewPurchaseHistory(u_id) {
+function viewPurchaseHistory(param) {
 
     console.log("view purchase History")
     document.querySelector('.lorem').innerHTML = makePurchaseHistoryContainer();
 
-    const data = {id : u_id}
+    const data = {
+        id : param.user_id,
+        order_number : param.order_number
+        }
 
         const option = {
             method: 'POST',

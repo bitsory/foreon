@@ -143,6 +143,106 @@ export function addBillingInfoBox() {
         <div class="change_profile_billing_form_container">
             <form action="/add_payment_method" method="post" id="change_profile_billing_info_form" class="change_profile_billing_info_form">
                 <div id="billing_info_add_box" class="billing_info_add_box">
+
+                    <div class="order_info_title">Billing Address</div>  
+                    <div class="form-row change_profile_shipping_info_row">
+                        <div id="shipping_address" class="field shipping_address">
+                        <input type="text" name="billing_address_street_line1" class="input_shipping_address_line1 input_change_profile_shipping_info" placeholder="Shipping Address Street Line 1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row change_profile_shipping_info_row">
+                        <div id="shipping_address" class="field shipping_address">
+                        <input type="text" name="billing_address_street_line2" class="input_shipping_address_line2 input_change_profile_shipping_info" placeholder="Shipping Address Street Line 2">
+                        </div>
+                    </div>
+
+                    <div class="shipping_info_csz">
+                        <div class="form-row change_profile_shipping_info_row">
+                            <div id="shipping_address" class="field shipping_addres_city">
+                            <input type="text" name="billing_address_city" class="input_shipping_address_city input_change_profile_shipping_info_csz" placeholder="City" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row change_profile_shipping_info_row">
+                            <div id="shipping_address" class="field shipping_address_state">
+                                <select name="billing_address_state" id="change_profile_state" class="input_change_profile_shipping_info_csz select_state_box">
+                                <option value="AL">Alabama</option>
+                                <option value="AK">Alaska</option>
+                                <option value="AZ">Arizona</option>
+                                <option value="AR">Arkansas</option>
+                                <option value="CA">California</option>
+                                <option value="CO">Colorado</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="DE">Delaware</option>
+                                <option value="DC">District Of Columbia</option>
+                                <option value="FL">Florida</option>
+                                <option value="GA">Georgia</option>
+                                <option value="HI">Hawaii</option>
+                                <option value="ID">Idaho</option>
+                                <option value="IL">Illinois</option>
+                                <option value="IN">Indiana</option>
+                                <option value="IA">Iowa</option>
+                                <option value="KS">Kansas</option>
+                                <option value="KY">Kentucky</option>
+                                <option value="LA">Louisiana</option>
+                                <option value="ME">Maine</option>
+                                <option value="MD">Maryland</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="MI">Michigan</option>
+                                <option value="MN">Minnesota</option>
+                                <option value="MS">Mississippi</option>
+                                <option value="MO">Missouri</option>
+                                <option value="MT">Montana</option>
+                                <option value="NE">Nebraska</option>
+                                <option value="NV">Nevada</option>
+                                <option value="NH">New Hampshire</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="NM">New Mexico</option>
+                                <option value="NY">New York</option>
+                                <option value="NC">North Carolina</option>
+                                <option value="ND">North Dakota</option>
+                                <option value="OH">Ohio</option>
+                                <option value="OK">Oklahoma</option>
+                                <option value="OR">Oregon</option>
+                                <option value="PA">Pennsylvania</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="SC">South Carolina</option>
+                                <option value="SD">South Dakota</option>
+                                <option value="TN">Tennessee</option>
+                                <option value="TX">Texas</option>
+                                <option value="UT">Utah</option>
+                                <option value="VT">Vermont</option>
+                                <option value="VA">Virginia</option>
+                                <option value="WA">Washington</option>
+                                <option value="WV">West Virginia</option>
+                                <option value="WI">Wisconsin</option>
+                                <option value="WY">Wyoming</option>
+                                </select>
+                            
+                            </div>
+                        </div>
+
+                        <div class="form-row change_profile_shipping_info_row">
+                            <div id="shipping_address" class="field shipping_address_zip">
+                            <input type="text" name="billing_address_zip" class="input_shipping_address_zip input_change_profile_shipping_info_csz" placeholder="Zip Code" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row change_profile_shipping_info_row">
+                        <div id="shipping_address" class="field shipping_address_phone">
+                        <input type="text" name="billing_address_phone" class="input_shipping_address_phone input_change_profile_shipping_info" placeholder="Phone">
+                        </div>
+                    </div>
+
+                    <div class="form-row change_profile_shipping_info_row">
+                        <div id="shipping_address" class="field shipping_address_email">
+                        <input type="text" name="billing_address_email" class="input_shipping_address_email input_change_profile_shipping_info" placeholder="Email">
+                        </div>
+                    </div>
+
+
                     <div class="order_info_title">Payment method</div>                    
 
                     <div class="form-row top-row change_profile_billing_info_row">
@@ -172,11 +272,7 @@ export function addBillingInfoBox() {
                     </div>
                     <div id="card-response" role="alert"></div>
 
-                    <div class="form-row change_profile_billing_info_row">
-                        <div id="card-email" class="field card-email">
-                        <input type="text" name="card_email" class="input_card_email input_change_profile_billing_info" placeholder="Email">
-                        </div>
-                    </div>     
+                    
 
                 </div>
 
@@ -197,6 +293,14 @@ export function addBillingInfoBox() {
     `;
 
 }
+
+/*
+<div class="form-row change_profile_billing_info_row">
+    <div id="card-email" class="field card-email">
+    <input type="text" name="card_email" class="input_card_email input_change_profile_billing_info" placeholder="Email">
+    </div>
+</div>     
+                    */
 
 
 

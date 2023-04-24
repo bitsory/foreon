@@ -1,5 +1,6 @@
 // import cart from "./cart.js";
 import Main from "../index.js"
+import * as PurchaseHistory from "./purchase_history_form.js";
 
 
 
@@ -28,6 +29,7 @@ export default class {
 
             if(e.target && e.target.id == 'create_an_account_btn') {                 
                 this.modalClose();
+                history.pushState(null, null, `/create-account`);
                 document.getElementById('main_background main_background__blink') ? document.getElementById('main_background main_background__blink').style.display = "none" : false;
                 document.getElementById('lorem').innerHTML = this.makeSignUpForm();
     
@@ -45,15 +47,11 @@ export default class {
 
             if(e.target && e.target.id == 'track_my_order_btn') {
                 this.modalClose();
+                history.pushState(null, null, `/track-orders`);
                 document.getElementById('main_background main_background__blink') ? document.getElementById('main_background main_background__blink').style.display = "none" : false;
                 document.getElementById('lorem').innerHTML = this.makeTrackMyOrderForm();
             }
-
-            // if(e.target && e.target.id == 'google_login') {
-            //     this.modalClose();
-            //     document.getElementById('main_background main_background__blink').style.display = "none";
-                
-            // }
+            
 
         }) 
 
@@ -89,8 +87,59 @@ export default class {
                 
                 } else this.signUpSubmit();        
             }
+
+            if (e.target && e.target.id == 'track_my_order_check_btn') {
+
+                const track_my_order_alert_box = document.getElementById("track_my_order_alert_box");
+                const track_my_order_form = document.forms.track_my_order_form;
+                if( track_my_order_form.track_my_order_number.value==""){
+                    track_my_order_alert_box.innerText = "please input your order number.";                    
+                    track_my_order_form.track_my_order_number.focus();		
+                    return false;			
+                } else if( track_my_order_form.track_my_order_email.value==""){
+                    track_my_order_alert_box.innerText = "please input your order email.";                    
+                    track_my_order_form.track_my_order_email.focus();		
+                    return false;		
+                } else if( track_my_order_form.track_my_order_zip.value==""){
+                    track_my_order_alert_box.innerText = "please input your billing zip code.";                    
+                    track_my_order_form.track_my_order_zip.focus();		
+                    return false;		
+                } else {
+                    const order_number = document.getElementById("track_my_order_number").value;
+                    const order_email = document.getElementById("track_my_order_email").value;
+                    const order_zip = document.getElementById("track_my_order_zip").value;
+
+                    const send_data = {
+                        order_number : order_number,
+                        email : order_email,
+                        zip : order_zip
+                    }
+
+                    const data = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'                        
+                            },
+                        body: JSON.stringify(send_data)                    
+                    };
+        
+                    fetch('/track_my_order', data)
+                    .then((res) => res.json())
+                    .then(result => {
+                        console.log(result)
+                        if (result.result == "nothing") {
+                            track_my_order_alert_box.innerText = "nothing this order... please check your order info";
+                            track_my_order_form.track_my_order_number.focus();
+                        } else {
+                            this.lorem.innerHTML = PurchaseHistory.makePurchaseHistoryContainer();
+                            PurchaseHistory.setPurchaseHistory(result);
+                        }
+                    })
+                }                
+            }
         });
     }
+
 
     modal_script() {
         var script = document.createElement('script');
@@ -124,9 +173,7 @@ export default class {
         document.getElementById('modal_body').remove();
         this.modal.style.display = 'none';
         document.body.style.overflow = 'auto';
-        // if (document.getElementById('glogin')) {
-        //     document.getElementById('glogin').remove();
-        // }
+        
     }
 
 
@@ -337,15 +384,16 @@ export default class {
                     Enter the order number and the billing address ZIP code.</div>
                     <form id="track_my_order_form">
                         Order Number *    
-                        <input type="text" id="track_my_order_number" class="track_my_order_number track_my_order_input" required>
+                        <input type="text" id="track_my_order_number" class="track_my_order_number track_my_order_input" title="use your order number when you got order confirm" required>
                         Order Email *
-                        <input type="text" id="track_my_order_email" class="track_my_order_email track_my_order_input" required>
+                        <input type="text" id="track_my_order_email" class="track_my_order_email track_my_order_input" title="use your email when you order" required>
                         Billing ZIP Code *
-                        <input type="text" id="track_my_order_zip" class="track_my_order_zip track_my_order_input" required>
+                        <input type="text" id="track_my_order_zip" class="track_my_order_zip track_my_order_input" title="use your billing zip code when you order" required>
                         <button type="button" id="track_my_order_check_btn" class="track_my_order_check_btn" title="check order status">
                         CHECK STATUS
                         </button>
                     </form>
+                    <div id="track_my_order_alert_box" class="track_my_order_alert_box"></div>
                 </div>
             </div>
         `;

@@ -1589,6 +1589,10 @@ padding-right: 1px; */
     display: none;
 }
 
+.input_shipping_checkbox {
+    transform: scale(1.1);
+}
+
 
 
 
