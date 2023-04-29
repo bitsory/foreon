@@ -2,16 +2,11 @@ import setItemBox from "./set_item_box.js";
 import orderComplete from "./order_complete.js";
 import * as AIF from "./form_acc_info.js";
 import * as ItemCounter from "./item_counter.js";
-import * as CartRender from "./cart.js";
 
 
 export default class {
 
     online_main = document.getElementById('online_main');
-    // guest_check_out_info = {};
-    payload = {};
-    user_default_shipping_info = {};
-    user_default_billing_info = {};
     
 
     constructor(user_id, proceed_checkout_selected_order_cart) {
@@ -21,12 +16,9 @@ export default class {
         this.order_info = {order_info : "order_info"}
         console.log(this.order_info)
         this.user_id = user_id;
-        // this.guest_check_out_info = {};
-
         
         this.check_out_box = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
       
-        
         this.online_main.addEventListener('click', (e) => {
 
             console.log("order confirm double check order confirm double check order confirm double check ")
@@ -95,8 +87,6 @@ export default class {
                     document.getElementById("input_billing_address_zip").value = zip;
                     document.getElementById("input_billing_contact_phone").value = phone;
                     document.getElementById("input_billing_contact_email").value = email;
-
-                    document.getElementById("same_billing_shipping_address_checkbtn").checked = true;
                 
                 } else {
                     document.getElementById("input_billing_address_line1").value = '';
@@ -106,44 +96,6 @@ export default class {
                     document.getElementById("input_billing_address_zip").value = '';
                     document.getElementById("input_billing_contact_phone").value = '';
                     document.getElementById("input_billing_contact_email").value = '';
-
-                    document.getElementById("same_billing_shipping_address_checkbtn").checked = false;
-                }
-
-            }
-
-            if(e.target && e.target.id == 'same_billing_shipping_address_checkbtn') {
-
-                const address1 = document.getElementById("input_shipping_address_line1").value;
-                const address2 = document.getElementById("input_shipping_address_line2").value;
-                const city = document.getElementById("input_shipping_address_city").value;
-                const state = document.getElementById("shipping_address_state").value;
-                const zip = document.getElementById("input_shipping_address_zip").value;
-                const phone = document.getElementById("input_shipping_contact_phone").value;
-                const email = document.getElementById("input_shipping_contact_email").value;
-
-                if (document.getElementById("same_billing_shipping_address_checkbtn").checked == true) {
-                                       
-                    document.getElementById("input_billing_address_line1").value = address1;
-                    document.getElementById("input_billing_address_line2").value = address2;
-                    document.getElementById("input_billing_address_city").value = city;
-                    document.getElementById("input_billing_address_state").value = state;
-                    document.getElementById("input_billing_address_zip").value = zip;
-                    document.getElementById("input_billing_contact_phone").value = phone;
-                    document.getElementById("input_billing_contact_email").value = email;
-
-                    document.getElementById("same_shipping_billing_address_checkbtn").checked = true;
-                
-                } else {
-                    document.getElementById("input_billing_address_line1").value = '';
-                    document.getElementById("input_billing_address_line2").value = '';
-                    document.getElementById("input_billing_address_city").value = '';
-                    document.getElementById("input_billing_address_state").value = '';
-                    document.getElementById("input_billing_address_zip").value = '';
-                    document.getElementById("input_billing_contact_phone").value = '';
-                    document.getElementById("input_billing_contact_email").value = '';
-
-                    document.getElementById("same_shipping_billing_address_checkbtn").checked = false;
                 }
 
             }
@@ -163,234 +115,25 @@ export default class {
 
             }
 
-            if (e.target && e.target.id == 'user_checkout_shipping_info_change_btn') {
-                
-                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
-                document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
-                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
-                document.getElementById('user_checkout_shipping_method_container').style.display = "none";
-                document.getElementById('user_checkout_billing_info_cover').style.display = "block";
-                document.getElementById('user_checkout_billing_info').style.display = "none";
-                document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
-                
-
-                document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = 
-                `
-                <div id="change_profile_shipping_info" class="change_profile_shipping_info">
-                    <div id="shipping_info_container" class="shipping_info_container">
-                        <div id="shipping_info_box" class="shipping_info_box"></div> 
-                    </div>
-                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container">
-                        <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
-                    </div>
-                </div>
-                
-                `;
-                
-                // document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();
-               
-                // let tab_links = document.querySelectorAll('li.tab-link');
-                // let tab_contents = document.querySelectorAll('div.tab-content');
-
-                // for (const element of tab_links) {
-                //     element.classList.remove('current');                
-                // }
-                // for (const element of tab_contents) {             
-                //     element.classList.remove('current');
-                // }
-           
-                // console.log(document.querySelector(".tab-link").getAttribute('data-tab'));
-                // document.getElementById("tab-3").classList.add('current');
-            
-
-              
-            
-                // const shipping_info_box = document.querySelector('.shipping_info_box');
-                // while (shipping_info_box.hasChildNodes()) {	
-                //     shipping_info_box.removeChild(shipping_info_box.firstChild);
-                // }
-    
-              
-                document.querySelector('.shipping_info_add_btn_container').style.display = "block";
-                fetch('/get_user_shipping_info') // get shipping info from DB
-                .then((res) => res.json())
-                .then(result => {
-                    CartRender.renderShippingInfo(result);
-                });
-
-
-            }           
-
-            if (e.target && e.target.id == 'user_checkout_change_method_btn') {
-                document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();
-                // let tab_id = document.querySelector("tab-link").getAttribute('data-tab');
-                // let tab_id = "tab-3";
-                let tab_links = document.querySelectorAll('li.tab-link');
-                let tab_contents = document.querySelectorAll('div.tab-content');
-
-                for (const element of tab_links) {
-                    element.classList.remove('current');                
-                }
-                for (const element of tab_contents) {             
-                    element.classList.remove('current');
-                }                
-                console.log(document.querySelector(".tab-link").getAttribute('data-tab'));
-                document.getElementById("tab-2").classList.add('current');
-                // document.querySelector(".tab-3").classList.add('current');
-                
-
-                history.pushState(null, null, `/account/billing-infomation`);
-                const billing_info_box = document.querySelector('.billing_info_box');
-                while (billing_info_box.hasChildNodes()) {	
-                    billing_info_box.removeChild(billing_info_box.firstChild);
-                }
-    
-                // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
-                document.querySelector('.billing_info_add_btn_container').style.display = "block";
-                fetch('/get_user_billing_info') // get billiing info from DB
-                .then((res) => res.json())
-                .then(result => {
-                    console.log(result);
-                    if (result.length > 0) {
-                        console.log(result)    
-                        CartRender.renderBillingInfo(result); 
-                    }
-                })
-
-
-            }           
-
-            if (e.target && e.target.id == 'user_checkout_shipping_info_next_btn') {
-                
-                document.getElementById('user_checkout_shipping_method_container').style.display = "block";
-                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
-                document.getElementById('user_checkout_shipping_info_next_btn').style.display = "none";
-                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
-                this.getUserDefaultShippingInfomation(user_id).then(data => {
-                    // console.log(data)
-                    // const shipping_info = this.getUserDefaultShippingInfo();
-                    // console.log(shipping_info);
-                    document.getElementById('user_checkout_shipping_info_detail_box_cover').innerText = data.recipient + '\n' + data.address1 + '\n' + data.city + ', ' + data.state + ' ' + data.zip;
-                
-                    this.getShippingRate(this.check_out_box.user_shipping_info);
-                    this.check_out_box.shipping_rate_flag = true;
-                });
-                
-            }
-
-            if(e.target && e.target.id == 'user_continue_to_payment_btn') {
-                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
-                document.getElementById('user_checkout_shipping_method_container').style.display = "none";
-                document.getElementById('user_checkout_billing_info').style.display = "block";
-                document.getElementById('user_checkout_billing_info_cover').style.display = "none";
-                this.check_out_box.setShippingMethodCoverContents(user_id);
-
-
-            }
-            
-
-            if(e.target && e.target.id == 'user_checkout_billing_info_next_btn') {
-
-                document.getElementById('user_checkout_billing_info').style.display = "none";
-                document.getElementById('user_checkout_billing_info_cover').style.display = "block";
-
-                const billing_info = this.getUserDefaultBillingInfo();
-                console.log(billing_info);
-
-                document.getElementById('user_checkout_billing_info_container_cover_contents').innerText = 
-                "**********" + billing_info.last4 + ' ' + billing_info.cardtype + ' ' + billing_info.exp.slice(0,2) + '/' + billing_info.exp.slice(-2);
-
-                document.getElementById('user_checkout_submit_button').disabled = false;
-                document.getElementById('user_checkout_submit_button').focus();
-
-            }
-
             if(e.target && e.target.id == 'guest_checkout_shipping_info_next_btn') {
-                
-                document.getElementById('guest_checkout_shipping_info').style.display = "none";
-                document.getElementById('guest_checkout_shipping_infomation_container_cover').style.display = "block";
-                document.getElementById('guest_checkout_shipping_infomation_container_cover').style.height = "auto";
-                document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
-                document.getElementById('guest_shipping_method_container').style.display = "block";
-                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "block";
-                
+                document.getElementById('shipping_method_container').style.display = "block";
                 this.getShippingRate('GUEST');
                 this.check_out_box.shipping_rate_flag = true;
 
-                const data = {
-                    recipient : document.getElementById('input_recipient_first_name').value + ' ' +document.getElementById('input_recipient_last_name').value,
-                    address : document.getElementById('input_shipping_address_line1').value + ' ' + document.getElementById('input_shipping_address_line2').value,
-                    city : document.getElementById('input_shipping_address_city').value,
-                    state : document.getElementById('shipping_address_state').value,
-                    zip : document.getElementById('input_shipping_address_zip').value,
-                }
-
-                document.getElementById('guest_checkout_shipping_infomation_container_cover_contents').innerText = data.recipient + '\n' + data.address + '\n' + data.city + ', ' + data.state + ' ' + data.zip;
-
             }
-            if(e.target && e.target.id == 'continue_to_payment_btn') {
-                document.getElementById('guest_shipping_method_container').style.display = "none";
-                document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "block";
-                document.getElementById('guest_checkout_shipping_method_container_cover').style.height = "auto";
-                document.getElementById('guest_checkout_billing_info_form_cover').style.display = "none";
-                document.getElementById('guest_checkout_billing_info_form').style.display = "block";
-                // document.getElementById('guest_checkout_shipping_method_container_cover_contents').innerText = "test shipping rate"
-                document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "block";
 
-                this.check_out_box.setShippingMethodCoverContents("GUEST");
+            if (e.target && e.target.id == 'user_checkout_shipping_info_next_btn') {
+                document.getElementById('shipping_method_container').style.display = "block";
+                this.getShippingRate(this.check_out_box.user_shipping_info);
+                this.check_out_box.shipping_rate_flag = true;
             }
             
-            if (e.target && e.target.id == 'guest_checkout_submit_button') {
-                console.log("this.check_out_box.guest_items_subtotal");
-                console.log(this.check_out_box.guest_items_subtotal);
-                (this.check_out_box.guest_items_subtotal > 0) ? guestCheckoutSubmit(guest_payload) : false;
-            }
-
-            if (e.target && e.target.id == 'guest_checkout_shipping_infomation_container_change_btn') {
-                document.getElementById('guest_checkout_shipping_info').style.display = "block";
-                document.getElementById('guest_checkout_shipping_infomation_container_cover').style.display = "none";
-                // document.getElementById('guest_checkout_shipping_infomation_container_cover').style.height = "auto";
-                // document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
-                // document.getElementById('guest_shipping_method_container').style.display = "block";
-                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "none";
-                
-                document.getElementById('input_recipient_first_name').focus();
-                window.scrollTo({
-                    top: 0,
-                    left: 0,
-                    behavior: 'smooth'});
-            }
-
-            if (e.target && e.target.id == 'guest_checkout_shipping_method_container_change_btn') {
-                document.getElementById('guest_shipping_method_container').style.display = "block";
-                document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
-                // document.getElementById('guest_checkout_shipping_method_container_cover').style.height = "auto";
-                document.getElementById('guest_checkout_billing_info_form_cover').style.display = "block";
-                document.getElementById('guest_checkout_billing_info_form').style.display = "none";
-                // document.getElementById('guest_checkout_shipping_method_container_cover_contents').innerText = "test shipping rate"
-                document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "none";
-
-                document.getElementById('guest_shipping_method_container').focus();
-                
-            }
-            
-            if (e.target && e.target.id == 'guest_checkout_billing_infomation_container_change_btn') {
-                document.getElementById('guest_checkout_billing_info_form_cover').style.display = "none";
-                // document.getElementById('guest_checkout_billing_info_form_cover').style.height = "auto";
-                document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "none";
-                // document.getElementById('guest_checkout_billing_info_form_cover_contents').innerText = 
-                // '**********' + card_info.last4 + ' ' + card_info.brand + ' ' + card_info.exp;
-                
-                document.getElementById('guest_checkout_billing_info_form').style.display = "block";
-                document.getElementById('guest_checkout_submit_button').setAttribute("disabled", "true");
-
-                
-                document.getElementById('input_billing_address_line1').focus();
-                e.preventDefault();
-                
-            }
         })
     }
+
+    // setCheckoutItemscount(items) {
+    //     this.checkout_items = items;
+    // }
 
     setCheckoutPage(){
         return`
@@ -408,6 +151,511 @@ export default class {
 
     }
 
+    
+    getUserOrderConfirm() {
+        return `
+        <div id="user_checkout_title" class="user_checkout_title">
+        <h2>Check Out</h2>
+        </div>
+        <div id="user_checkout_page" class="user_checkout_page">
+           
+            <div id="user_checkout_container" class="user_checkout_container">
+                <div id="user_checkout_info" class="user_checkout_info">
+                    <div id="user_checkout_shipping_info" class="user_checkout_shipping_info"></div>
+
+
+                    <div id="shipping_method_container" class="shipping_method_container">
+                        <div id="shipping_method_page" class="shipping_method_page">
+                            <div id="shipping_method_box_flat" class="shipping_method_box_flat">
+                                <input type="radio" name="rate_select" id="shipping_flat_rate" class="shipping_flat_rate" checked>
+                                <label for="shipping_flat_rate">Standard Flat Rate Shipping $9.90
+                                <div id="flat_rate_desc">Arrives in 2-5 Business Days - Monday thru Friday Delivery</div>
+                            </div>
+                            <div id="shipping_method_box_ground" class="shipping_method_box_ground">
+                                <input type="radio" name="rate_select" id="shipping_ground_rate" class="shipping_ground_rate">
+                                <label for="shipping_ground_rate">UPS Ground $<span id="shipping_ground_rate_price"></span>
+                                <div id="ground_rate_desc">Arrives in 4 Business Days</div>
+                            </div>
+                            <div id="shipping_method_box_3days" class="shipping_method_box_3days">
+                                <input type="radio" name="rate_select" id="shipping_3days_rate" class="shipping_3days_rate">
+                                <label for="shipping_3days_rate">UPS 3 Days Shipping $<span id="shipping_3days_rate_price"></span>
+                                <div id="3days_rate_desc">Arrives in 2-3 Business Days</div>
+                            </div>
+                            <div id="shipping_method_box_nextday" class="shipping_method_box_nextday">
+                                <input type="radio" name="rate_select" id="shipping_nextday_rate" class="shipping_nextday_rate">
+                                <label for="shipping_nextday_rate">UPS Next Day AIR Saver $<span id="shipping_nextday_rate_price"></span>
+                                <div id="nextday_rate_desc">Arrives in 1 Business Days</div>
+                            </div>
+                        </div>
+                        <div id="continue_to_payment_box" class="continue_to_payment_box">
+                            <button type="button" id="continue_to_payment_btn" class="continue_to_payment_btn">Continue to Payment</button>
+                        </div>
+                        
+                    </div>
+
+
+
+                    <div id="user_checkout_billing_info" class="user_checkout_billing_info"></div>
+                </div>
+
+            </div>
+
+            <div id="user_checkout_submit_container" class="user_checkout_submit_container">
+                <div id="user_checkout_submit_button_container" class="user_checkout_submit_button_container">
+                    <button id="user_checkout_submit_button" class="user_checkout_submit_button" title="Place order">Place My Order</button>
+                    <div id="checkout_submit_term" class="checkout_submit_term">By placing your order, you agree to Cafe Fore's privacy notice and conditions of use.</div>
+                </div>
+                <div id="checkout_submit_summary_container" class="checkout_submit_summary_container">
+                    <div id="checkout_submit_summary_title" class="checkout_submit_summary_title">Order Summary</div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_items_box" class="checkout_submit_summary_items_box">
+                            <span id="checkout_submit_summary_items_count" class="checkout_submit_summary_items_count"></span>
+                            <span id="checkout_submit_summary_items" class="checkout_submit_summary_items">&nbsp;Items:</span>
+                        </span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_items_value" class="checkout_submit_summary_items_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_shipping" class="checkout_submit_summary_shipping">Shipping & handling:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_shipping_value" class="checkout_submit_summary_shipping_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_before_tax" class="checkout_submit_summary_before_tax">Total before tax:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_before_tax_value" class="checkout_submit_summary_before_tax_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_Estimated_tax" class="checkout_submit_summary_Estimated_tax">Estimated tax:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_Estimated_tax_value" class="checkout_submit_summary_Estimated_tax_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail order_total" class="checkout_submit_summary_detail order_total">
+                        <span id="checkout_submit_summary_order_total" class="checkout_submit_summary_order_total">Payment total:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_order_total_value" class="checkout_submit_summary_order_total_value">00.00</span>
+                        </span>
+                    </div>
+                </div>
+            <div id="check_out_items_slider_box" class="check_out_items_slider_box">
+                <div id="check_out_items_slider" class="check_out_items_slider">
+                    <div id="check_out_items_container" class="check_out_items_container">
+                        
+                    </div>
+                </div>
+            
+                <button id="check_out_items_back_btn" class="back slider_btn">❮</button>
+                <button id="check_out_items_next_btn" class="next slider_btn">❯</button>
+            </div>
+            <div id="check_out_item_grand_total" class="check_out_item_grand_total">
+            </div>            
+
+        </div>
+        `    
+    }
+
+// <div class="form-row top-row style="display:none">
+//                                 <div id="amount" class="payment_amount_container">
+                                
+//                                 <div class="order_total_amount_title">Total Amount $</div><input type="text" name="amount" class="payment_amount" readonly>
+//                                 </div>
+//                             </div>
+
+    getGuestOrderConfirm() {
+        return `
+        <div id="guest_checkout_page" class="guest_checkout_page">
+        <div id="displayError" class="displayError"></div>
+            <h2>Check Out</h2>
+            <div id="guest_checkout_container" class="guest_checkout_container">
+            
+                <div id="guest_checkout_form_container" class="guest_checkout_form_container">            
+                    <form id="payment-form">
+                        * All fields are required to GUEST mode checkout.                         
+
+                        <div class="shipping_info">
+                            
+                            <div class="order_info_title">Shipping Infomation</div>
+
+                            <div class="shipping_info_recipient">
+                                <div class="guest_checkout_shipping_info_form_row">
+                                    <div id="recipient_first_name" class="field recipient_first_name">
+                                    <input type="text" name="recipient_first_name" id="input_recipient_first_name" class="input_recipient_first_name guest_checkout_input_shipping guest_checkout_input_shipping_recipient" placeholder="First Name" required>
+                                    </div>
+                                </div>
+
+                                <div class="guest_checkout_shipping_info_form_row">
+                                    <div id="recipient_last_name" class="field recipient_last_name">
+                                    <input type="text" name="recipient_last_name" id="input_recipient_last_name" class="input_recipient_last_name guest_checkout_input_shipping guest_checkout_input_shipping_recipient" placeholder="Last Name" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="shipping_address" class="field shipping_address_line1">
+                                <input type="text" name="shipping_address_street_line1" id="input_shipping_address_line1" class="input_shipping_address_line1 guest_checkout_input_shipping" placeholder="Shipping Address Street Line 1" required>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="shipping_address" class="field shipping_address_line2">
+                                <input type="text" name="shipping_address_street_line2" id="input_shipping_address_line2" class="input_shipping_address_line2 guest_checkout_input_shipping" placeholder="Shipping Address Street Line 2">
+                                </div>
+                            </div>
+
+                            <div class="shipping_info_csz">
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    <div id="shipping_address" class="field shipping_addres_city">
+                                    <input type="text" name="shipping_address_city" id="input_shipping_address_city" class="input_shipping_address_city guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="City" required>
+                                    </div>
+                                </div>
+
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    
+                                    <div id="shipping_address" class="field shipping_address_state">
+                                        <select name="shipping_address_state" id="shipping_address_state" class="input_shipping_address guest_checkout_input_shipping guest_checkout_input_shipping_csz" >
+                                        <option value="AL">Alabama</option>
+                                        <option value="AK">Alaska</option>
+                                        <option value="AZ">Arizona</option>
+                                        <option value="AR">Arkansas</option>
+                                        <option value="CA">California</option>
+                                        <option value="CO">Colorado</option>
+                                        <option value="CT">Connecticut</option>
+                                        <option value="DE">Delaware</option>
+                                        <option value="DC">District Of Columbia</option>
+                                        <option value="FL">Florida</option>
+                                        <option value="GA">Georgia</option>
+                                        <option value="HI">Hawaii</option>
+                                        <option value="ID">Idaho</option>
+                                        <option value="IL">Illinois</option>
+                                        <option value="IN">Indiana</option>
+                                        <option value="IA">Iowa</option>
+                                        <option value="KS">Kansas</option>
+                                        <option value="KY">Kentucky</option>
+                                        <option value="LA">Louisiana</option>
+                                        <option value="ME">Maine</option>
+                                        <option value="MD">Maryland</option>
+                                        <option value="MA">Massachusetts</option>
+                                        <option value="MI">Michigan</option>
+                                        <option value="MN">Minnesota</option>
+                                        <option value="MS">Mississippi</option>
+                                        <option value="MO">Missouri</option>
+                                        <option value="MT">Montana</option>
+                                        <option value="NE">Nebraska</option>
+                                        <option value="NV">Nevada</option>
+                                        <option value="NH">New Hampshire</option>
+                                        <option value="NJ">New Jersey</option>
+                                        <option value="NM">New Mexico</option>
+                                        <option value="NY">New York</option>
+                                        <option value="NC">North Carolina</option>
+                                        <option value="ND">North Dakota</option>
+                                        <option value="OH">Ohio</option>
+                                        <option value="OK">Oklahoma</option>
+                                        <option value="OR">Oregon</option>
+                                        <option value="PA">Pennsylvania</option>
+                                        <option value="RI">Rhode Island</option>
+                                        <option value="SC">South Carolina</option>
+                                        <option value="SD">South Dakota</option>
+                                        <option value="TN">Tennessee</option>
+                                        <option value="TX">Texas</option>
+                                        <option value="UT">Utah</option>
+                                        <option value="VT">Vermont</option>
+                                        <option value="VA">Virginia</option>
+                                        <option value="WA">Washington</option>
+                                        <option value="WV">West Virginia</option>
+                                        <option value="WI">Wisconsin</option>
+                                        <option value="WY">Wyoming</option>
+                                        </select>
+                                    
+                                    </div>
+                                </div>
+
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    <div id="shipping_address" class="field shipping_address_zip">
+                                    <input type="text" name="shipping_address_zip" id="input_shipping_address_zip" class="input_shipping_address_zip guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="Zip Code" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="order_contact_phone" class="field order_contact_phone">
+                                <input type="text" name="order_contact_phone" id="input_shipping_contact_phone" class="order_contact_phone guest_checkout_input_shipping" placeholder="Phone" required>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row" style="margin-bottom:1rem">
+                                <div id="order_contact_email" class="field order_contact_email">
+                                <input type="text" name="order_contact_email" id="input_shipping_contact_email" class="order_contact_email guest_checkout_input_shipping" placeholder="Email" required>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row" style="margin-bottom:1rem">
+                                <div id="same_shipping_billing_address_checkbox" class="same_shipping_billing_address_checkbox">
+                                <input type="checkbox" name="same_shipping_billing_address" id="same_shipping_billing_address_checkbtn" class="same_shipping_billing_address_checkbtn input_shipping_checkbox">
+                                <label for="same_shipping_billing_address_checkbtn">Same with Billing Address</label>
+                                </div>
+                            </div>
+
+                            <div id="guest_checkout_shipping_info_next_box" class="guest_checkout_shipping_info_next_box">
+                                <button type="button" id="guest_checkout_shipping_info_next_btn" class="guest_checkout_shipping_info_next_btn" title="next">NEXT</button>
+                            </div>
+
+                            
+                        </div> 
+
+                        <div id="shipping_method_container" class="shipping_method_container">
+                            <div id="shipping_method_page" class="shipping_method_page">
+                                <div id="shipping_method_box_flat" class="shipping_method_box_flat">
+                                    <input type="radio" name="rate_select" id="shipping_flat_rate" class="shipping_flat_rate" checked>
+                                    <label for="shipping_flat_rate">Standard Flat Rate Shipping $9.90
+                                    <div id="flat_rate_desc">Arrives in 2-5 Business Days - Monday thru Friday Delivery</div>
+                                </div>
+                                <div id="shipping_method_box_ground" class="shipping_method_box_ground">
+                                    <input type="radio" name="rate_select" id="shipping_ground_rate" class="shipping_ground_rate">
+                                    <label for="shipping_ground_rate">UPS Ground $<span id="shipping_ground_rate_price"></span>
+                                    <div id="ground_rate_desc">Arrives in 4 Business Days</div>
+                                </div>
+                                <div id="shipping_method_box_3days" class="shipping_method_box_3days">
+                                    <input type="radio" name="rate_select" id="shipping_3days_rate" class="shipping_3days_rate">
+                                    <label for="shipping_3days_rate">UPS 3 Days Shipping $<span id="shipping_3days_rate_price"></span>
+                                    <div id="3days_rate_desc">Arrives in 2-3 Business Days</div>
+                                </div>
+                                <div id="shipping_method_box_nextday" class="shipping_method_box_nextday">
+                                    <input type="radio" name="rate_select" id="shipping_nextday_rate" class="shipping_nextday_rate">
+                                    <label for="shipping_nextday_rate">UPS Next Day AIR Saver $<span id="shipping_nextday_rate_price"></span>
+                                    <div id="nextday_rate_desc">Arrives in 1 Business Days</div>
+                                </div>
+                            </div>
+                            <div id="continue_to_payment_box" class="continue_to_payment_box">
+                                <button type="button" id="continue_to_payment_btn" class="continue_to_payment_btn">Continue to Payment</button>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="billing_info">
+
+                        <div class="order_info_title">Billing Address</div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="shipping_address" class="field shipping_address_line1">
+                                <input type="text" name="billing_address_street_line1" id="input_billing_address_line1" class="input_shipping_address_line1 guest_checkout_input_shipping" placeholder="Billing Address Street Line 1" required>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="shipping_address" class="field shipping_address_line2">
+                                <input type="text" name="billing_address_street_line2" id="input_billing_address_line2" class="input_shipping_address_line2 guest_checkout_input_shipping" placeholder="Billing Address Street Line 2">
+                                </div>
+                            </div>
+
+                            <div class="shipping_info_csz">
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    <div id="shipping_address" class="field shipping_addres_city">
+                                    <input type="text" name="billing_address_city" id="input_billing_address_city" class="input_shipping_address_city guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="City" required>
+                                    </div>
+                                </div>
+
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    
+                                    <div id="shipping_address" class="field shipping_address_state">
+                                        <select name="billing_address_state" id="input_billing_address_state" class="input_shipping_address guest_checkout_input_shipping guest_checkout_input_shipping_csz" >
+                                        <option value="AL">Alabama</option>
+                                        <option value="AK">Alaska</option>
+                                        <option value="AZ">Arizona</option>
+                                        <option value="AR">Arkansas</option>
+                                        <option value="CA">California</option>
+                                        <option value="CO">Colorado</option>
+                                        <option value="CT">Connecticut</option>
+                                        <option value="DE">Delaware</option>
+                                        <option value="DC">District Of Columbia</option>
+                                        <option value="FL">Florida</option>
+                                        <option value="GA">Georgia</option>
+                                        <option value="HI">Hawaii</option>
+                                        <option value="ID">Idaho</option>
+                                        <option value="IL">Illinois</option>
+                                        <option value="IN">Indiana</option>
+                                        <option value="IA">Iowa</option>
+                                        <option value="KS">Kansas</option>
+                                        <option value="KY">Kentucky</option>
+                                        <option value="LA">Louisiana</option>
+                                        <option value="ME">Maine</option>
+                                        <option value="MD">Maryland</option>
+                                        <option value="MA">Massachusetts</option>
+                                        <option value="MI">Michigan</option>
+                                        <option value="MN">Minnesota</option>
+                                        <option value="MS">Mississippi</option>
+                                        <option value="MO">Missouri</option>
+                                        <option value="MT">Montana</option>
+                                        <option value="NE">Nebraska</option>
+                                        <option value="NV">Nevada</option>
+                                        <option value="NH">New Hampshire</option>
+                                        <option value="NJ">New Jersey</option>
+                                        <option value="NM">New Mexico</option>
+                                        <option value="NY">New York</option>
+                                        <option value="NC">North Carolina</option>
+                                        <option value="ND">North Dakota</option>
+                                        <option value="OH">Ohio</option>
+                                        <option value="OK">Oklahoma</option>
+                                        <option value="OR">Oregon</option>
+                                        <option value="PA">Pennsylvania</option>
+                                        <option value="RI">Rhode Island</option>
+                                        <option value="SC">South Carolina</option>
+                                        <option value="SD">South Dakota</option>
+                                        <option value="TN">Tennessee</option>
+                                        <option value="TX">Texas</option>
+                                        <option value="UT">Utah</option>
+                                        <option value="VT">Vermont</option>
+                                        <option value="VA">Virginia</option>
+                                        <option value="WA">Washington</option>
+                                        <option value="WV">West Virginia</option>
+                                        <option value="WI">Wisconsin</option>
+                                        <option value="WY">Wyoming</option>
+                                        </select>
+                                    
+                                    </div>
+                                </div>
+
+                                <div class="guest_checkout_shipping_info_form_row csz">
+                                    <div id="shipping_address" class="field shipping_address_zip">
+                                    <input type="text" name="billing_address_zip" id="input_billing_address_zip" class="input_shipping_address_zip guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="Zip Code" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row">
+                                <div id="order_contact_phone" class="field order_contact_phone">
+                                <input type="text" name="billing_address_contact_phone" id="input_billing_contact_phone" class="order_contact_phone guest_checkout_input_shipping" placeholder="Phone" required>
+                                </div>
+                            </div>
+
+                            <div class="guest_checkout_shipping_info_form_row" style="margin-bottom:1rem">
+                                <div id="order_contact_email" class="field order_contact_email">
+                                <input type="text" name="billing_address_contact_email" id="input_billing_contact_email" class="order_contact_email guest_checkout_input_shipping" placeholder="Email" required>
+                                </div>
+                            </div>                         
+
+
+                            <div class="order_info_title">Payment Infomation</div>                            
+
+                            <div class="form-row top-row">
+                                <div id="card-number" class="field card-number"></div>
+                                <div class="input-errors" id="card-number-errors" role="alert"></div>
+                            </div>
+
+                            <div class="form-row">
+                                <div id="card-name" class="field card-name">
+                                <input type="text" name='card_name' class="input_card_name" placeholder="Cardholder Name" required>
+                                </div>
+                            </div>                    
+
+                            <div class="form-row">
+                                <div id="card-date" class="field third-width"></div>
+                                <div class="input-errors" id="card-date-errors" role="alert"></div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div id="card-cvv" class="field third-width"></div>
+                                <div class="input-errors" id="card-cvv-errors" role="alert"></div>
+                            </div>
+
+                            <div class="form-row style="margin-bottom:1rem">
+                                <div id="card-postal-code" class="field third-width"></div>
+                                <div class="input-errors" id="card-postal-code-errors" role="alert"></div>
+                            </div>
+                            <div id="card-response" role="alert"></div>
+
+                            
+                        </div>
+                
+                    </form>
+                </div>
+
+                <div id="guest_checkout_submit_container" class="guest_checkout_submit_container">
+                <div id="guest_checkout_submit_button_container" class="guest_checkout_submit_button_container">
+                    <button type="submit" form="payment-form" id="guest_checkout_submit_button" class="guest_checkout_submit_button" title="Place order">Place My Order</button>
+                    <div id="checkout_submit_term" class="checkout_submit_term">By placing your order, you agree to Cafe Fore's privacy notice and conditions of use.</div>
+                </div>
+                <div id="checkout_submit_summary_container" class="checkout_submit_summary_container">
+                    <div id="checkout_submit_summary_title" class="checkout_submit_summary_title">Order Summary</div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_items_box" class="checkout_submit_summary_items_box">
+                            <span id="checkout_submit_summary_items_count" class="checkout_submit_summary_items_count"></span>
+                            <span id="checkout_submit_summary_items" class="checkout_submit_summary_items">&nbsp;Items:</span>
+                        </span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_items_value" class="checkout_submit_summary_items_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_shipping" class="checkout_submit_summary_shipping">Shipping & handling:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_shipping_value" class="checkout_submit_summary_shipping_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_before_tax" class="checkout_submit_summary_before_tax">Total before tax:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_before_tax_value" class="checkout_submit_summary_before_tax_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail" class="checkout_submit_summary_detail">
+                        <span id="checkout_submit_summary_Estimated_tax" class="checkout_submit_summary_Estimated_tax">Estimated tax:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_Estimated_tax_value" class="checkout_submit_summary_Estimated_tax_value">00.00</span>
+                        </span>
+                    </div>
+                    <div id="checkout_submit_summary_detail order_total" class="checkout_submit_summary_detail order_total">
+                        <span id="checkout_submit_summary_order_total" class="checkout_submit_summary_order_total">Payment total:</span>
+                        <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
+                        <span class="usd">$</span><span id="checkout_submit_summary_order_total_value" class="checkout_submit_summary_order_total_value">00.00</span>
+                        </span>
+                    </div>
+                </div>
+                
+                    <div id="check_out_items_slider_box" class="check_out_items_slider_box">
+                    <div id="check_out_items_slider" class="check_out_items_slider">
+                        <div id="check_out_items_container" class="check_out_items_container">
+                            
+                        </div>
+                    </div>
+                
+                    <button id="check_out_items_back_btn" class="back slider_btn">❮</button>
+                    <button id="check_out_items_next_btn" class="next slider_btn">❯</button>
+                    </div>
+
+                <div id="check_out_item_grand_total" class="check_out_item_grand_total" style="display:none">
+                </div>
+                
+            </div>
+
+        </div>
+
+        <div class="button-container-test">
+            <button class="submit_payment_test">Submit Payment Test</button>
+            <button class="get_charges_test">get_charges test</button>
+            <button class="submit_refund_test">Refund test</button>
+            <button class="submit_create_order_test">create order test</button>
+            <button class="submit_create_customer_test">create customer test</button><br>
+            <button class="submit_create_card_token_test">create card token test</button>
+            <button class="submit_create_get_customer_test">create get customer test</button>
+            <button class="submit_create_item_test">create item test</button>
+            <button class="submit_create_get_order_test">get_order_test</button>
+            <button class="submit_get_an_order_test">get_an_order_test</button>
+            <button class="pay_order_test">pay_order_test</button>
+            <button class="create_customer">create_customer</button>
+            <button class="get_single_customer">get_single_customer</button>
+            <button class="delete_card">delete_card</button>
+            <button class="save_card">save_card</button>
+            <button class="guest_test_submit">guest_test_submit</button>
+            <button class="check_guest_cart">check_guest_cart</button>
+            <button class="crypto_test">crypto_test</button>
+            <button class="make_item_test">make_item_test</button>
+        </div>
+        `;
+    }
 
     makeUserCheckOutForm(u_id, proceed_checkout_total, proceed_checkout_selected_order_cart) {
 
@@ -454,18 +702,11 @@ export default class {
             console.log("makeUserCheckOutbilling info Form")
             console.log(result) 
             if (result.length > 0) {
-                this.user_default_billing_info = {
-                    cardholder : result[0].cardholder,
-                    cardtype : result[0].type,
-                    last4 : result[0].last4,
-                    exp : result[0].exp
-                };
-
                 const cardholder = result[0].cardholder; 
                 const cardtype = result[0].type;
                 const last4 = result[0].last4;
 
-                setUserCheckoutBillingInfo(this.user_default_billing_info.cardholder, this.user_default_billing_info.cardtype, this.user_default_billing_info.last4);
+                setUserCheckoutBillingInfo(cardholder, cardtype, last4);
             } else {
                 document.querySelector('.user_checkout_billing_info').innerHTML = `
                 <div class="user_checkout_billing_info_title">Payment Infomation</div>
@@ -484,7 +725,7 @@ export default class {
             console.log("makeUserCheckOut shipping info Form")
             console.log(result) 
             if (result.length > 0) {
-                this.user_default_shipping_info = {
+                let user_checkout_info = {
                     recipient : result[0].recipient,
                     address1 : result[0].address1,
                     address2 : result[0].address2,
@@ -494,11 +735,11 @@ export default class {
                     phone : result[0].phone,
                     email : result[0].email,
                     sh_option : result[0].shipping_option
-                }
+                };             
 
-                setUserCheckoutShippingInfo(this.user_default_shipping_info);
+                setUserCheckoutShippingInfo(user_checkout_info);
                 
-                this.check_out_box.setUserShippingInfo(this.user_default_shipping_info);
+                this.check_out_box.setUserShippingInfo(user_checkout_info);
 
             } else {
                 document.querySelector('.user_checkout_shipping_info').innerHTML = `
@@ -511,7 +752,11 @@ export default class {
 
             }
         });
-        
+        // proceed_checkout_selected_order_cart.forEach(element => {
+        //     user_total_amount = user_total_amount + element.quantity * element.price_sell;
+        //     console.log(parseInt(user_total_amount))
+        // })
+        // console.log(parseInt(total_amount))
         console.log(parseInt(user_total_amount))
         
         if (parseInt(proceed_checkout_total) === parseInt(user_total_amount)) {
@@ -532,8 +777,6 @@ export default class {
             console.log("check total amount === user_total_amount")
         }
     }
-
-
 
     makeGuestCheckOutForm(check_out_cart, checked_order_list) {
               
@@ -593,7 +836,7 @@ export default class {
                 
 
             check_out_cart.forEach(element => {
-                this.check_out_box.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "check_out_items_container", "check_out_item");
+                this.check_out_box.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "check_out_items_container", "check_out_item")
                 // check_out_amount = check_out_amount + (element.c_item_price * element.c_item_price);
                 // console.log(check_out_amount);
             })
@@ -613,7 +856,7 @@ export default class {
 
 
     
-            // const order_info = this.order_info;   
+            const order_info = this.order_info;   
             const order_items = sessionStorage.getItem("checkoutcart"); 
             console.log(order_items);  
             const clover = new Clover(key.key);
@@ -707,35 +950,17 @@ export default class {
                         });
                         
                     } else {
-                        console.log(result);
-
-                        const card_info = {
-                            last4 : result.card.last4,
-                            brand : result.card.brand,
-                            exp : result.card.exp_month + '/' + result.card.exp_year.slice(-2)                            
-                        }
-                        
-                        console.log(result.token)
-                        document.getElementById('guest_checkout_billing_info_form_cover').style.display = "block";
-                        document.getElementById('guest_checkout_billing_info_form_cover').style.height = "auto";
-                        document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "block";
-                        document.getElementById('guest_checkout_billing_info_form_cover_contents').innerText = 
-                        '**********' + card_info.last4 + ' ' + card_info.brand + ' ' + card_info.exp;
-                        
-                        document.getElementById('guest_checkout_billing_info_form').style.display = "none";
-                        document.getElementById('guest_checkout_submit_button').disabled = false;
-                        document.getElementById('guest_checkout_submit_button').focus();
-                        
-                        cloverTokenHandler(result.token, order_items, shipping_rate);
+                    document.getElementById('guest_checkout_submit_button').setAttribute('disabled', 'true');
+                    turnOffDisplay();
+                    const order_items = sessionStorage.getItem("checkoutcart");                               
+                    
+                    cloverTokenHandler(result.token, order_items, shipping_rate);
                     
                     }
                 });
             });      
         });
     } 
-
-
-
 
     getShippingRate(param) {
 
@@ -802,60 +1027,12 @@ export default class {
 
         });
     }
-
-    getUserDefaultShippingInfomation(user_id) {
-        return new Promise((resolve, reject) => {
-            const send_data = {u_id : user_id};
-            const data = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                
-                    },
-                body: JSON.stringify(send_data)
-            };
-
-            fetch(`/get_user_default_shipping_info`, data)
-            .then((res) => res.json())
-            .then(result => {
-                console.log("makeUserCheckOut shipping info Form")
-                console.log(result) 
-                if (result.length > 0) {
-                    this.user_default_shipping_info = {
-                        recipient : result[0].recipient,
-                        address1 : result[0].address1,
-                        address2 : result[0].address2,
-                        city : result[0].city,
-                        state : result[0].state,
-                        zip : result[0].zip,
-                        phone : result[0].phone,
-                        email : result[0].email,
-                        sh_option : result[0].shipping_option
-                    }
-                    this.check_out_box.setUserShippingInfo(this.user_default_shipping_info);
-                    resolve(this.user_default_shipping_info);
-                }
-            });
-        });
-            
-    }
-
-    getUserDefaultShippingInfo() {
-        return this.user_default_shipping_info;
-    }
-
-    getUserDefaultBillingInfo() {
-        return this.user_default_billing_info;
-    }
-
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////// end of class///////////////////////////////////////////////////////////////
 
-let guest_payload = {};
+
 
 function removeFadeOut( el, speed ) {
     var seconds = speed/1000;
@@ -869,56 +1046,36 @@ function removeFadeOut( el, speed ) {
 }
 
 
-function cloverTokenHandler(token, items, ship_rate) {   
-    
 
+function cloverTokenHandler(token, items, ship_rate) {
+   
     const order_items = items;
     // const order_items = sessionStorage.getItem("checkoutcart"); 
     console.log(order_items);
-    console.log("ship_rate");
-    console.log(ship_rate);
     const shipping_rate = ship_rate;
     // Insert the token ID into the form so it gets submitted to the server
     var form = document.getElementById('payment-form');
-   
-    if (document.getElementById("cloverToken")) {       
-        form.removeChild(document.getElementById("cloverToken"));
-    }
-    if (document.getElementById("order_items")) {       
-        form.removeChild(document.getElementById("order_items"));
-    }
-    if (document.getElementById("shipping_rate")) {       
-        form.removeChild(document.getElementById("shipping_rate"));
-    }
-
     var hiddenInput = document.createElement('input');
     hiddenInput.setAttribute('type', 'hidden');
     hiddenInput.setAttribute('name', 'cloverToken');
-    hiddenInput.setAttribute('id', 'cloverToken');
     hiddenInput.setAttribute('value', token);
     form.appendChild(hiddenInput);
 
     var orderItems = document.createElement('input');
     orderItems.setAttribute('type', 'hidden');
     orderItems.setAttribute('name', 'order_items');
-    orderItems.setAttribute('id', 'order_items');
     orderItems.setAttribute('value', order_items);
     form.appendChild(orderItems);
 
     var shippingRate = document.createElement('input');
     shippingRate.setAttribute('type', 'hidden');
     shippingRate.setAttribute('name', 'shipping_rate');
-    shippingRate.setAttribute('id', 'shipping_rate');
     shippingRate.setAttribute('value', shipping_rate);
     form.appendChild(shippingRate);
-    
 
     const formData = new FormData(form);
     const payload = new URLSearchParams(formData);
-    guest_payload = payload;
-   
-
-    /*
+        
     fetch('/guest_order_checkout', {
         method: 'POST',
         headers: {
@@ -953,48 +1110,7 @@ function cloverTokenHandler(token, items, ship_rate) {
         ItemCounter.item_counter('GUEST');
 
     });
-    */
   
-}
-
-function guestCheckoutSubmit(payload) {
-    document.getElementById('guest_checkout_submit_button').setAttribute('disabled', 'true');
-    turnOffDisplay();
-
-    fetch('/guest_order_checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: payload,
-      })
-      .then(res => res.json())
-      .then(response => {
-
-        turnOnDisplay();
-
-        console.log("/guest_order_checkout complete")
-        console.log(response)
-        
-        const paid_item_no = response.paid_items_number;
-        console.log(paid_item_no)
-        let guest_cart = JSON.parse(sessionStorage.getItem("cart"));
-       
-        for (let i =0 ; i < paid_item_no.length ; i++) {
-            for(let j = 0; j < guest_cart.length; j++) { 
-                if(guest_cart[j].c_item_no == paid_item_no[i]) {                    
-                    guest_cart.splice([j], 1);
-                    j--;
-                }
-            }
-        }
-        sessionStorage.setItem("cart", JSON.stringify(guest_cart)); // set left over cart
-        sessionStorage.removeItem("checkoutcart");
-
-        setOrderConfirmationPage(response);
-        ItemCounter.item_counter('GUEST');
-
-    });
 }
 
 
@@ -1037,10 +1153,6 @@ function setUserCheckoutBillingInfo(cardholder, type, last4) {
 function setUserCheckoutBillingInfoCard(cardholder, type, last4) {
     const user_checkout_billing_info_detail = document.getElementById('user_checkout_billing_info_detail');
     
-    const user_checkout_billing_info_title_box = document.createElement('div');
-    user_checkout_billing_info_title_box.setAttribute('id', `user_checkout_billing_info_title_box`);
-    user_checkout_billing_info_title_box.setAttribute('class', `user_checkout_billing_info_title_box user_checkout_info_title`);
-
     const user_checkout_billing_info_title = document.createElement('div');
     user_checkout_billing_info_title.setAttribute('id', `user_checkout_billing_info_title`);
     user_checkout_billing_info_title.setAttribute('class', `user_checkout_billing_info_title user_checkout_info_title`);
@@ -1069,38 +1181,25 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4) {
     user_checkout_billing_info_context.setAttribute('id', `user_checkout_billing_info_context`);
     user_checkout_billing_info_context.setAttribute('class', `user_checkout_billing_info_context`);
 
-    const user_checkout_change_method_btn = document.createElement('button');
-    user_checkout_change_method_btn.setAttribute('id', `user_checkout_change_method_btn`);
-    user_checkout_change_method_btn.setAttribute('class', `user_checkout_change_method_btn`);
-
-    const user_checkout_billing_info_next_btn = document.createElement('Button');
-    user_checkout_billing_info_next_btn.setAttribute('id', `user_checkout_billing_info_next_btn`);
-    user_checkout_billing_info_next_btn.setAttribute('class', `user_checkout_billing_info_next_btn`);    
-
-    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_title_box);
-    user_checkout_billing_info_title_box.appendChild(user_checkout_billing_info_title);
-    user_checkout_billing_info_title_box.appendChild(user_checkout_change_method_btn);
+    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_title);
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_cardholder);
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_card);
     user_checkout_billing_info_card.appendChild(user_checkout_billing_info_cardtype);
     user_checkout_billing_info_card.appendChild(user_checkout_billing_info_text);
     user_checkout_billing_info_card.appendChild(user_checkout_billing_info_cardlast4);
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_context);
-    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_next_btn);
 
     user_checkout_billing_info_title.innerHTML = "Payment Infomation";
-    user_checkout_change_method_btn.innerText = "Change Payment Method";
     user_checkout_billing_info_cardholder.innerHTML = cardholder;
     user_checkout_billing_info_cardtype.innerHTML = type;
     user_checkout_billing_info_text.innerHTML = "ending in";
     user_checkout_billing_info_cardlast4.innerHTML = last4;
-    user_checkout_billing_info_context.innerHTML = setPromotionBox();  
-    user_checkout_billing_info_next_btn.innerText = "Continue to Place Order";      
+    user_checkout_billing_info_context.innerHTML = setPromotionBox();        
 }
 
 function setPromotionBox() {
     return `
-    
+    <a href="#">Change method</a>
         <div class"user_checkout_billing_info_promotion_container">
             Add a gift card or promotion code or voucher
             <form action="/promotion" method="post" id="promotion_code_form">
@@ -1115,31 +1214,16 @@ function setPromotionBox() {
 
 // function setUserCheckoutShippingInfo(recipient, address1, address2, city, state, zip, phone, email, sh_option) {
 function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
-
-    
-
-
     const user_checkout_shipping_info_detail = document.createElement('div');
     user_checkout_shipping_info_detail.setAttribute('id', `user_checkout_shipping_info_detail`);
     user_checkout_shipping_info_detail.setAttribute('class', `user_checkout_shipping_info_detail`);
     document.querySelector('.user_checkout_shipping_info').appendChild(user_checkout_shipping_info_detail); 
     
-    const user_checkout_shipping_info_title_box = document.createElement('div');
-    user_checkout_shipping_info_title_box.setAttribute('id', `user_checkout_shipping_info_title_box`);
-    user_checkout_shipping_info_title_box.setAttribute('class', `user_checkout_shipping_info_title_box`);
-
     const user_checkout_shipping_info_title = document.createElement('div');
     user_checkout_shipping_info_title.setAttribute('id', `user_checkout_shipping_info_title`);
     user_checkout_shipping_info_title.setAttribute('class', `user_checkout_shipping_info_title user_checkout_info_title`);
     
-    const user_checkout_shipping_info_detail_box_cover = document.createElement('div');
-    user_checkout_shipping_info_detail_box_cover.setAttribute('id', `user_checkout_shipping_info_detail_box_cover`);
-    user_checkout_shipping_info_detail_box_cover.setAttribute('class', `user_checkout_shipping_info_detail_box_cover`);
-
-    const user_checkout_shipping_info_detail_box = document.createElement('div');
-    user_checkout_shipping_info_detail_box.setAttribute('id', `user_checkout_shipping_info_detail_box`);
-    user_checkout_shipping_info_detail_box.setAttribute('class', `user_checkout_shipping_info_detail_box`);
-
+    
     const user_checkout_shipping_info_recipient = document.createElement('div');
     user_checkout_shipping_info_recipient.setAttribute('id', `user_checkout_shipping_info_recipient`);
     user_checkout_shipping_info_recipient.setAttribute('class', `user_checkout_shipping_info_recipient`);    
@@ -1180,35 +1264,27 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
     user_checkout_shipping_info_sh_option.setAttribute('id', `user_checkout_shipping_info_sh_option`);
     user_checkout_shipping_info_sh_option.setAttribute('class', `user_checkout_shipping_info_sh_option`);
 
-    const user_checkout_shipping_info_change_btn = document.createElement('button');
-    user_checkout_shipping_info_change_btn.setAttribute('id', `user_checkout_shipping_info_change_btn`);
-    user_checkout_shipping_info_change_btn.setAttribute('class', `user_checkout_shipping_info_change_btn`);
+    const user_checkout_shipping_info_context = document.createElement('div');
+    user_checkout_shipping_info_context.setAttribute('id', `user_checkout_shipping_info_context`);
+    user_checkout_shipping_info_context.setAttribute('class', `user_checkout_shipping_info_context`);
 
     const user_checkout_shipping_info_next_btn = document.createElement('Button');
     user_checkout_shipping_info_next_btn.setAttribute('id', `user_checkout_shipping_info_next_btn`);
     user_checkout_shipping_info_next_btn.setAttribute('class', `user_checkout_shipping_info_next_btn`);
 
-    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_title_box);
-    user_checkout_shipping_info_title_box.appendChild(user_checkout_shipping_info_title);
-    user_checkout_shipping_info_title_box.appendChild(user_checkout_shipping_info_change_btn);
-
-    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_detail_box_cover);
-    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_detail_box);
-    
-    
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_recipient);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_address1);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_address2);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_csz);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_title);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_recipient);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_address1);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_address2);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_csz);
     user_checkout_shipping_info_csz.appendChild(user_checkout_shipping_info_city);
     user_checkout_shipping_info_csz.appendChild(user_checkout_shipping_info_state);
     user_checkout_shipping_info_csz.appendChild(user_checkout_shipping_info_zip);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_phone);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_email);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_sh_option);
-    
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_phone);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_email);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_sh_option);
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_context);
     user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_next_btn);
-    // user_checkout_shipping_info_next_btn_container.appendChild(user_checkout_shipping_info_next_btn);
 
     user_checkout_shipping_info_title.innerHTML = "Shipping Infomation";
     user_checkout_shipping_info_recipient.innerHTML = user_checkout_shipping_info.recipient;
@@ -1220,8 +1296,8 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
     user_checkout_shipping_info_phone.innerHTML = user_checkout_shipping_info.phone;
     user_checkout_shipping_info_email.innerHTML = user_checkout_shipping_info.email;
     user_checkout_shipping_info_sh_option.innerHTML = user_checkout_shipping_info.sh_option;
-    user_checkout_shipping_info_change_btn.innerText = `Change Shipping Address`;
-    user_checkout_shipping_info_next_btn.innerText = "Continue to Select Shipping Method";
+    user_checkout_shipping_info_context.innerHTML = `<a href="#">Change address</a>`;
+    user_checkout_shipping_info_next_btn.innerText = "Next";
 }
 
 function Spinner(){

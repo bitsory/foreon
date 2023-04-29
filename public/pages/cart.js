@@ -1,6 +1,7 @@
-import * as AIF from "./acc_info_form.js";
+import * as AIF from "./form_acc_info.js";
 import * as ItemCounter from "./item_counter.js";
-import * as PurchaseHistory from "./purchase_history_form.js";
+import * as PurchaseHistory from "./form_purchase_history.js";
+
 
 export default class Cart {
     
@@ -361,7 +362,7 @@ export default class Cart {
                 var res_id = val.substring(start_id+6, end_id); 
 
                 result = [res_name, res_id];          
-            } 
+            }             
         })
         return result;        
     }
@@ -389,34 +390,9 @@ export default class Cart {
         `
     }
 
-    changeProfile() {    
-        document.getElementById('lorem').innerHTML = mekeChangePrifileTap();    
+    changeProfileTap() {    
+        document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();    
     }
-
-    // viewPurchaseHistory2(u_id) {
-    //     console.log("view purchase History")
-    //     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
-    
-    //     const data = {id : u_id}
-    
-    //     const option = {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'                
-    //             },
-    //         body: JSON.stringify(data)
-    //     };
-    //     console.log(option);
-
-    //     fetch('/check_purchase_history', option)
-    //     .then((res) => res.json())
-    //     .then(result => {
-    //         console.log(result)
-    //         setPurchaseHistory(result);
-
-    //     });
-    // }
-    
 
 }
 
@@ -436,11 +412,6 @@ document.addEventListener('click',function(e){
       
         changeProfile();
 
-
-        // fetch('/change_profile')
-        // .then(response => response.json())
-        // .then(response => console.log(response))
-        // .catch(err => console.error(err)); 
         
     }
 
@@ -489,6 +460,7 @@ document.addEventListener('click',function(e){
         document.getElementById(tab_id).classList.add('current');
 
         if (tab_id === 'tab-2') {
+            history.pushState(null, null, `/account/billing-infomation`);
             const billing_info_box = document.querySelector('.billing_info_box');
             while (billing_info_box.hasChildNodes()) {	
                 billing_info_box.removeChild(billing_info_box.firstChild);
@@ -510,7 +482,8 @@ document.addEventListener('click',function(e){
             })
 
 
-        } else if (tab_id === 'tab-3') {            
+        } else if (tab_id === 'tab-3') { 
+            history.pushState(null, null, `/account/shipping-infomation`);
             
             const shipping_info_box = document.querySelector('.shipping_info_box');
             while (shipping_info_box.hasChildNodes()) {	
@@ -586,10 +559,7 @@ document.addEventListener('click',function(e){
             while (billing_info_box.hasChildNodes()) {	
                 billing_info_box.removeChild(billing_info_box.firstChild);
             }
-            renderBillingInfo(result);
-            // const delete_node = document.getElementById(`billing_info BIN${delete_card_index}`);
-            // document.querySelector('.billing_info_box').removeChild(delete_node);
-
+            renderBillingInfo(result);          
         });
     }
 
@@ -706,6 +676,7 @@ document.addEventListener('click',function(e){
         });
     }
 
+
     
 
     if(e.target && e.target.id == 'purchase_history_order_cancel_btn') {
@@ -742,10 +713,7 @@ document.addEventListener('click',function(e){
 
     }
 
-    if(e.target && e.target.id == 'purchase_history_item_track_btn') {
-        console.log(e.target.getAttribute('track-itemid'));
-
-    }
+    
     
     if (e.target && e.target.id == 'purchase_history_item_order_cancel_btn') {
         console.log(e.target.getAttribute('cart-itemid'));
@@ -782,13 +750,20 @@ document.addEventListener('click',function(e){
           
         });
     }
+
+    if(e.target && e.target.id == 'purchase_history_item_track_btn') {
+        console.log(e.target.getAttribute('track-itemid'));
+
+    }
+
+
 });
 
 
 
 
 function changeProfile() {    
-    document.querySelector('.lorem').innerHTML = mekeChangePrifileTap();    
+    document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();    
 }
 
 
@@ -1097,7 +1072,7 @@ function setBillingInfoLast4(bi_num, last4) {
 
 function setBillingInfoExp(bi_num, exp) {
     const billingInfoExp = document.createElement('div');
-    const text_exp = exp.replace(/(.{2})/g,"$1/");
+    const text_exp = exp.slice(0,2) + '/' + exp.slice(-2);
     billingInfoExp.setAttribute('class', `billing_info_exp BIN${bi_num}`);
     document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(billingInfoExp);
     
@@ -1164,7 +1139,7 @@ function setBillingInfoEditBtn(bi_num) {
 
 }
 
-function renderBillingInfo(result) {
+export function renderBillingInfo(result) {
     if (result.length > 0) {
         console.log(result)
 
@@ -1340,7 +1315,7 @@ function setShippingInfoDefaultBtn(sh_num, default_check) {
     document.querySelector(`.shipping_info_default_label.SHN${sh_num}`).innerText = "Default Address";
     const default_check_radio = document.getElementById(`shipping_info_default_btn SHN${sh_num}`);
 
-    if (default_check === "default") {
+    if (default_check == "default") {
         default_check_radio.checked = true;
         shippingInfoDefaultBtn.setAttribute('value', `default`);
     } 
@@ -1378,7 +1353,7 @@ function setShippingInfoEditBtn(sh_num) {
 
 }
 
-function renderShippingInfo(result) {
+export function renderShippingInfo(result) {
     if (result.length > 0) {
         console.log(result)
 
@@ -1471,7 +1446,7 @@ function changePassword() {
 function viewPurchaseHistory(param) {
 
     console.log("view purchase History")
-    document.querySelector('.lorem').innerHTML = makePurchaseHistoryContainer();
+    document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
 
     const data = {
         id : param.user_id,

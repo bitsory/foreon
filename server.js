@@ -247,7 +247,9 @@ app.get('/shop/checkout/:id/item_num=:item_no', (req,res) => {
 
 app.post('/sign_in', function (req,res) {
     // res.sendFile(__dirname + "/public/login.html");
-    console.log(`req.body: ${req.body}`);
+    console.log("sign in")
+
+    console.log(req.body);
     console.log(`req.originalUrl: ${req}`);
     console.log(req.url);
     // const sess = req.session;
@@ -255,6 +257,7 @@ app.post('/sign_in', function (req,res) {
     // const con = makeConnect();
     const aid = req.body.aid;
     const bpw = req.body.bpw;
+    const remember_id = req.body.checked_remember;
 
     const decrypt = new JSEncrypt();
     
@@ -304,7 +307,7 @@ app.post('/sign_in', function (req,res) {
                             // con.end();
                         } else {                                         
                             console.log(`${result}`);                              
-                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id,);
+                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id, remember_id);
                             
                         }                                
                     });    
@@ -417,7 +420,7 @@ app.post('/sign_up', (req,res) => {
                             [sign_up_id, sign_up_pw, sign_up_first_name, clv_id, sign_up_email, sign_up_phone, date, date, salt]);
                         
 
-                            updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id);
+                            updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id, "signup");
 
                         })
                         .catch(err => console.error(err));
@@ -433,14 +436,16 @@ app.post('/sign_up', (req,res) => {
     });
 });
 
-function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_id ) {
+function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_id, remember_id ) {
         
     console.log(`update: ${u_id}, ${date}`);       
     connect.query('UPDATE users SET last_log = ? where id = ?', [date, u_id]);
     let data = {id : u_id, name : u_name, clv_id : clv_id};
+    let re_path = {url : url}
     request.session.loginData = data;
     console.log('req.session.loginData');
     console.log(request.session.loginData);
+
 
     response.cookie("cafe_fore_t", "test-test-test", {maxAge: 360000});
     response.cookie("cafe_fore_tt", "test-test-test", {maxAge: 3600000});
@@ -451,10 +456,30 @@ function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_
         clv : request.session.loginData.clv_id                    
         
     }, {maxAge: 3600000, credentials: true, authorized : true, signed: true});
+
+    if (remember_id == 'remember') {
+        response.cookie(
+            'saveid',{            
+            id : request.session.loginData.id
+        }, {maxAge: 360000000, credentials: true, authorized : true, signed: true});
+    } else if (remember_id == "signup") {
+        re_path = {url : "http://localhost:8080"};
+        response.cookie(
+            'saveid',{            
+            id : ''
+        }, {maxAge: 0, credentials: true, authorized : true, signed: true});
+    } else {
+        response.cookie(
+            'saveid',{            
+            id : ''
+        }, {maxAge: 0, credentials: true, authorized : true, signed: true});
+    }
+
     console.log("login complete")
-    const re_path = {url : url}
+    
     if (u_id == "cafeforeadmin") {
-        response.render('admin.ejs', {post : "ADMIN"})
+        console.log("admin login")
+        response.sendFile(__dirname + "/public/admin.html");       
     }
     else response.send(re_path);  
     // connect.release();     
@@ -1025,6 +1050,7 @@ app.get('/create_card_token', (req,res) => {
         .then(response => {
 
             console.log(response)
+            /*
             const options = {
                 method: 'PUT',
                 headers: {
@@ -1039,7 +1065,8 @@ app.get('/create_card_token', (req,res) => {
                 })
               };
               
-              fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
+              fetch('https://scl-sandbox.dev.clover.com/v1/customers/ZGDVQHPESCMV6', options)
+            //   fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
                 // fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers/DYSFDV5WVK3S4', options)
                 .then(response => response.json())
                 .then(response => console.log(response))
@@ -1076,14 +1103,11 @@ app.get('/create_card_token', (req,res) => {
             //     .then(response => console.log(response))
             //     .catch(err => console.error(err));
 
+*/
 
-
-        })
-            
-            
-            
-            
+        })            
         .catch(err => console.error(err));
+        
 })
 
 app.get('/pay_order_test', (req,res) => {
@@ -2597,7 +2621,7 @@ app.post(`/get_user_default_billing_info`, (req,res) => {
     const u_id = req.body.u_id;
 
     db.getConnection((con)=>{
-        con.query('SELECT cardholder, type, last4 FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
+        con.query('SELECT cardholder, type, last4, exp FROM billing_info WHERE id= ? and default_payment="default" and inuse="y"',[u_id], (err, result) => {
             if(err){                        
                 res.send(err);
                 // con.end();        
@@ -2643,9 +2667,6 @@ app.post('/check_user_cart', (req,res) => {
                 con.end();
             
             } else {
-                // console.log("result");
-                // console.log(result);
-                
                 res.send(result);
             }
         });
@@ -2733,11 +2754,9 @@ app.post('/item_delete_v2', (req,res) => {
     
     console.log('/item_delete /item_delete /item_delete /item_delete/item_delete')
 
-    // const connect = makeConnect();
-
     if (user_id == u_id) {      
         db.getConnection((con)=>{
-            con.query('DELETE FROM cart WHERE u_id=? and prodnum=?', [u_id, item_num] ,(err, result) => {
+            con.query('DELETE FROM cart WHERE u_id=? and prodnum=? and result = "n"', [u_id, item_num] ,(err, result) => {
                 if(err){                        
                     res.send(err);
                     // con.end();
@@ -2766,15 +2785,13 @@ app.post('/item_delete_v2', (req,res) => {
 app.post('/cancel_order', (req,res) => {
     console.log('/cancal_order cancal_order cancal_order ')
     console.log(req.body);
-    const order_num = req.body.order_number;
-    // const prodnum = req.body
-
+    const order_num = req.body.order_number; 
     const u_id = req.body.user_id;
     db.getConnection((con)=>{
         con.query('SELECT * FROM cart JOIN orders on cart.order_number = orders.order_number WHERE refund = "n" and cart.order_number = ? and cart.u_id = ?', [order_num, u_id] ,(err, result_param) => {
             if(err){                        
                 res.send(err);
-                // con.end();        
+                       
             } else {
                 console.log("result_param");
                 console.log(result_param);
@@ -2784,10 +2801,10 @@ app.post('/cancel_order', (req,res) => {
                 const cart_nums = result_param.map(element => {
                     return element.cartnum;
                 })
-                const item_nums = result_param.map(element => {
+                const item_prodnums = result_param.map(element => {
                     return element.prodnum;
                 })
-                const shipping_fee = result_param[0].shipping_fee;
+                
                 const order_items_count = result_param[0].order_items_count;
                 if (result_param.length == order_items_count) {
                     console.log("result_param.length == order_items_count");
@@ -2821,7 +2838,7 @@ app.post('/cancel_order', (req,res) => {
                                         } else {
                                             console.log(result);
                                             makeAllItemsRefundFlag(order_num, con);
-                                            (u_id == 'GUEST') ? checkGuestPurchaseHistory(order_num, con, res) : checkPurchaseHistory(u_id, con, res);
+                                            (u_id == 'GUEST') ? checkGuestPurchaseHistory(order_num, con, res) : checkPurchaseHistory(u_id, con, res);                                                   
                                         }
                                     });
                                     
@@ -2833,8 +2850,7 @@ app.post('/cancel_order', (req,res) => {
                 } else {
                     console.log("cancel order left over items")
                     const cancel_order_flag = true;
-                    cancelOrderItems(left_over, u_id, order_num, cart_nums, item_nums, con, res, cancel_order_flag);                  
-                    
+                    cancelOrderItems(left_over, u_id, order_num, cart_nums, item_prodnums, con, res, cancel_order_flag); 
                 }
             }
         });
@@ -2899,8 +2915,6 @@ function getUPSLineItemID(order_num) {
 }
 
 function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, cancel_order_flag) {
-    
-    // return new Promise((resolve, reject) => { 
     console.log("cancelOrderItems(result_param,");
     console.log(result_param);
     console.log(result_param.length);
@@ -2969,8 +2983,9 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                                     // con.end();        
                                 } else {
                                     console.log("returned items DB updated"); 
-                                    makeFullRefundFlag(ordernum, con);
-                                    (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);
+                                    makeFullRefundFlag(ordernum, con).then(e => {
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);                                    
+                                    });
                                 } 
                             });   
                         } else res.send("error : refund occur error");            
@@ -3000,13 +3015,9 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                     items.push(shipping_fee);
                     console.log("items");
                     console.log(items);
-
                     
                     const refunded = result.filter(element => {
                         return element.refund == 'y';
-                    });
-                    const last_refund = result.filter(element => {
-                        return element.refund == 'n';
                     });
                     console.log("refunded")
                     console.log(refunded)
@@ -3015,13 +3026,6 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                     refunded.forEach(element => {
                         refunded_amount = refunded_amount + element.refund_amount;                    
                     })
-
-                    const last_refund_amount = result[0].total_order_amount - refunded_amount;
-
-
-                    // const amount = ((result[0].price_sell * 100 * result[0].quantity) + (shipping_fee * 100)) * 1.06;
-                    // const item_num = result[0].prodnum;
-
                     const options = {
                         method: 'POST',
                         headers: {accept: 'application/json', 
@@ -3038,8 +3042,6 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                         console.log(response);
                         
                         if (response.status == 'returned') {
-                            
-
                             const returned_amount = response.items.map(element => {
                                 return element.amount / 100;                        
                             });
@@ -3058,8 +3060,9 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                                     // con.end();        
                                 } else {
                                     console.log(result);
-                                    makeFullRefundFlag(ordernum, con);
-                                    (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);                                    
+                                    makeFullRefundFlag(ordernum, con).then(e => {
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);                                    
+                                    });                                    
                                 } 
                             });   
                         } else res.send("error : refund occur error");              
@@ -3083,35 +3086,38 @@ function makeAllItemsRefundFlag(ordernum, con) {
 }
 
 function makeFullRefundFlag(ordernum, con) { 
-    console.log("makeFullRefundFlag(ordernum, con) ")   
-    console.log(ordernum);
-    con.query('SELECT * FROM cart WHERE order_number = ?', [ordernum], (err, result) => {
-        if(err){                        
-            res.send(err);
-            // con.end();        
-        } else {
-            console.log(result);
-            const cart_count = result.length;
-            const refunded = (result.filter(element => {
-                return element.refund == 'y';
-            })).length;
-            console.log("cart_count")
-            console.log(cart_count)
-            console.log("refunded")
-            console.log(refunded)
+    return new Promise((resolve, reject) => {
+        console.log("makeFullRefundFlag(ordernum, con) ")   
+        console.log(ordernum);
+        con.query('SELECT * FROM cart WHERE order_number = ?', [ordernum], (err, result) => {
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log(result);
+                const cart_count = result.length;
+                const refunded = (result.filter(element => {
+                    return element.refund == 'y';
+                })).length;
+                console.log("cart_count")
+                console.log(cart_count)
+                console.log("refunded")
+                console.log(refunded)
 
-            if (cart_count == refunded) {
-                con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [ordernum] ,(err, result) => { 
-                    if(err){                        
-                        res.send(err);
-                        // con.end();        
-                    } else {
-                        console.log(result);
-                    }
-                });
+                if (cart_count == refunded) {
+                    con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [ordernum] ,(err, result) => { 
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log(result);
+                            resolve();
+                        }
+                    });
+                } resolve();
             }
-        }
-    });    
+        });    
+    });
 }
 
 
@@ -3375,6 +3381,8 @@ app.post('/user_checkout_submit', (req,res) => {
         };
         console.log("options");
         console.log(options);
+        console.log("items");
+        console.log(items);
         
         fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
             .then(response => response.json())
@@ -3572,7 +3580,7 @@ app.post('/guest_order_checkout', (req,res) => {
                     const clv_order_id = response.id;
 
                     const cartnum = item_codes.map(element => {
-                        return date.replace(/\s|:|\-/g,"") + "CT" + element + "GUEST";                        
+                        return date.replace(/\s|:|\-/g,"") + "CT" + element + "G";                        
                     })
                     console.log(order_items)
                     console.log(item_codes)        
@@ -3848,7 +3856,7 @@ app.post('/get_admin_check_orders',(req, res) => {
     console.log("/get_admin_check_orders /get_admin_check_orders /get_admin_check_orders");
 
     db.getConnection((con)=>{
-        con.query('select * from orders where shipment = "n"', (err, result) => { 
+        con.query('select * from orders ORDER BY indate DESC', (err, result) => { 
             if (err) {
                 res.send(err);
                 // con.end();

@@ -2,6 +2,7 @@ import PlaceOrder from "./place_order.js";
 import Main from "../index.js";
 import OrderConfirm from "./oder_confirm.js";
 import * as ItemCounter from "./item_counter.js";
+import * as CheckoutOrderForm from "./form_checkout_order.js";
 // import place_order from "./place_order.js";
 
 
@@ -509,7 +510,10 @@ function setAddItemHtml(item_name, order_quantity) {
 document.addEventListener('click', (e) => {  
     let n_cart = Main;
     let user_id = n_cart.getCookie()[1];
+    
     console.log("shop detail.page click click shop detail.page click click shop detail.page click click");
+    console.log("n_cart")
+    console.log(n_cart)
 
     if(e.target && e.target.id == 'buy_now_btn') {
 
@@ -574,7 +578,7 @@ document.addEventListener('click', (e) => {
                 sessionStorage.setItem("cart", JSON.stringify(tmp_guest_order_cart));
                 sessionStorage.setItem("checkoutcart", JSON.stringify(guest_buy_now_checkout_cart));
                 const orderConfirm = new OrderConfirm(user_id, guest_buy_now_checkout_cart);
-                document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
+                document.getElementById("online_main").innerHTML = CheckoutOrderForm.getGuestOrderConfirm();
                 orderConfirm.makeGuestCheckOutForm(guest_buy_now_checkout_cart, buy_now_checkout_cart); 
                 ItemCounter.item_counter('GUEST');
             
@@ -609,7 +613,7 @@ document.addEventListener('click', (e) => {
                     sessionStorage.setItem("usercheckoutcart", JSON.stringify(selected_items_number_list));
 
                     const orderConfirm = new OrderConfirm(user_id, proceed_checkout_selected_order_cart);
-                    document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
+                    document.getElementById("online_main").innerHTML = CheckoutOrderForm.getUserOrderConfirm();
                     orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);       
                     ItemCounter.item_counter(user_id);
                 });        
@@ -850,17 +854,16 @@ document.addEventListener('click', (e) => {
                 console.log(check_out_cart)
 
                 const orderConfirm = new OrderConfirm(user_id, check_out_cart);
-                document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
+                document.getElementById("online_main").innerHTML = CheckoutOrderForm.getGuestOrderConfirm();
                 orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
                 })
         } else {  ///////////////////// user check out proceed
-            let u_cart = [{u_id : user_id}];
             
+            let u_cart = [{u_id : user_id}];            
             let data = [{
                 u_cart 
                 // checked_items_number_list : selected_items_number_list                      
             }];
-
 
             const options = {
                 method: 'POST',
@@ -896,7 +899,7 @@ document.addEventListener('click', (e) => {
                 })
 
                 const orderConfirm = new OrderConfirm(user_id, proceed_checkout_selected_order_cart);
-                document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
+                document.getElementById("online_main").innerHTML = CheckoutOrderForm.getUserOrderConfirm();
                 orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
             })
         }

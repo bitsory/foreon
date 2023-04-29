@@ -12,6 +12,7 @@ export default class {
     guest_item_total_weight = 0;
     user_item_total_weight = 0;
     user_shipping_info = {};
+    
 
     flat_rate = 9.90;
     ground_rate = 0;
@@ -20,10 +21,6 @@ export default class {
 
     shipping_rate_flag = false;
 
-
-    // backBtn = document.getElementById("check_out_items_back_btn");
-    // nextBtn = document.getElementById("check_out_items_next_btn");
-    // images = document.getElementById("check_out_items_container");
 
     setShippingGroundRate(param) {
         this.ground_rate = param;
@@ -115,7 +112,7 @@ export default class {
 
             
             // check_out_items_container _plus_quantity_btn
-            if(e.target && (e.target.className) == `${item_attribute}_plus_quantity_btn`) {
+            if(e.target && (e.target.id) == `${item_attribute}_plus_quantity_btn`) {
                 console.log(`${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn`)
                 let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
                 /////////////// rendering item subtotal /////////////////////////
@@ -133,6 +130,8 @@ export default class {
                 // let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
                 let item_weight = 0;
                 let new_grandtotal = 0;
+
+                
                 
                 const data = {                    
                     prodnum : item_number                    
@@ -154,6 +153,7 @@ export default class {
                 
                 //////user cart add up
                     if (user_id == 'GUEST') {
+                        
                     
                         /////////////guest cart add up
                         console.log(`check_out_cart : ${check_out_cart}`);
@@ -193,6 +193,7 @@ export default class {
                         if (this.shipping_rate_flag == true) {
                             this.getShippingRate('GUEST').then( e => {
                                 const shipping_rate =  this.checkShippingRate();
+                                this.setShippingMethodCoverContents("GUEST");
                                 // this.setTotal('GUEST', guest_new_grandtotal);
                                 document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
                                 document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + guest_new_grandtotal.toFixed(2);
@@ -243,12 +244,15 @@ export default class {
                             this.setTotal(user_id, new_grandtotal);
                             if (this.shipping_rate_flag == true) {
                                 this.getShippingRate(this.user_shipping_info).then( e => {
-                                    const shipping_rate =  this.checkShippingRate();                                
+                                    console.log("if (this.shipping_rate_flag == true) ")
+                                    const shipping_rate =  this.checkShippingRate();    
+                                    this.setShippingMethodCoverContents(user_id);                            
                                     document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
                                     this.rerenderTotal(this.getTotal(user_id), shipping_rate[1]);
                                     this.setReadyCart(result); 
                                 });
                             } else {
+                                console.log("else(this.shipping_rate_flag ")
                                 document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
                                 this.rerenderTotal(this.getTotal(user_id));
                                 this.setReadyCart(result);
@@ -260,7 +264,7 @@ export default class {
                     
             }
         
-            if(e.target && (e.target.className) == `${item_attribute}_minus_quantity_btn`) { // item quantity subtract
+            if(e.target && (e.target.id) == `${item_attribute}_minus_quantity_btn`) { // item quantity subtract
                 console.log("online_place_order_item_minus_quantity_btn");
                 let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
                 let item_number = e.target.parentElement.getAttribute('quantity-box-itemid');
@@ -302,6 +306,7 @@ export default class {
                         // let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
         
                         if (user_id == 'GUEST') {
+                            // this.setShippingMethodCoverContents("GUEST");
                         
                             /////////////guest cart subtract
                             // console.log(`tmp_order_cart : ${check_out_cart}`);
@@ -328,7 +333,9 @@ export default class {
 
                             if (this.shipping_rate_flag == true) {
                                 this.getShippingRate('GUEST').then( e => {
+                                    console.log("if (this.shipping_rate_flag == true) ")
                                     const shipping_rate =  this.checkShippingRate();
+                                    this.setShippingMethodCoverContents("GUEST");
                                     this.setTotal('GUEST', guest_new_grandtotal);                               
                                     document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);                                    
                                     document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + guest_new_grandtotal.toFixed(2);
@@ -336,6 +343,7 @@ export default class {
                                     this.setReadyCart(check_out_cart);                              
                                 });
                             } else {
+                                console.log(" else (this.shipping_rate_flag ) ")
                                 this.setTotal('GUEST', guest_new_grandtotal);                               
                                 document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
                                 document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + guest_new_grandtotal.toFixed(2);
@@ -380,12 +388,15 @@ export default class {
                                 this.setTotal(user_id, new_grandtotal);
                                 if (this.shipping_rate_flag == true) {
                                     this.getShippingRate(this.user_shipping_info).then( e => {
-                                        const shipping_rate =  this.checkShippingRate();                                
+                                        console.log("if (this.shipping_rate_flag == true) ")
+                                        const shipping_rate =  this.checkShippingRate();
+                                        this.setShippingMethodCoverContents(user_id);                                   
                                         document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
                                         this.rerenderTotal(this.getTotal(user_id), shipping_rate[1]);
                                         this.setReadyCart(result); 
                                     });
                                 } else {
+                                    console.log("else (this.shipping_rate_flag) ")
                                     document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
                                     this.rerenderTotal(this.getTotal(user_id));
                                     this.setReadyCart(result);
@@ -398,7 +409,7 @@ export default class {
                 
             }
         
-            if(e.target && (e.target.className) == `${item_attribute}_delete_btn`) { // item delete
+            if(e.target && (e.target.id) == `${item_attribute}_delete_btn`) { // item delete
                 // console.log("online_place_order_item_delete_btn");
                 const tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
                 const item_number = e.target.parentElement.getAttribute('name-box-itemid');
@@ -442,7 +453,8 @@ export default class {
         
                     if (user_id == 'GUEST') {            
                         /////////////item delete in guest cart 
-                        // console.log(`tmp_order_cart : ${tmp_order_cart}`);            
+                        // console.log(`tmp_order_cart : ${tmp_order_cart}`);    
+                                
             
                         let filtered = check_out_cart.filter((element) => element.c_item_no != item_number);
                         item_weight = result[0].weight * item_quantity;
@@ -471,45 +483,32 @@ export default class {
                         // g_total = guest_new_grandtotal;
                         if (this.shipping_rate_flag == true) {
                             this.getShippingRate('GUEST').then( e => {
+                                console.log("if (this.shipping_rate_flag == true) ")
                             document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
                         
                         // const amount = document.querySelector('.payment_amount');
                         // amount.value = parseFloat(guest_new_grandtotal).toFixed(2);
                             const shipping_rate =  this.checkShippingRate();
+                            console.log(shipping_rate)
+                            this.setShippingMethodCoverContents("GUEST");
                             this.rerenderTotal(this.getTotal('GUEST'), shipping_rate[1]);
                             this.setReadyCart(check_out_cart);
                             this.setCheckoutItemscount(check_out_cart.length);
                             document.getElementById('checkout_submit_summary_items_count').innerText = check_out_cart.length;
-                                                    
-                            if (this.pages != 0){
-                                this.positionValue += IMAGE_WIDTH;
-                                images.style.transform = `translateX(${this.positionValue}px)`;
-                                this.pages -= 1;
-                            }
-
-                            if (this.pages == 0 && this.checkout_items -1 == 0) {                                                     
-                                nextBtn.setAttribute('disabled', 'true');                            
-                            }
+                           
                             ItemCounter.item_counter('GUEST');
-                                });
-                            } else {
-                                document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
-                                this.rerenderTotal(this.getTotal('GUEST'));
-                                this.setReadyCart(check_out_cart);
-                                this.setCheckoutItemscount(check_out_cart.length);
-                                document.getElementById('checkout_submit_summary_items_count').innerText = check_out_cart.length;
-                                                        
-                                if (this.pages != 0){
-                                    this.positionValue += IMAGE_WIDTH;
-                                    images.style.transform = `translateX(${this.positionValue}px)`;
-                                    this.pages -= 1;
-                                }
-
-                                if (this.pages == 0 && this.checkout_items -1 == 0) {                                                     
-                                    nextBtn.setAttribute('disabled', 'true');                            
-                                    }
-                                ItemCounter.item_counter('GUEST');
-                            }
+                            });
+                        } else {
+                            console.log("else (this.shipping_rate_flag) ")
+                            document.querySelector(`.${item_attribute}_grand_total`).innerText = '$' + guest_new_grandtotal.toFixed(2);
+                            this.rerenderTotal(this.getTotal('GUEST'));
+                            this.setReadyCart(check_out_cart);
+                            this.setCheckoutItemscount(check_out_cart.length);
+                            document.getElementById('checkout_submit_summary_items_count').innerText = check_out_cart.length;
+                                                    
+                            
+                            ItemCounter.item_counter('GUEST');
+                        }
 
                     } else {
                         ///// item delete in user cart 
@@ -551,41 +550,44 @@ export default class {
 
                             if (this.shipping_rate_flag == true) {
                                 this.getShippingRate(this.user_shipping_info).then( e => {
+                                    console.log("if (this.shipping_rate_flag == true) ")
                                     const shipping_rate =  this.checkShippingRate();
+                                    this.setShippingMethodCoverContents(user_id);   
                                     sessionStorage.setItem("usercheckoutcart", JSON.stringify(selected_number_list));
                                     document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
                                     this.rerenderTotal(this.getTotal(user_id), shipping_rate[1]);  
                                     this.setReadyCart(result);
                                     this.setCheckoutItemscount(result.length);
                                                         
-                                    if (this.pages != 0){
-                                        this.positionValue += IMAGE_WIDTH;
-                                        images.style.transform = `translateX(${this.positionValue}px)`;
-                                        this.pages -= 1;
-                                    }
+                                    // if (this.pages != 0){
+                                    //     this.positionValue += IMAGE_WIDTH;
+                                    //     images.style.transform = `translateX(${this.positionValue}px)`;
+                                    //     this.pages -= 1;
+                                    // }
 
-                                    if (this.pages == 0 && this.checkout_items -1 == 0) {                                                     
-                                        nextBtn.setAttribute('disabled', 'true');                            
-                                        }
+                                    // if (this.pages == 0 && this.checkout_items -1 == 0) {                                                     
+                                    //     nextBtn.setAttribute('disabled', 'true');                            
+                                    //     }
                                     document.getElementById('checkout_submit_summary_items_count').innerText = result.length;
                                     ItemCounter.item_counter(user_id); 
                                 });
                             } else {
+                                console.log("else if (this.shipping_rate_flag ")
                                 sessionStorage.setItem("usercheckoutcart", JSON.stringify(selected_number_list));
                                 document.querySelector(`.checkout_submit_summary_items_value`).innerText = '$$$' + new_grandtotal.toFixed(2);
                                 this.rerenderTotal(this.getTotal(user_id));  
                                 this.setReadyCart(result);
                                 this.setCheckoutItemscount(result.length);
                                                     
-                                if (this.pages != 0){
-                                    this.positionValue += IMAGE_WIDTH;
-                                    images.style.transform = `translateX(${this.positionValue}px)`;
-                                    this.pages -= 1;
-                                }
+                                // if (this.pages != 0){
+                                //     this.positionValue += IMAGE_WIDTH;
+                                //     images.style.transform = `translateX(${this.positionValue}px)`;
+                                //     this.pages -= 1;
+                                // }
 
-                                if (this.pages == 0 && this.checkout_items -1 == 0) {                                                     
-                                    nextBtn.setAttribute('disabled', 'true');                            
-                                    }
+                                // if (this.pages == 0 && this.checkout_items -1 == 0) {                                                     
+                                //     nextBtn.setAttribute('disabled', 'true');                            
+                                //     }
                                 document.getElementById('checkout_submit_summary_items_count').innerText = result.length;
                                 ItemCounter.item_counter(user_id);
                             }        
@@ -763,7 +765,7 @@ export default class {
     setPlusQuantity(prodnum, item_attribute) {
         const plus_quantity_btn = document.createElement('button');
         plus_quantity_btn.setAttribute('id', `${item_attribute}_plus_quantity_btn`);
-        plus_quantity_btn.setAttribute('class', `${item_attribute}_plus_quantity_btn`);
+        plus_quantity_btn.setAttribute('class', `${item_attribute}_plus_quantity_btn checkout_ctl_btn`);
         document.querySelector(`[quantity-box-itemid="${prodnum}"]`).appendChild(plus_quantity_btn);
         plus_quantity_btn.innerText = '➕'; 
     }
@@ -771,7 +773,7 @@ export default class {
     setMinusQuantity(prodnum, item_attribute) {
         const minus_quantity_btn = document.createElement('button');
         minus_quantity_btn.setAttribute('id', `${item_attribute}_minus_quantity_btn`);
-        minus_quantity_btn.setAttribute('class', `${item_attribute}_minus_quantity_btn`);
+        minus_quantity_btn.setAttribute('class', `${item_attribute}_minus_quantity_btn checkout_ctl_btn`);
         document.querySelector(`[quantity-box-itemid="${prodnum}"]`).appendChild(minus_quantity_btn);
         minus_quantity_btn.innerText = '➖';
     }
@@ -779,7 +781,7 @@ export default class {
     setItemDelete(prodnum, item_attribute) {
         const item_deleteb_tn = document.createElement('button');
         item_deleteb_tn.setAttribute('id', `${item_attribute}_delete_btn`);
-        item_deleteb_tn.setAttribute('class', `${item_attribute}_delete_btn`);
+        item_deleteb_tn.setAttribute('class', `${item_attribute}_delete_btn checkout_ctl_btn`);
         document.querySelector(`[name-box-itemid="${prodnum}"]`).appendChild(item_deleteb_tn);
         item_deleteb_tn.innerText = '✖';
     }
@@ -846,84 +848,118 @@ export default class {
 
     getShippingRate(param) {
         return new Promise((resolve, reject) => {
+            if (this.guest_item_total_weight > 0 || this.user_item_total_weight > 0) {
+
+            
             let data = {};    
 
-        if (param == 'GUEST') {
-            data = {
-            recipient : document.getElementById('input_recipient_first_name').value + ' ' +document.getElementById('input_recipient_last_name').value,
-            address : document.getElementById('input_shipping_address_line1').value + ' ' + document.getElementById('input_shipping_address_line2').value,
-            city : document.getElementById('input_shipping_address_city').value,
-            state : document.getElementById('shipping_address_state').value,
-            zip : document.getElementById('input_shipping_address_zip').value,
-            phone : document.getElementById('input_shipping_contact_phone').value,
-            email : document.getElementById('input_shipping_contact_email').value,
-            weight : this.guest_item_total_weight
-            }
-        
-        } else {
-            data = {
-            recipient : param.recipient,
-            address : param.address1 + ' ' + param.address2,
-            city : param.city,
-            state : param.state,        
-            zip : param.zip,
-            phone : param.phone,
-            email : param.email,
-            weight : this.user_item_total_weight
+            if (param == 'GUEST') {
+                data = {
+                recipient : document.getElementById('input_recipient_first_name').value + ' ' +document.getElementById('input_recipient_last_name').value,
+                address : document.getElementById('input_shipping_address_line1').value + ' ' + document.getElementById('input_shipping_address_line2').value,
+                city : document.getElementById('input_shipping_address_city').value,
+                state : document.getElementById('shipping_address_state').value,
+                zip : document.getElementById('input_shipping_address_zip').value,
+                phone : document.getElementById('input_shipping_contact_phone').value,
+                email : document.getElementById('input_shipping_contact_email').value,
+                weight : this.guest_item_total_weight
+                }
+            
+            } else {
+                data = {
+                recipient : param.recipient,
+                address : param.address1 + ' ' + param.address2,
+                city : param.city,
+                state : param.state,        
+                zip : param.zip,
+                phone : param.phone,
+                email : param.email,
+                weight : this.user_item_total_weight
+                }
+                
             }
             
-        }
-        
-            console.log(data);
-            const options = 
-                {   
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'                
-                        },
-                    body: JSON.stringify(data)
-                }     
+                console.log(data);
+                const options = 
+                    {   
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'                
+                            },
+                        body: JSON.stringify(data)
+                    }     
 
-                fetch('/get_shipping_rate', options)
-                .then((res) => res.json())
-                .then(result => {
-                    console.log(result);
-                    let ground = result.RateResponse.RatedShipment.filter(element => {                
-                        return element.Service.Code == '03'})[0].TotalCharges.MonetaryValue;
-                    console.log(ground);
-                    let threedays = result.RateResponse.RatedShipment.filter(element => {                
-                        return element.Service.Code == '12'})[0].TotalCharges.MonetaryValue;
-                        console.log(threedays);
-                    let nextday = result.RateResponse.RatedShipment.filter(element => {                
-                        return element.Service.Code == '13'})[0].TotalCharges.MonetaryValue;
-                        console.log(nextday);
-                    this.setShippingGroundRate(parseFloat(ground));
-                    document.getElementById('shipping_ground_rate_price').innerText = ground;
+                    fetch('/get_shipping_rate', options)
+                    .then((res) => res.json())
+                    .then(result => {
+                        console.log(result);
+                        let ground = result.RateResponse.RatedShipment.filter(element => {                
+                            return element.Service.Code == '03'})[0].TotalCharges.MonetaryValue;
+                        console.log(ground);
+                        let threedays = result.RateResponse.RatedShipment.filter(element => {                
+                            return element.Service.Code == '12'})[0].TotalCharges.MonetaryValue;
+                            console.log(threedays);
+                        let nextday = result.RateResponse.RatedShipment.filter(element => {                
+                            return element.Service.Code == '13'})[0].TotalCharges.MonetaryValue;
+                            console.log(nextday);
+
+                        document.getElementById('shipping_flat_rate_price').innerText = 9.90;
+                        this.setShippingGroundRate(parseFloat(ground));
+                        document.getElementById('shipping_ground_rate_price').innerText = ground;
+                            
+                        this.setShippingThreeDaysRate(parseFloat(threedays));              
+                        document.getElementById('shipping_3days_rate_price').innerText = threedays;
+            
+                        this.setShippingNextDayRate(parseFloat(nextday));
+                        document.getElementById('shipping_nextday_rate_price').innerText = nextday;
+                        resolve();
                         
-                    this.setShippingThreeDaysRate(parseFloat(threedays));              
-                    document.getElementById('shipping_3days_rate_price').innerText = threedays;
+                        // this.setShippingGroundRate(parseFloat(result.RateResponse.RatedShipment[3].TotalCharges.MonetaryValue));
+                        // document.getElementById('shipping_ground_rate_price').innerText = result.RateResponse.RatedShipment[3].TotalCharges.MonetaryValue;
+                        
+                        // this.setShippingThreeDaysRate(parseFloat(result.RateResponse.RatedShipment[5].TotalCharges.MonetaryValue));              
+                        // document.getElementById('shipping_3days_rate_price').innerText = result.RateResponse.RatedShipment[5].TotalCharges.MonetaryValue;
         
-                    this.setShippingNextDayRate(parseFloat(nextday));
-                    document.getElementById('shipping_nextday_rate_price').innerText = nextday;
-                    resolve();
-                    
-                    // this.setShippingGroundRate(parseFloat(result.RateResponse.RatedShipment[3].TotalCharges.MonetaryValue));
-                    // document.getElementById('shipping_ground_rate_price').innerText = result.RateResponse.RatedShipment[3].TotalCharges.MonetaryValue;
-                     
-                    // this.setShippingThreeDaysRate(parseFloat(result.RateResponse.RatedShipment[5].TotalCharges.MonetaryValue));              
-                    // document.getElementById('shipping_3days_rate_price').innerText = result.RateResponse.RatedShipment[5].TotalCharges.MonetaryValue;
-    
-                    // this.setShippingNextDayRate(parseFloat(result.RateResponse.RatedShipment[2].TotalCharges.MonetaryValue));
-                    // document.getElementById('shipping_nextday_rate_price').innerText = result.RateResponse.RatedShipment[2].TotalCharges.MonetaryValue;
-                    
-                })
-            // console.log('resolve');          
-            
-            
+                        // this.setShippingNextDayRate(parseFloat(result.RateResponse.RatedShipment[2].TotalCharges.MonetaryValue));
+                        // document.getElementById('shipping_nextday_rate_price').innerText = result.RateResponse.RatedShipment[2].TotalCharges.MonetaryValue;
+                        
+                    })
+                // console.log('resolve');          
+            } else {
+                document.getElementById('shipping_flat_rate_price').innerText = 0.00;
+                document.getElementById('shipping_ground_rate_price').innerText = 0.00; 
+                document.getElementById('shipping_3days_rate_price').innerText = 0.00;               
+                document.getElementById('shipping_nextday_rate_price').innerText = 0.00;
+                this.flat_rate = 0;
+                this.ground_rate = 0;
+                this.three_days_rate = 0;
+                this.next_day_rate = 0;
+
+                resolve();
+            }
+                
         }); 
+        
         
     }
 
+    setShippingMethodCoverContents(param) {
+        const shipping_rate = this.checkShippingRate();
+        console.log("setShippingMethodCoverContents")
+        console.log(shipping_rate)
+
+        const checkout_shipping_method_container_cover_contents = (param == "GUEST") ? document.getElementById('guest_checkout_shipping_method_container_cover_contents') 
+            : document.getElementById('user_checkout_shipping_method_container_cover_contents');
+        if (shipping_rate[0] == "flat") {
+            checkout_shipping_method_container_cover_contents.innerText = "Standard Flat Rate Shipping  $9.90";
+        } else if (shipping_rate[0] == "ground") {
+            checkout_shipping_method_container_cover_contents.innerText = "UPS Ground Shipping" + ' ' + "$" + shipping_rate[1];
+        } else if (shipping_rate[0] == "3days") {
+            checkout_shipping_method_container_cover_contents.innerText = "UPS 3 Days Shipping" + ' ' + "$" + shipping_rate[1];
+        } else if (shipping_rate[0] == "nextday") {
+            checkout_shipping_method_container_cover_contents.innerText = "UPS Next Day AIR Saver" + ' ' + "$" + shipping_rate[1];
+        }
+    }
 
 
     rerenderShippingRate(shipping_rate) {
@@ -932,9 +968,10 @@ export default class {
     }
 
     rerenderTotal(user_total_amount, shipping_rate) {
-
+        console.log("shipping_rate")
+        console.log(shipping_rate)
         console.log(user_total_amount)
-        const shipping_fee = shipping_rate ? shipping_rate : 9.90;
+        const shipping_fee = shipping_rate == null ? (user_total_amount == 0 ? 0 : 9.90) : shipping_rate;
         console.log(shipping_fee)
         const total_before_tax = user_total_amount + shipping_fee;
         console.log(total_before_tax)

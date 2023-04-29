@@ -1,7 +1,7 @@
 import PlaceOrder from "./place_order.js";
 import Main from "../index.js";
 import ShopDetail from "./shop_detail.js"
-import * as ShopPageForm from "./shop_page_forms.js";
+import * as ShopPageForm from "./form_shop_page.js";
 
 
 export default class {

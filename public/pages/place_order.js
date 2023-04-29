@@ -1,5 +1,6 @@
 import OrderConfirm from "./oder_confirm.js";
 import * as ItemCounter from "./item_counter.js";
+import * as CheckoutOrderForm from "./form_checkout_order.js";
 
 export default class {
 
@@ -221,7 +222,7 @@ export default class {
 
 
                         const orderConfirm = new OrderConfirm(user_id, check_out_cart);
-                        document.getElementById("online_main").innerHTML = orderConfirm.getGuestOrderConfirm();
+                        document.getElementById("online_main").innerHTML = CheckoutOrderForm.getGuestOrderConfirm();
                         orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
                         ItemCounter.item_counter('GUEST');
                         })
@@ -272,7 +273,8 @@ export default class {
                         })
 
                         const orderConfirm = new OrderConfirm(user_id, proceed_checkout_selected_order_cart);
-                        document.getElementById("online_main").innerHTML = orderConfirm.getUserOrderConfirm();
+                        document.getElementById("online_main").innerHTML = CheckoutOrderForm.getUserOrderConfirm();
+                        
                         orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
                         ItemCounter.item_counter(user_id);
 

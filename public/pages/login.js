@@ -1,6 +1,6 @@
 // import cart from "./cart.js";
 import Main from "../index.js"
-import * as PurchaseHistory from "./purchase_history_form.js";
+import * as PurchaseHistory from "./form_purchase_history.js";
 
 
 
@@ -20,7 +20,8 @@ export default class {
 
             console.log("log in.js this.modal.addEventListener( this.modal.addEventListener(")
 
-            if(e.target && e.target.id == 'sign_in_btn') {  
+            if(e.target && e.target.id == 'sign_in_btn') { 
+               
                 document.getElementById('user_id').value ? this.signInSubmit() : 
                 document.getElementById('sign_in_form_extra').innerText = "input your ID";
                 document.user_login_form.sign_in_id.focus();
@@ -72,21 +73,27 @@ export default class {
                 if (!(document.getElementById('sign_up_user_name').value)) {
                     document.getElementById('sign_up_form_extra').textContent = "Please Input your Name...";
                     document.sign_up_form.sign_up_user_name.focus();
-                
-                } else if (!(document.getElementById('sign_up_user_email').value)) {
-                    document.getElementById('sign_up_form_extra').textContent = "Please Input your email address...";
-                    document.sign_up_form.sign_up_user_id.focus();
 
+                } else if (this.verifyEmail(document.getElementById('sign_up_user_email').value) != true)  {
+                    document.getElementById('sign_up_form_extra').textContent = "Please Input your valid email address...";
+                    document.sign_up_form.sign_up_user_email.focus();               
+                
                 } else if (!(document.getElementById('sign_up_user_pw').value)) {
                     document.getElementById('sign_up_form_extra').textContent = "Please Input your password...";
                     document.sign_up_form.sign_up_user_pw.focus();
-                 
+
+                } else if (this.pwdCheck(document.getElementById('sign_up_user_pw').value)!= true) {
+                    document.getElementById('sign_up_form_extra').textContent = "password must at least 6 characters and include at least 1 digit and 1 special character";
+                    document.sign_up_form.sign_up_user_pw.focus();                     
+                    
                 } else if (document.getElementById('sign_up_user_pw').value != document.getElementById('sign_up_user_pw_check').value) {
                     document.getElementById('sign_up_form_extra').textContent = "please make sure to confirm password";
                     document.sign_up_form.sign_up_user_pw_check.focus();
                 
                 } else this.signUpSubmit();        
             }
+
+            
 
             if (e.target && e.target.id == 'track_my_order_check_btn') {
 
@@ -140,6 +147,19 @@ export default class {
         });
     }
 
+    verifyEmail(email) {                   
+        const regExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;     
+        return (email.match(regExp) != null) ? true : false;     
+    };
+
+    pwdCheck(str) {    
+        const REGEX = /^(?=.*[a-zA-Z])((?=.*\d)(?=.*\W)).{6,16}$/;                
+        return REGEX.test(str);   
+       
+    }
+
+
+
 
     modal_script() {
         var script = document.createElement('script');
@@ -180,10 +200,14 @@ export default class {
 
     signInSubmit() {
         this.getPBKey().then(key => {
-
+            
+            const checked_remember = document.getElementById('remember_me_check');
             const uid = document.getElementById('user_id').value;
             const upw = document.getElementById('user_pw').value;
             const current_path = document.location.href;
+            const remember_id = checked_remember.checked == true ? "remember" : false;
+
+            console.log(remember_id);
 
             // const te = {key : test_text}
             const crypt = new JSEncrypt();
@@ -191,7 +215,7 @@ export default class {
         
             const encrypted1 = crypt.encrypt(uid);
             const encrypted2 = crypt.encrypt(upw);
-            const send_data = {aid : encrypted1, bpw : encrypted2, c_path : current_path}
+            const send_data = {aid : encrypted1, bpw : encrypted2, c_path : current_path, checked_remember : remember_id}
 
             
             const data = {
@@ -224,7 +248,6 @@ export default class {
         this.getPBKey().then(key => {
             console.log(key);
 
-            // const sign_up_uid = document.getElementById('sign_up_user_id').value;
             const sign_up_uname = document.getElementById('sign_up_user_name').value;
             const sign_up_uemail = document.getElementById('sign_up_user_email').value;
             const sign_up_upw = document.getElementById('sign_up_user_pw').value;
@@ -321,7 +344,7 @@ export default class {
                     
                     <div id="find_and_remember_container" class="find_and_remember_container">
                         <div id="remember_me_box" class="remember_me_box">  
-                            <input type="checkbox" id="remember_me_check" class="remember_me_check"><label for="remember_me_check">Remember Me</label></input>
+                            <input type="checkbox" id="remember_me_check" class="remember_me_check" value="remember_id"><label for="remember_me_check">Remember Me</label></input>
                         </div>
                         <button type="button" id="find_password" class="find_password btn" title="Find password">Forget Password</button>
                     </div>

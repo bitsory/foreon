@@ -15,17 +15,17 @@ body {
 
 .no_action {pointer-events : none; height:100%; min-height:100%; overflow:hidden !important; touch-action:none;}
 
-.btn, .cate_btn, .add_submit_btn, .cart_handle_btn {
+.btn, .cate_btn, .add_submit_btn, .cart_handle_btn, .checkout_ctl_btn, .cart_modal_ctl_btn, .guest_checkout_edit_btn {
     
     background-color: rgba(0,0,0,0);
 }
 
-.btn:hover, .cate_btn:hover, .cart_handle_btn:hover {
+.btn:hover, .cate_btn:hover, .cart_handle_btn:hover, .cart_modal_ctl_btn:hover, .checkout_ctl_btn:hover, .guest_checkout_edit_btn:hover {
     cursor: pointer;
     transform: scale(1.1);
 }
 
-.btn:active, .cart_handle_btn:active {
+.btn:active, .cart_handle_btn:active, .checkout_ctl_btn:active {
     border: 1px solid #000;
 }
 
@@ -34,7 +34,7 @@ body {
     font-size: medium;
 }
 
-.cate_btn:active, .online_title_label:active {
+.cate_btn:active, .online_title_label:active, .cart_modal_ctl_btn:active {
     border: 1px solid var(--subcolor)
 }
 
@@ -161,7 +161,7 @@ nav {
     display: none;
     
     /* background-color: rgba(0, 0, 0, 0.4); */ 
-     z-index: 4;
+     z-index: 9;
 }
 
 .modal.show {
@@ -213,6 +213,8 @@ nav {
     border: none;
     font-size: 12px;
 }
+
+
 
 /* //////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 /* ///////////////////////////////////////////// login modal window ///////////////////////////////////////////// */
@@ -295,7 +297,11 @@ nav {
     
 }
 
-.sign_in_btn_group:hover, .shop_add_btn:hover, .shop_detail_btn:hover, .check_go_cart_btn:hover{
+.sign_in_btn_group:hover, .shop_add_btn:hover, .shop_detail_btn:hover, 
+.check_go_cart_btn:hover, #guest_checkout_shipping_info_next_btn:hover, 
+#user_continue_to_payment_btn:hover, #continue_to_payment_btn:hover, #continue_to_place_order_btn:hover, 
+#user_checkout_shipping_info_next_btn:hover, #user_checkout_billing_info_next_btn:hover,
+#user_checkout_shipping_info_change_btn:hover, #user_checkout_change_method_btn:hover, .guest_checkout_edit_btn:hover, .user_checkout_edit_btn:hover{
     background-color: var(--maincolor);
     color: white;
     cursor: pointer;
@@ -403,6 +409,9 @@ nav {
 /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 
+
+
+/* //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 
 .user_profile_greet, .user_profile_name, .user_profile_cart, .user_profile_log_out {
@@ -1025,17 +1034,22 @@ nav {
 .online_main_item_link:hover::after {width: 100%; left: 0; right: auto;} */
 
 
-.shop_add_btn{
+.shop_add_btn, #user_continue_to_payment_btn, #continue_to_payment_btn, #guest_checkout_shipping_info_next_btn, #continue_to_place_order_btn, 
+#user_checkout_shipping_info_next_btn, #user_checkout_billing_info_next_btn{
     width: 80%;
     height: 3rem;
-    /* background-color:var(--subcolor); */
-    border-radius: 0.2rem;
+    background-color:var(--subcolor);
+    /* border-radius: 0.2rem; */
     border: 1px solid var(--maincolor);
     font-size: medium;
     font-weight: 500;
     color: black;
 }
 
+#user_continue_to_payment_btn, #continue_to_payment_btn, #guest_checkout_shipping_info_next_btn, #continue_to_place_order_btn, #user_checkout_shipping_info_next_btn, #user_checkout_billing_info_next_btn {
+    width: 100%;
+    margin-top: 1rem;
+}
 
 
 /* /////////////////////////////////////////////// shop detail page ////////////////////////////////////////////////////////////////// */
@@ -1117,6 +1131,10 @@ nav {
     font-size: medium;
     margin: 0.5rem;
 }
+/* 
+#guest_checkout_submit_button {
+    
+} */
 
 
 
@@ -1215,25 +1233,47 @@ nav {
 
 .user_checkout_container {
     display: flex;
-    width: 50rem;
+    width: 35rem;
     margin-right: 3rem;
 }
 
 .user_checkout_info {
-width: 80%;
+    width: 80%;
+}
+
+#user_checkout_billing_info_title_box, #user_checkout_shipping_info_title_box, .user_checkout_cover_title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    border-bottom: 0.5px solid grey;
+}
+
+#user_checkout_shipping_info_change_btn, #user_checkout_change_method_btn, .user_checkout_edit_btn {
+    /* font-weight: 100; */
+    width: auto;
+    height: auto;
+    background-color: rgba(0,0,0,0);
+   
 }
 
 
 .user_checkout_submit_container {
-width: 40%;
+    width: 40%;
 }
 
-.user_checkout_billing_info, .user_checkout_shipping_info {
+.user_checkout_billing_info, .user_checkout_shipping_info, .user_shipping_method_container, .user_checkout_cover {
     width: 90%;
     text-align: left;
     border: 0.5px solid lightgray;
-    margin: 0.5rem;
+    margin: 1.5rem;
     padding: 2rem;
+}
+
+
+
+#user_checkout_billing_info, #user_checkout_shipping_method_container {
+    display: none;
 }
 
 .guest_checkout_submit_container {
@@ -1282,8 +1322,59 @@ width: 40%;
 
 
 
+.check_out_item_pic_container {
+    padding: 1rem;
+}
+
+.check_out_item_pic {
+    width: 7rem;
+}
+
+.check_out_items_container {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.check_out_item_container {
+    display: flex;
+    margin-bottom: 1.5rem;
+}
+
+.check_out_item_box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 0.5px solid lightgray;
+}
+
+.check_out_item_content {
+    width: 18rem;
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+}
+
+.quantity_control_box, .item_name_box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#check_out_item_name_box {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
 
 
+
+/* ///////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+/*
 .check_out_item_pic {
     width: 8rem;
 }
@@ -1300,16 +1391,20 @@ width: 40%;
     margin: 0 auto;
 }
 
-.check_out_items_slider{ /**이만큼의 크기로 보이겠다는 의미**/
-    width:400px; height:333px;/**사진보다 크면 다음 사진까지 표시되어 img와 slide크기를 맞춘다.**/
-    overflow: hidden;/**이미지는 내장이라 overflow:hidden을 사용해 넘친 사진들을 안보이게 한다.**/
+.check_out_items_slider{ 
+    /*이만큼의 크기로 보이겠다는 의미**
+    width:400px; height:333px;
+    /**사진보다 크면 다음 사진까지 표시되어 img와 slide크기를 맞춘다.**
+    overflow: hidden; 
+    /**이미지는 내장이라 overflow:hidden을 사용해 넘친 사진들을 안보이게 한다.**
 }
+
 .check_out_items_container{
-    display: inline-flex; /**좌우 슬라이드를 위해 flex로 사진을 가로정렬한다.**/
-    height:333px; /**slide와 images의 높이가 다르면 부자연스럽게 표시돼 slide의 높이에 맞게 높이를 바꾼다.**/
+    display: inline-flex; /**좌우 슬라이드를 위해 flex로 사진을 가로정렬한다.**
+    height:333px; /**slide와 images의 높이가 다르면 부자연스럽게 표시돼 slide의 높이에 맞게 높이를 바꾼다.**
     transition: transform 0.5s;
 /**어떤 속성에 대해 애니메이션 효과를 주는 속성이다. 
-tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간)을 준다.**/
+tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간)을 준다.**
 }
 .check_out_item_container{
     width: 400px;
@@ -1351,7 +1446,7 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     justify-content: space-between;
 }
 
-/**버튼위치**/
+/**버튼위치**
 .back{
     position:relative;
     bottom: 170px; right: 200px;
@@ -1361,17 +1456,159 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     bottom: 170px; left: 200px;
 }
 
-/**버튼디자인**/
+/**버튼디자인**
 .slider_btn{
     width: 30px; height: 30px;
     color: white;
     background: var(--maincolor);
 }
-.slider_btn:active{/**버튼을 클릭하는 동안 색을 바꾼다.**/
+.slider_btn:active{/**버튼을 클릭하는 동안 색을 바꾼다.**
     background: var(--subcolor);
 }
-.slider_btn:disabled, #guest_checkout_submit_button:disabled, #user_checkout_submit_button:disabled{/**버튼 속성이 disabled되면 색을 바꾼다.**/
+.slider_btn:disabled, #guest_checkout_submit_button:disabled, #user_checkout_submit_button:disabled{/**버튼 속성이 disabled되면 색을 바꾼다.**
     background: #cbcaca;
+}
+
+/* ///////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+
+
+#cart_modal_container {
+    display: none;
+    width: 28rem;
+    height: 12rem;
+    background-color: var(--maincolor);
+    position: absolute;
+    right: -100px;
+    top: 2.5rem;
+    z-index: 5;
+}
+
+
+.cart_modal_item_pic {
+    width: 5rem;
+}
+
+#user_checkout_submit_button, #guest_checkout_submit_button {
+    width: 20rem;
+    font-size: large;
+    font-weight: 500;
+}
+
+
+#cart_modal_items_slider_box {
+    width:400px;
+    height: 140px;
+    margin: 0 auto;
+}
+
+.cart_modal_items_slider{ /**이만큼의 크기로 보이겠다는 의미**/
+    width:400px; height:140px;/**사진보다 크면 다음 사진까지 표시되어 img와 slide크기를 맞춘다.**/
+    overflow: hidden;/**이미지는 내장이라 overflow:hidden을 사용해 넘친 사진들을 안보이게 한다.**/
+}
+.cart_modal_items_container{
+    display: inline-flex; /**좌우 슬라이드를 위해 flex로 사진을 가로정렬한다.**/
+    height:140px; /**slide와 images의 높이가 다르면 부자연스럽게 표시돼 slide의 높이에 맞게 높이를 바꾼다.**/
+    transition: transform 0.5s;
+/**어떤 속성에 대해 애니메이션 효과를 주는 속성이다. 
+tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간)을 준다.**/
+}
+.cart_modal_item_container{
+    width: 400px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart_modal_item_box {
+    width: 350px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2rem;
+}
+
+.cart_modal_items_container_pic {
+    width: 6rem;
+}
+
+.cart_modal_item_content {
+    width: 13rem;
+    /* margin-left: 1rem; */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 1rem;
+    color: var(--subcolor);
+}
+
+
+.cart_modal_quantity_control_box, .cart_modal_item_name_box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/**버튼위치**/
+.cart_modal_slider_back{
+    position: relative;
+    bottom: 90px;
+    right: 10px;
+}
+.cart_modal_slider_next{
+    position: relative;
+    bottom: 90px;
+    left: 340px;
+}
+
+/**버튼디자인**/
+.modal_slider_btn{
+    width: 35px;
+    height: 35px;
+    color: var(--maincolor);
+    background: var(--subcolor);
+}
+.modal_slider_btn:active{/**버튼을 클릭하는 동안 색을 바꾼다.**/
+    background: var(--subcolor);
+}
+.modal_slider_btn:disabled, #guest_checkout_submit_button:disabled, #user_checkout_submit_button:disabled{/**버튼 속성이 disabled되면 색을 바꾼다.**/
+    background: #cbcaca;
+}
+
+#go_cart_page_btn_container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#go_cart_page_btn {
+    width: 20rem;
+    height: 2.5rem;
+    font-size: larger;
+    font-weight: 500;
+    background-color: var(--maincolor);
+    color: #FFFFFF;
+    border: 0.5px solid var(--subcolor);
+}
+
+#go_cart_page_btn:hover, #cart_modal_items_back_btn:hover ,#cart_modal_items_next_btn:hover {
+    background-color: var(--subcolor);
+    color: var(--maincolor);
+}
+
+#cart_modal_items_back_btn ,#cart_modal_items_next_btn {
+    font-weight: 500;
+    background-color: var(--maincolor);
+    color: #FFFFFF;
+    border: 0.5px solid var(--subcolor);
+}
+
+#cart_modal_items_back_btn:disabled ,#cart_modal_items_next_btn:disabled {
+    background-color: gray;
+    color: black
 }
 
 
@@ -1381,11 +1618,73 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
 /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 /* ///////////////////////////////////////////////////////// guest checkout page
                                                             payment frame */
-
 #guest_checkout_page {
     margin-top: 2rem;
 }
 
+
+
+#guest_checkout_billing_info_form {
+    display: none;
+}
+
+#guest_shipping_method_container, #guest_checkout_shipping_infomation_container_cover {
+    border: 0.5px solid gray;
+    margin: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    width: 80%;
+    display: none;
+    text-align: left;
+    padding: 1rem;
+    
+}
+
+#shipping_method_title, #user_checkout_shipping_info_title, #user_checkout_billing_info_title, .user_checkout_cover_title {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: left;
+   
+}
+
+/* #shipping_method_page, #user_checkout_shipping_info_detail, #user_checkout_billing_info_detail {
+    padding: 1rem;
+} */
+
+.shipping_method_box {
+    margin: 1rem;
+    font-size: 16px;
+    border-bottom: 0.5px solid darkgray;
+}
+
+#guest_checkout_shipping_info_next_box {
+    width: 100%;
+}
+
+#guest_checkout_shipping_infomation_container_cover_contents, #guest_checkout_shipping_method_container_cover_contents, #guest_checkout_billing_info_form_cover_contents {
+    font-size: 1rem;
+    border-top: 0.5px solid lightgrey;
+    padding: 1rem 0rem 0rem 1rem;
+    text-align: left;
+}
+
+
+
+
+#guest_checkout_shipping_infomation_container_cover, #guest_checkout_billing_info_form_cover, #guest_checkout_shipping_method_container_cover {
+    font-size: 2rem;
+    font-weight: 600;
+    height: 3rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.guest_checkout_container_cover_title {
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: space-around;
+}
 
 
 
@@ -1406,7 +1705,7 @@ padding-right: 1px; */
     width: 30rem;   
 }
   
-  .guest_checkout_form_container * {
+  .guest_checkout_form_container  {
    
     font-size: 14px;
   }
@@ -1585,9 +1884,8 @@ padding-right: 1px; */
     font-size: 16px;
   }
 
-#shipping_method_container {
-    display: none;
-}
+
+
 
 .input_shipping_checkbox {
     transform: scale(1.1);
@@ -1608,7 +1906,7 @@ padding-right: 1px; */
     width: 600px;
   }
 
-  .navbar_icons:hover, .login_btn :hover {
+  #go_cart_box:hover, .login_btn :hover, #item_count :hover {
     cursor: pointer;
     transform: scale(1.1);
   }
@@ -1971,13 +2269,19 @@ ul.tabs li.current{
     align-items: center;
 }
 
-.billing_info, .shipping_info {
-    border: 0.5px solid gray;
+.billing_info, .shipping_info, #guest_checkout_shipping_method_container_cover, #guest_checkout_billing_info_form_cover {
+    border: 0.5px solid lightgray;
     margin: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 80%;
+    padding: 1rem;
+    
+}
+
+.guest_checkout_edit_btn {
+    display: none;
 }
 
 .change_profile_billing_info_form, .change_profile_shipping_info_form {

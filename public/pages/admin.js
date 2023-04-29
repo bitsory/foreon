@@ -12,7 +12,7 @@ export default class {
             <div id="admin_container" class="admin_container"></div>
         
             <div id="admin_button_box" class="admin_button_box">
-                <button id="check_orders" class="check_orders">check_orders</button>
+                <button id="admin_check_orders" class="admin_check_orders">check_orders</button>
             </div>
         </div>
         
@@ -21,13 +21,25 @@ export default class {
 
 }
 
-window.onload = function () {
+const main_section = document.getElementById('main');
 
-    var el = document.getElementById("check_orders");
+// window.onload = function () {
 
-    el.onclick = hello;
+//     var el = document.getElementById("admin_check_orders");
 
-}
+//     el.onclick = hello;
+
+// }
+
+main_section.addEventListener('click',function(e){ 
+
+    console.log("admin js click ")    
+        
+    if(e.target && e.target.id == 'admin_check_orders') {
+        e.preventDefault();
+        hello();
+    }
+});
 
  
 
@@ -92,6 +104,7 @@ function setAdminCheckOrdersTableDetail(response) {
         newText3.setAttribute('value', `${element.order_number}`);
         newCell3.appendChild(newText3);
         newText3.innerText = 'shipping check';
+        if (element.shipment == 'y') {newText3.setAttribute('disabled', 'true'); }
        
         newText3.onclick = shippingCheck;
     })
