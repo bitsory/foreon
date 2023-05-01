@@ -19,7 +19,7 @@ export default class {
     three_days_rate = 0;
     next_day_rate = 0;
 
-    shipping_rate_flag = false;
+    shipping_rate_flag = true;
 
 
     setShippingGroundRate(param) {

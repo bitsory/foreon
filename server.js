@@ -2303,7 +2303,14 @@ app.post('/edit_profile_shipping', (req,res) => {
 
 });
 
+app.post('/add_profile_shipping_test', (req,res) => {
+    console.log(`req contact: ${req}`);
+    console.log(req.body);
+    const test = {test : req.body}
 
+    res.send(test)
+
+});
 
 
 app.post('/add_profile_shipping', (req,res) => {
@@ -3173,7 +3180,7 @@ app.post('/track_my_order', (req,res) => {
             if(err){                        
                 res.send(err);                       
             } else {
-                console.log(result);  
+                // console.log(result);  
                 if (result.length == 0) {
                     res.send({"result" : "nothing"});
                 } else {
@@ -3266,7 +3273,7 @@ app.post('/user_checkout_submit', (req,res) => {
                         billing_phone = result[0].phone;
                         billing_address = {
                             address1 : result[0].address1,
-                            address2 : result[0].address2,
+                            address2 : (result[0].address2) ? result[0].address2 : '' ,
                             city : result[0].city,
                             state : result[0].state,
                             zip : result[0].address_zip                           
@@ -3418,10 +3425,21 @@ app.post('/user_checkout_submit', (req,res) => {
         
                             const order_items_count = order_items.length;
 
+                            let paid_item = [];
+                            cart.forEach(element => {
+                                for(let i = 0 ; i < response.items.length ; i++) {
+                                    element.item_code == response.items[i].inventory_id ? paid_item.push(element) : false;
+                                }
+                            });
+
+                            console.log("paid_item");
+                            console.log(paid_item);
+
                             const confirm_info = {
                             status : "complete",
                             name : req.session.loginData.name,
                             order_number : order_number,
+                            paid_item : paid_item,
                             email : default_shipping_info.email,
                             billing_email : billing_email,
                             shipping_address : default_shipping_info.address1 + ' ' + default_shipping_info.address2 + ', ' + default_shipping_info.city + ', ' + default_shipping_info.state + ' ' + default_shipping_info.zip,
@@ -3431,9 +3449,10 @@ app.post('/user_checkout_submit', (req,res) => {
                             ending4 : response.source.last4,
                             billing_address : billing_address.address1 + ' ' + billing_address.address2 + ', ' + billing_address.city + ', ' + billing_address.state + ' ' + billing_address.zip,
                             cardholder : cardholder,
-                            subtotal : response.amount - response.tax_amount, 
-                            tax : response.tax_amount,
-                            grandtotal : response.amount
+                            subtotal : (response.amount - response.tax_amount) / 100 - shipping_fee.amount / 100, 
+                            shipping_fee : shipping_fee.amount / 100, 
+                            tax : response.tax_amount / 100,
+                            grandtotal : response.amount / 100
                             };
                             console.log(confirm_info);
                             setOrders(response, confirm_info, default_shipping_info, billing_email, billing_phone, billing_address.zip, order_items_count);    
@@ -3629,11 +3648,18 @@ app.post('/guest_order_checkout', (req,res) => {
 
                                 let paid_items_numbers = result_items.map(element => {                                                             
                                     return element.prodnum;
-                                })            
+                                });    
+                                
+                                const paid_items = result_items.map(element => {                                                             
+                                    return {
+                                        item_num : element.prodnum,
+                                        item_image : element.image};
+                                });
 
                                 const confirm_info = {
                                     status : "complete",
                                     paid_items_number : paid_items_numbers,
+                                    paid_item : result_items,
                                     name : recipient,
                                     order_number : order_num,
                                     email : req.body.order_contact_email,
@@ -3645,9 +3671,10 @@ app.post('/guest_order_checkout', (req,res) => {
                                     ending4 : response.source.last4,
                                     billing_address : billing_address.address1 + ' ' + billing_address.address2 + ', ' + billing_address.city + ', ' + billing_address.state + ' ' + billing_address.zip,
                                     cardholder : cardholder,
-                                    subtotal : response.amount - response.tax_amount, 
-                                    tax : response.tax_amount,
-                                    grandtotal : response.amount
+                                    subtotal : (response.amount - response.tax_amount) / 100 - shipping_fee.amount / 100, 
+                                    shipping_fee : shipping_fee.amount / 100, 
+                                    tax : response.tax_amount / 100,
+                                    grandtotal : response.amount / 100
                                 };
 
                                 console.log(confirm_info)                    

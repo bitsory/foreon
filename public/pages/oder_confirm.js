@@ -162,15 +162,22 @@ export default class {
                 // exp.cloverTokenHandler(token);
 
             }
+            
+            
 
             if (e.target && e.target.id == 'user_checkout_shipping_info_change_btn') {
+                console.log("(e.target && e.target.id == 'user_checkout_shipping_info_change_btn' && (document.getElementById('user_checkout_shipping_method_container_change_btn').style.display == 'none')) {")
                 
+                if (document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off") {
+                    document.getElementById('user_continue_to_payment_btn').style.display = "none";
+                }
                 document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
                 document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
-                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
-                document.getElementById('user_checkout_shipping_method_container').style.display = "none";
-                document.getElementById('user_checkout_billing_info_cover').style.display = "block";
-                document.getElementById('user_checkout_billing_info').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                // document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+                
                 document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
                 
 
@@ -180,36 +187,13 @@ export default class {
                     <div id="shipping_info_container" class="shipping_info_container">
                         <div id="shipping_info_box" class="shipping_info_box"></div> 
                     </div>
-                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container">
+                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container info_add_btn_container">
                         <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
                     </div>
                 </div>
                 
                 `;
-                
-                // document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();
-               
-                // let tab_links = document.querySelectorAll('li.tab-link');
-                // let tab_contents = document.querySelectorAll('div.tab-content');
-
-                // for (const element of tab_links) {
-                //     element.classList.remove('current');                
-                // }
-                // for (const element of tab_contents) {             
-                //     element.classList.remove('current');
-                // }
-           
-                // console.log(document.querySelector(".tab-link").getAttribute('data-tab'));
-                // document.getElementById("tab-3").classList.add('current');
-            
-
-              
-            
-                // const shipping_info_box = document.querySelector('.shipping_info_box');
-                // while (shipping_info_box.hasChildNodes()) {	
-                //     shipping_info_box.removeChild(shipping_info_box.firstChild);
-                // }
-    
+                    
               
                 document.querySelector('.shipping_info_add_btn_container').style.display = "block";
                 fetch('/get_user_shipping_info') // get shipping info from DB
@@ -221,31 +205,41 @@ export default class {
 
             }           
 
-            if (e.target && e.target.id == 'user_checkout_change_method_btn') {
-                document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();
-                // let tab_id = document.querySelector("tab-link").getAttribute('data-tab');
-                // let tab_id = "tab-3";
-                let tab_links = document.querySelectorAll('li.tab-link');
-                let tab_contents = document.querySelectorAll('div.tab-content');
+            if (e.target && e.target.id == 'user_checkout_change_payment_method_btn' || e.target && e.target.id == 'user_checkout_billing_info_container_change_btn') {
+                console.log("user_checkout_billing_info_container_change_btn")
 
-                for (const element of tab_links) {
-                    element.classList.remove('current');                
+                document.getElementById('user_checkout_billing_info_next_btn').setAttribute('value', 'on');
+                document.getElementById('user_checkout_billing_info_select_btn').setAttribute('value', 'on');
+
+                document.getElementById('user_checkout_billing_info_select_btn').style.display = "block";
+                document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
+                
+                
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container').style.display = "none";
+                document.getElementById('user_checkout_billing_info').style.display = "block";
+                document.getElementById('user_checkout_billing_info_cover').style.display = "none";
+                
+                
+                document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+                // document.getElementById('user_checkout_billing_info_contents').removeChild();
+                const user_checkout_billing_info_contents = document.getElementById('user_checkout_billing_info_contents');
+                while (user_checkout_billing_info_contents.hasChildNodes()) {	
+                    user_checkout_billing_info_contents.removeChild(user_checkout_billing_info_contents.firstChild);
                 }
-                for (const element of tab_contents) {             
-                    element.classList.remove('current');
-                }                
-                console.log(document.querySelector(".tab-link").getAttribute('data-tab'));
-                document.getElementById("tab-2").classList.add('current');
-                // document.querySelector(".tab-3").classList.add('current');
+                document.getElementById('user_checkout_billing_info_contents').innerHTML =
+                `
+                <div id="change_profile_billing_info" class="change_profile_billing_info">
+                    <div id="billing_info_container" class="billing_info_container">
+                        <div id="billing_info_box" class="billing_info_box"></div>         
+                    </div>
+                    <div id="billing_info_add_btn_container" class="billing_info_add_btn_container info_add_btn_container" >
+                        <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
+                    </div>
+                </div>
+                `;
                 
 
-                history.pushState(null, null, `/account/billing-infomation`);
-                const billing_info_box = document.querySelector('.billing_info_box');
-                while (billing_info_box.hasChildNodes()) {	
-                    billing_info_box.removeChild(billing_info_box.firstChild);
-                }
-    
-                // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
                 document.querySelector('.billing_info_add_btn_container').style.display = "block";
                 fetch('/get_user_billing_info') // get billiing info from DB
                 .then((res) => res.json())
@@ -260,12 +254,102 @@ export default class {
 
             }           
 
-            if (e.target && e.target.id == 'user_checkout_shipping_info_next_btn') {
+            if (e.target && e.target.id == 'user_checkout_shipping_method_container_change_btn') {
+                console.log("user_checkout_shipping_method_container_change_btn")
+                document.getElementById('user_select_this_shipping_method_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "none";
+                document.getElementById('user_continue_to_payment_btn').style.display = "none";
                 
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_detail_box_cover').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                
+                
+                document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+
+
+
+            }
+            
+
+            // if (e.target && e.target.id == 'user_checkout_shipping_info_select_btn') { 
+            //     document.getElementById('user_checkout_submit_button').disabled = false;
+            //     document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+            //     document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
+            //     document.getElementById('user_checkout_shipping_method_container').style.display = "none";
+                
+            //     document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+            //     document.getElementById('user_checkout_billing_info').style.display = "none";
+            //     this.getUserDefaultShippingInfomation(user_id).then(data => {
+            //         // console.log(data)
+            //         // const shipping_info = this.getUserDefaultShippingInfo();
+            //         // console.log(shipping_info);
+            //         document.getElementById('user_checkout_shipping_info_detail_box_cover').innerText = data.recipient + '\n' + data.address1 + '\n' + data.city + ', ' + data.state + ' ' + data.zip;
+                
+            //         this.getShippingRate(this.check_out_box.user_shipping_info);
+            //         this.check_out_box.shipping_rate_flag = true;
+            //     });
+            // }
+
+            
+            if (e.target && e.target.id == 'user_checkout_billing_info_select_btn') { 
+                // document.getElementById('user_checkout_submit_button').disabled = false;
+                document.getElementById('user_checkout_billing_info_next_btn').setAttribute('value', 'off');
+                document.getElementById('user_checkout_billing_info_select_btn').setAttribute('value', 'off');
+                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container').style.display = "none";
+                
+                document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+                document.getElementById('user_checkout_billing_info').style.display = "none";
+                document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";
+                
+
+                const billing_info = this.getUserDefaultBillingInfo();
+                console.log(billing_info);
+
+                document.getElementById('user_checkout_billing_info_container_cover_contents').innerText = 
+                "**********" + billing_info.last4 + ' ' + billing_info.cardtype + ' ' + billing_info.exp.slice(0,2) + '/' + billing_info.exp.slice(-2);
+                document.getElementById("user_checkout_billing_info_container_cover_context").innerHTML = setPromotionBox();
+                document.getElementById('user_checkout_submit_button').disabled = false;
+                document.getElementById('user_checkout_submit_button').focus();
+
+            }
+
+            if (e.target && e.target.id == 'user_select_this_shipping_method_btn') { 
+                if (document.getElementById('user_checkout_billing_info_next_btn').value == 'off' && document.getElementById('user_checkout_billing_info_select_btn').value == 'off') {
+                    document.getElementById('user_checkout_submit_button').disabled = false;
+                }
+                
+                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container').style.display = "none";
+                document.getElementById('user_select_this_shipping_method_btn').style.display = "none";
+                
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+                this.check_out_box.setShippingMethodCoverContents(user_id);
+                this.getShippingRate(this.check_out_box.user_shipping_info);
+                const shipping_rate = this.check_out_box.checkShippingRate();
+                
+                this.check_out_box.rerenderTotal(this.check_out_box.getTotal(user_id), shipping_rate[1]);
+
+            }
+            
+
+
+            if (e.target && e.target.id == 'user_checkout_shipping_info_next_btn') {
+
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
                 document.getElementById('user_checkout_shipping_method_container').style.display = "block";
                 document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
                 document.getElementById('user_checkout_shipping_info_next_btn').style.display = "none";
-                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                
+                (document.getElementById('user_checkout_shipping_method_container_change_btn').value == 'on') ?
+                document.getElementById('user_continue_to_payment_btn').style.display = "block" :
+                document.getElementById('user_select_this_shipping_method_btn').style.display = "block";
+                
                 this.getUserDefaultShippingInfomation(user_id).then(data => {
                     // console.log(data)
                     // const shipping_info = this.getUserDefaultShippingInfo();
@@ -278,32 +362,51 @@ export default class {
                 
             }
 
+            
+
             if(e.target && e.target.id == 'user_continue_to_payment_btn') {
+                
+                document.getElementById('user_checkout_shipping_method_container_change_btn').setAttribute('value', 'off');
                 document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
                 document.getElementById('user_checkout_shipping_method_container').style.display = "none";
                 document.getElementById('user_checkout_billing_info').style.display = "block";
                 document.getElementById('user_checkout_billing_info_cover').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block";
+
+                document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
+                document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";                
+                
                 this.check_out_box.setShippingMethodCoverContents(user_id);
+                const shipping_rate = this.check_out_box.checkShippingRate();
+                
+                this.check_out_box.rerenderTotal(this.check_out_box.getTotal(user_id), shipping_rate[1]);
 
 
-            }
-            
+
+            }            
 
             if(e.target && e.target.id == 'user_checkout_billing_info_next_btn') {
 
+                document.getElementById('user_checkout_billing_info_next_btn').setAttribute('value', 'off');
+                document.getElementById('user_checkout_billing_info_select_btn').setAttribute('value', 'off');
                 document.getElementById('user_checkout_billing_info').style.display = "none";
                 document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+                document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";
+                // const user_checkout_billing_info_cover = document.getElementById("user_checkout_billing_info_cover");
+                // user_checkout_billing_info_cover.appendChild(user_checkout_billing_info_context);
+                
 
                 const billing_info = this.getUserDefaultBillingInfo();
                 console.log(billing_info);
 
                 document.getElementById('user_checkout_billing_info_container_cover_contents').innerText = 
                 "**********" + billing_info.last4 + ' ' + billing_info.cardtype + ' ' + billing_info.exp.slice(0,2) + '/' + billing_info.exp.slice(-2);
-
+                document.getElementById("user_checkout_billing_info_container_cover_context").innerHTML = setPromotionBox();
                 document.getElementById('user_checkout_submit_button').disabled = false;
                 document.getElementById('user_checkout_submit_button').focus();
 
             }
+
 
             if(e.target && e.target.id == 'guest_checkout_shipping_info_next_btn') {
                 
@@ -465,7 +568,7 @@ export default class {
                 const cardtype = result[0].type;
                 const last4 = result[0].last4;
 
-                setUserCheckoutBillingInfo(this.user_default_billing_info.cardholder, this.user_default_billing_info.cardtype, this.user_default_billing_info.last4);
+                setUserCheckoutBillingInfo(this.user_default_billing_info.cardholder, this.user_default_billing_info.cardtype, this.user_default_billing_info.last4, this.user_default_billing_info.exp);
             } else {
                 document.querySelector('.user_checkout_billing_info').innerHTML = `
                 <div class="user_checkout_billing_info_title">Payment Infomation</div>
@@ -499,6 +602,7 @@ export default class {
                 setUserCheckoutShippingInfo(this.user_default_shipping_info);
                 
                 this.check_out_box.setUserShippingInfo(this.user_default_shipping_info);
+                this.getShippingRate(this.check_out_box.user_shipping_info);
 
             } else {
                 document.querySelector('.user_checkout_shipping_info').innerHTML = `
@@ -1024,17 +1128,17 @@ function setOrderConfirmationPage(response) {
     history.pushState(null, null, `/order-confirmation`);
 }
 
-function setUserCheckoutBillingInfo(cardholder, type, last4) {
+function setUserCheckoutBillingInfo(cardholder, type, last4, exp) {
     const user_checkout_billing_info_detail = document.createElement('div');
     user_checkout_billing_info_detail.setAttribute('id', `user_checkout_billing_info_detail`);
     user_checkout_billing_info_detail.setAttribute('class', `user_checkout_billing_info_detail`);
     document.querySelector('.user_checkout_billing_info').appendChild(user_checkout_billing_info_detail);
 
-    setUserCheckoutBillingInfoCard(cardholder, type, last4);    
+    setUserCheckoutBillingInfoCard(cardholder, type, last4, exp);    
 
 }
 
-function setUserCheckoutBillingInfoCard(cardholder, type, last4) {
+function setUserCheckoutBillingInfoCard(cardholder, type, last4, exp) {
     const user_checkout_billing_info_detail = document.getElementById('user_checkout_billing_info_detail');
     
     const user_checkout_billing_info_title_box = document.createElement('div');
@@ -1044,6 +1148,10 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4) {
     const user_checkout_billing_info_title = document.createElement('div');
     user_checkout_billing_info_title.setAttribute('id', `user_checkout_billing_info_title`);
     user_checkout_billing_info_title.setAttribute('class', `user_checkout_billing_info_title user_checkout_info_title`);
+
+    const user_checkout_billing_info_contents = document.createElement('div');
+    user_checkout_billing_info_contents.setAttribute('id', `user_checkout_billing_info_contents`);
+    user_checkout_billing_info_contents.setAttribute('class', `user_checkout_billing_info_contents`);
 
     const user_checkout_billing_info_cardholder = document.createElement('div');
     user_checkout_billing_info_cardholder.setAttribute('id', `user_checkout_billing_info_cardholder`);
@@ -1065,37 +1173,55 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4) {
     user_checkout_billing_info_cardlast4.setAttribute('id', `user_checkout_billing_info_cardlast4`);
     user_checkout_billing_info_cardlast4.setAttribute('class', `user_checkout_billing_info_cardlast4 user_checkout_card`);
     
+    const user_checkout_billing_info_exp = document.createElement('div');
+    user_checkout_billing_info_exp.setAttribute('id', `user_checkout_billing_info_exp`);
+    user_checkout_billing_info_exp.setAttribute('class', `user_checkout_billing_info_exp user_checkout_card`);
+
     const user_checkout_billing_info_context = document.createElement('div');
     user_checkout_billing_info_context.setAttribute('id', `user_checkout_billing_info_context`);
     user_checkout_billing_info_context.setAttribute('class', `user_checkout_billing_info_context`);
 
-    const user_checkout_change_method_btn = document.createElement('button');
-    user_checkout_change_method_btn.setAttribute('id', `user_checkout_change_method_btn`);
-    user_checkout_change_method_btn.setAttribute('class', `user_checkout_change_method_btn`);
+    const user_checkout_change_payment_method_btn = document.createElement('button');
+    user_checkout_change_payment_method_btn.setAttribute('id', `user_checkout_change_payment_method_btn`);
+    user_checkout_change_payment_method_btn.setAttribute('class', `user_checkout_change_payment_method_btn user_checkout_edit_btn`);
 
     const user_checkout_billing_info_next_btn = document.createElement('Button');
     user_checkout_billing_info_next_btn.setAttribute('id', `user_checkout_billing_info_next_btn`);
-    user_checkout_billing_info_next_btn.setAttribute('class', `user_checkout_billing_info_next_btn`);    
+    user_checkout_billing_info_next_btn.setAttribute('class', `user_checkout_billing_info_next_btn`); 
+    user_checkout_billing_info_next_btn.setAttribute('value', `on`); 
+    
+    const user_checkout_billing_info_select_btn = document.createElement('Button');
+    user_checkout_billing_info_select_btn.setAttribute('id', `user_checkout_billing_info_select_btn`);
+    user_checkout_billing_info_select_btn.setAttribute('class', `user_checkout_billing_info_select_btn user_checkout_select_option_btn`);
+    user_checkout_billing_info_select_btn.setAttribute('value', `on`);
 
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_title_box);
     user_checkout_billing_info_title_box.appendChild(user_checkout_billing_info_title);
-    user_checkout_billing_info_title_box.appendChild(user_checkout_change_method_btn);
-    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_cardholder);
-    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_card);
+    user_checkout_billing_info_title_box.appendChild(user_checkout_change_payment_method_btn);
+    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_contents);
+
+    user_checkout_billing_info_contents.appendChild(user_checkout_billing_info_cardholder);
+    user_checkout_billing_info_contents.appendChild(user_checkout_billing_info_card);
     user_checkout_billing_info_card.appendChild(user_checkout_billing_info_cardtype);
     user_checkout_billing_info_card.appendChild(user_checkout_billing_info_text);
     user_checkout_billing_info_card.appendChild(user_checkout_billing_info_cardlast4);
+    user_checkout_billing_info_card.appendChild(user_checkout_billing_info_exp);
+
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_context);
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_next_btn);
+    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_select_btn);
 
-    user_checkout_billing_info_title.innerHTML = "Payment Infomation";
-    user_checkout_change_method_btn.innerText = "Change Payment Method";
-    user_checkout_billing_info_cardholder.innerHTML = cardholder;
-    user_checkout_billing_info_cardtype.innerHTML = type;
-    user_checkout_billing_info_text.innerHTML = "ending in";
-    user_checkout_billing_info_cardlast4.innerHTML = last4;
+    user_checkout_billing_info_title.innerText = "Payment Infomation";
+    user_checkout_change_payment_method_btn.innerText = "Change Payment Method";
+    user_checkout_billing_info_cardholder.innerText = cardholder;
+    user_checkout_billing_info_cardtype.innerText = type;
+    user_checkout_billing_info_text.innerText = "ending in";
+    user_checkout_billing_info_cardlast4.innerText = last4;
+    user_checkout_billing_info_exp.innerText = 'EXP' + ' ' + exp.slice(0,2) + '/' + exp.slice(-2);
     user_checkout_billing_info_context.innerHTML = setPromotionBox();  
-    user_checkout_billing_info_next_btn.innerText = "Continue to Place Order";      
+    user_checkout_billing_info_next_btn.innerText = "Continue to Place Order";     
+    user_checkout_billing_info_select_btn.innerText = "Select This Payment Method";     
+   
 }
 
 function setPromotionBox() {
@@ -1142,7 +1268,11 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
 
     const user_checkout_shipping_info_recipient = document.createElement('div');
     user_checkout_shipping_info_recipient.setAttribute('id', `user_checkout_shipping_info_recipient`);
-    user_checkout_shipping_info_recipient.setAttribute('class', `user_checkout_shipping_info_recipient`);    
+    user_checkout_shipping_info_recipient.setAttribute('class', `user_checkout_shipping_info_recipient`);   
+    
+    const user_checkout_shipping_info_address = document.createElement('div');
+    user_checkout_shipping_info_address.setAttribute('id', `user_checkout_shipping_info_address`);
+    user_checkout_shipping_info_address.setAttribute('class', `user_checkout_shipping_info_address`);
 
     const user_checkout_shipping_info_address1 = document.createElement('div');
     user_checkout_shipping_info_address1.setAttribute('id', `user_checkout_shipping_info_address1`);
@@ -1182,23 +1312,27 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
 
     const user_checkout_shipping_info_change_btn = document.createElement('button');
     user_checkout_shipping_info_change_btn.setAttribute('id', `user_checkout_shipping_info_change_btn`);
-    user_checkout_shipping_info_change_btn.setAttribute('class', `user_checkout_shipping_info_change_btn`);
+    user_checkout_shipping_info_change_btn.setAttribute('class', `user_checkout_shipping_info_change_btn user_checkout_edit_btn`);
 
     const user_checkout_shipping_info_next_btn = document.createElement('Button');
     user_checkout_shipping_info_next_btn.setAttribute('id', `user_checkout_shipping_info_next_btn`);
     user_checkout_shipping_info_next_btn.setAttribute('class', `user_checkout_shipping_info_next_btn`);
+
+    // const user_checkout_shipping_info_select_btn = document.createElement('Button');
+    // user_checkout_shipping_info_select_btn.setAttribute('id', `user_checkout_shipping_info_select_btn`);
+    // user_checkout_shipping_info_select_btn.setAttribute('class', `user_checkout_shipping_info_select_btn user_checkout_select_option_btn`);
 
     user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_title_box);
     user_checkout_shipping_info_title_box.appendChild(user_checkout_shipping_info_title);
     user_checkout_shipping_info_title_box.appendChild(user_checkout_shipping_info_change_btn);
 
     user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_detail_box_cover);
-    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_detail_box);
-    
+    user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_detail_box);   
     
     user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_recipient);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_address1);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_address2);
+    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_address);
+    user_checkout_shipping_info_address.appendChild(user_checkout_shipping_info_address1);
+    user_checkout_shipping_info_address.appendChild(user_checkout_shipping_info_address2);
     user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_csz);
     user_checkout_shipping_info_csz.appendChild(user_checkout_shipping_info_city);
     user_checkout_shipping_info_csz.appendChild(user_checkout_shipping_info_state);
@@ -1208,6 +1342,7 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
     user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_sh_option);
     
     user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_next_btn);
+    // user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_select_btn);
     // user_checkout_shipping_info_next_btn_container.appendChild(user_checkout_shipping_info_next_btn);
 
     user_checkout_shipping_info_title.innerHTML = "Shipping Infomation";
@@ -1222,6 +1357,7 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
     user_checkout_shipping_info_sh_option.innerHTML = user_checkout_shipping_info.sh_option;
     user_checkout_shipping_info_change_btn.innerText = `Change Shipping Address`;
     user_checkout_shipping_info_next_btn.innerText = "Continue to Select Shipping Method";
+    // user_checkout_shipping_info_select_btn.innerText = "Select This Shipping Address";
 }
 
 function Spinner(){

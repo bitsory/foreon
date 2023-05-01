@@ -436,11 +436,14 @@ document.addEventListener('click',function(e){
         document.querySelector('.billing_info_box').innerHTML = AIF.addBillingInfoBox();
         AIF.addBillingMethodForm();
         document.querySelector('.billing_info_add_btn_container').style.display = "none";
+        document.change_profile_billing_info_form.billing_address_street_line1.focus();
     }
     if(e.target && e.target.id == 'shipping_info_add_btn') {
         document.querySelector('.shipping_info_box').innerHTML = AIF.addShippingInfoBox();
         document.querySelector('.shipping_info_add_btn_container').style.display = "none";
+        
         AIF.addShippingInfo();
+        document.change_profile_shipping_info_form.shipping_recipient.focus()
     }
 
 
@@ -562,6 +565,68 @@ document.addEventListener('click',function(e){
             renderBillingInfo(result);          
         });
     }
+
+    if(e.target && e.target.id == 'add_shipping_info_submit_btn') {
+       
+        if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+
+            console.log("if (location.pathname.substring(0, 15) == '/shop/checkout/') {")
+
+            var form = document.getElementById('change_profile_shipping_info_form');            
+        
+            const formData = new FormData(form);
+            const payload = new URLSearchParams(formData);                  
+            
+            fetch('/add_profile_shipping_test', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: payload,
+              })
+              .then(res => res.json())
+              .then(response => {
+                console.log(response)
+                if (document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off") {
+                    document.getElementById('user_continue_to_payment_btn').style.display = "none";
+                }
+                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                // document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+                
+                document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+                
+
+                document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = 
+                `
+                <div id="change_profile_shipping_info" class="change_profile_shipping_info">
+                    <div id="shipping_info_container" class="shipping_info_container">
+                        <div id="shipping_info_box" class="shipping_info_box"></div> 
+                    </div>
+                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container info_add_btn_container">
+                        <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
+                    </div>
+                </div>
+                
+                `;
+                    
+              
+                document.querySelector('.shipping_info_add_btn_container').style.display = "block";
+                fetch('/get_user_shipping_info') // get shipping info from DB
+                .then((res) => res.json())
+                .then(result => {
+                    renderShippingInfo(result);
+                });
+            
+              });
+        
+        }
+
+    }
+    
 
 /////////////////////// edit shipping info //////////////////////////////////////////
 
@@ -767,264 +832,6 @@ function changeProfile() {
 }
 
 
-function mekeChangePrifileTap() {
-    return `
-    <div id="change_profile_form_container" class="change_profile_form_container">
-
-        <ul id="tabs" class="tabs">
-            <li class="tab-link current" data-tab="tab-1">General Infomation</li>
-            <li class="tab-link" data-tab="tab-2">Billing Infomation</li>
-            <li class="tab-link" data-tab="tab-3">Shipping Infomation</li>
-        </ul>
-        <div id="change_profile_form" class="change_profile_form">
-
-            <div id="tab-1" class="tab-content current change_profile_general_info">general_info            
-                <form action="/change_profile_general" class="change_profile_general_info_form" method="post">
-                    <div align="left" class="form-tag input_general_info_tag">Name</div>
-                    <div class="form-row general_name">
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_name">
-                                <input type="text" name="general_first_name" class="input_general_first_name input_general_info_name" placeholder="First">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_name">
-                                <input type="text" name="general_last_name" class="input_general_last_name input_general_info_name" placeholder="Last">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-tag input_general_info_tag">Mobile number</div>
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_phone">
-                        <input type="text" name="general_phone" class="input_general_phone input_general_info" placeholder="### ### ####">
-                        </div>
-                    </div>
-
-                    <div class="form-tag input_general_info_tag">Email</div>
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_email">
-                        <input type="text" name="general_email" class="input_general_email input_general_info" >
-                        </div>
-                    </div>
-
-                    <div class="form-tag input_general_info_tag">Address</div>
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_address">
-                        <input type="text" name="general_address_street_line1" class="input_general_address_street_line1 input_general_info" placeholder="Address Street Line 1">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_address">
-                        <input type="text" name="general_address_street_line2" class="input_general_address_street_line2 input_general_info" placeholder="Address Street Line 2">
-                        </div>
-                    </div>
-
-                    <div class="general_info_csz">
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_address">
-                            <input type="text" name="general_address_city" class="input_general_address_city input_general_info_csz" placeholder="City">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_address">
-                                <select name="general_address_state" id="change_profile_general" class="change_profile_general input_general_info_csz select_state_box">
-                                <option value="AL">Alabama</option>
-                                <option value="AK">Alaska</option>
-                                <option value="AZ">Arizona</option>
-                                <option value="AR">Arkansas</option>
-                                <option value="CA">California</option>
-                                <option value="CO">Colorado</option>
-                                <option value="CT">Connecticut</option>
-                                <option value="DE">Delaware</option>
-                                <option value="DC">District Of Columbia</option>
-                                <option value="FL">Florida</option>
-                                <option value="GA">Georgia</option>
-                                <option value="HI">Hawaii</option>
-                                <option value="ID">Idaho</option>
-                                <option value="IL">Illinois</option>
-                                <option value="IN">Indiana</option>
-                                <option value="IA">Iowa</option>
-                                <option value="KS">Kansas</option>
-                                <option value="KY">Kentucky</option>
-                                <option value="LA">Louisiana</option>
-                                <option value="ME">Maine</option>
-                                <option value="MD">Maryland</option>
-                                <option value="MA">Massachusetts</option>
-                                <option value="MI">Michigan</option>
-                                <option value="MN">Minnesota</option>
-                                <option value="MS">Mississippi</option>
-                                <option value="MO">Missouri</option>
-                                <option value="MT">Montana</option>
-                                <option value="NE">Nebraska</option>
-                                <option value="NV">Nevada</option>
-                                <option value="NH">New Hampshire</option>
-                                <option value="NJ">New Jersey</option>
-                                <option value="NM">New Mexico</option>
-                                <option value="NY">New York</option>
-                                <option value="NC">North Carolina</option>
-                                <option value="ND">North Dakota</option>
-                                <option value="OH">Ohio</option>
-                                <option value="OK">Oklahoma</option>
-                                <option value="OR">Oregon</option>
-                                <option value="PA">Pennsylvania</option>
-                                <option value="RI">Rhode Island</option>
-                                <option value="SC">South Carolina</option>
-                                <option value="SD">South Dakota</option>
-                                <option value="TN">Tennessee</option>
-                                <option value="TX">Texas</option>
-                                <option value="UT">Utah</option>
-                                <option value="VT">Vermont</option>
-                                <option value="VA">Virginia</option>
-                                <option value="WA">Washington</option>
-                                <option value="WV">West Virginia</option>
-                                <option value="WI">Wisconsin</option>
-                                <option value="WY">Wyoming</option>
-                                </select>
-                            
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_address">
-                            <input type="text" name="general_address_zip" class="input_general_address_zip input_general_info_csz" placeholder="Zip Code">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="change_profile_general_default_address input_general_info_tag">
-                    <input type="checkbox" id="change_profile_general_default_address_checkbox" name="default_address" value="default" checked>
-                    <label for="change_profile_general_default_address_checkbox">make default shipping address</label>
-                    </div>
-
-
-
-                    <button type="button" class="btn change_password_btn">Change Password</button>
-                    <div class="form-tag">Change Password</div>
-                    <div class="change_password_container">
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_current_password">
-                            <input type="password" name="general_current_password" class="input_general_current_password" placeholder="Current password">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_new_password">
-                            <input type="password" name="general_new_password" class="input_general_new_password" placeholder="New password">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_new_password_confirm">
-                            <input type="password" name="general_new_password_confirm" class="input_general_new_password_cofirm" placeholder="Confirm New password">
-                            </div>
-                        </div>
-                    
-                    
-                    
-                    </div>
-            
-                    <div class="button-container">
-                        <input type="submit" value="Submit">
-                    </div> 
-
-
-
-                </form>
-            </div>
-
-
-            <div id="tab-2" class="tab-content change_profile_billing_info_container">
-                Billing Infomation
-                <div id="change_profile_billing_info" class="change_profile_billing_info">
-                    <div id="billing_info_container" class="billing_info_container">
-                        <div id="billing_info_box" class="billing_info_box"></div>         
-                    </div>
-                    <div id="billing_info_add_btn_container" class="billing_info_add_btn_container" >
-                        <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-3" class="tab-content change_profile_shipping_info_container">
-                Shipping Infomation
-                <div id="change_profile_shipping_info" class="change_profile_shipping_info">
-                    <div id="shipping_info_container" class="shipping_info_container">
-                        <div id="shipping_info_box" class="shipping_info_box"></div> 
-                    </div>
-                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container">
-                        <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
-                    </div>
-                </div>
-            </div>
-        </div>        
-    </div>
-    `;
-}
-
-
-function addBillingInfoBox() {
-    return `
-        <div class="change_profile_billing_form_container">
-            <form action="/add_payment_method" method="post" id="payment-form">
-                <div class="billing_info">
-                    <div class="order_info_title">Billing Infomation</div>
-                    
-
-                    <div class="form-row top-row">
-                        <div id="card-number" class="field card-number"></div>
-                        <div class="input-errors" id="card-number-errors" role="alert"></div>
-                    </div>
-
-                    <div class="form-row">
-                        <div id="card-name" class="field card-name">
-                        <input type="text" name="card_name" class="input_card_name" placeholder="Cardholder Name">
-                        </div>
-                    </div>                    
-
-                    <div class="form-row">
-                        <div id="card-date" class="field third-width"></div>
-                        <div class="input-errors" id="card-date-errors" role="alert"></div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div id="card-cvv" class="field third-width"></div>
-                        <div class="input-errors" id="card-cvv-errors" role="alert"></div>
-                    </div>
-
-                    <div class="form-row">
-                        <div id="card-postal-code" class="field third-width"></div>
-                        <div class="input-errors" id="card-postal-code-errors" role="alert"></div>
-                    </div>
-                    <div id="card-response" role="alert"></div>
-
-                    <div class="form-row">
-                        <div id="card-email" class="field card-email">
-                        <input type="text" name="card_email" class="input_card_email" placeholder="Email">
-                        </div>
-                    </div>     
-
-                </div>
-
-                <input type="checkbox" name="default_payment" value="default" checked> make default payment method <br>
-            
-                <div class="button-container">
-                    <input type="submit" value="Submit">
-                    <button type="button" class="cancel_add_billing_info_btn">Cancel</button>
-                </div>
-
-
-            </form>
-        </div>
-    `;
-
-}
-
-
-
 ////////////////////////////set billing info functions /////////////////////////////
 
 
@@ -1042,9 +849,7 @@ function setBillingInfoDetail(bi_num, cardholder, type, last4, exp, default_chec
     billingInfoDetail.setAttribute('class', `billing_info_detial BIN${bi_num}`);
     document.getElementById(`billing_info BIN${bi_num}`).appendChild(billingInfoDetail);
     setBillingInfoCardholer(bi_num, cardholder);
-    setBillingInfoType(bi_num, type);
-    setBillingInfoLast4(bi_num, last4);
-    setBillingInfoExp(bi_num, exp)
+    setBillingInfoCardDetail(bi_num, last4, type, exp);
     setBillingInfoDefaultBtn(bi_num, default_check)
     setBillingInfoEditBtn(bi_num)
 }
@@ -1056,26 +861,35 @@ function setBillingInfoCardholer(bi_num, cardholder) {
     document.querySelector(`.billing_info_cardholder.BIN${bi_num}`).innerHTML = cardholder;
 }
 
-function setBillingInfoType(bi_num, type) {
-    const billingInfoType = document.createElement('div');
-    billingInfoType.setAttribute('class', `billing_info_type BIN${bi_num}`);
-    document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(billingInfoType);
-    document.querySelector(`.billing_info_type.BIN${bi_num}`).innerHTML = type;
+function setBillingInfoCardDetail(bi_num, last4, type, exp) {
+    const billingInfoCardDetail = document.createElement('div');
+    billingInfoCardDetail.setAttribute('id', `billing_info_card_detail BIN${bi_num}`);
+    billingInfoCardDetail.setAttribute('class', `billing_info_card_detail BIN${bi_num}`);
+    document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(billingInfoCardDetail);
+    setBillingInfoLast4(bi_num, last4);
+    setBillingInfoType(bi_num, type);    
+    setBillingInfoExp(bi_num, exp)
 }
 
 function setBillingInfoLast4(bi_num, last4) {
     const billingInfoLast4 = document.createElement('div');
     billingInfoLast4.setAttribute('class', `billing_info_last4 BIN${bi_num}`);
-    document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(billingInfoLast4);
-    document.querySelector(`.billing_info_last4.BIN${bi_num}`).innerHTML = last4;
+    document.getElementById(`billing_info_card_detail BIN${bi_num}`).appendChild(billingInfoLast4);
+    document.querySelector(`.billing_info_last4.BIN${bi_num}`).innerText = '*********' + last4;
+}
+
+function setBillingInfoType(bi_num, type) {
+    const billingInfoType = document.createElement('div');
+    billingInfoType.setAttribute('class', `billing_info_type BIN${bi_num}`);
+    document.getElementById(`billing_info_card_detail BIN${bi_num}`).appendChild(billingInfoType);
+    document.querySelector(`.billing_info_type.BIN${bi_num}`).innerHTML = type;
 }
 
 function setBillingInfoExp(bi_num, exp) {
     const billingInfoExp = document.createElement('div');
     const text_exp = exp.slice(0,2) + '/' + exp.slice(-2);
     billingInfoExp.setAttribute('class', `billing_info_exp BIN${bi_num}`);
-    document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(billingInfoExp);
-    
+    document.getElementById(`billing_info_card_detail BIN${bi_num}`).appendChild(billingInfoExp);    
     document.querySelector(`.billing_info_exp.BIN${bi_num}`).innerHTML = text_exp;
 }
 
@@ -1126,14 +940,14 @@ function setBillingInfoEditBtn(bi_num) {
     billing_info_make_default_btn.setAttribute('class', `billing_info_make_default_btn BIN${bi_num}`);
     billing_info_make_default_btn.setAttribute('type', `button`);
     billing_info_make_default_btn.setAttribute('value', `make_default_billing_info`);
-    billing_info_make_default_btn.textContent = "Make Default Payment Method";
+    billing_info_make_default_btn.textContent = "Set Default";
     document.getElementById(`billing_info_edit_btn_container BIN${bi_num}`).appendChild(billing_info_make_default_btn);
 
     const billing_info_delete_btn = document.createElement('button');
     billing_info_delete_btn.setAttribute('class', `billing_info_delete_btn BIN${bi_num}`);
     billing_info_delete_btn.setAttribute('type', `button`);
     billing_info_delete_btn.setAttribute('value', `delete_payment_method`);
-    billing_info_delete_btn.textContent = "Delete";
+    billing_info_delete_btn.textContent = "Delete Method";
     document.getElementById(`billing_info_edit_btn_container BIN${bi_num}`).appendChild(billing_info_delete_btn);
 
 
@@ -1196,8 +1010,8 @@ function setShippingInfoDetail(sh_num, recipient, address1, address2, city, stat
     shippingInfoDetail.setAttribute('class', `shipping_info_detial SHN${sh_num}`);
     document.querySelector(`.shipping_info.SHN${sh_num}`).appendChild(shippingInfoDetail);
     setShippingInfoRecipient(sh_num, recipient);
-    setShippingInfoAddress1(sh_num, address1);
-    setShippingInfoAddress2(sh_num, address2);
+    setShippingInfoAddress(sh_num, address1, address2);
+    
     setShippingInfoCSZ(sh_num, city, state, zip)
     setShippingInfoPhoneEmail(sh_num, phone, email)
     setShippingInfoDefaultBtn(sh_num, default_check);
@@ -1209,21 +1023,30 @@ function setShippingInfoRecipient(sh_num, recipient) {
     shippingInfoRecipient.setAttribute('class', `shipping_info_recipient SHN${sh_num}`);
     document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(shippingInfoRecipient);
     document.querySelector(`.shipping_info_recipient.SHN${sh_num}`).innerText = recipient;
+}
+
+function setShippingInfoAddress(sh_num, address1, address2) {
+    const shippingInfoAddress = document.createElement('div');
+    shippingInfoAddress.setAttribute('class', `shipping_info_address SHN${sh_num}`);
+    document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(shippingInfoAddress);   
+
+    setShippingInfoAddress1(sh_num, address1);
+    setShippingInfoAddress2(sh_num, address2);
 
 }
 
 function setShippingInfoAddress1(sh_num, address1) {
     const shippingInfoAddress1 = document.createElement('div');
     shippingInfoAddress1.setAttribute('class', `shipping_info_address1 SHN${sh_num}`);
-    document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(shippingInfoAddress1);
+    document.querySelector(`.shipping_info_address.SHN${sh_num}`).appendChild(shippingInfoAddress1);
     document.querySelector(`.shipping_info_address1.SHN${sh_num}`).innerText = address1;
 
 }
 
 function setShippingInfoAddress2(sh_num, address2) {
-    const shippingInfoAddress2 = document.createElement('div');
+    const shippingInfoAddress2 = document.createElement('span');
     shippingInfoAddress2.setAttribute('class', `shipping_info_address2 SHN${sh_num}`);
-    document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(shippingInfoAddress2);
+    document.querySelector(`.shipping_info_address.SHN${sh_num}`).appendChild(shippingInfoAddress2);
     document.querySelector(`.shipping_info_address2.SHN${sh_num}`).innerText = address2;
 
 }
@@ -1327,6 +1150,14 @@ function setShippingInfoEditBtn(sh_num) {
     shipping_info_edit_btn_container.setAttribute('id', `shipping_info_edit_btn_container SHN${sh_num}`);
     document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(shipping_info_edit_btn_container);
 
+    const shipping_info_make_default_btn = document.createElement('button');
+    shipping_info_make_default_btn.setAttribute('class', `shipping_info_make_default_btn SHN${sh_num}`);
+    shipping_info_make_default_btn.setAttribute('type', `button`);
+    shipping_info_make_default_btn.setAttribute('value', `make_default_shipping_info`);
+    shipping_info_make_default_btn.textContent = "Set Default"
+
+    document.getElementById(`shipping_info_edit_btn_container SHN${sh_num}`).appendChild(shipping_info_make_default_btn);
+
     const shipping_info_edit_btn = document.createElement('button');
     shipping_info_edit_btn.setAttribute('class', `shipping_info_edit_btn SHN${sh_num}`);
     shipping_info_edit_btn.setAttribute('type', `button`);
@@ -1343,13 +1174,7 @@ function setShippingInfoEditBtn(sh_num) {
 
     document.getElementById(`shipping_info_edit_btn_container SHN${sh_num}`).appendChild(shipping_info_delete_btn);
 
-    const shipping_info_make_default_btn = document.createElement('button');
-    shipping_info_make_default_btn.setAttribute('class', `shipping_info_make_default_btn SHN${sh_num}`);
-    shipping_info_make_default_btn.setAttribute('type', `button`);
-    shipping_info_make_default_btn.setAttribute('value', `make_default_shipping_info`);
-    shipping_info_make_default_btn.textContent = "Make Default Address"
-
-    document.getElementById(`shipping_info_edit_btn_container SHN${sh_num}`).appendChild(shipping_info_make_default_btn);
+    
 
 }
 
@@ -1500,8 +1325,7 @@ function setPurchaseHistory(result) {
         let total_amount = element.total_order_amount;
         let oddate = element.oddate;
         let track_number = element.track_number;
-        let shipping_fee = element.shipping_fee;
-        let shipping_rate = element.shipping_rate;
+      
         let refund = element.refund;
         let full_refunded = element.full_refunded;
         // let $purchase_history = document.querySelector(`[orderid="${order_id}"]`);
@@ -1558,7 +1382,7 @@ function setPurchaseHistoryHeadOrderTotal(order_id, total_amount) {
 function setCancelOrder(order_id, full_refunded) {
     const purchase_history_order_cancel_btn = document.createElement('button');
     purchase_history_order_cancel_btn.setAttribute('id', `purchase_history_order_cancel_btn`);
-    purchase_history_order_cancel_btn.setAttribute('class', `purchase_history_order_cancel_btn`);
+    purchase_history_order_cancel_btn.setAttribute('class', `purchase_history_order_cancel_btn purchase_page_btn purchase_header_page_btn`);
     purchase_history_order_cancel_btn.setAttribute('title', `cancel this order`);        
     document.querySelector(`[head_orderid="${order_id}"]`).appendChild(purchase_history_order_cancel_btn);
     purchase_history_order_cancel_btn.innerText = 'Cancel This Order';
@@ -1708,7 +1532,7 @@ function setPurchaseHistoryItemExtrabox(cart_id, prodnum, track_number, order_id
 function setPurchaseHistoryItemReorder(cart_id, prodnum) {
     const purchase_history_item_reorder_btn = document.createElement('button');
     purchase_history_item_reorder_btn.setAttribute('id', `purchase_history_item_reorder_btn`);
-    purchase_history_item_reorder_btn.setAttribute('class', `purchase_history_item_reorder_btn`);
+    purchase_history_item_reorder_btn.setAttribute('class', `purchase_history_item_reorder_btn purchase_page_btn`);
     purchase_history_item_reorder_btn.setAttribute('title', `item reorder`);    
     purchase_history_item_reorder_btn.setAttribute('itemid', `${prodnum}`);
     document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_reorder_btn);
@@ -1718,7 +1542,7 @@ function setPurchaseHistoryItemReorder(cart_id, prodnum) {
 function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {
     const purchase_history_item_track_btn = document.createElement('button');
     purchase_history_item_track_btn.setAttribute('id', `purchase_history_item_track_btn`);
-    purchase_history_item_track_btn.setAttribute('class', `purchase_history_item_track_btn`);
+    purchase_history_item_track_btn.setAttribute('class', `purchase_history_item_track_btn purchase_page_btn`);
     purchase_history_item_track_btn.setAttribute('title', `item track`);    
     purchase_history_item_track_btn.setAttribute('track-itemid', `${track_number}`);
     document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_track_btn);
@@ -1728,7 +1552,7 @@ function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {
 function setCancelOrderItem(cart_id, prodnum, order_id, refund) {
     const purchase_history_item_order_cancel_btn = document.createElement('button');
     purchase_history_item_order_cancel_btn.setAttribute('id', `purchase_history_item_order_cancel_btn`);
-    purchase_history_item_order_cancel_btn.setAttribute('class', `purchase_history_item_order_cancel_btn`);
+    purchase_history_item_order_cancel_btn.setAttribute('class', `purchase_history_item_order_cancel_btn purchase_page_btn`);
     purchase_history_item_order_cancel_btn.setAttribute('title', `cancel this order`);    
     purchase_history_item_order_cancel_btn.setAttribute('cart-itemid', `${cart_id}`);
     purchase_history_item_order_cancel_btn.setAttribute('order-itemid', `${order_id}`);

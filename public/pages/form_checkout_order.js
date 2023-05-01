@@ -14,7 +14,7 @@ export function getUserOrderConfirm() {
                 <div id="user_checkout_shipping_method_container_cover" class="user_checkout_shipping_method_container_cover user_checkout_cover">
                     <div id="user_checkout_shipping_method_container_cover_title" class="user_checkout_shipping_method_container_cover_title user_checkout_cover_title">
                         Shipping Method
-                        <button id="user_checkout_shipping_method_container_change_btn" class="user_checkout_shipping_method_container_change_btn user_checkout_edit_btn">Edit Shipping Method</button>
+                        <button id="user_checkout_shipping_method_container_change_btn" class="user_checkout_shipping_method_container_change_btn user_checkout_edit_btn" value="on">Edit Shipping Method</button>
                     </div>
                     
                     <div id="user_checkout_shipping_method_container_cover_contents" class="user_checkout_shipping_method_container_cover_contents"></div>
@@ -47,6 +47,7 @@ export function getUserOrderConfirm() {
                     </div>
                     <div id="continue_to_payment_box" class="continue_to_payment_box">
                         <button type="button" id="user_continue_to_payment_btn" class="user_continue_to_payment_btn">Continue to Payment</button>
+                        <button type="button" id="user_select_this_shipping_method_btn" class="user_select_this_shipping_method_btn user_checkout_select_option_btn">Select This Shipping Method</button>
                     </div>
                     
                 </div>
@@ -59,6 +60,8 @@ export function getUserOrderConfirm() {
                     </div>
                 
                     <div id="user_checkout_billing_info_container_cover_contents" class="user_checkout_billing_info_container_cover_contents"></div>                    
+                    <div id="user_checkout_billing_info_container_cover_context" class="user_checkout_billing_info_container_cover_context"></div>
+
                 </div>
 
                 <div id="user_checkout_billing_info" class="user_checkout_billing_info">

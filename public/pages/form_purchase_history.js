@@ -82,7 +82,7 @@ function setPurchaseHistoryHeadOrderTotal(order_id, total_amount) {
 function setCancelOrder(order_id, full_refunded) {
     const purchase_history_order_cancel_btn = document.createElement('button');
     purchase_history_order_cancel_btn.setAttribute('id', `purchase_history_order_cancel_btn`);
-    purchase_history_order_cancel_btn.setAttribute('class', `purchase_history_order_cancel_btn`);
+    purchase_history_order_cancel_btn.setAttribute('class', `purchase_history_order_cancel_btn purchase_page_btn`);
     purchase_history_order_cancel_btn.setAttribute('title', `cancel this order`);        
     document.querySelector(`[head_orderid="${order_id}"]`).appendChild(purchase_history_order_cancel_btn);
     purchase_history_order_cancel_btn.innerText = 'Cancel This Order';
@@ -232,7 +232,7 @@ function setPurchaseHistoryItemExtrabox(cart_id, prodnum, track_number, order_id
 function setPurchaseHistoryItemReorder(cart_id, prodnum) {
     const purchase_history_item_reorder_btn = document.createElement('button');
     purchase_history_item_reorder_btn.setAttribute('id', `purchase_history_item_reorder_btn`);
-    purchase_history_item_reorder_btn.setAttribute('class', `purchase_history_item_reorder_btn`);
+    purchase_history_item_reorder_btn.setAttribute('class', `purchase_history_item_reorder_btn purchase_page_btn`);
     purchase_history_item_reorder_btn.setAttribute('title', `item reorder`);    
     purchase_history_item_reorder_btn.setAttribute('itemid', `${prodnum}`);
     document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_reorder_btn);
@@ -242,7 +242,7 @@ function setPurchaseHistoryItemReorder(cart_id, prodnum) {
 function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {
     const purchase_history_item_track_btn = document.createElement('button');
     purchase_history_item_track_btn.setAttribute('id', `purchase_history_item_track_btn`);
-    purchase_history_item_track_btn.setAttribute('class', `purchase_history_item_track_btn`);
+    purchase_history_item_track_btn.setAttribute('class', `purchase_history_item_track_btn purchase_page_btn`);
     purchase_history_item_track_btn.setAttribute('title', `item track`);    
     purchase_history_item_track_btn.setAttribute('track-itemid', `${track_number}`);
     document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_track_btn);
@@ -252,7 +252,7 @@ function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {
 function setCancelOrderItem(cart_id, prodnum, order_id, refund) {
     const purchase_history_item_order_cancel_btn = document.createElement('button');
     purchase_history_item_order_cancel_btn.setAttribute('id', `purchase_history_item_order_cancel_btn`);
-    purchase_history_item_order_cancel_btn.setAttribute('class', `purchase_history_item_order_cancel_btn`);
+    purchase_history_item_order_cancel_btn.setAttribute('class', `purchase_history_item_order_cancel_btn purchase_page_btn`);
     purchase_history_item_order_cancel_btn.setAttribute('title', `cancel this order`);    
     purchase_history_item_order_cancel_btn.setAttribute('cart-itemid', `${cart_id}`);
     purchase_history_item_order_cancel_btn.setAttribute('order-itemid', `${order_id}`);

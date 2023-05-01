@@ -174,7 +174,7 @@ export function mekeChangePrifileTap() {
                     <div id="billing_info_container" class="billing_info_container">
                         <div id="billing_info_box" class="billing_info_box"></div>         
                     </div>
-                    <div id="billing_info_add_btn_container" class="billing_info_add_btn_container" >
+                    <div id="billing_info_add_btn_container" class="billing_info_add_btn_container info_add_btn_container" >
                         <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
                     </div>
                 </div>
@@ -186,7 +186,7 @@ export function mekeChangePrifileTap() {
                     <div id="shipping_info_container" class="shipping_info_container">
                         <div id="shipping_info_box" class="shipping_info_box"></div> 
                     </div>
-                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container">
+                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container info_add_btn_container">
                         <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
                     </div>
                 </div>
@@ -201,7 +201,7 @@ export function mekeChangePrifileTap() {
 export function addShippingInfoBox() {
     return `
         <div class="change_profile_shipping_form_container">
-            <form id= "change_profile_shipping_info_form" class="change_profile_shipping_info_form" method="post">
+            <form id="change_profile_shipping_info_form" class="change_profile_shipping_info_form" name="change_profile_shipping_info_form" method="post">
                 <div id="shipping_info_add_box" class="shipping_info_add_box">
                     <div class="form-row change_profile_shipping_info_row">
                         <div id="recipient" class="field recipient">
@@ -318,8 +318,8 @@ export function addShippingInfoBox() {
                     </div>
                 
                     <div id="change_shipping_info_btn_container" class="button-container">
-                        <input type="submit" value="Submit" class="add_shipping_info_btn add_submit_btn">
-                        <button type="button" class="add_shipping_info_cancel_btn" value="add_shipping_info_cancel">Cancel</button>
+                        <button type="button" id="add_shipping_info_submit_btn" class="add_shipping_info_submit_btn add_submit_btn">Submit</button>
+                        <button type="button" id="add_shipping_info_cancel_btn" class="add_shipping_info_cancel_btn" value="add_shipping_info_cancel">Cancel</button>
                     </div>
                 </div>
 
@@ -341,7 +341,7 @@ export function addShippingInfo() {
 export function addBillingInfoBox() {
     return `
         <div class="change_profile_billing_form_container">
-            <form action="/add_payment_method" method="post" id="change_profile_billing_info_form" class="change_profile_billing_info_form">
+            <form action="/add_payment_method" method="post" name="change_profile_billing_info_form" id="change_profile_billing_info_form" class="change_profile_billing_info_form">
                 <div id="billing_info_add_box" class="billing_info_add_box">
 
                     <div class="order_info_title">Billing Address</div>  
@@ -493,15 +493,6 @@ export function addBillingInfoBox() {
     `;
 
 }
-
-/*
-<div class="form-row change_profile_billing_info_row">
-    <div id="card-email" class="field card-email">
-    <input type="text" name="card_email" class="input_card_email input_change_profile_billing_info" placeholder="Email">
-    </div>
-</div>     
-                    */
-
 
 
 export function addBillingMethodForm() {
