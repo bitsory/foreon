@@ -3,6 +3,7 @@ import orderComplete from "./order_complete.js";
 import * as AIF from "./form_acc_info.js";
 import * as ItemCounter from "./item_counter.js";
 import * as CartRender from "./cart.js";
+import * as SPINNER from "./spinner.js";
 
 
 export default class {
@@ -17,12 +18,34 @@ export default class {
     constructor(user_id, proceed_checkout_selected_order_cart) {
         document.title = "Cafe FORE";
         console.log("order_confirm page")
-        // this.order_info2 = order_info;
+        
         this.order_info = {order_info : "order_info"}
         console.log(this.order_info)
         this.user_id = user_id;
-        // this.guest_check_out_info = {};
+     
 
+        // const opts = {
+        //     lines: 13, // The number of lines to draw
+        //     length: 38, // The length of each line
+        //     width: 17, // The line thickness
+        //     radius: 42, // The radius of the inner circle
+        //     scale: 1, // Scales overall size of the spinner
+        //     corners: 1, // Corner roundness (0..1)
+        //     speed: 1, // Rounds per second
+        //     rotate: 0, // The rotation offset
+        //     animation: 'spinner-line-fade-more', // The CSS animation name for the lines
+        //     direction: 1, // 1: clockwise, -1: counterclockwise
+        //     color: '#983131', // CSS color or array of colors
+        //     fadeColor: 'transparent', // CSS color or array of colors
+        //     top: '44%', // Top position relative to parent
+        //     left: '50%', // Left position relative to parent
+        //     shadow: '0 0 1px transparent', // Box-shadow for the lines
+        //     zIndex: 2000000000, // The z-index (defaults to 2e9)
+        //     className: 'spinner', // The CSS class to assign to the spinner
+        //     position: 'absolute', // Element positioning
+        // };    
+        
+        // this.spinner = new Spinner(opts);
         
         this.check_out_box = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
       
@@ -31,11 +54,10 @@ export default class {
 
             console.log("order confirm double check order confirm double check order confirm double check ")
 
-            
 
-            if(e.target && e.target.className == 'user_checkout_submit_button') {
+            if(e.target && e.target.id == 'user_checkout_submit_button') {
 
-                turnOffDisplay();
+                SPINNER.turnOffDisplay(e);
                 console.log('user_checkout_submit_button user_checkout_submit_button user_checkout_submit_button')
                 
                 document.getElementById('user_checkout_submit_button').setAttribute('disabled', 'true');
@@ -63,11 +85,14 @@ export default class {
                 .then(response => {
                     console.log(response)
                     if (response.status == 'complete') {
-                    ////////// order-confirmation page ///////////////////////
-                    turnOnDisplay();
-                    setOrderConfirmationPage(response);
-                    ItemCounter.item_counter(this.user_id);
+                        ////////// order-confirmation page ///////////////////////
+                        SPINNER.turnOnDisplay();
+                        setOrderConfirmationPage(response);
+                        ItemCounter.item_counter(this.user_id);
 
+                    } else {
+                        SPINNER.turnOnDisplay();
+                        alert("we are very sorry... Server error occured. Can you try again?");
                     }
                     
 
@@ -151,14 +176,49 @@ export default class {
 
             if(e.target && e.target.id == 'set_default_address_btn') {
 
+                document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = 
+                `
+                <div id="change_profile_shipping_info" class="change_profile_shipping_info">
+                    <div id="shipping_info_container" class="shipping_info_container">
+                        <div id="shipping_info_box" class="shipping_info_box"></div> 
+                    </div>
+                   
+                </div>
                 
-                document.getElementById('lorem').innerHTML = AIF.addShippingInfoBox();
-                AIF.addShippingInfo();
+                `;
+
+                document.getElementById('shipping_info_box').innerHTML = AIF.addShippingInfoBox();
+                document.getElementById('change_shipping_info_btn_container').innerHTML = AIF.addShippingInfoBtnBox();
+                // document.querySelector('.shipping_info_add_btn_container').style.display = "none";
+                
+                // AIF.addShippingInfo();
+                document.change_profile_shipping_info_form.shipping_recipient.focus();
+                // if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+                //     document.getElementById('user_checkout_shipping_info_next_btn').style.display = "none";
+                // }
+                
             }
 
             if(e.target && e.target.id == 'set_default_payment_method_btn') {
-                document.getElementById('lorem').innerHTML = AIF.addBillingInfoBox();
-                AIF.addBillingMethodForm();
+                
+                // document.getElementById('user_checkout_billing_info_detail_box_cover').innerHTML = 
+                document.getElementById('user_checkout_billing_info_contents').innerHTML = 
+                `
+                <div id="change_profile_billing_info" class="change_profile_billing_info">
+                    <div id="billing_info_container" class="billing_info_container">
+                        <div id="billing_info_box" class="billing_info_box"></div> 
+                    </div>
+                    <div id="billing_info_add_btn_container" class="billing_info_add_btn_container info_add_btn_container" >
+                        <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
+                    </div>
+                   
+                </div>
+                
+                `;
+                document.getElementById('billing_info_add_btn_container').style.display = 'none';
+                document.getElementById('billing_info_box').innerHTML = AIF.addBillingInfoBox();
+                
+                CartRender.addBillingMethodForm();
                 // exp.cloverTokenHandler(token);
 
             }
@@ -168,14 +228,27 @@ export default class {
             if (e.target && e.target.id == 'user_checkout_shipping_info_change_btn') {
                 console.log("(e.target && e.target.id == 'user_checkout_shipping_info_change_btn' && (document.getElementById('user_checkout_shipping_method_container_change_btn').style.display == 'none')) {")
                 
-                if (document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off") {
-                    document.getElementById('user_continue_to_payment_btn').style.display = "none";
-                }
-                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                document.getElementById('user_checkout_billing_info_next_btn').value == "on" ? 
+                    document.getElementById('user_checkout_billing_info_next_btn').style.display = 'none' : false;
+                 
+                document.getElementById('user_continue_to_payment_btn').style.display = "none";
+                
                 document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+
+                document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+
+                document.getElementById('user_checkout_shipping_method_container_change_btn').setAttribute('value', 'on');
                 document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
+
                 document.getElementById('user_checkout_shipping_method_container').style.display = "block";
                 document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+
+                document.getElementById('user_checkout_change_payment_method_btn').style.display = "none";
+                document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "none";
+
+                
+                
                 // document.getElementById('user_checkout_billing_info_cover').style.display = "block";
                 
                 document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
@@ -211,14 +284,22 @@ export default class {
                 document.getElementById('user_checkout_billing_info_next_btn').setAttribute('value', 'on');
                 document.getElementById('user_checkout_billing_info_select_btn').setAttribute('value', 'on');
 
-                document.getElementById('user_checkout_billing_info_select_btn').style.display = "block";
-                document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
+                // document.getElementById('user_checkout_billing_info_select_btn').style.display = "block";
+                document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
                 
-                
+                this.check_out_box.setShippingMethodCoverContents(user_id);
                 document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
                 document.getElementById('user_checkout_shipping_method_container').style.display = "none";
                 document.getElementById('user_checkout_billing_info').style.display = "block";
-                document.getElementById('user_checkout_billing_info_cover').style.display = "none";
+                document.getElementById('user_checkout_billing_info_detail_box_cover').style.display = "none";
+                document.getElementById('user_checkout_billing_info_contents').style.display = "block";
+                
+                
+                // document.getElementById('user_checkout_billing_info_cover').style.display = "none";
+
+                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "none"; 
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none"; 
+                
                 
                 
                 document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
@@ -253,10 +334,15 @@ export default class {
 
 
             }           
-
+            
             if (e.target && e.target.id == 'user_checkout_shipping_method_container_change_btn') {
                 console.log("user_checkout_shipping_method_container_change_btn")
+                document.getElementById('user_checkout_billing_info_next_btn').value == "on" ? 
+                    document.getElementById('user_checkout_billing_info_next_btn').style.display = 'none' : false;
+                
+                document.getElementById('user_checkout_shipping_method_container_change_btn').value = 'on';
                 document.getElementById('user_select_this_shipping_method_btn').style.display = "block";
+                
                 document.getElementById('user_checkout_shipping_info_change_btn').style.display = "none";
                 document.getElementById('user_continue_to_payment_btn').style.display = "none";
                 
@@ -264,6 +350,9 @@ export default class {
                 document.getElementById('user_checkout_shipping_method_container').style.display = "block";
                 document.getElementById('user_checkout_shipping_info_detail_box_cover').style.display = "block";
                 document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+
+                document.getElementById('user_checkout_change_payment_method_btn').style.display = "none";
+                document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "none"; 
                 
                 
                 document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
@@ -272,27 +361,7 @@ export default class {
 
             }
             
-
-            // if (e.target && e.target.id == 'user_checkout_shipping_info_select_btn') { 
-            //     document.getElementById('user_checkout_submit_button').disabled = false;
-            //     document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
-            //     document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
-            //     document.getElementById('user_checkout_shipping_method_container').style.display = "none";
-                
-            //     document.getElementById('user_checkout_billing_info_cover').style.display = "block";
-            //     document.getElementById('user_checkout_billing_info').style.display = "none";
-            //     this.getUserDefaultShippingInfomation(user_id).then(data => {
-            //         // console.log(data)
-            //         // const shipping_info = this.getUserDefaultShippingInfo();
-            //         // console.log(shipping_info);
-            //         document.getElementById('user_checkout_shipping_info_detail_box_cover').innerText = data.recipient + '\n' + data.address1 + '\n' + data.city + ', ' + data.state + ' ' + data.zip;
-                
-            //         this.getShippingRate(this.check_out_box.user_shipping_info);
-            //         this.check_out_box.shipping_rate_flag = true;
-            //     });
-            // }
-
-            
+            /*
             if (e.target && e.target.id == 'user_checkout_billing_info_select_btn') { 
                 // document.getElementById('user_checkout_submit_button').disabled = false;
                 document.getElementById('user_checkout_billing_info_next_btn').setAttribute('value', 'off');
@@ -305,35 +374,64 @@ export default class {
                 document.getElementById('user_checkout_billing_info').style.display = "none";
                 document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";
                 
+                this.getUserDefaultBillingInfomation(user_id).then(data => {
 
-                const billing_info = this.getUserDefaultBillingInfo();
-                console.log(billing_info);
+                    const billing_info = this.getUserDefaultBillingInfo();
+                    console.log(billing_info);
 
-                document.getElementById('user_checkout_billing_info_container_cover_contents').innerText = 
-                "**********" + billing_info.last4 + ' ' + billing_info.cardtype + ' ' + billing_info.exp.slice(0,2) + '/' + billing_info.exp.slice(-2);
-                document.getElementById("user_checkout_billing_info_container_cover_context").innerHTML = setPromotionBox();
-                document.getElementById('user_checkout_submit_button').disabled = false;
-                document.getElementById('user_checkout_submit_button').focus();
+                    document.getElementById('user_checkout_billing_info_container_cover_contents').innerText = 
+                    "**********" + billing_info.last4 + ' ' + billing_info.cardtype + ' ' + billing_info.exp.slice(0,2) + '/' + billing_info.exp.slice(-2);
+                    document.getElementById("user_checkout_billing_info_container_cover_context").innerHTML = setPromotionBox();
+                    document.getElementById('user_checkout_submit_button').disabled = false;
+                    document.getElementById('user_checkout_submit_button').focus();
+                });
 
             }
+            */
 
             if (e.target && e.target.id == 'user_select_this_shipping_method_btn') { 
-                if (document.getElementById('user_checkout_billing_info_next_btn').value == 'off' && document.getElementById('user_checkout_billing_info_select_btn').value == 'off') {
-                    document.getElementById('user_checkout_submit_button').disabled = false;
-                }
+                document.getElementById('user_checkout_billing_info_next_btn').value == 'off' ?
+                //  && document.getElementById('user_checkout_billing_info_select_btn').value == 'off') {
+                    document.getElementById('user_checkout_submit_button').disabled = false : false;
+
+                // document.getElementById('set_default_payment_method_btn') && document.getElementById('set_default_payment_method_btn').value == "on" ?
+                document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').getAttribute('value') == "off" ?
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "none" : 
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
                 
+                    
                 document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
                 document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
                 document.getElementById('user_checkout_shipping_method_container').style.display = "none";
                 document.getElementById('user_select_this_shipping_method_btn').style.display = "none";
                 
                 document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container_change_btn').value = "off";
+                
                 document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+
+                
+                // document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";
+
                 this.check_out_box.setShippingMethodCoverContents(user_id);
                 this.getShippingRate(this.check_out_box.user_shipping_info);
                 const shipping_rate = this.check_out_box.checkShippingRate();
                 
                 this.check_out_box.rerenderTotal(this.check_out_box.getTotal(user_id), shipping_rate[1]);
+
+                console.log("this.user_default_billing_info")
+                console.log(this.user_default_billing_info)
+
+                this.getUserDefaultBillingInfomation(user_id).then(data => {
+                    console.log(this.user_default_billing_info.cardholder);
+                    if (this.user_default_billing_info.cardholder) {
+                        document.getElementById('user_checkout_billing_info_next_btn').value == 'on' ?
+                            document.getElementById('user_checkout_billing_info_next_btn').style.display = "block" : false;
+                        document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                        document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";   
+                    }
+                });
+
 
             }
             
@@ -347,8 +445,8 @@ export default class {
                 document.getElementById('user_checkout_shipping_info_next_btn').style.display = "none";
                 
                 (document.getElementById('user_checkout_shipping_method_container_change_btn').value == 'on') ?
-                document.getElementById('user_continue_to_payment_btn').style.display = "block" :
-                document.getElementById('user_select_this_shipping_method_btn').style.display = "block";
+                    document.getElementById('user_continue_to_payment_btn').style.display = "block" :
+                    document.getElementById('user_select_this_shipping_method_btn').style.display = "block";
                 
                 this.getUserDefaultShippingInfomation(user_id).then(data => {
                     // console.log(data)
@@ -365,45 +463,83 @@ export default class {
             
 
             if(e.target && e.target.id == 'user_continue_to_payment_btn') {
-                
+                console.log("if(e.target && e.target.id == 'user_continue_to_payment_btn') {")
+                console.log(document.getElementById('user_checkout_billing_info_context').getAttribute('value'))
                 document.getElementById('user_checkout_shipping_method_container_change_btn').setAttribute('value', 'off');
+                
+                // document.getElementById('set_default_payment_method_btn') && document.getElementById('set_default_payment_method_btn').value == "on" ?
+                //     document.getElementById('user_checkout_change_payment_method_btn').style.display = "none" : 
+                //     document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+
+                document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').getAttribute('value') == "off" ?
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "none" : 
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                
+                    // if (document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').getAttribute('value') == "off" ) {
+                    //     console.log("if (document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').value == off ) {")
+                    
+                    //     document.getElementById('user_checkout_change_payment_method_btn').style.display = "none";
+                    // } else document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                
+
+
                 document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
                 document.getElementById('user_checkout_shipping_method_container').style.display = "none";
                 document.getElementById('user_checkout_billing_info').style.display = "block";
-                document.getElementById('user_checkout_billing_info_cover').style.display = "none";
-                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block";
+                // document.getElementById('user_checkout_billing_info_cover').style.display = "none";
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block";                             
 
-                document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
-                document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";                
-                
                 this.check_out_box.setShippingMethodCoverContents(user_id);
                 const shipping_rate = this.check_out_box.checkShippingRate();
                 
                 this.check_out_box.rerenderTotal(this.check_out_box.getTotal(user_id), shipping_rate[1]);
+
+                this.getUserDefaultBillingInfomation(user_id).then(data => {
+                    console.log(this.user_default_billing_info.cardholder);
+                    if (this.user_default_billing_info.cardholder) {
+                        document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
+                        document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                        document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";   
+                    }
+                });
+
 
 
 
             }            
 
             if(e.target && e.target.id == 'user_checkout_billing_info_next_btn') {
+                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block"; 
 
                 document.getElementById('user_checkout_billing_info_next_btn').setAttribute('value', 'off');
                 document.getElementById('user_checkout_billing_info_select_btn').setAttribute('value', 'off');
-                document.getElementById('user_checkout_billing_info').style.display = "none";
-                document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+                
+                document.getElementById('user_checkout_billing_info_contents').style.display = "none";
                 document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";
+                document.getElementById('user_checkout_billing_info_detail_box_cover').style.display = "block";
+                document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
+                
+                               
+                
+                this.check_out_box.setShippingMethodCoverContents(user_id);
+                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container').style.display = "none";
                 // const user_checkout_billing_info_cover = document.getElementById("user_checkout_billing_info_cover");
                 // user_checkout_billing_info_cover.appendChild(user_checkout_billing_info_context);
-                
+                this.getUserDefaultBillingInfomation(user_id).then(data => {
 
-                const billing_info = this.getUserDefaultBillingInfo();
-                console.log(billing_info);
+                    // const billing_info = this.getUserDefaultBillingInfo();
+                    // console.log(billing_info);
 
-                document.getElementById('user_checkout_billing_info_container_cover_contents').innerText = 
-                "**********" + billing_info.last4 + ' ' + billing_info.cardtype + ' ' + billing_info.exp.slice(0,2) + '/' + billing_info.exp.slice(-2);
-                document.getElementById("user_checkout_billing_info_container_cover_context").innerHTML = setPromotionBox();
-                document.getElementById('user_checkout_submit_button').disabled = false;
-                document.getElementById('user_checkout_submit_button').focus();
+                    document.getElementById('user_checkout_billing_info_detail_box_cover').innerText = data.cardholder + ' ' +
+                    "**********" + data.last4 + ' ' + data.cardtype + ' ' + data.exp.slice(0,2) + '/' + data.exp.slice(-2);
+                    // document.getElementById("user_checkout_billing_info_container_cover_context").innerHTML = setPromotionBox();
+                    document.getElementById('user_checkout_submit_button').disabled = false;
+                    document.getElementById('user_checkout_submit_button').focus();
+                });
 
             }
 
@@ -563,20 +699,10 @@ export default class {
                     last4 : result[0].last4,
                     exp : result[0].exp
                 };
-
-                const cardholder = result[0].cardholder; 
-                const cardtype = result[0].type;
-                const last4 = result[0].last4;
-
-                setUserCheckoutBillingInfo(this.user_default_billing_info.cardholder, this.user_default_billing_info.cardtype, this.user_default_billing_info.last4, this.user_default_billing_info.exp);
+                setUserCheckoutBillingInfo(this.user_default_billing_info);
             } else {
-                document.querySelector('.user_checkout_billing_info').innerHTML = `
-                <div class="user_checkout_billing_info_title">Payment Infomation</div>
-                <h2>Nothing have for default payment method yet</h2>
-                <h2>Would like to make default payment method?</h2>
-                <button type="button" id="set_default_payment_method_btn" class="set_default_payment_method_btn" title="set payment method">Set Up</button>     
-                
-                `;
+                this.user_default_billing_info = {};
+                setUserCheckoutBillingInfo();
 
             }
         });
@@ -605,13 +731,9 @@ export default class {
                 this.getShippingRate(this.check_out_box.user_shipping_info);
 
             } else {
-                document.querySelector('.user_checkout_shipping_info').innerHTML = `
-                <div class="user_checkout_shipping_info_title">Shipping Infomation</div>
-                <h2>Nothing have for default address yet</h2>
-                <h2>Would like to make default address?</h2>
-                <button type="button" id="set_default_address_btn" class="set_default_address_btn" title="set shipping address">Set Up</button>     
+                setUserCheckoutShippingInfo();
+
                 
-                `;
 
             }
         });
@@ -692,9 +814,7 @@ export default class {
 
             this.check_out_box.setItemTotalWeight('GUEST', guest_total_item_weight);
 
-
-            this.check_out_box.setTotal('GUEST', guest_total_amount);
-                
+            this.check_out_box.setTotal('GUEST', guest_total_amount);                
 
             check_out_cart.forEach(element => {
                 this.check_out_box.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "check_out_items_container", "check_out_item");
@@ -868,10 +988,13 @@ export default class {
             email : param.email,
             weight : this.check_out_box.user_item_total_weight
             }
-            
+            // document.getElementById('user_checkout_shipping_info_next_btn').setAttribute("disabled", 'true');
+            document.getElementById('user_checkout_shipping_info_next_btn').classList.add("disabled"); 
         }
     
         console.log(data);
+        
+        
         const options = 
             {   
                 method: 'POST',
@@ -885,25 +1008,66 @@ export default class {
         .then((res) => res.json())
         .then(result => {
             console.log(result);
+            if (result.RateResponse.Response.ResponseStatus.Description == 'Success') {
+                if(document.getElementById('user_checkout_shipping_info_next_btn')) {
+                    // document.getElementById('user_checkout_shipping_info_next_btn').setAttribute("disabled",'false');
+                    document.getElementById('user_checkout_shipping_info_next_btn').classList.remove("disabled"); 
+                }
 
-            let ground = result.RateResponse.RatedShipment.filter(element => {                
-                return element.Service.Code == '03'})[0].TotalCharges.MonetaryValue;
-            console.log(ground);
-            let threedays = result.RateResponse.RatedShipment.filter(element => {                
-                return element.Service.Code == '12'})[0].TotalCharges.MonetaryValue;
-                console.log(threedays);
-            let nextday = result.RateResponse.RatedShipment.filter(element => {                
-                return element.Service.Code == '13'})[0].TotalCharges.MonetaryValue;
-                console.log(nextday);
-            this.check_out_box.setShippingGroundRate(parseFloat(ground));
-            document.getElementById('shipping_ground_rate_price').innerText = ground;
+                let ground = result.RateResponse.RatedShipment.filter(element => {                
+                    return element.Service.Code == '03'})[0].TotalCharges.MonetaryValue;
+                console.log(ground);
+                let threedays = result.RateResponse.RatedShipment.filter(element => {                
+                    return element.Service.Code == '12'})[0].TotalCharges.MonetaryValue;
+                    console.log(threedays);
+                let nextday = result.RateResponse.RatedShipment.filter(element => {                
+                    return element.Service.Code == '13'})[0].TotalCharges.MonetaryValue;
+                    console.log(nextday);
+                this.check_out_box.setShippingGroundRate(parseFloat(ground));
+                document.getElementById('shipping_ground_rate_price').innerText = ground;
+                    
+                this.check_out_box.setShippingThreeDaysRate(parseFloat(threedays));              
+                document.getElementById('shipping_3days_rate_price').innerText = threedays;
+
+                this.check_out_box.setShippingNextDayRate(parseFloat(nextday));
+                document.getElementById('shipping_nextday_rate_price').innerText = nextday;
+            }
+        });
+    }
+
+    getUserDefaultBillingInfomation(user_id) {
+        return new Promise((resolve, reject) => {
+            const send_data = {u_id : user_id};
+
+            const data = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
                 
-            this.check_out_box.setShippingThreeDaysRate(parseFloat(threedays));              
-            document.getElementById('shipping_3days_rate_price').innerText = threedays;
+                    },
+                body: JSON.stringify(send_data)
+            };
+            console.log(data);
 
-            this.check_out_box.setShippingNextDayRate(parseFloat(nextday));
-            document.getElementById('shipping_nextday_rate_price').innerText = nextday;
-
+            fetch(`/get_user_default_billing_info`, data)
+            .then((res) => res.json())
+            .then(result => {
+                console.log("makeUserCheckOutbilling info Form")
+                console.log(result) 
+                if (result.length > 0) {
+                    this.user_default_billing_info = {
+                        cardholder : result[0].cardholder,
+                        cardtype : result[0].type,
+                        last4 : result[0].last4,
+                        exp : result[0].exp
+                    };
+                    resolve(this.user_default_billing_info);
+                    
+                } else {
+                    this.user_default_billing_info = {};
+                    resolve(this.user_default_billing_info);
+                }
+            });
         });
     }
 
@@ -938,6 +1102,9 @@ export default class {
                     }
                     this.check_out_box.setUserShippingInfo(this.user_default_shipping_info);
                     resolve(this.user_default_shipping_info);
+                } else {
+                    this.user_default_shipping_info = {};
+                    resolve(this.user_default_shipping_info);
                 }
             });
         });
@@ -951,6 +1118,30 @@ export default class {
     getUserDefaultBillingInfo() {
         return this.user_default_billing_info;
     }
+
+    // turnOffDisplay() {
+    //     const modal = document.getElementById('modal');
+    //     modal.style.display = "block";
+    //     modal.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
+    //     modal.style.pointerEvents = "none";   
+    //     document.body.classList.add("no_action");
+        
+    //     const target = document.getElementById('lorem');
+    //     this.spinner.spin(target);
+    //     target.appendChild(this.spinner.el);
+    
+        
+    // }
+
+    // turnOnDisplay() {
+    //     modal.style.display = "none";
+    //     modal.style.backgroundColor = "rgba(0, 0, 0, 0)";
+    //     modal.style.pointerEvents = "auto";
+    //     document.body.classList.remove("no_action");        
+    //     this.spinner.stop();
+    // }
+
+    
 
 }
 
@@ -1019,51 +1210,12 @@ function cloverTokenHandler(token, items, ship_rate) {
 
     const formData = new FormData(form);
     const payload = new URLSearchParams(formData);
-    guest_payload = payload;
-   
-
-    /*
-    fetch('/guest_order_checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: payload,
-      })
-      .then(res => res.json())
-      .then(response => {
-
-        turnOnDisplay();
-
-        console.log("/guest_order_checkout complete")
-        console.log(response)
-        
-        const paid_item_no = response.paid_items_number;
-        console.log(paid_item_no)
-        let guest_cart = JSON.parse(sessionStorage.getItem("cart"));
-       
-        for (let i =0 ; i < paid_item_no.length ; i++) {
-            for(let j = 0; j < guest_cart.length; j++) { 
-                if(guest_cart[j].c_item_no == paid_item_no[i]) {                    
-                    guest_cart.splice([j], 1);
-                    j--;
-                }
-            }
-        }
-        sessionStorage.setItem("cart", JSON.stringify(guest_cart)); // set left over cart
-        sessionStorage.removeItem("checkoutcart");
-
-        setOrderConfirmationPage(response);
-        ItemCounter.item_counter('GUEST');
-
-    });
-    */
-  
+    guest_payload = payload;    
 }
 
 function guestCheckoutSubmit(payload) {
     document.getElementById('guest_checkout_submit_button').setAttribute('disabled', 'true');
-    turnOffDisplay();
+    SPINNER.turnOffDisplay();
 
     fetch('/guest_order_checkout', {
         method: 'POST',
@@ -1075,7 +1227,7 @@ function guestCheckoutSubmit(payload) {
       .then(res => res.json())
       .then(response => {
 
-        turnOnDisplay();
+        SPINNER.turnOnDisplay();
 
         console.log("/guest_order_checkout complete")
         console.log(response)
@@ -1101,23 +1253,6 @@ function guestCheckoutSubmit(payload) {
     });
 }
 
-
-function turnOffDisplay() {
-    const modal = document.getElementById('modal');
-    modal.style.display = "block";
-    modal.style.backgroundColor = "rgba(0, 0, 0, 0.4)";
-    modal.style.pointerEvents = "none";   
-    document.body.classList.add("no_action");
-    Spinner.show();
-}
-
-function turnOnDisplay() {
-    modal.style.display = "none";
-    modal.style.backgroundColor = "rgba(0, 0, 0, 0)";
-    modal.style.pointerEvents = "auto";
-    document.body.classList.remove("no_action");        
-    Spinner.hide();
-}
 
 function setOrderConfirmationPage(response) {
     const online_main_page = document.getElementById('online_main');
@@ -1128,17 +1263,17 @@ function setOrderConfirmationPage(response) {
     history.pushState(null, null, `/order-confirmation`);
 }
 
-function setUserCheckoutBillingInfo(cardholder, type, last4, exp) {
+function setUserCheckoutBillingInfo(user_checkout_billing_info) {
     const user_checkout_billing_info_detail = document.createElement('div');
     user_checkout_billing_info_detail.setAttribute('id', `user_checkout_billing_info_detail`);
     user_checkout_billing_info_detail.setAttribute('class', `user_checkout_billing_info_detail`);
     document.querySelector('.user_checkout_billing_info').appendChild(user_checkout_billing_info_detail);
 
-    setUserCheckoutBillingInfoCard(cardholder, type, last4, exp);    
+    setUserCheckoutBillingInfoCard(user_checkout_billing_info);    
 
 }
 
-function setUserCheckoutBillingInfoCard(cardholder, type, last4, exp) {
+function setUserCheckoutBillingInfoCard(user_checkout_billing_info) {
     const user_checkout_billing_info_detail = document.getElementById('user_checkout_billing_info_detail');
     
     const user_checkout_billing_info_title_box = document.createElement('div');
@@ -1148,6 +1283,10 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4, exp) {
     const user_checkout_billing_info_title = document.createElement('div');
     user_checkout_billing_info_title.setAttribute('id', `user_checkout_billing_info_title`);
     user_checkout_billing_info_title.setAttribute('class', `user_checkout_billing_info_title user_checkout_info_title`);
+
+    const user_checkout_billing_info_detail_box_cover = document.createElement('div');
+    user_checkout_billing_info_detail_box_cover.setAttribute('id', `user_checkout_billing_info_detail_box_cover`);
+    user_checkout_billing_info_detail_box_cover.setAttribute('class', `user_checkout_billing_info_detail_box_cover`);
 
     const user_checkout_billing_info_contents = document.createElement('div');
     user_checkout_billing_info_contents.setAttribute('id', `user_checkout_billing_info_contents`);
@@ -1180,6 +1319,7 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4, exp) {
     const user_checkout_billing_info_context = document.createElement('div');
     user_checkout_billing_info_context.setAttribute('id', `user_checkout_billing_info_context`);
     user_checkout_billing_info_context.setAttribute('class', `user_checkout_billing_info_context`);
+    user_checkout_billing_info_context.setAttribute('value', `on`);
 
     const user_checkout_change_payment_method_btn = document.createElement('button');
     user_checkout_change_payment_method_btn.setAttribute('id', `user_checkout_change_payment_method_btn`);
@@ -1198,6 +1338,8 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4, exp) {
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_title_box);
     user_checkout_billing_info_title_box.appendChild(user_checkout_billing_info_title);
     user_checkout_billing_info_title_box.appendChild(user_checkout_change_payment_method_btn);
+    user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_detail_box_cover);
+    
     user_checkout_billing_info_detail.appendChild(user_checkout_billing_info_contents);
 
     user_checkout_billing_info_contents.appendChild(user_checkout_billing_info_cardholder);
@@ -1213,15 +1355,31 @@ function setUserCheckoutBillingInfoCard(cardholder, type, last4, exp) {
 
     user_checkout_billing_info_title.innerText = "Payment Infomation";
     user_checkout_change_payment_method_btn.innerText = "Change Payment Method";
-    user_checkout_billing_info_cardholder.innerText = cardholder;
-    user_checkout_billing_info_cardtype.innerText = type;
-    user_checkout_billing_info_text.innerText = "ending in";
-    user_checkout_billing_info_cardlast4.innerText = last4;
-    user_checkout_billing_info_exp.innerText = 'EXP' + ' ' + exp.slice(0,2) + '/' + exp.slice(-2);
-    user_checkout_billing_info_context.innerHTML = setPromotionBox();  
+    user_checkout_billing_info_context.innerHTML = setPromotionBox(); 
     user_checkout_billing_info_next_btn.innerText = "Continue to Place Order";     
-    user_checkout_billing_info_select_btn.innerText = "Select This Payment Method";     
+    user_checkout_billing_info_select_btn.innerText = "Select This Payment Method";  
+
+    if (user_checkout_billing_info) {
+        user_checkout_billing_info_cardholder.innerText = user_checkout_billing_info.cardholder;
+        user_checkout_billing_info_cardtype.innerText = user_checkout_billing_info.cardtype;
+        user_checkout_billing_info_text.innerText = "ending in";
+        user_checkout_billing_info_cardlast4.innerText = user_checkout_billing_info.last4;
+        user_checkout_billing_info_exp.innerText = 'EXP' + ' ' + user_checkout_billing_info.exp.slice(0,2) + '/' + user_checkout_billing_info.exp.slice(-2);
+         
+    } else {
+        user_checkout_change_payment_method_btn.style.display = 'none';
+        user_checkout_billing_info_next_btn.style.display = 'none';
+        user_checkout_billing_info_select_btn.style.display = 'none';
+        user_checkout_billing_info_context.style.display = 'none';
+        user_checkout_billing_info_context.setAttribute('value', `off`);
+        document.getElementById('user_checkout_billing_info_contents').innerHTML = AIF.setUpPaymentMethodForm();
+
+    }
+       
    
+
+    
+    
 }
 
 function setPromotionBox() {
@@ -1241,9 +1399,6 @@ function setPromotionBox() {
 
 // function setUserCheckoutShippingInfo(recipient, address1, address2, city, state, zip, phone, email, sh_option) {
 function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
-
-    
-
 
     const user_checkout_shipping_info_detail = document.createElement('div');
     user_checkout_shipping_info_detail.setAttribute('id', `user_checkout_shipping_info_detail`);
@@ -1339,27 +1494,40 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
     user_checkout_shipping_info_csz.appendChild(user_checkout_shipping_info_zip);
     user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_phone);
     user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_email);
-    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_sh_option);
-    
+    user_checkout_shipping_info_detail_box.appendChild(user_checkout_shipping_info_sh_option);    
     user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_next_btn);
     // user_checkout_shipping_info_detail.appendChild(user_checkout_shipping_info_select_btn);
     // user_checkout_shipping_info_next_btn_container.appendChild(user_checkout_shipping_info_next_btn);
 
-    user_checkout_shipping_info_title.innerHTML = "Shipping Infomation";
-    user_checkout_shipping_info_recipient.innerHTML = user_checkout_shipping_info.recipient;
-    user_checkout_shipping_info_address1.innerHTML = user_checkout_shipping_info.address1;
-    user_checkout_shipping_info_address2.innerHTML = user_checkout_shipping_info.address2;
-    user_checkout_shipping_info_city.innerHTML = user_checkout_shipping_info.city;
-    user_checkout_shipping_info_state.innerHTML = user_checkout_shipping_info.state;
-    user_checkout_shipping_info_zip.innerHTML = user_checkout_shipping_info.zip;
-    user_checkout_shipping_info_phone.innerHTML = user_checkout_shipping_info.phone;
-    user_checkout_shipping_info_email.innerHTML = user_checkout_shipping_info.email;
-    user_checkout_shipping_info_sh_option.innerHTML = user_checkout_shipping_info.sh_option;
+    user_checkout_shipping_info_title.innerText = "Shipping Infomation";
     user_checkout_shipping_info_change_btn.innerText = `Change Shipping Address`;
     user_checkout_shipping_info_next_btn.innerText = "Continue to Select Shipping Method";
+
+    if (user_checkout_shipping_info) {        
+        user_checkout_shipping_info_recipient.innerHTML = user_checkout_shipping_info.recipient;
+        user_checkout_shipping_info_address1.innerHTML = user_checkout_shipping_info.address1;
+        user_checkout_shipping_info_address2.innerHTML = user_checkout_shipping_info.address2;
+        user_checkout_shipping_info_city.innerHTML = user_checkout_shipping_info.city;
+        user_checkout_shipping_info_state.innerHTML = user_checkout_shipping_info.state;
+        user_checkout_shipping_info_zip.innerHTML = user_checkout_shipping_info.zip;
+        user_checkout_shipping_info_phone.innerHTML = user_checkout_shipping_info.phone;
+        user_checkout_shipping_info_email.innerHTML = user_checkout_shipping_info.email;
+        user_checkout_shipping_info_sh_option.innerHTML = user_checkout_shipping_info.sh_option;
+        
+    } else {
+        document.getElementById('user_checkout_shipping_method_container_cover').style.display = 'block';
+        document.getElementById('user_checkout_shipping_method_container').style.display = 'none';
+        
+
+        user_checkout_shipping_info_change_btn.style.display = 'none';
+        user_checkout_shipping_info_next_btn.style.display = 'none';
+        document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = AIF.setUpShippingAddressForm();
+    }
     // user_checkout_shipping_info_select_btn.innerText = "Select This Shipping Address";
 }
 
+
+/*
 function Spinner(){
 	Spinner.element=document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 	let c=document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -1422,6 +1590,7 @@ Spinner.hide=function(){
 	Spinner.element.setAttribute('stroke-dasharray','0 264');
 	Spinner.element.setAttribute('stroke-dashoffset','0')
 };
+*/
 
 
 
@@ -1665,7 +1834,7 @@ document.addEventListener('click',function(e){
         modal.style.pointerEvents = "auto";
         document.body.classList.remove("hidden");
         
-        Spinner.hide();
+        // Spinner.hide();
         // let data = [];
         // let order_items = [
         //     {
@@ -1749,27 +1918,28 @@ document.addEventListener('click',function(e){
         
     }
 
+     
     if(e.target && e.target.className == 'crypto_test') {
 
-        const payload = {test : "test"}
-        fetch('/test_ups_ship', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: payload,
-          })
-          .then(res => res.json())
-          .then(response => {
+        // const payload = {test : "test"}
+        // fetch('/test_ups_ship', {
+        //     method: 'POST',
+        //     headers: {
+        //       'Content-Type': 'application/x-www-form-urlencoded'
+        //     },
+        //     body: payload,
+        //   })
+        //   .then(res => res.json())
+        //   .then(response => {
     
     
-            console.log("/test_order_checkout complete")
-            console.log(response)
+        //     console.log("/test_order_checkout complete")
+        //     console.log(response)
             
             // const paid_item_no = response.paid_items_number;
             // console.log(paid_item_no)
             // let guest_cart = JSON.parse(sessionStorage.getItem("cart"));
-           
+        
             // for (let i =0 ; i < paid_item_no.length ; i++) {
             //     for(let j = 0; j < guest_cart.length; j++) { 
             //         if(guest_cart[j].c_item_no == paid_item_no[i]) {                    
@@ -1784,31 +1954,56 @@ document.addEventListener('click',function(e){
             // setOrderConfirmationPage(response);
             // ItemCounter.item_counter('GUEST');
     
-        });
-        
+        // });
+        const sp = e.pageY;
+        console.log(sp);
+        document.querySelector('.spinner').style.top = `${sp}px`;
+        // SPINNER.turnOnDisplay();
     }
-
 
     if(e.target && e.target.className == 'make_item_test') {
+        const target = document.querySelector('.make_item_test'); // 요소의 id 값이 target이라 가정
+        const clientRect = target.getBoundingClientRect(); // DomRect 구하기 (각종 좌표값이 들어있는 객체)
+        const relativeTop = clientRect.top; // Viewport의 시작지점을 기준으로한 상대좌표 Y 값.
+        
+        var winX = e.clientX;
+        var winY = e.clientY;
+        console.log(winX)
+        console.log(target)
+        console.log(clientRect)
+        console.log(relativeTop)
+         // const opts = {
+    //     lines: 13, // The number of lines to draw
+    //     length: 38, // The length of each line
+    //     width: 17, // The line thickness
+    //     radius: 42, // The radius of the inner circle
+    //     scale: 1, // Scales overall size of the spinner
+    //     corners: 1, // Corner roundness (0..1)
+    //     speed: 1, // Rounds per second
+    //     rotate: 0, // The rotation offset
+    //     animation: 'spinner-line-fade-more', // The CSS animation name for the lines
+    //     direction: 1, // 1: clockwise, -1: counterclockwise
+    //     color: '#983131', // CSS color or array of colors
+    //     fadeColor: 'transparent', // CSS color or array of colors
+    //     top: '44%', // Top position relative to parent
+    //     left: '50%', // Left position relative to parent
+    //     shadow: '0 0 1px transparent', // Box-shadow for the lines
+    //     zIndex: 2000000000, // The z-index (defaults to 2e9)
+    //     className: 'spinner', // The CSS class to assign to the spinner
+    //     position: 'absolute', // Element positioning
+    //   };
 
-        const payload = {test : "test"}
-        fetch('/make_item_test', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: payload,
-          })
-          .then(res => res.json())
-          .then(response => {
-    
-    
-            console.log("/test_order_checkout complete")
-            console.log(response)
-            
-         
-        });
+    //   var target = document.getElementById('lorem');
+    // var spinner = new Spinner(opts).spin(target);
+
+    // target.appendChild(spinner.el);
+        SPINNER.turnOffDisplay();
+       
     }
 
+
+
     
+
+   
 });

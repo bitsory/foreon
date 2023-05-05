@@ -4,12 +4,15 @@ import ShopDetail from "./shop_detail.js"
 import * as ShopPageForm from "./form_shop_page.js";
 
 
+
 export default class {
     // lorem = document.getElementById('lorem');
 
     constructor() {
         document.title = "Cafe FORE";
         console.log("shop page");
+
+
         // this.n_cart = Main;    
         /*
         this.lorem.addEventListener('click', function(e) {
@@ -255,35 +258,28 @@ document.addEventListener('click', function(e) {
 
     if (e.target && e.target.id == 'shop_test_btn') {
 
-        // fetch('https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080')
-        // .then(response => response.json())
-        // .then(result => {
-        //     console.log(result);
-        //     window.location.href = response.LassoRedirectURL;
-        // });
-        console.log("sho[p teset sho[p teset sho[p tesetsho[p teset ")
-        const send_data = { post : "item detail view"};
-        const data = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+       
+        // console.log("sho[p teset sho[p teset sho[p tesetsho[p teset ")
+        // const send_data = { post : "item detail view"};
+        // const data = {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json'
                
-                },
-            body: JSON.stringify(send_data)
-        };
-        console.log(data);
+        //         },
+        //     body: JSON.stringify(send_data)
+        // };
+        // console.log(data);
 
-        fetch(`/test_ups_ship`, data)
-        .then(response => response.json())
-        .then(response => {
+        // fetch(`/test_ups_ship`, data)
+        // .then(response => response.json())
+        // .then(response => {
 
-        console.log("response")
-        console.log(response)
+        // console.log("response")
+        // console.log(response)
         //  response.LassoRedirectURL + `?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080&response_type=code&scope=read&type=ups_com_api`;
         // res.redirect(`https://www.ups.com/lasso/signin`+`?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080&response_type=code&scope=read&type=ups_com_api`)
         // !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
-})
-        .catch(err => console.error(err)); 
     }
 
 });

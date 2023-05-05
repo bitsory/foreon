@@ -149,7 +149,7 @@ export function getGuestOrderConfirm() {
                         
                         <div class="order_info_title">Shipping Infomation</div>
 
-                        <div class="shipping_info_recipient">
+                        <div class="guest_checkout_shipping_info_recipient">
                             <div class="guest_checkout_shipping_info_form_row">
                                 <div id="recipient_first_name" class="field recipient_first_name">
                                 <input type="text" name="recipient_first_name" id="input_recipient_first_name" class="input_recipient_first_name guest_checkout_input_shipping guest_checkout_input_shipping_recipient" placeholder="First Name" required>

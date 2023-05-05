@@ -91,13 +91,17 @@ gotoTop.addEventListener('click', () => {
 });
 
 window.addEventListener('click', (e) => {   
-    e.target.className === 'modal_overlay' ? modalClose() : false       
+    if (e.target.className === 'modal_overlay') {
+        modal.style.display = 'none';
+        modalClose('modal_body');
+    }
+
 })
 
-function modalClose() {
-    modal.style.display = 'none';
+function modalClose(param) {
     document.body.style.overflow = 'auto';
-    document.getElementById('modal_body').remove();
+    document.getElementById(param).remove();
+    
 }
 
 document.addEventListener('click', function(e){    
@@ -114,10 +118,6 @@ document.addEventListener('click', function(e){
     const view_cart_btn = document.getElementById('view_cart_btn');
     const cart_modal_items_slider_box = document.getElementById('cart_modal_items_slider_box');
     
-
-    const go_cart_page_btn = document.getElementById('go_cart_page_btn');
-
-
     // const account_modal_pop_container = document.getElementById("account_modal_pop_container");
     
     // const sign_in_btn = document.getElementById("sign_in_btn");

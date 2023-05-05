@@ -1,6 +1,7 @@
 import * as AIF from "./form_acc_info.js";
 import * as ItemCounter from "./item_counter.js";
-import * as PurchaseHistory from "./form_purchase_history.js";
+import * as SPINNER from "./spinner.js";
+
 
 
 export default class Cart {
@@ -432,18 +433,57 @@ document.addEventListener('click',function(e){
     }
 
     if(e.target && e.target.id == 'billing_info_add_btn') {
+
+        const target = document.getElementById("billing_info_add_btn");
+
+        // const t_offset = target.offsetTop();
+        const targetTop = target.getBoundingClientRect().top;
+        
+
+        const abTop = window.pageYOffset + target.getBoundingClientRect().top;
+        const ttt = window.pageYOffset;
+        const tttt = e.pageY;
+
+        // const sp = document.getElementById('billing_info_add_btn').offsetHeight;
+        // console.log(e);
+        // console.log(e.pageY);
+        // console.log(sp);
+
+        console.log(target);
+        console.log(target.getBoundingClientRect());
+
+       
+        console.log(targetTop);
+        console.log(ttt);
+        console.log(tttt);
+        console.log(abTop);
+        console.log(window.pageYOffset);        
+
+        
         console.log("e.target && e.target.id == 'billing_info_add_btn'")
         document.querySelector('.billing_info_box').innerHTML = AIF.addBillingInfoBox();
-        AIF.addBillingMethodForm();
+        addBillingMethodForm();
         document.querySelector('.billing_info_add_btn_container').style.display = "none";
         document.change_profile_billing_info_form.billing_address_street_line1.focus();
+
+        if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+            document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
+        }
+        
+        
+        
     }
+
     if(e.target && e.target.id == 'shipping_info_add_btn') {
         document.querySelector('.shipping_info_box').innerHTML = AIF.addShippingInfoBox();
+        document.getElementById('change_shipping_info_btn_container').innerHTML = AIF.addShippingInfoBtnBox();
         document.querySelector('.shipping_info_add_btn_container').style.display = "none";
         
         AIF.addShippingInfo();
-        document.change_profile_shipping_info_form.shipping_recipient.focus()
+        document.change_profile_shipping_info_form.shipping_recipient.focus();
+        if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+            document.getElementById('user_checkout_shipping_info_next_btn').style.display = "none";
+        }
     }
 
 
@@ -528,6 +568,7 @@ document.addEventListener('click',function(e){
                 billing_info_box.removeChild(billing_info_box.firstChild);
               }
             renderBillingInfo(result);
+            document.getElementById('choose_defualt_btn_container').focus();
 
         });
     }
@@ -558,72 +599,242 @@ document.addEventListener('click',function(e){
         .then((res) => res.json())
         .then(result => {
             console.log(result)
+
             const billing_info_box = document.querySelector('.billing_info_box');
             while (billing_info_box.hasChildNodes()) {	
                 billing_info_box.removeChild(billing_info_box.firstChild);
             }
-            renderBillingInfo(result);          
+            renderBillingInfo(result);  
+            
+
+            
+            if (location.pathname.substring(0, 15) == '/shop/checkout/') { // checkout page
+                document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+
+                if (result.length > 0) {
+                    console.log("if (location.pathname.substring(0, 15) == '/shop/checkout/') {")
+
+                    // document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
+                    //     document.getElementById('user_continue_to_payment_btn').style.display = "none" : false;
+                    
+                    // document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                    // document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                    // document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
+                    // document.getElementById('user_checkout_shipping_method_container').style.display = "block";
+                    // document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                   
+                    
+                    // document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+
+                    document.getElementById('user_checkout_billing_info_contents').innerHTML = 
+                    `
+                    <div id="change_profile_billing_info" class="change_profile_billing_info">
+                        <div id="billing_info_container" class="billing_info_container">
+                            <div id="billing_info_box" class="billing_info_box"></div> 
+                        </div>
+                        <div id="billing_info_add_btn_container" class="billing_info_add_btn_container info_add_btn_container">
+                            <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
+                        </div>
+                    </div>
+                    
+                    `;                    
+                    
+                    document.getElementById('billing_info_add_btn_container').style.display = "block";
+                    const billing_info_box = document.getElementById('billing_info_box');
+                    while (billing_info_box.hasChildNodes()) {	
+                        billing_info_box.removeChild(billing_info_box.firstChild);
+                    }
+                    renderBillingInfo(result); 
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                    document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
+
+                } else { 
+                    console.log("result.length == 0")
+                    document.getElementById('user_checkout_billing_info_contents').innerHTML = AIF.setUpPaymentMethodForm();
+                    document.getElementById('user_checkout_billing_info_detail_box_cover').innerText = '';                    
+                    
+                    document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+
+                    document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
+                        document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block" : false;                      
+                                        
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "none";                    
+                    document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
+                    document.getElementById('billing_info_add_btn_container') ? document.getElementById('billing_info_add_btn_container').style.display = "none" : false;
+                    document.getElementById('user_checkout_billing_info_context').style.display = "none";
+                    document.getElementById('user_checkout_billing_info_context').setAttribute('value', 'off');
+                    
+                }                
+
+            } else { //account page
+                const billing_info_box = document.getElementById('billing_info_box');
+                while (billing_info_box.hasChildNodes()) {	
+                    billing_info_box.removeChild(billing_info_box.firstChild);
+                }
+                renderBillingInfo(result); 
+                document.getElementById('billing_info_add_btn_container').style.display = "block";
+            }               
+
+        
+
         });
     }
 
     if(e.target && e.target.id == 'add_shipping_info_submit_btn') {
-       
-        if (location.pathname.substring(0, 15) == '/shop/checkout/') {
 
-            console.log("if (location.pathname.substring(0, 15) == '/shop/checkout/') {")
-
-            var form = document.getElementById('change_profile_shipping_info_form');            
+        const form = document.getElementById('change_profile_shipping_info_form');            
         
-            const formData = new FormData(form);
-            const payload = new URLSearchParams(formData);                  
-            
-            fetch('/add_profile_shipping_test', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: payload,
-              })
-              .then(res => res.json())
-              .then(response => {
-                console.log(response)
-                if (document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off") {
-                    document.getElementById('user_continue_to_payment_btn').style.display = "none";
-                }
-                document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
-                document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
-                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
-                document.getElementById('user_checkout_shipping_method_container').style.display = "block";
-                document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
-                // document.getElementById('user_checkout_billing_info_cover').style.display = "block";
-                
-                document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
-                
+        const formData = new FormData(form);
+        const payload = new URLSearchParams(formData);                  
+        
+        fetch('/add_profile_shipping', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: payload,
+        })
+        .then(res => res.json())
+        .then(response => {
+            console.log(response)
+            if (response.result == 'ok') {                
+                if (location.pathname.substring(0, 15) == '/shop/checkout/') {
 
-                document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = 
-                `
-                <div id="change_profile_shipping_info" class="change_profile_shipping_info">
-                    <div id="shipping_info_container" class="shipping_info_container">
-                        <div id="shipping_info_box" class="shipping_info_box"></div> 
-                    </div>
-                    <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container info_add_btn_container">
-                        <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
-                    </div>
-                </div>
-                
-                `;
+                    console.log("if (location.pathname.substring(0, 15) == '/shop/checkout/') {")
+
+                    document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
+                        document.getElementById('user_continue_to_payment_btn').style.display = "none" : false;
+                        
+                    document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                    document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                    document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
+                    document.getElementById('user_checkout_shipping_method_container').style.display = "block";
+                    document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                    // document.getElementById('user_checkout_billing_info_cover').style.display = "block";
                     
-              
-                document.querySelector('.shipping_info_add_btn_container').style.display = "block";
-                fetch('/get_user_shipping_info') // get shipping info from DB
-                .then((res) => res.json())
-                .then(result => {
-                    renderShippingInfo(result);
-                });
+                    document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+                    
+
+                    document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = 
+                    `
+                    <div id="change_profile_shipping_info" class="change_profile_shipping_info">
+                        <div id="shipping_info_container" class="shipping_info_container">
+                            <div id="shipping_info_box" class="shipping_info_box"></div> 
+                        </div>
+                        <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container info_add_btn_container">
+                            <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
+                        </div>
+                    </div>
+                    
+                    `;                    
+                    
+                    document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+                    document.getElementById('shipping_info_add_btn_container').style.display = "block";
+                    fetch('/get_user_shipping_info') // get shipping info from DB
+                    .then((res) => res.json())
+                    .then(result => {
+                        renderShippingInfo(result);
+                        document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                    }); 
+
+                } else {
+                    
+                    const shipping_info_box = document.querySelector('.shipping_info_box');
+                    while (shipping_info_box.hasChildNodes()) {	
+                        shipping_info_box.removeChild(shipping_info_box.firstChild);
+                    }
+
+                    // document.querySelector('.shipping_info_box').innerHTML.removeChild();
+                    document.getElementById('shipping_info_add_btn_container').style.display = "block";
+                    fetch('/get_user_shipping_info') // get shipping info from DB
+                    .then((res) => res.json())
+                    .then(result => {
+                        renderShippingInfo(result)
+                    });
+                }
+            } else alert(response);
             
-              });
-        
+        });    
+    }
+
+    if(e.target && e.target.id == 'cancel_add_billing_info_btn') {
+        console.log("if(e.target && e.target.className == 'cancel_add_billing_info_btn') {")
+
+        const billing_info_box = document.querySelector('.billing_info_box');
+        while (billing_info_box.hasChildNodes()) {	
+            billing_info_box.removeChild(billing_info_box.firstChild);
         }
+
+        // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
+        
+        fetch('/get_user_billing_info') // get billiing info from DB
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result);
+            if (result.length > 0) {
+                console.log("fetch('/get_user_billing_info')  if (result.length > 0) {")
+
+                renderBillingInfo(result);
+
+                if(location.pathname.substring(0, 15) == '/shop/checkout/') { //checkout page
+                    document.querySelector('.billing_info_add_btn_container').style.display = "block";
+                    
+                    document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
+                        document.getElementById('user_checkout_billing_info_next_btn').style.display = "block" : false;
+                }
+
+            } else {                
+
+                if (location.pathname.substring(0, 15) == '/shop/checkout/') { // checkout page
+                    document.getElementById('user_checkout_billing_info_contents').innerHTML = AIF.setUpPaymentMethodForm();
+                } else {
+                    document.querySelector('.billing_info_add_btn_container').style.display = "block";
+                }
+            }
+        })
+
+        
+        // location.pathname.substring(0, 15) == '/shop/checkout/' ? document.getElementById('user_checkout_billing_info_select_btn').style.display = "block" : false;
+    }
+
+
+    if(e.target && e.target.className == 'shipping_info_cancel_btn') {
+        
+       
+            
+        
+        const shipping_info_box = document.querySelector('.shipping_info_box');
+        while (shipping_info_box.hasChildNodes()) {	
+            shipping_info_box.removeChild(shipping_info_box.firstChild);
+        }
+
+        // document.querySelector('.shipping_info_box').innerHTML.removeChild();
+        
+        fetch('/get_user_shipping_info') // get shipping info from DB
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result);
+            if (result.length > 0) {
+                renderShippingInfo(result);
+                document.querySelector('.shipping_info_add_btn_container').style.display = "block";
+
+                location.pathname.substring(0, 15) == '/shop/checkout/' ?             
+                    document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block" : false;
+                
+            } else {                
+
+                if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+                    document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = AIF.setUpShippingAddressForm();
+                } else {
+                    document.querySelector('.shipping_info_add_btn_container').style.display = "block";
+                }
+            }
+           
+});
+
+   
+        
+        
 
     }
     
@@ -631,11 +842,13 @@ document.addEventListener('click',function(e){
 /////////////////////// edit shipping info //////////////////////////////////////////
 
     if(e.target && e.target.value == 'edit_shipping_info') {
-        console.log("edit_shipping_info edit_shipping_info")
+        console.log("edit_shipping_info edit_shipping_info")        
 
         let str = e.target.className;
         let uid = u_id;
         let edit_shipping_index = str.substring(str.indexOf("SHN")+3);
+        console.log(str)
+        console.log(edit_shipping_index)
 
         let recipient = (document.querySelector(`.shipping_info_recipient.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_recipient.SHN${edit_shipping_index}`).innerText : '';
         let address1 = (document.querySelector(`.shipping_info_address1.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_address1.SHN${edit_shipping_index}`).innerText : '';
@@ -645,15 +858,17 @@ document.addEventListener('click',function(e){
         let zip = (document.querySelector(`.shipping_info_zip.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_zip.SHN${edit_shipping_index}`).innerText : '';
         let phone = (document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`).innerText : '';
         let email = (document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`).innerText : '';
-        
-        document.querySelector('.shipping_info_box').innerHTML = AIF.addShippingInfoBox();        
+               
+        document.querySelector('.shipping_info_box').innerHTML = AIF.addShippingInfoBox();
+        document.getElementById('change_shipping_info_btn_container').innerHTML = AIF.editShippingInfoBtnBox(edit_shipping_index);        
         document.querySelector('.shipping_info_add_btn_container').style.display = "none";
         
         document.querySelector('.input_recipient').value = recipient;
         document.querySelector('.input_shipping_address_line1').value = address1;
         document.querySelector('.input_shipping_address_line2').value = address2;
         document.querySelector('.input_shipping_address_city').value = city;
-        
+
+        document.change_profile_shipping_info_form.shipping_recipient.focus();
         let selected_state = document.getElementById('change_profile_state');        
 
         for (let i = 0 ; i < selected_state.options.length ; i++) {
@@ -665,50 +880,195 @@ document.addEventListener('click',function(e){
         document.querySelector('.input_shipping_address_zip').value = zip;
         document.querySelector('.input_shipping_address_phone').value = phone;
         document.querySelector('.input_shipping_address_email').value = email;
+        // editShippingInfo();
+        if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+            document.getElementById('user_checkout_shipping_info_next_btn').style.display = "none";
+        }
 
-        let edit_form = document.getElementById('change_profile_shipping_info_form');
-        var hiddenInput = document.createElement('input');
-        hiddenInput.setAttribute('type', 'hidden');
-        hiddenInput.setAttribute('name', 'shipping_index');
-        hiddenInput.setAttribute('value', edit_shipping_index);
-        edit_form.appendChild(hiddenInput);
-
-        editShippingInfo();
 
     }
+
+    if(e.target && e.target.id == 'edit_shipping_info_submit_btn') {
+        // /edit_profile_shipping
+        const edit_shipping_index = e.target.getAttribute('edit_no');
+        console.log("edit_shipping_index");
+        console.log(edit_shipping_index);
+        const edit_form = document.getElementById('change_profile_shipping_info_form');  
+
+        const hiddenInput = document.createElement('input');
+        hiddenInput.setAttribute('type', 'hidden');
+        hiddenInput.setAttribute('name', 'shipping_address_index');
+        hiddenInput.setAttribute('value', edit_shipping_index);
+        edit_form.appendChild(hiddenInput);        
+        
+        const formData = new FormData(edit_form);
+        const payload = new URLSearchParams(formData);                  
+        
+        fetch('/edit_profile_shipping', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: payload,
+        })
+        .then(res => res.json())
+        .then(response => {
+            console.log(response)
+            if (response.result == 'ok') {                
+                if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+
+                    console.log("if (location.pathname.substring(0, 15) == '/shop/checkout/') {")
+
+                    document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
+                        document.getElementById('user_continue_to_payment_btn').style.display = "none" : false;
+                    
+                    document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                    document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                    document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
+                    document.getElementById('user_checkout_shipping_method_container').style.display = "block";
+                    document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                    // document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+                    
+                    document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+                    
+
+                    document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = 
+                    `
+                    <div id="change_profile_shipping_info" class="change_profile_shipping_info">
+                        <div id="shipping_info_container" class="shipping_info_container">
+                            <div id="shipping_info_box" class="shipping_info_box"></div> 
+                        </div>
+                        <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container info_add_btn_container">
+                            <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
+                        </div>
+                    </div>
+                    
+                    `;                    
+                    
+                    document.getElementById('shipping_info_add_btn_container').style.display = "block";
+                    fetch('/get_user_shipping_info') // get shipping info from DB
+                    .then((res) => res.json())
+                    .then(result => {
+                        renderShippingInfo(result);
+                        document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                    }); 
+
+                } else {
+                    const shipping_info_box = document.querySelector('.shipping_info_box');
+                    while (shipping_info_box.hasChildNodes()) {	
+                        shipping_info_box.removeChild(shipping_info_box.firstChild);
+                    }
+
+                    // document.querySelector('.shipping_info_box').innerHTML.removeChild();
+                    document.getElementById('shipping_info_add_btn_container').style.display = "block";
+                    fetch('/get_user_shipping_info') // get shipping info from DB
+                    .then((res) => res.json())
+                    .then(result => {
+                        renderShippingInfo(result)
+                    });
+                }
+            } else alert(response);
+        });       
+
+    }
+
     
 
     if(e.target && e.target.value == 'delete_shipping_info') {
 
+        Swal.fire({
+            title: 'Are you sure to delete this Shipping Address?',            
+           
+            showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+            confirmButtonColor: '#983131', // confrim 버튼 색깔 지정 98, 31, 31 3085d6
+            cancelButtonColor: '#254248241', // cancel 버튼 색깔 지정 d33
+            confirmButtonText: 'Confirm', // confirm 버튼 텍스트 지정
+            cancelButtonText: 'Cancel', // cancel 버튼 텍스트 지정
+            width: 400,
+            // height: 400,
+            
+            reverseButtons: true, // 버튼 순서 거꾸로
+            
+         }).then(result => {
+            // if get promise return
+            if (result.isConfirmed) { // button click confirm
+
 
         // console.log("delete_shipping_info delete_shipping_info")
-        let str = e.target.className;
-        
-        let uid = u_id;
-        let delete_shipping_index = str.substring(str.indexOf("SHN")+3);
-        let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
-       
-        const data = {id : uid, shipping_index : delete_shipping_index, default_address : default_addr}
+                let str = e.target.className;
+                
+                let uid = u_id;
+                let delete_shipping_index = str.substring(str.indexOf("SHN")+3);
+                let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
+            
+                const data = {id : uid, shipping_index : delete_shipping_index, default_address : default_addr}
 
-        const option = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'                
-                },
-            body: JSON.stringify(data)
-        };
-        console.log(option);
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(data)
+                };
+                console.log(option);
 
-        fetch('/delete_shipping_info', option)
-        .then((res) => res.json())
-        .then(result => {
-            console.log(result)
-            const shipping_info_box = document.querySelector('.shipping_info_box');
-            while (shipping_info_box.hasChildNodes()) {	
-                shipping_info_box.removeChild(shipping_info_box.firstChild);
-              }
-            renderShippingInfo(result);
+                fetch('/delete_shipping_info', option)
+                .then((res) => res.json())
+                .then(result => {         
+                
+                    if (location.pathname.substring(0, 15) == '/shop/checkout/') {
+                        if (result.length) {
+                            console.log("if (location.pathname.substring(0, 15) == '/shop/checkout/') {")
 
+                            document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
+                                document.getElementById('user_continue_to_payment_btn').style.display = "none" : false;
+                            
+                            document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
+                            document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                            document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
+                            document.getElementById('user_checkout_shipping_method_container').style.display = "block";
+                            document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
+                            // document.getElementById('user_checkout_billing_info_cover').style.display = "block";
+                            
+                            document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+                            document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = 
+                            `
+                            <div id="change_profile_shipping_info" class="change_profile_shipping_info">
+                                <div id="shipping_info_container" class="shipping_info_container">
+                                    <div id="shipping_info_box" class="shipping_info_box"></div> 
+                                </div>
+                                <div id="shipping_info_add_btn_container" class="shipping_info_add_btn_container info_add_btn_container">
+                                    <button id="shipping_info_add_btn" class="btn shipping_info_add_btn">+ Add Shipping Infomation</button>
+                                </div>
+                            </div>
+                            
+                            `;                    
+                            
+                            document.getElementById('shipping_info_add_btn_container').style.display = "block";
+                            const shipping_info_box = document.querySelector('.shipping_info_box');
+                            while (shipping_info_box.hasChildNodes()) {	
+                                shipping_info_box.removeChild(shipping_info_box.firstChild);
+                            }
+                            renderShippingInfo(result);
+                            document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
+                        } else {
+                            document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = AIF.setUpShippingAddressForm();
+                            document.getElementById('user_checkout_shipping_info_change_btn').style.display = 'none';
+                            document.getElementById('user_checkout_shipping_info_next_btn').style.display = 'none';
+                        }
+                        
+
+                    } else {
+                        const shipping_info_box = document.querySelector('.shipping_info_box');
+                        while (shipping_info_box.hasChildNodes()) {	
+                            shipping_info_box.removeChild(shipping_info_box.firstChild);
+                        }
+                        renderShippingInfo(result);
+                        document.getElementById('shipping_info_add_btn_container').style.display = "block";
+                    }               
+
+                });
+            }
         });
 
     }
@@ -738,83 +1098,132 @@ document.addEventListener('click',function(e){
                 shipping_info_box.removeChild(shipping_info_box.firstChild);
               }
             renderShippingInfo(result);
+            document.getElementById('choose_defualt_btn_container').focus();
+            
+            
+            
+            
         });
+        
     }
 
 
     
 
     if(e.target && e.target.id == 'purchase_history_order_cancel_btn') {
-        console.log(e.target.parentElement.getAttribute('head_orderid'));
-        const user_id = u_id ? u_id : 'GUEST';
-        const send_data = {
-            user_id : user_id,
-            order_number : e.target.parentElement.getAttribute('head_orderid')     
+        Swal.fire({
+            title: 'Are you sure to cancel this order?',            
+           
+            showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+            confirmButtonColor: '#983131', // confrim 버튼 색깔 지정 98, 31, 31 3085d6
+            cancelButtonColor: '#254248241', // cancel 버튼 색깔 지정 d33
+            confirmButtonText: 'Confirm', // confirm 버튼 텍스트 지정
+            cancelButtonText: 'Cancel', // cancel 버튼 텍스트 지정
+            width: 400,
+            // height: 400,
+            
+            reverseButtons: true, // 버튼 순서 거꾸로
+            
+        }).then(result => {
+            // if get promise return
+            if (result.isConfirmed) { // button click confirm
+
+                SPINNER.turnOffDisplay(e);
+
+                console.log(e.target.parentElement.getAttribute('head_orderid'));
+                const user_id = u_id ? u_id : 'GUEST';
+                const send_data = {
+                    user_id : user_id,
+                    order_number : e.target.parentElement.getAttribute('head_orderid')     
+                    }
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(send_data)
+                };
+                console.log(option);
+
+                fetch('/cancel_order', option)
+                .then((res) => res.json())
+                .then(result => {
+                    console.log(result);
+                    SPINNER.turnOnDisplay();
+
+                    const lorem = document.getElementById('lorem');
+                    while (lorem.hasChildNodes()) {	
+                        lorem.removeChild(lorem.firstChild);
+                    }
+
+                    document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
+                    setPurchaseHistory(result);
+                    // viewPurchaseHistory(send_data);
+
+                });
             }
-        const option = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'                
-                },
-            body: JSON.stringify(send_data)
-        };
-        console.log(option);
-
-        fetch('/cancel_order', option)
-        .then((res) => res.json())
-        .then(result => {
-            console.log(result);
-
-            const lorem = document.getElementById('lorem');
-            while (lorem.hasChildNodes()) {	
-                lorem.removeChild(lorem.firstChild);
-            }
-
-            document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
-            setPurchaseHistory(result);
-            // viewPurchaseHistory(send_data);
-
         });
 
     }
-
-    
     
     if (e.target && e.target.id == 'purchase_history_item_order_cancel_btn') {
-        console.log(e.target.getAttribute('cart-itemid'));
-        // const cart_number = e.target.getAttribute('cart-itemid');
-        // const user_id = u_id;
-        const user_id = u_id ? u_id : 'GUEST';
-        // const order_number = ;
-        const send_data = {
-            user_id : user_id,
-            cart_number : e.target.getAttribute('cart-itemid'), 
-            order_number : e.target.getAttribute('order-itemid'),
-            prodnum : e.target.getAttribute('itemid')
-            }
-        const option = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'                
-                },
-            body: JSON.stringify(send_data)
-        };
-        console.log(option);
 
-        fetch('/cancel_order_item', option)
-        .then((res) => res.json())
-        .then(result => {
-            console.log(result);
-          
-            const lorem = document.getElementById('lorem');
-            while (lorem.hasChildNodes()) {	
-                lorem.removeChild(lorem.firstChild);
+        Swal.fire({
+            title: 'Are you sure to cancel this item order?',            
+           
+            showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+            confirmButtonColor: '#983131', // confrim 버튼 색깔 지정 98, 31, 31 3085d6
+            cancelButtonColor: '#254248241', // cancel 버튼 색깔 지정 d33
+            confirmButtonText: 'Confirm', // confirm 버튼 텍스트 지정
+            cancelButtonText: 'Cancel', // cancel 버튼 텍스트 지정
+            width: 400,
+            // height: 400,
+            
+            reverseButtons: true, // 버튼 순서 거꾸로
+            
+         }).then(result => {
+            // if get promise return
+            if (result.isConfirmed) { // button click confirm
+
+                SPINNER.turnOffDisplay(e);
+                console.log(e.target.getAttribute('cart-itemid'));
+                // const cart_number = e.target.getAttribute('cart-itemid');
+                // const user_id = u_id;
+                const user_id = u_id ? u_id : 'GUEST';
+                // const order_number = ;
+                const send_data = {
+                    user_id : user_id,
+                    cart_number : e.target.getAttribute('cart-itemid'), 
+                    order_number : e.target.getAttribute('order-itemid'),
+                    prodnum : e.target.getAttribute('itemid')
+                    }
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(send_data)
+                };
+                console.log(option);
+
+                fetch('/cancel_order_item', option)
+                .then((res) => res.json())
+                .then(result => {
+                    console.log(result);
+                    SPINNER.turnOnDisplay();
+                    const lorem = document.getElementById('lorem');
+                    while (lorem.hasChildNodes()) {	
+                        lorem.removeChild(lorem.firstChild);
+                    }
+                    document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
+                    setPurchaseHistory(result);
+                
+                });
             }
-            document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
-            setPurchaseHistory(result);
-          
         });
     }
+    
+
 
     if(e.target && e.target.id == 'purchase_history_item_track_btn') {
         console.log(e.target.getAttribute('track-itemid'));
@@ -894,32 +1303,62 @@ function setBillingInfoExp(bi_num, exp) {
 }
 
 function setBillingInfoDefaultBtn(bi_num, default_check) {
-    const choose_defualt_btn_container = document.createElement('div');
-    choose_defualt_btn_container.setAttribute('class', `choose_defualt_btn_container BIN${bi_num}`);
-    document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(choose_defualt_btn_container);
+    if (default_check == "default") {
+        const choose_defualt_btn_container = document.createElement('div');
+        choose_defualt_btn_container.setAttribute('id', `choose_defualt_btn_container`);
+        choose_defualt_btn_container.setAttribute('class', `choose_defualt_btn_container BIN${bi_num}`);
+        choose_defualt_btn_container.setAttribute('tabindex', `0`); 
+        document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(choose_defualt_btn_container);
+        
+        const billingInfoDefaultBtn = document.createElement('input');
+        billingInfoDefaultBtn.setAttribute('id', `billing_info_default_btn BIN${bi_num}`);
+        billingInfoDefaultBtn.setAttribute('class', `billing_info_default_btn BIN${bi_num}`);
+        billingInfoDefaultBtn.setAttribute('type', `radio`);
+        billingInfoDefaultBtn.setAttribute('name', `check_default_billing`);
+        billingInfoDefaultBtn.setAttribute('value', ``);   
+        
+        document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtn);
+        
+        const billingInfoDefaultBtnLabel = document.createElement('label');
+        billingInfoDefaultBtnLabel.setAttribute('class', `billing_info_default_label BIN${bi_num}`);
+        billingInfoDefaultBtnLabel.setAttribute('for', `billing_info_default_btn BIN${bi_num}`);
+        
+        document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtnLabel);
+        document.querySelector(`.billing_info_default_label.BIN${bi_num}`).innerHTML = "Default Payment";
+        const default_check_radio = document.getElementById(`billing_info_default_btn BIN${bi_num}`);
+        console.log(default_check_radio);
+        console.log(default_check)
     
-    const billingInfoDefaultBtn = document.createElement('input');
-    billingInfoDefaultBtn.setAttribute('id', `billing_info_default_btn BIN${bi_num}`);
-    billingInfoDefaultBtn.setAttribute('class', `billing_info_default_btn BIN${bi_num}`);
-    billingInfoDefaultBtn.setAttribute('type', `radio`);
-    billingInfoDefaultBtn.setAttribute('name', `check_default_billing`);
-    billingInfoDefaultBtn.setAttribute('value', ``);   
-    
-    document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtn);
-    
-    const billingInfoDefaultBtnLabel = document.createElement('label');
-    billingInfoDefaultBtnLabel.setAttribute('class', `billing_info_default_label BIN${bi_num}`);
-    billingInfoDefaultBtnLabel.setAttribute('for', `billing_info_default_btn BIN${bi_num}`);
-    
-    document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtnLabel);
-    document.querySelector(`.billing_info_default_label.BIN${bi_num}`).innerHTML = "Default Payment";
-    const default_check_radio = document.getElementById(`billing_info_default_btn BIN${bi_num}`);
-    console.log(default_check_radio);
-    console.log(default_check)
-    if (default_check === "default") {
         default_check_radio.checked = true;
         billingInfoDefaultBtn.setAttribute('value', `default`);
     } 
+
+    // const choose_defualt_btn_container = document.createElement('div');
+    // choose_defualt_btn_container.setAttribute('class', `choose_defualt_btn_container BIN${bi_num}`);
+    // document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(choose_defualt_btn_container);
+    
+    // const billingInfoDefaultBtn = document.createElement('input');
+    // billingInfoDefaultBtn.setAttribute('id', `billing_info_default_btn BIN${bi_num}`);
+    // billingInfoDefaultBtn.setAttribute('class', `billing_info_default_btn BIN${bi_num}`);
+    // billingInfoDefaultBtn.setAttribute('type', `radio`);
+    // billingInfoDefaultBtn.setAttribute('name', `check_default_billing`);
+    // billingInfoDefaultBtn.setAttribute('value', ``);   
+    
+    // document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtn);
+    
+    // const billingInfoDefaultBtnLabel = document.createElement('label');
+    // billingInfoDefaultBtnLabel.setAttribute('class', `billing_info_default_label BIN${bi_num}`);
+    // billingInfoDefaultBtnLabel.setAttribute('for', `billing_info_default_btn BIN${bi_num}`);
+    
+    // document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtnLabel);
+    // document.querySelector(`.billing_info_default_label.BIN${bi_num}`).innerHTML = "Default Payment";
+    // const default_check_radio = document.getElementById(`billing_info_default_btn BIN${bi_num}`);
+    // console.log(default_check_radio);
+    // console.log(default_check)
+    // if (default_check == "default") {
+    //     default_check_radio.checked = true;
+    //     billingInfoDefaultBtn.setAttribute('value', `default`);
+    // } 
 
 }
 
@@ -1115,30 +1554,33 @@ function setShippingInfoEmail(sh_num, email) {
 
 function setShippingInfoDefaultBtn(sh_num, default_check) {
     
-    const choose_defualt_btn_container = document.createElement('div');
-    choose_defualt_btn_container.setAttribute('class', `choose_defualt_btn_container SHN${sh_num}`);
-    document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(choose_defualt_btn_container);
-    
-    const shippingInfoDefaultBtn = document.createElement('input');
-    shippingInfoDefaultBtn.setAttribute('id', `shipping_info_default_btn SHN${sh_num}`);
-    shippingInfoDefaultBtn.setAttribute('class', `shipping_info_default_btn SHN${sh_num}`);
-    shippingInfoDefaultBtn.setAttribute('type', `radio`);
-    shippingInfoDefaultBtn.setAttribute('name', `check_default_shipping`);
-    shippingInfoDefaultBtn.setAttribute('value', ``);   
-    
-    document.querySelector(`.choose_defualt_btn_container.SHN${sh_num}`).appendChild(shippingInfoDefaultBtn);
-    
-    
-    // document.querySelector(`.shipping_info_default_btn.s${sh_num}`).innerHTML = "Default Address";
-    const shippingInfoDefaultBtnLabel = document.createElement('label');
-    shippingInfoDefaultBtnLabel.setAttribute('class', `shipping_info_default_label SHN${sh_num}`);
-    shippingInfoDefaultBtnLabel.setAttribute('for', `shipping_info_default_btn SHN${sh_num}`);
-    
-    document.querySelector(`.choose_defualt_btn_container.SHN${sh_num}`).appendChild(shippingInfoDefaultBtnLabel);
-    document.querySelector(`.shipping_info_default_label.SHN${sh_num}`).innerText = "Default Address";
-    const default_check_radio = document.getElementById(`shipping_info_default_btn SHN${sh_num}`);
-
     if (default_check == "default") {
+        const choose_defualt_btn_container = document.createElement('div');
+        choose_defualt_btn_container.setAttribute('id', `choose_defualt_btn_container`);
+        choose_defualt_btn_container.setAttribute('class', `choose_defualt_btn_container SHN${sh_num}`);
+        choose_defualt_btn_container.setAttribute('tabindex', `0`);
+        document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(choose_defualt_btn_container);
+        
+        const shippingInfoDefaultBtn = document.createElement('input');
+        shippingInfoDefaultBtn.setAttribute('id', `shipping_info_default_btn SHN${sh_num}`);
+        shippingInfoDefaultBtn.setAttribute('class', `shipping_info_default_btn SHN${sh_num}`);
+        shippingInfoDefaultBtn.setAttribute('type', `radio`);
+        shippingInfoDefaultBtn.setAttribute('name', `check_default_shipping`);
+        shippingInfoDefaultBtn.setAttribute('value', ``);   
+        
+        document.querySelector(`.choose_defualt_btn_container.SHN${sh_num}`).appendChild(shippingInfoDefaultBtn);
+        
+        
+        // document.querySelector(`.shipping_info_default_btn.s${sh_num}`).innerHTML = "Default Address";
+        const shippingInfoDefaultBtnLabel = document.createElement('label');
+        shippingInfoDefaultBtnLabel.setAttribute('class', `shipping_info_default_label SHN${sh_num}`);
+        shippingInfoDefaultBtnLabel.setAttribute('for', `shipping_info_default_btn SHN${sh_num}`);
+        
+        document.querySelector(`.choose_defualt_btn_container.SHN${sh_num}`).appendChild(shippingInfoDefaultBtnLabel);
+        document.querySelector(`.shipping_info_default_label.SHN${sh_num}`).innerText = "Default Address";
+        const default_check_radio = document.getElementById(`shipping_info_default_btn SHN${sh_num}`);
+
+    
         default_check_radio.checked = true;
         shippingInfoDefaultBtn.setAttribute('value', `default`);
     } 
@@ -1179,6 +1621,7 @@ function setShippingInfoEditBtn(sh_num) {
 }
 
 export function renderShippingInfo(result) {
+  
     if (result.length > 0) {
         console.log(result)
 
@@ -1216,9 +1659,12 @@ export function renderShippingInfo(result) {
                 setShippingInfo(element.sh_number, element.recipient, element.address1, element.address2, 
                     element.city, element.state, element.zip, element.phone, element.email, "n")}) : false;
 
+          
+
              
         }
     }
+
 }
 
 
@@ -1564,6 +2010,174 @@ function setCancelOrderItem(cart_id, prodnum, order_id, refund) {
         purchase_history_item_order_cancel_btn.setAttribute('disabled', 'true'); 
     }
 }
+
+export function addBillingMethodForm() {
+   
+    const send_data = {u_id : 'getkey'};
+
+    const data = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'            
+            },
+        body: JSON.stringify(send_data)
+    };
+    console.log(data);
+
+    fetch(`/get_api_key`, data)
+    .then((res) => res.json())
+    .then(result => {
+        const key = result;
+        
+        const clover = new Clover(key.key);
+
+        const elements = clover.elements();
+            
+
+        const styles = {
+            body: {
+                fontfamily: 'Jost, sans-serif',
+            //   fontFamily: 'Roboto, Open Sans, sans-serif',
+            fontSize: '10px',
+            },
+            input: {
+            fontSize: '11px', padding: '5px', height: '1.65rem', width: '98%'
+            },
+        };
+        
+        const cardNumber = elements.create('CARD_NUMBER', styles);
+        // const cardName = elements.create('CARD_NAME', styles);
+        const cardDate = elements.create('CARD_DATE', styles);
+        const cardCvv = elements.create('CARD_CVV', styles);
+        const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
+            
+        cardNumber.mount('#card-number');
+        // cardName.mount('#card-name');
+        cardDate.mount('#card-date');
+        cardCvv.mount('#card-cvv');
+        cardPostalCode.mount('#card-postal-code');
+
+        const cardResponse = document.getElementById('card-response');
+        const displayCardNumberError = document.getElementById('card-number-errors');
+        const displayCardDateError = document.getElementById('card-date-errors');
+        const displayCardCvvError = document.getElementById('card-cvv-errors');
+        const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
+        const payment_form = document.getElementById('change_profile_billing_info_form');
+        
+        // Handle real-time validation errors from the card element
+        cardNumber.addEventListener('change', function(event) {
+        console.log(`cardNumber changed ${JSON.stringify(event)}`);
+        });
+
+        cardNumber.addEventListener('blur', function(event) {
+        console.log(`cardNumber blur ${JSON.stringify(event)}`);
+        });
+
+        cardDate.addEventListener('change', function(event) {
+        console.log(`cardDate changed ${JSON.stringify(event)}`);
+        });
+
+        cardDate.addEventListener('blur', function(event) {
+            console.log(`cardDate blur ${JSON.stringify(event)}`);
+        });
+
+        cardCvv.addEventListener('change', function(event) {
+            console.log(`cardCvv changed ${JSON.stringify(event)}`);
+        });
+
+        cardCvv.addEventListener('blur', function(event) {
+            console.log(`cardCvv blur ${JSON.stringify(event)}`);
+        });
+
+        cardPostalCode.addEventListener('change', function(event) {
+            console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
+        });
+
+        cardPostalCode.addEventListener('blur', function(event) {
+            console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
+        });
+
+        payment_form.addEventListener('submit', function(event) {
+           
+            console.log("payment_form.addEventListener('submit', function(event)")
+            event.preventDefault();
+            // Use the iframe's tokenization method with the user-entered card details
+            clover.createToken()
+                .then(function(result) {
+                if (result.errors) {
+                Object.values(result.errors).forEach(function (value) {
+                    displayError.textContent = value;
+                });
+                } else {
+                    const spin_param = "add_payment_method";
+                    
+                    SPINNER.turnOffDisplay(spin_param);
+                    
+
+                    const form = document.getElementById('change_profile_billing_info_form');
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.setAttribute('type', 'hidden');
+                    hiddenInput.setAttribute('name', 'cloverToken');
+                    hiddenInput.setAttribute('value', result.token);
+                    form.appendChild(hiddenInput);
+                    // form.submit();
+
+                    const formData = new FormData(form);
+                    const payload = new URLSearchParams(formData);
+                    fetch('/add_payment_method', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: payload,
+                    })
+                    .then(res => res.json())
+                    .then(response => {
+                        if (response.result == "ok") {
+                            SPINNER.turnOnDisplay();
+
+                            const billing_info_box = document.querySelector('.billing_info_box');
+                            while (billing_info_box.hasChildNodes()) {	
+                                billing_info_box.removeChild(billing_info_box.firstChild);
+                            }
+                
+                            // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
+                            document.querySelector('.billing_info_add_btn_container').style.display = "block";
+                            fetch('/get_user_billing_info') // get billiing info from DB
+                            .then((res) => res.json())
+                            .then(result => {
+                                console.log(result);
+                                if (result.length > 0) {
+                                    console.log(result)                
+                                    renderBillingInfo(result);         
+                                    
+                                }
+                            })
+                            
+                            if(location.pathname.substring(0, 15) == '/shop/checkout/') {
+                                console.log("if(location.pathname.substring(0, 15) == '/shop/checkout/') {")
+                                document.getElementById('user_checkout_billing_info_context').style.display = "block";
+                                document.getElementById('user_checkout_billing_info_context').setAttribute('value', 'on');
+                                
+                                if (document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off") {
+                                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                                    document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
+
+                                }
+                                     
+                            }
+
+
+                        } else {
+                            alert("sorry... something wrong in DB SERVER.")
+
+                        }
+                    });               
+                }
+            });
+        });        
+    });
+} 
 
 
 

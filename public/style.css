@@ -11,11 +11,15 @@ body {
     
 }
 
+
+
+
+
 /* .hidden {height:100%; min-height:100%; overflow:hidden !important; touch-action:none;} */
 
 .no_action {pointer-events : none; height:100%; min-height:100%; overflow:hidden !important; touch-action:none;}
 
-.btn, .cate_btn, .add_submit_btn, .cart_handle_btn, 
+.btn, .cate_btn, .cart_handle_btn, 
 .checkout_ctl_btn, .cart_modal_ctl_btn, .guest_checkout_edit_btn, .purchase_page_btn
 {    
     background-color: rgba(0,0,0,0);
@@ -151,8 +155,56 @@ nav {
     display: flex;
     flex-direction: row;
     align-items: center;
-
+   
 }
+
+
+
+
+
+@keyframes spinner-line-fade-more {
+    0%, 100% {
+      opacity: 0; /* minimum opacity */
+    }
+    1% {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes spinner-line-fade-quick {
+    0%, 39%, 100% {
+      opacity: 0.25; /* minimum opacity */
+    }
+    40% {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes spinner-line-fade-default {
+    0%, 100% {
+      opacity: 0.22; /* minimum opacity */
+    }
+    1% {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes spinner-line-shrink {
+    0%, 25%, 100% {
+      /* minimum scale and opacity */
+      transform: scale(0.5);
+      opacity: 0.25;
+    }
+    26% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+
+
+
+
 
 
 
@@ -169,11 +221,11 @@ nav {
      z-index: 9;
 }
 
-.modal.show {
+.modal.show{
     display: block;
 }
 
-.modal_overlay {
+.modal_overlay{
     position: fixed;
     top: 0;
     left: 0;
@@ -184,7 +236,7 @@ nav {
 
 }
   
-.modal_body {
+.modal_body{
     position: absolute;
     top: 35%;
     left: 50%;
@@ -218,6 +270,25 @@ nav {
     border: none;
     font-size: 12px;
 }
+
+
+
+
+.swal2-popup {
+    font-size: 0.8rem !important;
+}
+
+.swal2-styled {
+    /* padding: 10px 32px 10px 32px !important;
+    margin: 20px 10px 0px 10px !important; */
+    width: 170px;
+    height: 45px;
+}
+
+
+
+
+
 
 
 
@@ -312,7 +383,7 @@ nav {
 }
 
 #guest_checkout_shipping_info_next_btn:hover, #user_continue_to_payment_btn:hover, #continue_to_payment_btn:hover, #continue_to_place_order_btn:hover, 
-#user_checkout_shipping_info_next_btn:hover, #user_checkout_billing_info_next_btn:hover, .user_checkout_select_option_btn:hover{
+.user_checkout_shipping_info_next_btn:not(.disabled):hover, #user_checkout_billing_info_next_btn:hover, .user_checkout_select_option_btn:hover{
     background-color: var(--subcolor);
     color: black;
     cursor: pointer;
@@ -1057,7 +1128,7 @@ nav {
 }
 
 #continue_to_payment_btn, #guest_checkout_shipping_info_next_btn, #continue_to_place_order_btn, #user_continue_to_payment_btn,
-#user_checkout_shipping_info_next_btn, #user_checkout_billing_info_next_btn, .user_checkout_select_option_btn {
+.user_checkout_shipping_info_next_btn, #user_checkout_billing_info_next_btn, .user_checkout_select_option_btn {
     width: 80%;
     height: 3rem;
     background-color:var(--maincolor);
@@ -1068,7 +1139,7 @@ nav {
     color: white;
 }
 
-#user_continue_to_payment_btn, #continue_to_payment_btn, #guest_checkout_shipping_info_next_btn, #continue_to_place_order_btn, #user_checkout_shipping_info_next_btn, #user_checkout_billing_info_next_btn, .user_checkout_select_option_btn {
+#user_continue_to_payment_btn, #continue_to_payment_btn, #guest_checkout_shipping_info_next_btn, #continue_to_place_order_btn, .user_checkout_shipping_info_next_btn, #user_checkout_billing_info_next_btn, .user_checkout_select_option_btn {
     width: 100%;
     margin-top: 1rem;
 }
@@ -1263,7 +1334,7 @@ nav {
     width: 80%;
 }
 
-#user_checkout_billing_info_title_box, #user_checkout_shipping_info_title_box, .user_checkout_cover_title {
+#user_checkout_billing_info_title_box, #user_checkout_shipping_info_title_box, #shipping_method_title, .user_checkout_cover_title {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -1291,6 +1362,7 @@ nav {
     margin: 1.5rem;
     padding: 2rem;
 }
+
 
 #user_checkout_shipping_method_container_cover, #user_continue_to_payment_btn, 
 #user_checkout_billing_info_cover, #user_checkout_shipping_method_container_change_btn, 
@@ -1636,9 +1708,9 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     border: 0.5px solid var(--subcolor);
 }
 
-#cart_modal_items_back_btn:disabled ,#cart_modal_items_next_btn:disabled {
+#cart_modal_items_back_btn:disabled ,#cart_modal_items_next_btn:disabled, .user_checkout_shipping_info_next_btn:disabled {
     background-color: gray;
-    color: black
+    color: white;
 }
 
 
@@ -1858,9 +1930,22 @@ padding-right: 1px; */
     height: 2rem;
   } */
 
+  .guest_checkout_shipping_info_recipient {
+    display: flex;
+   
+    text-align: left;
+    justify-content: flex-start;
+
+  }
+
   .shipping_info_recipient {
     display: flex;
-    justify-content: center;
+    width: 100%;
+    border-bottom: 0.5px solid grey;
+    /* text-align: left; */
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
   }
 
   .shipping_info_csz {
@@ -2322,7 +2407,7 @@ ul.tabs li.current{
     flex-direction: row;
 }
 
-.shipping_info_edit_btn, .shipping_info_delete_btn, .shipping_info_make_default_btn, .billing_info_make_default_btn, .billing_info_delete_btn   {
+.shipping_info_edit_btn, .shipping_info_delete_btn, .shipping_info_make_default_btn, .billing_info_make_default_btn, .billing_info_delete_btn, .account_info_submit_btn, .shipping_info_cancel_btn, .set_default_method_btn   {
     border: 0.5px solid gray;
     width: 6rem;
     height: auto;
@@ -2331,7 +2416,7 @@ ul.tabs li.current{
 }
 
 .shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, .shipping_info_make_default_btn:hover,
-.shipping_info_add_btn:hover, .billing_info_add_btn:hover, .billing_info_make_default_btn:hover, .billing_info_delete_btn:hover  {
+.shipping_info_add_btn:hover, .billing_info_add_btn:hover, .billing_info_make_default_btn:hover, .billing_info_delete_btn:hover, .account_info_submit_btn:hover, .shipping_info_cancel_btn:hover, .set_default_method_btn:hover  {
     background-color: var(--maincolor);
     color: var(--subcolor);
 }
@@ -2340,11 +2425,17 @@ ul.tabs li.current{
     margin: 0rem 0.8rem;
 }
 
-.billing_info_make_default_btn, .billing_info_delete_btn{
-    width: 10rem;
-
+.billing_info_make_default_btn, .billing_info_delete_btn, .account_info_submit_btn, .shipping_info_cancel_btn{
+    width: 9rem;
+    height: auto;
+    font-size: 1.1rem;
 }
 
+.set_default_method_btn {
+    font-size: 1.2rem;
+    font-weight: 500;
+    width: 15rem;
+}
 .shipping_info_detial, .billing_info_detial  {
     display: flex;
     flex-direction: column;

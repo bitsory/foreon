@@ -318,8 +318,7 @@ export function addShippingInfoBox() {
                     </div>
                 
                     <div id="change_shipping_info_btn_container" class="button-container">
-                        <button type="button" id="add_shipping_info_submit_btn" class="add_shipping_info_submit_btn add_submit_btn">Submit</button>
-                        <button type="button" id="add_shipping_info_cancel_btn" class="add_shipping_info_cancel_btn" value="add_shipping_info_cancel">Cancel</button>
+                        
                     </div>
                 </div>
 
@@ -332,16 +331,30 @@ export function addShippingInfoBox() {
     `;
 }
 
+export function addShippingInfoBtnBox () {
+    return `
+    <button type="button" id="add_shipping_info_submit_btn" class="add_shipping_info_submit_btn account_info_submit_btn">Add Submit</button>
+    <button type="button" id="add_shipping_info_cancel_btn" class="shipping_info_cancel_btn" value="add_shipping_info_cancel">Cancel</button>
+    `;
+}  
+
+export function editShippingInfoBtnBox (param) {
+    return `
+    <button type="button" id="edit_shipping_info_submit_btn" class="edit_shipping_info_submit_btn edit_submit_btn account_info_submit_btn" edit_no=${param}>Edit Submit</button>
+    <button type="button" id="edit_shipping_info_cancel_btn" class="shipping_info_cancel_btn" value="edit_shipping_info_cancel">Cancel</button>
+    `;
+}  
+
 export function addShippingInfo() {
     document.getElementById('change_profile_shipping_info_form').action = '/add_profile_shipping';
     
 }
 
-
+// action="/add_payment_method"
 export function addBillingInfoBox() {
     return `
         <div class="change_profile_billing_form_container">
-            <form action="/add_payment_method" method="post" name="change_profile_billing_info_form" id="change_profile_billing_info_form" class="change_profile_billing_info_form">
+            <form name="change_profile_billing_info_form" id="change_profile_billing_info_form" class="change_profile_billing_info_form">
                 <div id="billing_info_add_box" class="billing_info_add_box">
 
                     <div class="order_info_title">Billing Address</div>  
@@ -483,8 +496,8 @@ export function addBillingInfoBox() {
                 </div>
             
                 <div id="change_payment_method_btn_container" class="button-container">
-                    <input type="submit" value="Submit" class="add_payment_method_btn add_submit_btn">
-                    <button type="button" class="cancel_add_billing_info_btn">Cancel</button>
+                    <button type="submit" form="change_profile_billing_info_form" value="Submit" id="add_payment_method_btn" class="add_payment_method_btn account_info_submit_btn">Add Submit</button>
+                    <button type="button" id="cancel_add_billing_info_btn" class="cancel_add_billing_info_btn shipping_info_cancel_btn">Cancel</button>
                 </div>
 
 
@@ -494,127 +507,165 @@ export function addBillingInfoBox() {
 
 }
 
-
-export function addBillingMethodForm() {
-   
-    const send_data = {u_id : 'getkey'};
-
-    const data = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'            
-            },
-        body: JSON.stringify(send_data)
-    };
-    console.log(data);
-
-    fetch(`/get_api_key`, data)
-    .then((res) => res.json())
-    .then(result => {
-        const key = result;
-        
-        const clover = new Clover(key.key);
-
-        const elements = clover.elements();
-            
-
-        const styles = {
-            body: {
-                fontfamily: 'Jost, sans-serif',
-            //   fontFamily: 'Roboto, Open Sans, sans-serif',
-            fontSize: '10px',
-            },
-            input: {
-            fontSize: '11px', padding: '5px', height: '1.65rem', width: '98%'
-            },
-        };
-        
-        const cardNumber = elements.create('CARD_NUMBER', styles);
-        // const cardName = elements.create('CARD_NAME', styles);
-        const cardDate = elements.create('CARD_DATE', styles);
-        const cardCvv = elements.create('CARD_CVV', styles);
-        const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
-            
-        cardNumber.mount('#card-number');
-        // cardName.mount('#card-name');
-        cardDate.mount('#card-date');
-        cardCvv.mount('#card-cvv');
-        cardPostalCode.mount('#card-postal-code');
-
-        const cardResponse = document.getElementById('card-response');
-        const displayCardNumberError = document.getElementById('card-number-errors');
-        const displayCardDateError = document.getElementById('card-date-errors');
-        const displayCardCvvError = document.getElementById('card-cvv-errors');
-        const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
-        const payment_form = document.getElementById('change_profile_billing_info_form');
-        
-        // Handle real-time validation errors from the card element
-        cardNumber.addEventListener('change', function(event) {
-        console.log(`cardNumber changed ${JSON.stringify(event)}`);
-        });
-
-        cardNumber.addEventListener('blur', function(event) {
-        console.log(`cardNumber blur ${JSON.stringify(event)}`);
-        });
-
-        cardDate.addEventListener('change', function(event) {
-        console.log(`cardDate changed ${JSON.stringify(event)}`);
-        });
-
-        cardDate.addEventListener('blur', function(event) {
-            console.log(`cardDate blur ${JSON.stringify(event)}`);
-        });
-
-        cardCvv.addEventListener('change', function(event) {
-            console.log(`cardCvv changed ${JSON.stringify(event)}`);
-        });
-
-        cardCvv.addEventListener('blur', function(event) {
-            console.log(`cardCvv blur ${JSON.stringify(event)}`);
-        });
-
-        cardPostalCode.addEventListener('change', function(event) {
-            console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
-        });
-
-        cardPostalCode.addEventListener('blur', function(event) {
-            console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
-        });
-
-        payment_form.addEventListener('submit', function(event) {
-            console.log("payment_form.addEventListener('submit', function(event)")
-            event.preventDefault();
-            // Use the iframe's tokenization method with the user-entered card details
-            clover.createToken()
-                .then(function(result) {
-                if (result.errors) {
-                Object.values(result.errors).forEach(function (value) {
-                    displayError.textContent = value;
-                });
-                } else {
-                    var form = document.getElementById('change_profile_billing_info_form');
-                    var hiddenInput = document.createElement('input');
-                    hiddenInput.setAttribute('type', 'hidden');
-                    hiddenInput.setAttribute('name', 'cloverToken');
-                    hiddenInput.setAttribute('value', result.token);
-                    form.appendChild(hiddenInput);
-                    form.submit();
-
-                // cloverTokenHandler(result.token);
-                }
-            });
-        });        
-    });
-} 
-
-export function cloverTokenHandler(token) {
-    console.log(token)
-    // Insert the token ID into the form so it gets submitted to the server
-    var form = document.getElementById('change_profile_billing_info_form');
-    var hiddenInput = document.createElement('input');
-    hiddenInput.setAttribute('type', 'hidden');
-    hiddenInput.setAttribute('name', 'cloverToken');
-    hiddenInput.setAttribute('value', token);
-    form.appendChild(hiddenInput);
-    form.submit();
+export function setUpPaymentMethodForm() {
+    return `
+    <h2>Nothing have for default payment method yet</h2>
+    <h2>Would like to make default payment method?</h2>
+    <button type="button" id="set_default_payment_method_btn" class="set_default_payment_method_btn set_default_method_btn" title="set payment method" value="on">Set Up Payment Method</button>                            
+    
+    `;
 }
+
+export function setUpShippingAddressForm() {
+    return `
+    <h2>Nothing have for default shipping address yet</h2>
+    <h2>Would like to make shipping address?</h2>
+    <button type="button" id="set_default_address_btn" class="set_default_address_btn set_default_method_btn" title="set shipping address" value="on">Set Up</button>     
+            
+    
+    `;
+}
+
+
+// export function addBillingMethodForm() {
+   
+//     const send_data = {u_id : 'getkey'};
+
+//     const data = {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'            
+//             },
+//         body: JSON.stringify(send_data)
+//     };
+//     console.log(data);
+
+//     fetch(`/get_api_key`, data)
+//     .then((res) => res.json())
+//     .then(result => {
+//         const key = result;
+        
+//         const clover = new Clover(key.key);
+
+//         const elements = clover.elements();
+            
+
+//         const styles = {
+//             body: {
+//                 fontfamily: 'Jost, sans-serif',
+//             //   fontFamily: 'Roboto, Open Sans, sans-serif',
+//             fontSize: '10px',
+//             },
+//             input: {
+//             fontSize: '11px', padding: '5px', height: '1.65rem', width: '98%'
+//             },
+//         };
+        
+//         const cardNumber = elements.create('CARD_NUMBER', styles);
+//         // const cardName = elements.create('CARD_NAME', styles);
+//         const cardDate = elements.create('CARD_DATE', styles);
+//         const cardCvv = elements.create('CARD_CVV', styles);
+//         const cardPostalCode = elements.create('CARD_POSTAL_CODE', styles);
+            
+//         cardNumber.mount('#card-number');
+//         // cardName.mount('#card-name');
+//         cardDate.mount('#card-date');
+//         cardCvv.mount('#card-cvv');
+//         cardPostalCode.mount('#card-postal-code');
+
+//         const cardResponse = document.getElementById('card-response');
+//         const displayCardNumberError = document.getElementById('card-number-errors');
+//         const displayCardDateError = document.getElementById('card-date-errors');
+//         const displayCardCvvError = document.getElementById('card-cvv-errors');
+//         const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
+//         const payment_form = document.getElementById('change_profile_billing_info_form');
+        
+//         // Handle real-time validation errors from the card element
+//         cardNumber.addEventListener('change', function(event) {
+//         console.log(`cardNumber changed ${JSON.stringify(event)}`);
+//         });
+
+//         cardNumber.addEventListener('blur', function(event) {
+//         console.log(`cardNumber blur ${JSON.stringify(event)}`);
+//         });
+
+//         cardDate.addEventListener('change', function(event) {
+//         console.log(`cardDate changed ${JSON.stringify(event)}`);
+//         });
+
+//         cardDate.addEventListener('blur', function(event) {
+//             console.log(`cardDate blur ${JSON.stringify(event)}`);
+//         });
+
+//         cardCvv.addEventListener('change', function(event) {
+//             console.log(`cardCvv changed ${JSON.stringify(event)}`);
+//         });
+
+//         cardCvv.addEventListener('blur', function(event) {
+//             console.log(`cardCvv blur ${JSON.stringify(event)}`);
+//         });
+
+//         cardPostalCode.addEventListener('change', function(event) {
+//             console.log(`cardPostalCode changed ${JSON.stringify(event)}`);
+//         });
+
+//         cardPostalCode.addEventListener('blur', function(event) {
+//             console.log(`cardPostalCode blur ${JSON.stringify(event)}`);
+//         });
+
+//         payment_form.addEventListener('submit', function(event) {
+//             console.log("payment_form.addEventListener('submit', function(event)")
+//             event.preventDefault();
+//             // Use the iframe's tokenization method with the user-entered card details
+//             clover.createToken()
+//                 .then(function(result) {
+//                 if (result.errors) {
+//                 Object.values(result.errors).forEach(function (value) {
+//                     displayError.textContent = value;
+//                 });
+//                 } else {
+//                     const form = document.getElementById('change_profile_billing_info_form');
+//                     const hiddenInput = document.createElement('input');
+//                     hiddenInput.setAttribute('type', 'hidden');
+//                     hiddenInput.setAttribute('name', 'cloverToken');
+//                     hiddenInput.setAttribute('value', result.token);
+//                     form.appendChild(hiddenInput);
+//                     // form.submit();
+
+//                     const formData = new FormData(form);
+//                     const payload = new URLSearchParams(formData);
+//                     fetch('/add_payment_method_test', {
+//                         method: 'POST',
+//                         headers: {
+//                           'Content-Type': 'application/x-www-form-urlencoded'
+//                         },
+//                         body: payload,
+//                     })
+//                     .then(res => res.json())
+//                     .then(response => {
+//                         if (response.result == "ok") {
+
+
+
+//                         } else {
+
+
+//                         }
+//                     });               
+//                 }
+//             });
+//         });        
+//     });
+// } 
+
+// export function cloverTokenHandler(token) {
+//     console.log(token)
+//     // Insert the token ID into the form so it gets submitted to the server
+//     var form = document.getElementById('change_profile_billing_info_form');
+//     var hiddenInput = document.createElement('input');
+//     hiddenInput.setAttribute('type', 'hidden');
+//     hiddenInput.setAttribute('name', 'cloverToken');
+//     hiddenInput.setAttribute('value', token);
+//     form.appendChild(hiddenInput);
+//     form.submit();
+// }

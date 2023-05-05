@@ -1748,16 +1748,21 @@ app.get('/get_user_billing_info', (req,res) => {
                     let res_data = response.cards.elements.map(element => {
                         return element.id;
                     })
-                    console.log(res_data);                    
-                    con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
-                        if (err) {
-                            res.send(err);
-                            // con.end();
-                        } else {
-                            console.log(result);
-                            res.send(result);
-                        }
-                    })                    
+                    console.log(res_data);   
+                    if (res_data.length) {     
+                        console.log("if (res_data.length) {  ")                               
+                        // con.query('SELECT * FROM billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
+                        con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                console.log(result);
+                                res.send(result);
+                                
+                            }
+                        })    
+                    } else res.send(res_data);              
                 })
                 .catch(err => console.error(err));            
             }
@@ -1767,16 +1772,18 @@ app.get('/get_user_billing_info', (req,res) => {
 });
 
 app.get('/get_user_shipping_info', (req,res) => {
+    console.log("/get_user_shipping_info' /get_user_shipping_info' /get_user_shipping_info'")
     console.log(req.body);
     const u_id = req.session.loginData.id;
     console.log(u_id);
 
     db.getConnection((con)=>{
-        con.query('SELECT * FROM shipping_info WHERE id = ?', [u_id], (err, result) => {
+        con.query('SELECT * FROM shipping_info WHERE id = ? and inuse="y"', [u_id], (err, result) => {
             if (err) {
                 res.send(err);
                 // con.end();
-            } else {                
+            } else {     
+                console.log(result);           
                 res.send(result);
             }
         }); 
@@ -1785,10 +1792,11 @@ app.get('/get_user_shipping_info', (req,res) => {
 })
 
 
+
 app.post('/add_payment_method', (req,res) => {
     console.log('/add_payment_method /add_payment_method /add_payment_method')
-    const body = req.body;
-    console.log(body);
+    // const body = req.body;
+    console.log(req.body);
     const clv_id = req.session.loginData.clv_id; 
     const c_num = req.body.cardnumber;
     const card_holder = req.body.card_name;
@@ -1816,7 +1824,7 @@ app.post('/add_payment_method', (req,res) => {
         body: JSON.stringify({
             ecomind: 'ecom',
             "source": req.body.cloverToken, 
-            "email" : 'rangdad@gmail.com' // user email to recieve a notice  
+            "email" : card_email // user email to recieve a notice  
         })
       };
       
@@ -1855,7 +1863,7 @@ app.post('/add_payment_method', (req,res) => {
                 
                 checkDefault().then((data) => { 
                     console.log("checkDefault().then((data) =>");
-                    console.log(data);
+                    
                     addBillingInfo();            
                 });
 
@@ -1890,7 +1898,10 @@ app.post('/add_payment_method', (req,res) => {
                                 res.send(err);
                                 // con.end();
                             } else {
-                                res.send(result);
+                                console.log("addBillingInfo()");
+                                console.log(result)
+                                result.protocol41 == true ? res.send({result : "ok"}) : res.send({result:"sorry... something wrong in DB SERVER."}); 
+                                // res.send(result);
                             }
                         });
                         con.release();
@@ -1991,7 +2002,7 @@ app.post('/delete_payment_method', (req,res) => {
 
         function checkDefaultPayment() {
             return new Promise((resolve, reject) => { 
-                if (default_payment === 'default') {
+                if (default_payment == 'default') {
                     db.getConnection((con)=>{
                         con.query('select * from billing_info where id= ? and inuse="y" order by indate desc', [u_id],(err, result) => {
                             if (err) {
@@ -2229,7 +2240,7 @@ app.post('/delete_shipping_info', (req,res) => {
                             } else {
                                 console.log("res.send(result)")
                                 console.log(result)
-                                res.send(result);  
+                                res.send(result);   
                             }              
                             
                         })                  
@@ -2245,8 +2256,10 @@ app.post('/delete_shipping_info', (req,res) => {
 app.post('/edit_profile_shipping', (req,res) => {
     console.log("/edit_profile_shipping /edit_profile_shipping /edit_profile_shipping")
         
+    console.log(req.body)
+
     const u_id = req.session.loginData.id;
-    const sh_number = req.body.shipping_index
+    const sh_number = req.body.shipping_address_index;
     const recipient = req.body.shipping_recipient;
     const address1 = req.body.shipping_address_street_line1;
     const address2 = req.body.shipping_address_street_line2;
@@ -2294,7 +2307,7 @@ app.post('/edit_profile_shipping', (req,res) => {
                     // con.end();
                 } else {
                     console.log(result)
-                    res.send(result);
+                    result.protocol41 == true ? res.send({result : "ok"}) : res.send("sorry... something wrong in DB SERVER.");                    
                 }
             });
             con.release();
@@ -2338,13 +2351,14 @@ app.post('/add_profile_shipping', (req,res) => {
 
     function checkDefault() {
         return new Promise((resolve, reject) => {
-            if (default_check === 'default') { 
+            if (default_check == 'default') { 
                 db.getConnection((con)=>{
                     con.query('SELECT id from shipping_info WHERE id=?', [u_id],(err, result) => {
                         if (err) {
                             res.send(err);
                             // con.end();
-                        } else if (result !== undefined) { 
+                        } else if (result !== undefined) {
+                            console.log("UPDATE shipping_info SET default_address = n where id =?");                             
                             console.log(result)                
                             con.query('UPDATE shipping_info SET default_address = "n" where id =?', [u_id])
                             resolve();
@@ -2369,7 +2383,8 @@ app.post('/add_profile_shipping', (req,res) => {
                 } else {
                     console.log(result);
                     if (result.protocol41 == true) {
-                        res.redirect('http://localhost:8080/account');
+                        res.send({result : "ok"});
+                        // res.redirect('http://localhost:8080/account/shipping-infomation');
                     } else res.send("sorry... something wrong in DB SERVER.");                        
                 }
             });
@@ -2693,7 +2708,7 @@ app.post('/item_addup_v2', (req,res) => {
 
     if (user_id == u_id) {        
         db.getConnection((con)=>{
-            con.query('UPDATE cart SET quantity=cart.quantity + 1, modate = ? where u_id = ? and prodnum = ?', [date, u_id, item_num]
+            con.query('UPDATE cart SET quantity=cart.quantity + 1, modate = ? where u_id = ? and prodnum = ? and result = "n"', [date, u_id, item_num]
                 ,(err, result) => {
                     if(err){                        
                         res.send(err);
@@ -2728,7 +2743,7 @@ app.post('/item_subtract_v2', (req,res) => {
 
     if (user_id == u_id) {        
         db.getConnection((con)=>{
-            con.query('UPDATE cart SET quantity=cart.quantity - 1, modate =? where u_id=? and prodnum=?', [date, u_id, item_num] ,(err, result) => {
+            con.query('UPDATE cart SET quantity=cart.quantity - 1, modate =? where u_id=? and prodnum=? and result = "n"', [date, u_id, item_num] ,(err, result) => {
                 if(err){                        
                     res.send(err);
                     // con.end();                    
@@ -3394,25 +3409,26 @@ app.post('/user_checkout_submit', (req,res) => {
         fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
             .then(response => response.json())
             .then(response => {
-                console.log("make order")
+                console.log("make order")               
                 console.log(response)
-
-                const options = {
-                    method: 'POST',
-                    headers: {
-                    accept: 'application/json',
-                    'content-type': 'application/json',
-                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                    },
-                    body: JSON.stringify({"source":default_payment_method,
-                    "email":billing_email,
-                    "stored_credentials":{
-                        "sequence": "SUBSEQUENT",
-                        "is_scheduled": false,
-                        "initiator": "CARDHOLDER"}})
-                };
+                if (response.status == 'created') {
                 
-                fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                        accept: 'application/json',
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({"source":default_payment_method,
+                        "email":billing_email,
+                        "stored_credentials":{
+                            "sequence": "SUBSEQUENT",
+                            "is_scheduled": false,
+                            "initiator": "CARDHOLDER"}})
+                    };
+                    
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
                     .then(response => response.json())
                     .then(response => {
                         console.log(`make payment for created order ${response.id}`)
@@ -3456,16 +3472,16 @@ app.post('/user_checkout_submit', (req,res) => {
                             };
                             console.log(confirm_info);
                             setOrders(response, confirm_info, default_shipping_info, billing_email, billing_phone, billing_address.zip, order_items_count);    
-                            // updateOrderedCart(order_number, date, cart_numbers, u_id)
-                            
-                            // res.send(confirm_info);     
-                                      
-                        }                        
+                                                                
+                        } else res.send(response);                       
                     })
-                    .catch(err => console.error(err));               
+                    .catch(err => console.error(err));        
+                } else {
+                    res.send(response);
+                }      
                 
             })
-            .catch(err => console.error(err));
+        .catch(err => console.error(err));
     }
 
 
