@@ -9,157 +9,138 @@ export function mekeChangePrifileTap() {
         </ul>
         <div id="change_profile_form" class="change_profile_form">
 
-            <div id="tab-1" class="tab-content current change_profile_general_info">general_info            
-                <form action="/change_profile_general" class="change_profile_general_info_form" method="post">
+            <div id="tab-1" class="tab-content current change_profile_general_info">       
+                <form id="change_profile_general_info_form" class="change_profile_general_info_form">
                     <div align="left" class="form-tag input_general_info_tag">Name</div>
                     <div class="form-row general_name">
                         <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_name">
-                                <input type="text" name="general_first_name" class="input_general_first_name input_general_info_name" placeholder="First">
+                                <div name="general_first_name" id="input_general_first_name" class="input_general_first_name input_general_info_name" ></div>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_name">
-                                <input type="text" name="general_last_name" class="input_general_last_name input_general_info_name" placeholder="Last">
+                                <div name="general_last_name" id="input_general_last_name" class="input_general_last_name input_general_info_name"></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-tag input_general_info_tag">Mobile number</div>
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_phone">
-                        <input type="text" name="general_phone" class="input_general_phone input_general_info" placeholder="### ### ####">
+                    <div id="general_info_box" class="general_info_box">
+                        <div class="form-tag input_general_info_tag">Mobile number</div>
+                        <div class="form-row">
+                            <div id="change_profile_general" class="field change_profile_general_phone">
+                            <input type="text" name="general_phone" id="input_general_phone" class="input_general_phone input_general_info" placeholder="### ### ####">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-tag input_general_info_tag">Email</div>
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_email">
-                        <input type="text" name="general_email" class="input_general_email input_general_info" >
+                        <div class="form-tag input_general_info_tag">Email</div>
+                        <div class="form-row">
+                            <div id="change_profile_general" class="field change_profile_general_email">
+                            <input type="text" name="general_email" id="input_general_email" class="input_general_email input_general_info" >
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-tag input_general_info_tag">Address</div>
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_address">
-                        <input type="text" name="general_address_street_line1" class="input_general_address_street_line1 input_general_info" placeholder="Address Street Line 1">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div id="change_profile_general" class="field change_profile_general_address">
-                        <input type="text" name="general_address_street_line2" class="input_general_address_street_line2 input_general_info" placeholder="Address Street Line 2">
-                        </div>
-                    </div>
-
-                    <div class="general_info_csz">
+                        <div class="form-tag input_general_info_tag">Address</div>
                         <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_address">
-                            <input type="text" name="general_address_city" class="input_general_address_city input_general_info_csz" placeholder="City">
+                            <input type="text" name="general_address_street_line1" id="input_general_address_street_line1" class="input_general_address_street_line1 input_general_info" placeholder="Address Street Line 1">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div id="change_profile_general" class="field change_profile_general_address">
-                                <select name="general_address_state" id="change_profile_general" class="change_profile_general input_general_info_csz select_state_box">
-                                <option value="AL">Alabama</option>
-                                <option value="AK">Alaska</option>
-                                <option value="AZ">Arizona</option>
-                                <option value="AR">Arkansas</option>
-                                <option value="CA">California</option>
-                                <option value="CO">Colorado</option>
-                                <option value="CT">Connecticut</option>
-                                <option value="DE">Delaware</option>
-                                <option value="DC">District Of Columbia</option>
-                                <option value="FL">Florida</option>
-                                <option value="GA">Georgia</option>
-                                <option value="HI">Hawaii</option>
-                                <option value="ID">Idaho</option>
-                                <option value="IL">Illinois</option>
-                                <option value="IN">Indiana</option>
-                                <option value="IA">Iowa</option>
-                                <option value="KS">Kansas</option>
-                                <option value="KY">Kentucky</option>
-                                <option value="LA">Louisiana</option>
-                                <option value="ME">Maine</option>
-                                <option value="MD">Maryland</option>
-                                <option value="MA">Massachusetts</option>
-                                <option value="MI">Michigan</option>
-                                <option value="MN">Minnesota</option>
-                                <option value="MS">Mississippi</option>
-                                <option value="MO">Missouri</option>
-                                <option value="MT">Montana</option>
-                                <option value="NE">Nebraska</option>
-                                <option value="NV">Nevada</option>
-                                <option value="NH">New Hampshire</option>
-                                <option value="NJ">New Jersey</option>
-                                <option value="NM">New Mexico</option>
-                                <option value="NY">New York</option>
-                                <option value="NC">North Carolina</option>
-                                <option value="ND">North Dakota</option>
-                                <option value="OH">Ohio</option>
-                                <option value="OK">Oklahoma</option>
-                                <option value="OR">Oregon</option>
-                                <option value="PA">Pennsylvania</option>
-                                <option value="RI">Rhode Island</option>
-                                <option value="SC">South Carolina</option>
-                                <option value="SD">South Dakota</option>
-                                <option value="TN">Tennessee</option>
-                                <option value="TX">Texas</option>
-                                <option value="UT">Utah</option>
-                                <option value="VT">Vermont</option>
-                                <option value="VA">Virginia</option>
-                                <option value="WA">Washington</option>
-                                <option value="WV">West Virginia</option>
-                                <option value="WI">Wisconsin</option>
-                                <option value="WY">Wyoming</option>
-                                </select>
-                            
+                            <input type="text" name="general_address_street_line2" id="input_general_address_street_line2" class="input_general_address_street_line2 input_general_info" placeholder="Address Street Line 2">
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_address">
-                            <input type="text" name="general_address_zip" class="input_general_address_zip input_general_info_csz" placeholder="Zip Code">
+                        <div class="general_info_csz">
+                            <div class="form-row">
+                                <div id="change_profile_general" class="field change_profile_general_address">
+                                <input type="text" name="general_address_city" id="input_general_address_city" class="input_general_address_city input_general_info_csz" placeholder="City">
+                                </div>
                             </div>
+
+                            <div class="form-row">
+                                <div id="change_profile_general" class="field change_profile_general_address">
+                                    <select name="general_address_state" id="change_profile_general_state" class="change_profile_general input_general_info_csz select_state_box">
+                                    <option value="AL">Alabama</option>
+                                    <option value="AK">Alaska</option>
+                                    <option value="AZ">Arizona</option>
+                                    <option value="AR">Arkansas</option>
+                                    <option value="CA">California</option>
+                                    <option value="CO">Colorado</option>
+                                    <option value="CT">Connecticut</option>
+                                    <option value="DE">Delaware</option>
+                                    <option value="DC">District Of Columbia</option>
+                                    <option value="FL">Florida</option>
+                                    <option value="GA">Georgia</option>
+                                    <option value="HI">Hawaii</option>
+                                    <option value="ID">Idaho</option>
+                                    <option value="IL">Illinois</option>
+                                    <option value="IN">Indiana</option>
+                                    <option value="IA">Iowa</option>
+                                    <option value="KS">Kansas</option>
+                                    <option value="KY">Kentucky</option>
+                                    <option value="LA">Louisiana</option>
+                                    <option value="ME">Maine</option>
+                                    <option value="MD">Maryland</option>
+                                    <option value="MA">Massachusetts</option>
+                                    <option value="MI">Michigan</option>
+                                    <option value="MN">Minnesota</option>
+                                    <option value="MS">Mississippi</option>
+                                    <option value="MO">Missouri</option>
+                                    <option value="MT">Montana</option>
+                                    <option value="NE">Nebraska</option>
+                                    <option value="NV">Nevada</option>
+                                    <option value="NH">New Hampshire</option>
+                                    <option value="NJ">New Jersey</option>
+                                    <option value="NM">New Mexico</option>
+                                    <option value="NY">New York</option>
+                                    <option value="NC">North Carolina</option>
+                                    <option value="ND">North Dakota</option>
+                                    <option value="OH">Ohio</option>
+                                    <option value="OK">Oklahoma</option>
+                                    <option value="OR">Oregon</option>
+                                    <option value="PA">Pennsylvania</option>
+                                    <option value="RI">Rhode Island</option>
+                                    <option value="SC">South Carolina</option>
+                                    <option value="SD">South Dakota</option>
+                                    <option value="TN">Tennessee</option>
+                                    <option value="TX">Texas</option>
+                                    <option value="UT">Utah</option>
+                                    <option value="VT">Vermont</option>
+                                    <option value="VA">Virginia</option>
+                                    <option value="WA">Washington</option>
+                                    <option value="WV">West Virginia</option>
+                                    <option value="WI">Wisconsin</option>
+                                    <option value="WY">Wyoming</option>
+                                    </select>
+                                
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div id="change_profile_general" class="field change_profile_general_address">
+                                <input type="text" name="general_address_zip" id="input_general_address_zip" class="input_general_address_zip input_general_info_csz" placeholder="Zip Code">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="change_profile_general_default_address input_general_info_tag">
+                        <input type="checkbox" id="change_profile_general_default_address_checkbox" name="default_address" value="default" checked>
+                        <label for="change_profile_general_default_address_checkbox">make default shipping address</label>
                         </div>
                     </div>
 
-                    <div class="change_profile_general_default_address input_general_info_tag">
-                    <input type="checkbox" id="change_profile_general_default_address_checkbox" name="default_address" value="default" checked>
-                    <label for="change_profile_general_default_address_checkbox">make default shipping address</label>
-                    </div>
 
-
-
-                    <button type="button" class="btn change_password_btn">Change Password</button>
-                    <div class="form-tag">Change Password</div>
-                    <div class="change_password_container">
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_current_password">
-                            <input type="password" name="general_current_password" class="input_general_current_password" placeholder="Current password">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_new_password">
-                            <input type="password" name="general_new_password" class="input_general_new_password" placeholder="New password">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div id="change_profile_general" class="field change_profile_general_new_password_confirm">
-                            <input type="password" name="general_new_password_confirm" class="input_general_new_password_cofirm" placeholder="Confirm New password">
-                            </div>
-                        </div>
                     
                     
-                    
-                    </div>
             
-                    <div class="button-container">
-                        <input type="submit" value="Submit">
+                    <div id="general_info_change_button_container" class="general_info_change_button_container">
+                        
+                        <button type="button" id="general_info_change_submit_btn" class="general_info_change_submit_btn general_info_change_btn">Submit Update</button>                        
+                        <button type="button" id="change_password_btn" class="btn change_password_btn general_info_change_btn">Password Change</button>
                     </div> 
 
 
@@ -194,6 +175,47 @@ export function mekeChangePrifileTap() {
         </div>        
     </div>
     `;
+}
+
+/* <button type="button" id="general_info_change_submit_cancel_btn" class="general_info_change_submit_cancel_btn general_info_change_btn">Cancel</button> */
+
+export function changePasswordForm() {
+    return `           
+        <div class="change_password_container">
+           
+            <div id="change_profile_general_current_password_box" class="change_profile_general_current_password_box change_password_box">
+                <div id="change_profile_general_current_password_title" id="change_profile_general_current_password_title change_password_title">
+                Current Password *
+                </div>
+                <input type="password" name="general_current_password" id="input_general_current_password" class="input_general_current_password change_password_input" >
+            </div>
+        
+            <div id="change_profile_general_new_password_box" class="change_profile_general_new_password_box change_password_box">
+                <div id="change_profile_general_new_password_title" id="change_profile_general_new_password_title change_password_title">
+                New Password *
+                </div>
+                <input type="password" name="general_new_password" id="input_general_new_password" class="input_general_new_password change_password_input" >
+            </div>
+        
+            <div id="change_profile_general_new_password_confirm_box" class="change_profile_general_new_password_confirm_box change_password_box">
+                <div id="change_profile_general_new_password_confirm_title" id="change_profile_general_new_password_confirm_title change_password_title">
+                New Password Confirm *
+                </div>
+                <input type="password" name="general_new_password_confirm" id="input_general_new_password_cofirm" class="input_general_new_password_cofirm change_password_input" >
+            </div>
+         
+        </div>
+        `;
+}
+
+export function makeChangePasswordBtnContainer() {
+    return `   
+                    
+        <button type="button" id="general_info_change_pswd_submit_btn" class="general_info_change_pswd_submit_btn general_info_change_btn">Submit</button>
+        <button type="button" id="general_info_change_pswd_cancel_btn" class="general_info_change_pswd_cancel_btn general_info_change_btn">Cancel</button>     
+        <div id="change_pswd_extra" class="change_pswd_extra"></div>   
+    
+        `;
 }
 
 

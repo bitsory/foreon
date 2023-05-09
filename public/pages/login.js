@@ -1,6 +1,8 @@
 // import cart from "./cart.js";
 import Main from "../index.js"
 import * as PurchaseHistory from "./form_purchase_history.js";
+import * as SPINNER from "./spinner.js";
+import * as WEBS from "./form_webs.js";
 
 
 
@@ -52,9 +54,15 @@ export default class {
                 document.getElementById('main_background main_background__blink') ? document.getElementById('main_background main_background__blink').style.display = "none" : false;
                 document.getElementById('lorem').innerHTML = this.makeTrackMyOrderForm();
             }
-            
 
-        }) 
+            if(e.target && e.target.id == 'find_password') {
+                this.modalClose();
+                history.pushState(null, null, `/find-password`);
+                document.getElementById('main_background main_background__blink') ? document.getElementById('main_background main_background__blink').style.display = "none" : false;
+                document.getElementById('lorem').innerHTML = this.makeFindPasswordForm();
+
+            }
+        });
 
         this.modal.addEventListener('keyup', (e)=> {
             if(e.target && e.target.id == 'user_pw' && (e.keyCode == 13)) {                
@@ -70,9 +78,13 @@ export default class {
 
                 // document.getElementById('user_login_form').remove();
                 // this.modal_page.innerHTML = makeSignUpForm();  
-                if (!(document.getElementById('sign_up_user_name').value)) {
-                    document.getElementById('sign_up_form_extra').textContent = "Please Input your Name...";
-                    document.sign_up_form.sign_up_user_name.focus();
+                if (!(document.getElementById('sign_up_user_first_name').value)) {
+                    document.getElementById('sign_up_form_extra').textContent = "Please Input your First Name...";
+                    document.sign_up_form.sign_up_user_first_name.focus();
+
+                } else if (!(document.getElementById('sign_up_user_last_name').value)) {
+                    document.getElementById('sign_up_form_extra').textContent = "Please Input your Last Name...";
+                    document.sign_up_form.sign_up_user_last_name.focus();
 
                 } else if (this.verifyEmail(document.getElementById('sign_up_user_email').value) != true)  {
                     document.getElementById('sign_up_form_extra').textContent = "Please Input your valid email address...";
@@ -93,7 +105,53 @@ export default class {
                 } else this.signUpSubmit();        
             }
 
+
+
             
+            if (e.target && e.target.id == 'find_password_submit_btn') {
+
+                if (!(document.getElementById('find_password_email').value)) {
+                    document.getElementById('find_password_alert_box').textContent = "Please Input your email...";
+                    document.find_password_form.find_password_email.focus();
+                } else if (!(document.getElementById('find_password_first_name').value)) {
+                    document.getElementById('find_password_alert_box').textContent = "Please Input your first name...";
+                    document.find_password_form.find_password_first_name.focus();
+                } else if (!(document.getElementById('find_password_last_name').value)) {
+                    document.getElementById('find_password_alert_box').textContent = "Please Input your last name...";
+                    document.find_password_form.find_password_last_name.focus();
+                } else {
+                    const find_password_email = document.getElementById("find_password_email").value;
+                    const find_password_first_name = document.getElementById("find_password_first_name").value;
+                    const find_password_last_name = document.getElementById("find_password_last_name").value;
+                    const send_data = {
+                        email : find_password_email,
+                        first_name : find_password_first_name,
+                        last_name : find_password_last_name
+                    }
+
+                    const data = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'                        
+                            },
+                        body: JSON.stringify(send_data)                    
+                    };
+
+                    fetch('/find_password', data)
+                    .then(res => res.json())
+                    .then(response => {
+                        console.log(response)
+                        if (response.result == "ok") {
+                            document.getElementById('find_password_alert_box').innerText = "A temporary password has been sent.";
+                            console.log("A temporary password has been sent.")
+                            
+                        } else {
+                            document.getElementById('find_password_alert_box').innerText = response.result;                          
+
+                        }
+                    });
+                }
+            }            
 
             if (e.target && e.target.id == 'track_my_order_check_btn') {
 
@@ -199,7 +257,7 @@ export default class {
 
 
     signInSubmit() {
-        this.getPBKey().then(key => {
+        WEBS.getPBKey().then(key => {
             
             const checked_remember = document.getElementById('remember_me_check');
             const uid = document.getElementById('user_id').value;
@@ -245,10 +303,13 @@ export default class {
 
     signUpSubmit() {
 
-        this.getPBKey().then(key => {
+        WEBS.getPBKey().then(key => {
             console.log(key);
 
-            const sign_up_uname = document.getElementById('sign_up_user_name').value;
+            // const sign_up_uname = document.getElementById('sign_up_user_name').value;
+          
+            const sign_up_ufirst_name = document.getElementById('sign_up_user_first_name').value;
+            const sign_up_ulast_name = document.getElementById('sign_up_user_last_name').value;
             const sign_up_uemail = document.getElementById('sign_up_user_email').value;
             const sign_up_upw = document.getElementById('sign_up_user_pw').value;
             const sign_up_upw_confirm = document.getElementById('sign_up_user_pw_check').value; 
@@ -258,8 +319,8 @@ export default class {
     
             if (sign_up_upw === sign_up_upw_confirm) {                
                 console.log("sign up progress")
-                // const te = {key : test_text}
-                const tmp_uname = sign_up_uname.split(" ");
+                SPINNER.turnOffDisplay();
+                // const tmp_uname = sign_up_uname.split(" ");
                 const crypt = new JSEncrypt();
                 crypt.setPublicKey(key);         
 
@@ -267,7 +328,9 @@ export default class {
                 const encrypted2 = crypt.encrypt(sign_up_upw);
                 const send_data = {
                     // aid : sign_up_uid, 
-                    uname : tmp_uname,
+                    // uname : tmp_uname,
+                    ufirstname : sign_up_ufirst_name,
+                    ulastname : sign_up_ulast_name,
                     uemail : encrypted1,
                     bpw : encrypted2, 
                     uphone : sign_up_uphone,                
@@ -288,6 +351,7 @@ export default class {
                 fetch('/sign_up', data)
                 .then((res) => res.json())
                 .then(result => {
+                    SPINNER.turnOnDisplay();
                     console.log(result)
                     // if (result.key == 'complete') {
                     //     window.location.href = result.url;
@@ -376,7 +440,10 @@ export default class {
                 <form id="sign_up_form" class="sign_up_form" name="sign_up_form">
                     <div id="sign_up_box" class="sign_up_box">
                         <div id="sign_up_form_label_name" class="sign_up_form_label_name sign_up_form_label">Your name *</div>
-                        <input type='text' id='sign_up_user_name' class='sign_up_user_name sign_up_input_box' name='sign_up_name' value='' placeholder="First and Last Name" required/>
+                        <div id="sign_up_form_name_box" class="sign_up_form_name_box">
+                            <input type='text' id='sign_up_user_first_name' class='sign_up_user_name sign_up_input_box sign_up_input_name_box' name='sign_up_first_name' value='' placeholder="First Name" required/>
+                            <input type='text' id='sign_up_user_last_name' class='sign_up_user_name sign_up_input_box sign_up_input_name_box' name='sign_up_last_name' value='' placeholder="Last Name" required/>
+                        </div>
                         <div id="sign_up_form_label_email" class="sign_up_form_label_email sign_up_form_label">Email for your ID *</div>
                         <input type='text' id='sign_up_user_email' class='sign_up_user_email sign_up_input_box' name='sign_up_email' placeholder="email address for Sign Up" required/ value='' />
                         <div id="sign_up_form_label_pw" class="sign_up_form_label_pw sign_up_form_label">Password *</div>
@@ -420,6 +487,44 @@ export default class {
                 </div>
             </div>
         `;
+    }
+
+
+    makeFindPasswordForm() {
+        return `
+        <div id="find_password_container" class="find_password_container">
+            <div id="find_password_box" class="find_password_box">
+            
+         
+                <div id="find_password_title" class="find_password_title">Forgot Password?</div>
+                <div id="find_password_context" class="find_password_context">
+                    You can find through your email & name when you sign up.<br>
+                    Temporary password will be sent to your email if your sign up email & name are correct.
+                    </div>
+                
+                <form id="find_password_form" class="find_password_form" name="find_password_form">
+
+                    Your Email when you sign up*    
+                    <input type="text" id="find_password_email" class="find_password_email find_password_input" title="use your email when you sign up" required>
+                    Your Name when you sign up*
+                    <div id="find_password_name" class="find_password_name">
+                        <input type="text" id="find_password_first_name" class="find_password_first_name find_password_input find_password_name_input" title="use your first name when you sign up" placeholder="First Name" required>
+                        <input type="text" id="find_password_last_name" class="find_password_last_name find_password_input find_password_name_input" title="use your last name when you sign up" placeholder="Last Name" required>
+                    </div>
+
+                    <button type="button" id="find_password_submit_btn" class="find_password_submit_btn" title="find password">
+                    Find Password
+                    </button>
+
+                </form>
+                <div id="find_password_alert_box" class="find_password_alert_box"></div>
+            </div>
+        </div>
+        
+        `
+       
+
+
     }
 }
 

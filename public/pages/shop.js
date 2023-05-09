@@ -103,10 +103,7 @@ export default class {
                     </div>
                     <div id="shop_cat_gift" class="shop_cat_gift shop_category">
                         <button id="shop_gift_btn" class="shop_gift_btn cate_btn">Gift</button>
-                    </div>
-                    <div id="shop_cat_test" class="shop_cat_test shop_category">
-                        <button id="shop_test_btn" class="shop_test_btn cate_btn">test</button>
-                    </div>
+                    </div>                   
                 </div>
             </div>
 

@@ -14,6 +14,7 @@ import Admin from "./pages/admin.js";
 import * as ItemCounter from "./pages/item_counter.js";
 import * as ShopPageForm from "./pages/form_shop_page.js";
 import * as CheckoutOrderForm from "./pages/form_checkout_order.js";
+import * as WEBS from "./pages/form_webs.js";
 
 
 
@@ -122,6 +123,14 @@ document.addEventListener('click', function(e){
     
     // const sign_in_btn = document.getElementById("sign_in_btn");
     // const account_modal = document.getElementById("account_modal");
+
+    console.log("document.addEventListener('click', function(e){")
+    console.log(toggleBtn.classList.toggle);
+    // if (e.target != document.getElementById('navbar')) {
+    if (e.target != document.getElementById('navbar') && toggleBtn.classList.toggle == 'on') {
+        console.log("if (e.target != document.getElementById('navbar') && toggleBtn.classList.toggle == 'on') {")
+        WEBS.toggleFunc();
+    }
     
     if(e.target == account_modal_pop_btn || e.target == account_modal_pop_btn_id) { // account modal pop
        
@@ -458,7 +467,11 @@ function setInvisibleModalCtlBtn() {
     const cart_modal_container = document.getElementById('cart_modal_container');
         if (location.pathname.substring(0, 15) == '/shop/checkout/') {
             const cart_modal_ctl_btn = cart_modal_container.querySelectorAll('.cart_modal_ctl_btn');
-            console.log(cart_modal_ctl_btn)
+            const cart_modal_item_quantity_flag = cart_modal_container.querySelectorAll('.cart_modal_item_quantity_flag');
+            
+            cart_modal_item_quantity_flag.forEach (element => {
+                element.style.display = "block";
+            })
             cart_modal_ctl_btn.forEach (element => {
                 element.style.display = "none";
             })

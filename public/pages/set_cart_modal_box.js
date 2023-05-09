@@ -31,9 +31,8 @@ export default class {
             console.log(user_id)
             console.log(check_out_cart);
 
-            const IMAGE_WIDTH = 400;//한번 이동 시 IMAGE_WIDTH만큼 이동한다.
-            //DOM
-            
+            const IMAGE_WIDTH = 400;//한번 이동 시 IMAGE_WIDTH만큼 이동한다. // once move size
+                        
             const backBtn = document.getElementById("cart_modal_items_back_btn");
             const nextBtn = document.getElementById("cart_modal_items_next_btn");
             const images = document.getElementById("cart_modal_items_container");
@@ -51,7 +50,7 @@ export default class {
                     nextBtn.removeAttribute('disabled')
                     this.positionValue += IMAGE_WIDTH;
                     images.style.transform = `translateX(${this.positionValue}px)`;
-                    this.pages -= 1; //이전 페이지로 이동해서 pages를 1감소 시킨다.
+                    this.pages -= 1; //이전 페이지로 이동해서 pages를 1감소 시킨다. // decrease page count 1 that moving back page
                     console.log('this.positionValue after')
                     console.log(this.positionValue)
                 }
@@ -533,14 +532,16 @@ export default class {
         this.setItemNameBox(prodnum, name, item_attribute);
         // this.setItemName(prodnum, name, item_attribute);
         // this.setItemDelete(prodnum, item_attribute);
-        this.setItemPrice(prodnum, price, item_attribute);
+        this.setItemPriceBox(prodnum, price, quantity, item_attribute);
 
-        this.setItemQuantityControlBox(prodnum, quantity, item_attribute)
+        // this.setItemPrice(prodnum, price, item_attribute);
+
+        // this.setItemQuantityControlBox(prodnum, quantity, item_attribute)
         // this.setMinusQuantity(prodnum, item_attribute);
         // this.setItemQuantity(prodnum, quantity, item_attribute);
         // this.setPlusQuantity(prodnum, item_attribute);
 
-        this.getSubTotal(prodnum, item_attribute);
+        // this.getSubTotal(prodnum, item_attribute);
 
     }
 
@@ -565,7 +566,7 @@ export default class {
         const $item_link = document.createElement('a');
         $item_link.setAttribute('class', `${item_attribute}_link`);  
         $item_link.setAttribute('cart_modal_link_data_itemid', `${prodnum}`);  
-        // ItemLink.setAttribute('href', '/shop/view/item/' + prodnum);
+        $item_link.setAttribute('href', '/shop/view/item/' + prodnum);
         document.querySelector(`[cart_modal_image_itemid="${prodnum}"]`).appendChild($item_link);
         
         this.setItemImage(prodnum, image_src, item_attribute);
@@ -594,16 +595,44 @@ export default class {
         $item_name_box.setAttribute('class', `${item_attribute}_name_box cart_modal_item_name_box`);
         $item_name_box.setAttribute('cart_modal_name_box_itemid',`${prodnum}`); 
         document.querySelector(`[cart_modal_contents_data_itemid="${prodnum}"]`).appendChild($item_name_box);
-        this.setItemName(prodnum, item_name, item_attribute);
+        // this.setItemName(prodnum, item_name, item_attribute);
+        this.setItemNameLink(prodnum, item_name, item_attribute)
         this.setItemDelete(prodnum, item_attribute);
+    }
+
+    setItemNameLink(prodnum, item_name, item_attribute) {
+        const $item_name_link = document.createElement('a');
+        $item_name_link.setAttribute('class', `${item_attribute}_link`);  
+        $item_name_link.setAttribute('cart_modal_link_name_itemid', `${prodnum}`);  
+        $item_name_link.setAttribute('href', '/shop/view/item/' + prodnum);
+        document.querySelector(`[cart_modal_name_box_itemid="${prodnum}"]`).appendChild($item_name_link);
+        
+        this.setItemName(prodnum, item_name, item_attribute);
+        // setItemPrice(prodnum, item_price);
+        // setItemName(prodnum, item_name);
+        
+        
     }
 
     setItemName(prodnum, item_name, item_attribute) {
         const $item_name = document.createElement('div');
         $item_name.setAttribute('id', `${item_attribute}_name`);
         $item_name.setAttribute('class', `${item_attribute}_name`);
-        document.querySelector(`[cart_modal_name_box_itemid="${prodnum}"]`).appendChild($item_name);
+        document.querySelector(`[cart_modal_link_name_itemid="${prodnum}"]`).appendChild($item_name);
         $item_name.innerText = item_name;
+    }
+
+    setItemPriceBox(prodnum, item_price, item_quantity, item_attribute) {
+        const $item_price_box = document.createElement('div');
+        $item_price_box.setAttribute('id', `${item_attribute}_item_price_box`);
+        $item_price_box.setAttribute('class', `${item_attribute}_item_price_box cart_modal_item_price_box`);
+        $item_price_box.setAttribute('cart_modal_price_box_itemid',`${prodnum}`); 
+        document.querySelector(`[cart_modal_contents_data_itemid="${prodnum}"]`).appendChild($item_price_box);
+        this.setItemPrice(prodnum, item_price, item_attribute);
+        this.setItemQuantityControlBox(prodnum, item_quantity, item_attribute);
+        this.getSubTotal(prodnum, item_attribute);
+
+
     }
 
     setItemPrice(prodnum, item_price, item_attribute) {
@@ -611,8 +640,8 @@ export default class {
         $item_price.setAttribute('id', `${item_attribute}_price`);
         $item_price.setAttribute('class', `${item_attribute}_price`);
         $item_price.setAttribute('cart_modal_price_itemid',`${prodnum}`);    
-        document.querySelector(`[cart_modal_contents_data_itemid="${prodnum}"]`).appendChild($item_price);
-        $item_price.innerText = '$'+item_price;
+        document.querySelector(`[cart_modal_price_box_itemid="${prodnum}"]`).appendChild($item_price);
+        $item_price.innerText = '$'+parseFloat(item_price).toFixed(2);
     }
 
     setItemQuantityControlBox(prodnum, item_quantity, item_attribute) {
@@ -620,11 +649,22 @@ export default class {
         $item_quantity_control_box.setAttribute('id', `${item_attribute}_quantity_box`);
         $item_quantity_control_box.setAttribute('class', `${item_attribute}_quantity_box cart_modal_quantity_control_box`);
         $item_quantity_control_box.setAttribute('cart_modal_quantity_box_itemid',`${prodnum}`);   
-        document.querySelector(`[cart_modal_contents_data_itemid="${prodnum}"]`).appendChild($item_quantity_control_box);
+        document.querySelector(`[cart_modal_price_box_itemid="${prodnum}"]`).appendChild($item_quantity_control_box);
         this.setMinusQuantity(prodnum, item_attribute);
+        this.setItemQuantityFlag(prodnum, item_attribute);
         this.setItemQuantity(prodnum, item_quantity, item_attribute);
         this.setPlusQuantity(prodnum, item_attribute);
         
+    }
+
+    setItemQuantityFlag(prodnum, item_attribute) {
+        const $item_quantity_flag = document.createElement('div');
+        $item_quantity_flag.setAttribute('id', `${item_attribute}_quantity_flag`);
+        $item_quantity_flag.setAttribute('class', `${item_attribute}_quantity_flag`);
+        // $item_quantity_flag.setAttribute('cart_modal_quantity_itemid',`${prodnum}`);   
+        document.querySelector(`[cart_modal_quantity_box_itemid="${prodnum}"]`).appendChild($item_quantity_flag);    
+        $item_quantity_flag.innerText = 'x\u00a0';
+    
     }
 
     setItemQuantity(prodnum, item_quantity, item_attribute) {
@@ -658,7 +698,8 @@ export default class {
         item_deleteb_tn.setAttribute('id', `${item_attribute}_delete_btn`);
         item_deleteb_tn.setAttribute('class', `${item_attribute}_delete_btn cart_modal_ctl_btn`);
         document.querySelector(`[cart_modal_name_box_itemid="${prodnum}"]`).appendChild(item_deleteb_tn);
-        item_deleteb_tn.innerText = '✖';
+        item_deleteb_tn.innerText = 'X';
+        // item_deleteb_tn.innerText = '✖';
     }
 
     getSubTotal(prodnum, item_attribute) {
@@ -673,7 +714,7 @@ export default class {
         // console.log(item_price);
         // console.log(item_subtotal);
 
-        document.querySelector(`[cart_modal_contents_data_itemid="${prodnum}"]`).appendChild($item_subtotal);
+        document.querySelector(`[cart_modal_price_box_itemid="${prodnum}"]`).appendChild($item_subtotal);
         $item_subtotal.innerText = '$' +item_subtotal.toFixed(2);
 
     }

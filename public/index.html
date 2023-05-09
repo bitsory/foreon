@@ -44,48 +44,64 @@
     <nav id="navbar" class="navbar">
         <div id="navbar_or" class="navbar_or">
             <div id="navbar_w4" class="navbar_w4">
+                <a href="javascript:;" class="navbar_toggleBtn"></a>
                 <div id="navbar_logo" class="navbar_logo">
                     <a href="http://localhost:8080" class="logo_btn"></a>
                     <!-- <a href="./cafeFORE">Cafe FORE</a> -->
                 </div>
 
-                <a href="javascript:;" class="navbar_toggleBtn">
-              
-                </a>
-        <!-- </div> -->
-            </div>
-            <ul class="navbar_nav_list">
-                <!-- <li><a href="/" data-link-T>HOME</a></li> -->
-                <li><a href="/about" data-link-T>ABOUT</a></li>
-                <li><a href="/menu"  data-link-T>MENU</a></li>   
-                <li><a href="/shop"  data-link-T>ONLINE SHOP</a></li>             
-                <li><a href="/contact"  data-link-T>CONTACT</a></li>
-                <!-- <li><a href="/test" data-link-T>test</a></li> -->
-                
-            </ul>
-            <div in="login" class="login">
-                <div id="login_btn" class="login_btn">
-                    <img src="http://localhost:8080/images/login.png" id="account_modal_pop_btn" class="account_modal_pop_btn" title="Sign In" width="40px">
-                    <div id="account_modal_pop_btn_id" class="account_modal_pop_btn_id" title="Log In">GUEST</div>
-                </div>
-               
-                <div id="account_modal_pop_container" class="account_modal_pop_container">
-                   
-                </div>
-            </div>
-            <div id="navbar_icons" class="navbar_icons">
-                <div id="item_count" class="item_count"></div>
-                <div id="go_cart_box" class="go_cart_box">
-                    <img src="http://localhost:8080/images/cart.png" id="view_cart_btn" class="view_cart_btn" title="view cart" width="38px">
+                <ul class="navbar_nav_list">
+                    <!-- <li><a href="/" data-link-T>HOME</a></li> -->
+                    <li><a href="/about" data-link-T>ABOUT</a></li>
+                    <li><a href="/menu"  data-link-T>MENU</a></li>   
+                    <li><a href="/shop"  data-link-T>ONLINE SHOP</a></li>             
+                    <li><a href="/contact"  data-link-T>CONTACT</a></li>
+                    <li class="li_login_toggle">
+                        <div in="login_toggle" class="login_toggle">
+                            <div id="login_btn" class="login_btn">
+                                <img src="http://localhost:8080/images/login.png" id="account_modal_pop_btn" class="account_modal_pop_btn" title="Sign In" width="40px">
+                                <div id="account_modal_pop_btn_id" class="account_modal_pop_btn_id" title="Log In">GUEST</div>
+                            </div>
+                           
+                            <div id="account_modal_pop_container" class="account_modal_pop_container">
+                               
+                            </div>
+                        </div>
+
+                    </li>
                     
-                </div>
-                <div id="cart_modal_container" class="cart_modal_container">
-                    <div id="cart_modal_page" class="cart_modal_page">
+                </ul>
+                <!-- <div in="login" class="login">
+                    <div id="login_btn" class="login_btn">
+                        <img src="http://localhost:8080/images/login.png" id="account_modal_pop_btn" class="account_modal_pop_btn" title="Sign In" width="40px">
+                        <div id="account_modal_pop_btn_id" class="account_modal_pop_btn_id" title="Log In">GUEST</div>
+                    </div>
+                   
+                    <div id="account_modal_pop_container" class="account_modal_pop_container">
+                       
+                    </div>
+                </div> -->
+                <div id="navbar_icons" class="navbar_icons">
+                    <div id="item_count" class="item_count"></div>
+                    <div id="go_cart_box" class="go_cart_box">
+                        <img src="http://localhost:8080/images/cart.png" id="view_cart_btn" class="view_cart_btn" title="view cart" width="38px">
                         
                     </div>
+                    <div id="cart_modal_container" class="cart_modal_container">
+                        <div id="cart_modal_page" class="cart_modal_page">
+                            
+                        </div>
+                    </div>
+    
                 </div>
 
+               
+                
+      
             </div>
+            
+            
+            
             
         </div>
     </nav>

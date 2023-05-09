@@ -8,6 +8,8 @@ const JSEncrypt = require('nodejs-jsencrypt').default;
 const CryptoJS = require("crypto-js");
 const db = require('./public/service/db.js');
 const schedule = require('node-schedule');
+const nodemailer = require('nodemailer');
+
 require('dotenv').config({ override: true });
 // import fetch from 'node-fetch';
 
@@ -75,37 +77,6 @@ app.use(session({
 app.use(cookieParser("secret"));
 
 const uuid4 = require('uuid');
-
-
-// const axios = require('axios');
-
-// // Config Set Up
-// const targetEnv = 'https://sandbox.dev.clover.com'; // Pointing to Sandbox Environment
-// // const targetEnv = 'https://www.clover.com'; // Pointing to Prod Environment
-
-// const appID = 'DRXJ3XYX3VZXT'; // Input your app ID here
-// const appSecret = '6b39c8ef-a361-95b9-e24e-7cb7c1fe551a'; // Input your app secret here
-
-// app.get('/', (req, res) => authenticate(req, res));
-
-// // Steps 1 & 2 - Request merchant authorization to receive authorization code
-// const authenticate = async (req, res) => {
-//   const url = `${targetEnv}/oauth/authorize?client_id=${appID}`;
-
-//   /* If there is no code parameter in the query string of the current url
-//   redirect user for authentication. If there isn't then request API token */
-//   !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
-// }
-
-// // Steps 3 & 4 - Request and serve up API token using the received authorization code
-// const requestAPIToken = async (res, query) => {
-//   const url = `${targetEnv}/oauth/token?client_id=${appID}&client_secret=${appSecret}&code=${query.code}`;
-
-//   // Request
-//   await axios.get(url)
-//     .then(({ data }) => res.send(data))
-//     .catch(err => res.send(err.message));
-// }
 
 
 app.get('/',(req,res) => {
@@ -252,9 +223,7 @@ app.post('/sign_in', function (req,res) {
     console.log(req.body);
     console.log(`req.originalUrl: ${req}`);
     console.log(req.url);
-    // const sess = req.session;
-    
-    // const con = makeConnect();
+   
     const aid = req.body.aid;
     const bpw = req.body.bpw;
     const remember_id = req.body.checked_remember;
@@ -270,18 +239,13 @@ app.post('/sign_in', function (req,res) {
 
     const sign_in_id = decrypt.decrypt(aid);
     const sign_in_pw = decrypt.decrypt(bpw);
+
     const redirect_path = req.body.c_path;
-    // const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
-    console.log(redirect_path);
+      
     
     const date = getDate();  
     const crypto = require('crypto');
-    // const buf = crypto.randomBytes(64);
-
-    // const salt = buf.toString('base64');
-    // console.log('salt');
-    // console.log(salt);
-
+    
     
     db.getConnection((con)=>{
         con.query('SELECT salt from users where id = ?', [sign_in_id], (err, result) => { 
@@ -293,9 +257,7 @@ app.post('/sign_in', function (req,res) {
                 makeKey(sign_in_pw, result[0].salt).then(key => {
                     console.log('key')
                     console.log(key)
-                    con.query('SELECT *  from users where id = ? and pw = ?',
-                    // con.query('SELECT COALESCE(MAX(id), "false") AS id from users where id = ? and pw = ?',
-                        [sign_in_id, key], (err, result) => {
+                    con.query('SELECT *  from users where id = ? and pw = ?', [sign_in_id, key], (err, result) => {
                         if(err){
                             res.send(err);
                             // con.end();
@@ -307,7 +269,7 @@ app.post('/sign_in', function (req,res) {
                             // con.end();
                         } else {                                         
                             console.log(`${result}`);                              
-                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id, remember_id);
+                            updateLastLog(con, result[0].id, result[0].first_name, req, res, date, redirect_path, result[0].clv_id, remember_id);
                             
                         }                                
                     });    
@@ -369,14 +331,14 @@ app.post('/sign_up', (req,res) => {
     makeKey(decryptedbpw, salt).then(key => {
         console.log('key')
         console.log(key)
-        
-        let sign_up_first_name = '';
-        let sign_up_last_name = '';
 
-        if (req.body.uname.length > 1) {
-            sign_up_first_name = req.body.uname[0];
-            sign_up_last_name = req.body.uname[1];
-        } else sign_up_first_name = req.body.uname[0];           
+        // if (req.body.uname.length > 1) {
+        //     sign_up_first_name = req.body.uname[0];
+        //     sign_up_last_name = req.body.uname[1];
+        // } else sign_up_first_name = req.body.uname[0];
+
+        const sign_up_first_name = req.body.ufirstname;
+        const sign_up_last_name = req.body.ulastname;           
                 
         const sign_up_id = decryptedaid;
         const sign_up_pw = key;
@@ -412,21 +374,25 @@ app.post('/sign_up', (req,res) => {
                     };
                     
                     fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
-                        .then(response => response.json())
-                        .then(response => {                
-                            console.log(response)
-                            const clv_id = response.id;
-                            con.query('INSERT INTO users (id, pw, name, clv_id, email, phone, resi_date, last_log, salt) values (?,?,?,?,?,?,?,?,?)', 
-                            [sign_up_id, sign_up_pw, sign_up_first_name, clv_id, sign_up_email, sign_up_phone, date, date, salt]);
-                        
+                    .then(response => response.json())
+                    .then(response => {                
+                        console.log(response)
+                        const clv_id = response.id;
+                        con.query('INSERT INTO users (id, pw, first_name, last_name, clv_id, email, phone, resi_date, last_log, salt) values (?,?,?,?,?,?,?,?,?,?)', 
+                        [sign_up_id, sign_up_pw, sign_up_first_name, sign_up_last_name, clv_id, sign_up_email, sign_up_phone, date, date, salt], (err, result) => {
+                            if(err){
+                                console.log(err);
+                                res.send(err);
+                                  
+                            } else {
+                                console.log("sign up complete!!");  
+                                console.log(result); 
 
-                            updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id, "signup");
-
-                        })
-                        .catch(err => console.error(err));
-                    
-                    console.log("sign up complete!!");                 
-                
+                                updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id, "signup");
+                            }               
+                        }); 
+                    })
+                    .catch(err => console.error(err));                
                 } else {
                     console.log('use_other_id')
                     res.send({key : 'use_other_id'})
@@ -565,10 +531,10 @@ app.post('/g_sign_in', function (req,res) {
                     .then(response => {                
                         console.log(response)
                         const clv_id = response.id;
-                        con.query('INSERT INTO users (id, pw, name, clv_id, email, phone, resi_date, last_log, salt, description) values (?,?,?,?,?,?,?,?,?,?)', 
-                        [g_loginid, sign_up_pw, name, clv_id, g_loginid, "", date, date, signup_salt, "google"]);
+                        con.query('INSERT INTO users (id, pw, first_name, last_name, clv_id, email, phone, resi_date, last_log, salt, description) values (?,?,?,?,?,?,?,?,?,?,?)', 
+                        [g_loginid, sign_up_pw, first_name, last_name, clv_id, g_loginid, "", date, date, signup_salt, "google"]);
 
-                        updateLastLog(con, g_loginid, name, req, res, date, redirect_path, clv_id);
+                        updateLastLog(con, g_loginid, first_name, req, res, date, redirect_path, clv_id);
                     })
                 })
                 
@@ -598,6 +564,180 @@ app.post('/g_sign_in', function (req,res) {
 
     });
 
+    function makeKey(decryptedpw, salt) {
+        return new Promise((resolve, reject) => {
+                crypto.pbkdf2(decryptedpw, salt, 1000, 32, 'SHA512', (err, key) => {
+                if (err){
+                    console.log(err)
+                } else resolve(key.toString("base64"));
+            })
+        });
+    }
+
+});
+
+
+app.post('/change_password', (req,res) => {
+    console.log("change_password change_password ");
+    console.log(req.body);
+    const u_id = req.body.id;
+    const cur_pw = req.body.cur_pw;
+    const new_pw = req.body.new_pw;
+
+    
+    const crypto = require('crypto');
+    const buf = crypto.randomBytes(64);
+
+    const decrypt = new JSEncrypt();
+
+    decrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
+
+    const decrypted_cur_pw = decrypt.decrypt(cur_pw);
+    const decrypted_new_pw = decrypt.decrypt(new_pw);
+
+    const new_salt = buf.toString('base64');
+    console.log('new_salt');
+    console.log(new_salt);
+
+    db.getConnection((con)=>{
+        con.query('SELECT salt from users where id = ?', [u_id], (err, result) => { 
+            if(err) next(err);
+
+            console.log('salt')
+            console.log(result)
+            if (result.length == 1) {
+                makeKey(decrypted_cur_pw, result[0].salt).then(key => {
+                    console.log('key')
+                    console.log(key)
+                    con.query('SELECT *  from users where id = ? and pw = ?', [u_id, key], (err, result) => {
+                        if(err){
+                            res.send(err);
+                            // con.end();
+                        }
+                        // else if(result[0] === 'false') {
+                        else if(result[0] == undefined) {
+                            console.log("current password not match")
+                            res.send({result : 'current password not match'});
+                            // con.end();
+                        } else {                                         
+                            console.log(`${result}`);
+                            makeKey(decrypted_new_pw, new_salt).then(new_key => {
+                                con.query('UPDATE users SET pw = ?, salt = ? where id = ?', [new_key, new_salt, u_id], (err, result) => {
+                                    if(err){                        
+                                        res.send(err);
+                                        // con.end();
+                                    } else {
+                                        console.log(result);                                                           
+                                        result.protocol41 == true ? res.send({result : "ok"}) : res.send({result : "We are very sorry...DB error occured. Can you try again?"})
+                                        
+                                    }                    
+                                });
+                            });
+                        }                                
+                    });    
+                });
+            } else res.send({result : "not exist"});
+        }); con.release();
+    })
+
+
+    // db.getConnection((con)=>{
+    //     con.query('SELECT pw FROM users WHERE id = ?', [u_id], (err, result) => {
+    //         if(err){
+    //             console.log(err)
+    //             res.send(err);
+                   
+    //         } else {
+    //             console.log(result); 
+
+
+    function makeKey(decrypted, salt) {
+        return new Promise((resolve, reject) => {
+                crypto.pbkdf2(decrypted, salt, 1000, 32, 'SHA512', (err, key) => {
+                if (err){
+                    console.log(err)
+                } else resolve(key.toString("base64"));
+            })
+        });
+    }
+});
+
+app.post('/find_password', (req,res) => {
+    console.log("find_password find_password find_password ");
+    console.log(req.body);
+    const u_id = req.body.email;
+    const u_first_name = req.body.first_name;
+    const u_last_name = req.body.last_name;
+
+    const crypto = require('crypto');
+    const buf = crypto.randomBytes(64);
+
+    db.getConnection((con)=>{
+        con.query('SELECT * FROM users WHERE id = ? and first_name = ? and last_name = ?', [u_id, u_first_name, u_last_name], (err, result) => {
+            if(err){
+                console.log(err)
+                res.send(err);
+                   
+            } else {
+                console.log(result); 
+                if (result.length > 0) {
+                    const tmp_pass = Math.random().toString(36).slice(2);
+                    console.log(tmp_pass);
+                                  
+                    
+                    const salt = buf.toString('base64');
+                    console.log('salt');
+                    console.log(salt);
+
+                    const sendTmpPswdMail = async () => {
+                        let transporter = nodemailer.createTransport({
+                            service: "gmail",
+                            host: "smtp.gmail.com",
+                            port: 587,
+                            secure: false,
+                            auth: {
+                                user: process.env.NODEMAILER_USER,
+                                pass: process.env.NODEMAILER_PSWD
+                            },
+                        });
+                      
+                        // send mail with defined transport object
+                        let info = await transporter.sendMail({
+                          from: `"cafe FORE" <${process.env.NODEMAILER_USER}>`,                       
+                          to: 'jonghk8111@gmail.com',
+                          subject: 'cafe FORE Temporary password',
+                          text: `cafe FORE Temporary password ${tmp_pass}` ,
+                        //   html: `<b>${generatedAuthNumber}</b>`,
+                        });
+                      
+                        console.log('Message sent: %s', info.messageId);       
+                      
+                      };
+
+                    makeKey(tmp_pass, salt).then(key => {
+                        con.query('UPDATE users SET pw = ?, salt = ? where id = ? and first_name = ?', [key, salt, u_id, u_first_name], (err, result) => {
+                            if(err){                        
+                                res.send(err);
+                                // con.end();
+                            } else {
+                                console.log(result);
+                                sendTmpPswdMail();                                 
+
+                                res.send({"result" : "ok"});
+                            }                    
+                        });
+                    })                   
+                    
+                } else {
+                    res.send({"result" : "not matched... check email & name again"});
+
+                }
+            }  
+        });
+        con.release();
+    });
+
+
     function makeKey(decryptedbpw, salt) {
         return new Promise((resolve, reject) => {
                 crypto.pbkdf2(decryptedbpw, salt, 1000, 32, 'SHA512', (err, key) => {
@@ -608,7 +748,9 @@ app.post('/g_sign_in', function (req,res) {
         });
     }
 
+
 });
+
 
 
 app.post('/item_counter', (req,res) => {
@@ -623,11 +765,38 @@ app.post('/item_counter', (req,res) => {
         db.getConnection((con)=>{
             con.query('SELECT * FROM cart WHERE u_id = ? and result="n"', [u_id], (err, result) => {
                 if(err){
+                    console.log(err)
                     res.send(err);
-                    con.end();      
+                      
                 } else {
                     console.log(result); 
                     res.send(result);
+                }               
+            }); 
+            con.release();
+        });  
+    }
+});
+
+
+app.post('/get_user_info', (req,res) => {
+    console.log(req.body);
+    console.log("/get_user_info /get_user_info /get_user_info ");
+    
+    const u_id = req.body.id;
+    console.log(u_id);
+    console.log(req.session.loginData.id);
+
+    if (req.session.loginData && req.session.loginData.id == u_id) {     
+        db.getConnection((con)=>{
+            con.query('SELECT id, first_name, last_name, phone, email, address1, address2, city, state, zip FROM users WHERE id = ?', [u_id], (err, result) => {
+                if(err){
+                    console.log(err)
+                    res.send(err);
+                      
+                } else {
+                    console.log(result); 
+                    res.send(result[0]);
                 }               
             }); 
             con.release();
@@ -1645,28 +1814,7 @@ app.post("/shop/order", function (req, res) {
     console.log("/shop/order/shop/order/shop/order/shop/order");
     console.log(req.body);
     const u_id = req.body[0].u_cart.length ? req.body[0].u_cart[0].u_id : 'GUEST';
-        
-    /*
-    const mysql = require('mysql');
-
-    const con = mysql.createConnection({
-        host: '127.0.0.1',
-        port: '3306',
-        user: 'root',
-        password: '111111',
-        database: 'test1',
-        
-    });
-
-    con.connect((err) => {
-        if(err){
-        console.log('Error connecting to Db');
-        return;
-        }
-        console.log('Connection established /shop/order');
-    });
-    */
-
+       
     db.getConnection((con)=>{
         if (req.session.loginData && req.session.loginData.id == u_id) {
             console.log(req.session.loginData.id);
@@ -1709,11 +1857,96 @@ app.post("/shop/order", function (req, res) {
 
 
 
-app.post('/change_profile_general',(req,res) => {
-    console.log(`req contact: ${req}`);
+app.post('/update_general_profile',(req,res) => {
+    console.log(`/update_general_profile /update_general_profile/update_general_profile`);
     console.log(req.body);
-    if (req.session.loginData) {
-		res.send(req.session.loginData);
+    console.log(req.session.loginData)
+
+    
+    // const sh_number = req.body.shipping_address_index;
+    const recipient = req.body.first_name + ' ' + req.body.last_name;
+    const address1 = req.body.address1;
+    const address2 = req.body.address2;
+    const city = req.body.city;
+    const state = req.body.state;
+    const zip = req.body.zip;
+    const phone = req.body.phone;
+    const email = req.body.email;    
+    const default_check = req.body.default_check;
+    const indate = getDate();
+
+    if (req.session && req.session.loginData.id == req.body.id) {
+        const u_id = req.session.loginData.id;
+
+        updateGeneralInfo();
+
+        checkDefault().then(() => {         
+            addShippingInfo();
+        });
+    
+        function checkDefault() {
+            return new Promise((resolve, reject) => {
+                if (default_check == 'default') { 
+                    db.getConnection((con)=>{
+                        con.query('SELECT id from shipping_info WHERE id=?', [u_id],(err, result) => {
+                            if (err) {
+                                res.send(err);
+                                // con.end();
+                            } else if (result !== undefined) {
+                                console.log("UPDATE shipping_info SET default_address = n where id =?");                             
+                                console.log(result)                
+                                con.query('UPDATE shipping_info SET default_address = "n" where id =?', [u_id])
+                                resolve();
+                            }                     
+                        });
+                        con.release();
+                    });
+                } else {
+                    addShippingInfo();  
+                }
+            });
+        }        
+    
+        function addShippingInfo() {
+            console.log("add ship info")
+            db.getConnection((con)=>{
+                con.query('INSERT INTO shipping_info (id, recipient, address1, address2, city, state, zip, phone, email, default_address, indate) values (?,?,?,?,?,?,?,?,?,?,?)', 
+                    [u_id, recipient, address1, address2, city, state, zip, phone, email, default_check, indate], (err, result) => {
+                    if (err) {
+                        res.send(err);
+                        // con.end();
+                    } else {
+                        console.log(result);
+                        if (result.protocol41 == true) {
+                            res.send({result : "ok"});
+                            // res.redirect('http://localhost:8080/account/shipping-infomation');
+                        } else res.send("sorry... something wrong in DB SERVER.");                        
+                    }
+                });
+                con.release();
+            });
+        } 
+
+        
+        function updateGeneralInfo() {
+            console.log("update general info")
+            db.getConnection((con)=>{               
+                con.query('UPDATE users SET phone = ?, email = ?, address1 = ?, address2 = ?, city = ?, state = ?, zip = ? where id = ?', 
+                [phone, email, address1, address2, city, state, zip, u_id], (err, result) => {
+                    if(err){                        
+                        res.send(err);
+                        // con.end();        
+                    } else {
+                        console.log('update set general info'); 
+                        console.log(result);                                                                       
+                    }
+                });
+                con.release();
+            })
+        }
+
+
+		
 	}
     
 });
@@ -1930,7 +2163,7 @@ app.post('/make_default_billing_info', (req,res) => {
                 con.query('UPDATE test1.billing_info SET default_payment="default" WHERE id = ? and bi_number = ?', [u_id, bi_number], (err, result) => {
                     if (err) {
                         res.send(err);
-                        con.end();
+                        // con.end();
                     } else {
                         console.log(result);
                         con.query('SELECT clv_id FROM test1.billing_info WHERE id = ?', [u_id], (err, result) => {
@@ -2421,12 +2654,20 @@ app.post('/shop',(req,res) => {
     console.log(`req test: ${req}`);  
     console.log(req.body);
     console.log("shop post/ shop post/ shop post/ shop post/ shop post/ shop post/ ");
-    
+    console.log("db");
+        console.log(db);
+        console.log(db.getConnection);
+        
     
     db.getConnection((con)=>{
+        // console.log("con");
+        // console.log(con);
+        
+
         con.query('SELECT * from product where useyn = "y"', (err, result) => {
             if(err){
                 res.send(err);
+                console.log(err);
                 // con.end();        
             } else {
                 console.log("SELECT * from product where prodnum = ");
@@ -2809,6 +3050,7 @@ app.post('/cancel_order', (req,res) => {
     console.log(req.body);
     const order_num = req.body.order_number; 
     const u_id = req.body.user_id;
+    const page_num = req.body.page_num;
     db.getConnection((con)=>{
         con.query('SELECT * FROM cart JOIN orders on cart.order_number = orders.order_number WHERE refund = "n" and cart.order_number = ? and cart.u_id = ?', [order_num, u_id] ,(err, result_param) => {
             if(err){                        
@@ -2860,7 +3102,7 @@ app.post('/cancel_order', (req,res) => {
                                         } else {
                                             console.log(result);
                                             makeAllItemsRefundFlag(order_num, con);
-                                            (u_id == 'GUEST') ? checkGuestPurchaseHistory(order_num, con, res) : checkPurchaseHistory(u_id, con, res);                                                   
+                                            (u_id == 'GUEST') ? checkGuestPurchaseHistory(order_num, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                                   
                                         }
                                     });
                                     
@@ -2872,7 +3114,7 @@ app.post('/cancel_order', (req,res) => {
                 } else {
                     console.log("cancel order left over items")
                     const cancel_order_flag = true;
-                    cancelOrderItems(left_over, u_id, order_num, cart_nums, item_prodnums, con, res, cancel_order_flag); 
+                    cancelOrderItems(left_over, u_id, order_num, cart_nums, item_prodnums, con, res, cancel_order_flag, page_num); 
                 }
             }
         });
@@ -2888,13 +3130,15 @@ app.post('/cancel_order_item', (req,res) => {
     const ordernum = req.body.order_number;
     const prodnum = req.body.prodnum;
     const u_id = req.body.user_id;
+    const page_num = req.body.page_num;
+
     db.getConnection((con)=>{
         con.query('SELECT cartnum, orders.clv_order_id, shipping_fee FROM orders join cart on cart.order_number = orders.order_number WHERE refund = "n" and orders.order_number = ? and orders.u_id = ?', [ordernum, u_id] ,(err, result_param) => {
             if(err){                        
                 res.send(err);            
             } else {
                 console.log(result_param);
-                cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res);           
+                cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, '', page_num);           
             }
         });
         con.release();             
@@ -2936,7 +3180,7 @@ function getUPSLineItemID(order_num) {
 
 }
 
-function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, cancel_order_flag) {
+function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, cancel_order_flag, page_num) {
     console.log("cancelOrderItems(result_param,");
     console.log(result_param);
     console.log(result_param.length);
@@ -3006,7 +3250,7 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                                 } else {
                                     console.log("returned items DB updated"); 
                                     makeFullRefundFlag(ordernum, con).then(e => {
-                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);                                    
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                    
                                     });
                                 } 
                             });   
@@ -3083,7 +3327,7 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                                 } else {
                                     console.log(result);
                                     makeFullRefundFlag(ordernum, con).then(e => {
-                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res);                                    
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                    
                                     });                                    
                                 } 
                             });   
@@ -3146,31 +3390,62 @@ function makeFullRefundFlag(ordernum, con) {
 app.post('/check_purchase_history', (req,res) => {
 
     console.log('/check_purchase_history /check_purchase_history')
+    console.log(req.body)
     const u_id = req.session.loginData ? req.session.loginData.id : false;
     const id= req.body.id;    
     const order_number = req.body.order_number;
+    const page_num = req.body.page_num;
 
     db.getConnection((con)=>{
+       
+        
         if (id == u_id) {         
-            checkPurchaseHistory(u_id, con, res); 
+            checkPurchaseHistory(u_id, con, res, page_num); 
         } else if (!u_id && id == 'GUEST') {
             console.log(" guest purchase history")
             checkGuestPurchaseHistory(order_number, con, res);
-        } else console.log("id Check")
+        } else console.log("id Check");
+        
+        con.release();
     });
+    
     
 });
 
-function checkPurchaseHistory(u_id, con, res) {
-    con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
-        if(err){                        
-            res.send(err);                 
-        } else {           
-            res.send(result);      
-        }
+function checkPurchaseHistory(u_id, con, res, page_num) {
+    // console.log("checkPurchaseHistory(u_id, con, res, page_num)")
+    checkPurchaseHistoryTotal(u_id, con, res).then(data => {
+        console.log(data)
+        const page_limit = page_num *10 -10;
+        // const total_purchase = data;
+
+        con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC LIMIT ?, 10',[u_id, page_limit],(err, result) => {
+            if(err){                        
+                res.send(err);                 
+            } else {           
+                
+                res.send({total_purchase : data, result : result});      
+            }
+        });
     });
-    
+
+
+    function checkPurchaseHistoryTotal(u_id, con, res) {
+        return new Promise((resolve, reject) => { 
+            con.query('select count(*) from cart WHERE result="y" and u_id = ?',[u_id],(err, result) => {
+            // con.query('select count(*) from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC',[u_id],(err, result) => {
+                if(err){                        
+                    res.send(err);                 
+                } else {   
+                    console.log(result);        
+                    resolve(result[0]['count(*)']);
+                    // res.send(result);      
+                }
+            });
+        });        
+    }    
 }
+
 
 function checkGuestPurchaseHistory(order_number, con, res) {
     con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (?) ORDER BY oddate DESC',[order_number],(err, result) => {

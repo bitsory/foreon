@@ -1,6 +1,7 @@
 import * as AIF from "./form_acc_info.js";
 import * as ItemCounter from "./item_counter.js";
 import * as SPINNER from "./spinner.js";
+import * as WEBS from "./form_webs.js";
 
 
 
@@ -371,7 +372,7 @@ export default class Cart {
 
     getUserProfile() {
         return `
-            <div id='user_profile_greet' class='user_profile_greet'>Hello</div>
+            <div id='user_profile_greet' class='user_profile_greet'>Hello,</div>
             <div id='user_profile_name' class='user_profile_name'>${this.getCookie()[0]}</div>
             <div id='user_account_box' class='user_account_box'>
                 <div id='user_profile_change' class='user_profile_change user_account_box_el'>                
@@ -391,9 +392,9 @@ export default class Cart {
         `
     }
 
-    changeProfileTap() {    
-        document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();    
-    }
+    // changeProfileTap() {    
+    //     document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();    
+    // }
 
 }
 
@@ -406,12 +407,40 @@ document.addEventListener('click',function(e){
     console.log("cart click double check ")
     
         
-    if(e.target && e.target.id == 'user_profile_change_btn') {
+    if(e.target && e.target.id == 'user_profile_change_btn' || e.target && e.target.id == 'general_info_change_pswd_cancel_btn') {
 
+        WEBS.toggleFunc();
         history.pushState(null, null, `/account`); // url change
         (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
       
         changeProfile();
+        const data = {id : u_id}
+
+        const option = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'                
+                },
+            body: JSON.stringify(data)
+        };
+        console.log(option);
+
+        fetch('/get_user_info', option)
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result)
+
+            document.getElementById('input_general_first_name').innerText = result.first_name;
+            document.getElementById('input_general_last_name').innerText = result.last_name; 
+            document.getElementById('input_general_phone').value = result.phone;
+            document.getElementById('input_general_email').value = result.email;
+            document.getElementById('input_general_address_street_line1').value = result.address1;
+            document.getElementById('input_general_address_street_line2').value = result.address2;
+            document.getElementById('input_general_address_city').value = result.city;
+            document.getElementById('change_profile_general_state').value = result.state;
+            document.getElementById('input_general_address_zip').value = result.zip;         
+            
+        });
 
         
     }
@@ -421,43 +450,163 @@ document.addEventListener('click',function(e){
         history.pushState(null, null, `/purchase-history`); // url change
         (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
         viewPurchaseHistory({user_id:u_id});
-        
-
+        WEBS.toggleFunc();
     }
 
+    if(e.target && e.target.id == 'general_info_change_submit_btn') {
 
+        const first_name = document.getElementById('input_general_first_name').innerText;
+        const last_name = document.getElementById('input_general_last_name').innerText;
+        const phone = document.getElementById('input_general_phone').value;
+        const email = document.getElementById('input_general_email').value;
+        const address1 = document.getElementById('input_general_address_street_line1').value;
+        const address2 = document.getElementById('input_general_address_street_line2').value;
+        const city = document.getElementById('input_general_address_city').value;
+        const state = document.getElementById('change_profile_general_state').value;
+        const zip = document.getElementById('input_general_address_zip').value;
+        const default_checkbox = document.getElementById('change_profile_general_default_address_checkbox');
+        // let default_check = '';
+        const default_check = default_checkbox.checked == true ? 'default' : '';
+        
+        const data = {
+            id : u_id,
+            first_name : first_name,
+            last_name : last_name,
+            phone : phone,
+            email : email,
+            address1 : address1,
+            address2 : address2,
+            city : city,
+            state : state,
+            zip : zip,
+            default_check : default_check
+        }
+
+        const option = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'                
+                },
+            body: JSON.stringify(data)
+        };
+        console.log(option);
+
+        fetch('/update_general_profile', option)
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result)
+            if (result.result == 'ok') {
+                alert("general info have been updated.");
+            } else alert("we are very sorry...server has something wrong. Can you try again?");
+
+        });   
+
+    }
 
     if(e.target && e.target.id == 'change_password_btn') {
-        document.querySelector('.change_password_container').classList.toggle('pw_active');
-        // document.querySelector('.change_password_container').innerHTML = changePassword();
+        document.getElementById('general_info_box').innerHTML = AIF.changePasswordForm();
+        document.getElementById('general_info_change_button_container').innerHTML = AIF.makeChangePasswordBtnContainer();
+
     }
+
+    if(e.target && e.target.id == 'general_info_change_pswd_submit_btn') {        
+        const extra_box = document.getElementById('change_pswd_extra');
+        if (!(document.getElementById('input_general_current_password').value)) {
+            document.getElementById('change_pswd_extra').textContent = "Please Input your current password...";
+            document.getElementById('input_general_current_password').focus();
+            // WEBS.removeFadeOut( extra_box, 5000 );
+        } else if (!(document.getElementById('input_general_new_password').value)) {
+            document.getElementById('change_pswd_extra').textContent = "Please Input your new password...";
+            document.getElementById('input_general_new_password').focus();
+            // WEBS.removeFadeOut( extra_box, 5000 );
+        } else if (!(document.getElementById('input_general_new_password_cofirm').value)) {
+            document.getElementById('change_pswd_extra').textContent = "Please Input your new password once again...";
+            document.getElementById('input_general_new_password_cofirm').focus();
+            // WEBS.removeFadeOut( extra_box, 5000 );        
+        } else {
+            WEBS.getPBKey().then(key => {
+                console.log(key);
+
+                const change_cur_pw = document.getElementById('input_general_current_password').value;
+                const change_new_pw = document.getElementById('input_general_new_password').value; 
+                const change_new_pw_confirm = document.getElementById('input_general_new_password_cofirm').value; 
+
+                if (change_new_pw === change_new_pw_confirm) {                
+                    console.log("sign up progress")
+                    // SPINNER.turnOffDisplay();
+                    
+                    const crypt = new JSEncrypt();
+                    crypt.setPublicKey(key);         
+
+                    const encrypted_cur = crypt.encrypt(change_cur_pw);
+                    const encrypted_new = crypt.encrypt(change_new_pw);
+                    const send_data = {
+                    
+                        id : u_id,                   
+                        cur_pw : encrypted_cur,
+                        new_pw : encrypted_new                   
+                    }
+                    
+                    const data = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                            // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                            },
+                        body: JSON.stringify(send_data),
+                        
+                    };
+                    console.log(data);
+        
+                    fetch('/change_password', data)
+                    .then((res) => res.json())
+                    .then(result => {
+                        // SPINNER.turnOnDisplay();
+                        console.log(result);
+                        if (result.result == "ok") {
+                            alert("Password has changed!")
+                        } else {
+                            alert(result.result);
+                        }
+                    });
+                } else {
+                    document.getElementById('change_pswd_extra').innerText = "please make sure to confirm password"
+                }
+            })
+        }
+    }
+
+    // if(e.target && e.target.id == 'general_info_change_pswd_cancel_btn') {
+    //     document.getElementById('general_info_box').innerHTML = AIF.changePasswordForm();
+    //     document.getElementById('general_info_change_button_container').innerHTML = AIF.makeChangePasswordBtnContainer();
+    
+
+    // }
 
     if(e.target && e.target.id == 'billing_info_add_btn') {
 
-        const target = document.getElementById("billing_info_add_btn");
+        // const target = document.getElementById("billing_info_add_btn");
 
-        // const t_offset = target.offsetTop();
-        const targetTop = target.getBoundingClientRect().top;
-        
+        // // const t_offset = target.offsetTop();
+        // const targetTop = target.getBoundingClientRect().top;
+        // const abTop = window.pageYOffset + target.getBoundingClientRect().top;
+        // const ttt = window.pageYOffset;
+        // const tttt = e.pageY;
 
-        const abTop = window.pageYOffset + target.getBoundingClientRect().top;
-        const ttt = window.pageYOffset;
-        const tttt = e.pageY;
+        // // const sp = document.getElementById('billing_info_add_btn').offsetHeight;
+        // // console.log(e);
+        // // console.log(e.pageY);
+        // // console.log(sp);
 
-        // const sp = document.getElementById('billing_info_add_btn').offsetHeight;
-        // console.log(e);
-        // console.log(e.pageY);
-        // console.log(sp);
-
-        console.log(target);
-        console.log(target.getBoundingClientRect());
+        // console.log(target);
+        // console.log(target.getBoundingClientRect());
 
        
-        console.log(targetTop);
-        console.log(ttt);
-        console.log(tttt);
-        console.log(abTop);
-        console.log(window.pageYOffset);        
+        // console.log(targetTop);
+        // console.log(ttt);
+        // console.log(tttt);
+        // console.log(abTop);
+        // console.log(window.pageYOffset);        
 
         
         console.log("e.target && e.target.id == 'billing_info_add_btn'")
@@ -469,8 +618,6 @@ document.addEventListener('click',function(e){
         if (location.pathname.substring(0, 15) == '/shop/checkout/') {
             document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
         }
-        
-        
         
     }
 
@@ -1132,9 +1279,11 @@ document.addEventListener('click',function(e){
 
                 console.log(e.target.parentElement.getAttribute('head_orderid'));
                 const user_id = u_id ? u_id : 'GUEST';
+                const page_num = parseInt(document.querySelector(`.purchase_page.page_el.active`).getAttribute('page_data_num'));
                 const send_data = {
                     user_id : user_id,
-                    order_number : e.target.parentElement.getAttribute('head_orderid')     
+                    order_number : e.target.parentElement.getAttribute('head_orderid'),
+                    page_num : page_num     
                     }
                 const option = {
                     method: 'POST',
@@ -1157,7 +1306,8 @@ document.addEventListener('click',function(e){
                     }
 
                     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
-                    setPurchaseHistory(result);
+                    setPurchaseHistory(result.result);
+                    renderPagination(result.total_purchase, page_num ? page_num : 1)
                     // viewPurchaseHistory(send_data);
 
                 });
@@ -1190,12 +1340,15 @@ document.addEventListener('click',function(e){
                 // const cart_number = e.target.getAttribute('cart-itemid');
                 // const user_id = u_id;
                 const user_id = u_id ? u_id : 'GUEST';
+                const page_num = parseInt(document.querySelector(`.purchase_page.page_el.active`).getAttribute('page_data_num'));
+                console.log(page_num)
                 // const order_number = ;
                 const send_data = {
                     user_id : user_id,
                     cart_number : e.target.getAttribute('cart-itemid'), 
                     order_number : e.target.getAttribute('order-itemid'),
-                    prodnum : e.target.getAttribute('itemid')
+                    prodnum : e.target.getAttribute('itemid'),
+                    page_num : page_num
                     }
                 const option = {
                     method: 'POST',
@@ -1216,7 +1369,8 @@ document.addEventListener('click',function(e){
                         lorem.removeChild(lorem.firstChild);
                     }
                     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
-                    setPurchaseHistory(result);
+                    setPurchaseHistory(result.result);
+                    renderPagination(result.total_purchase, page_num ? page_num : 1)
                 
                 });
             }
@@ -1228,8 +1382,20 @@ document.addEventListener('click',function(e){
     if(e.target && e.target.id == 'purchase_history_item_track_btn') {
         console.log(e.target.getAttribute('track-itemid'));
 
+       
     }
 
+    if(e.target && e.target.id == 'js-pagination') {
+        console.log(e.target);
+        console.log(e.target.getAttribute('page_data_num'));
+        const select_page_num = parseInt(e.target.getAttribute('page_data_num'));
+       
+        document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
+       
+        viewPurchaseHistory({user_id:u_id}, select_page_num);
+        
+    }
+   
 
 });
 
@@ -1668,60 +1834,15 @@ export function renderShippingInfo(result) {
 }
 
 
-
-function editShippingInfo() {
-    document.getElementById('change_shipping_info_btn_container').insertAdjacentHTML = `
-        edit
-        <input type="submit" value="Submit" onclick="editShippingInfo();"></input>
-        <button type="button" class="edit_shipping_info_cancel_btn" value="edit_shipping_info_cancel">Cancel</button>
-        `;  
-    document.querySelector('.change_profile_shipping_info_form').action = '/edit_profile_shipping';
-    
-}
-
-function setCancelBtn(param) {
-
-    const cancel_btn = document.createElement('button');
-    cancel_btn.setAttribute('class', `cancel_btn ${param}`);
-    cancel_btn.setAttribute('type', `button`);
-    cancel_btn.setAttribute('value', `cancel_${param}`);
-    cancel_btn.textContent = param;
-
-    document.querySelector(`.cancel_btn_contatiner`).appendChild(cancel_btn);
-
-}
-
-function changePassword() {
-    return `
-        <div class="form-row">
-            <div id="change_profile_general" class="field change_profile_general_current_password">
-            <input type="password" name="general_current_password" class="input_general_current_password" placeholder="Current password">
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div id="change_profile_general" class="field change_profile_general_new_password">
-            <input type="password" name="general_new_password" class="input_general_new_password" placeholder="New password">
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div id="change_profile_general" class="field change_profile_general_new_password_confirm">
-            <input type="password" name="general_new_password_confirm" class="input_general_new_password_cofirm" placeholder="Confirm New password">
-            </div>
-        </div>
-    
-    `;
-}
-
-function viewPurchaseHistory(param) {
+function viewPurchaseHistory(param, page_num) {
 
     console.log("view purchase History")
     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
 
     const data = {
         id : param.user_id,
-        order_number : param.order_number
+        order_number : param.order_number,
+        page_num : page_num ? page_num : 1
         }
 
         const option = {
@@ -1737,10 +1858,13 @@ function viewPurchaseHistory(param) {
         .then((res) => res.json())
         .then(result => {
             console.log(result)
-            setPurchaseHistory(result);
+            setPurchaseHistory(result.result);
+            // const page_info = pageAlgo(result.length, 5, 10, 1);
+            // console.log(page_info)
 
-            // const delete_node = document.getElementById(`billing_info BIN${delete_card_index}`);
-            // document.querySelector('.billing_info_box').removeChild(delete_node);
+            // paging(result.length, 1)
+            renderPagination(result.total_purchase, page_num ? page_num : 1);
+
 
         });
 }
@@ -1752,15 +1876,106 @@ function makePurchaseHistoryContainer() {
             <div id="purchase_history_title" class="purchase_history_title">Purchase History</div>
             <div id="purchase_history_box" class="purchase_history_box">
             </div>
-        </div>   
+        </div> 
+        <div id="purchase_history_pagenation" id="purchase_history_pagenation">
+           
+        </div> 
     </div>
     `;
 }
 
+
+function renderPagination(_totalCount, currentPage) {
+    const dataPerPage = 10;
+    const pageCount = 5; // how namy count pages in page gruop 
+    if (_totalCount <= 10) return; 
+  
+    let totalPage = Math.ceil(_totalCount / dataPerPage);
+    let pageGroup = Math.ceil(currentPage / pageCount); // how many page numbers in pagination
+    console.log("currentPage");
+    console.log(currentPage);
+    
+    console.log("pageGroup");
+    console.log(pageGroup);
+  
+    let last = pageGroup * pageCount;    // 화면에 보여질 마지막 페이지 번호 // last number in current page group
+    if (last > totalPage) last = totalPage;
+    // let first = last - (pageCount - 1) <= 0 ? 1 : last - (pageCount - 1);    // 화면에 보여질 첫번째 페이지 번호
+    let first = pageGroup == 1 ? 1 : currentPage - currentPage % pageCount + 1;  //하단 최초 숫자
+    console.log("first");
+    console.log(first);
+    const next = last + 1;
+    const prev = first - 1;
+
+  
+    const fragmentPage = document.createDocumentFragment();
+    if (prev > 0) {
+      var allpreli = document.createElement('button');
+      allpreli.setAttribute('id', 'js-pagination');
+      allpreli.setAttribute('class', 'page_el');
+      allpreli.setAttribute('page_index', `allprev`);
+      allpreli.setAttribute('page_data_num', `1`);
+      allpreli.insertAdjacentHTML("beforeend", `&lt;&lt;`);
+
+    //   allpreli.insertAdjacentHTML("beforeend", `<id='allprev' class='page_el'>&lt;&lt;`);
+  
+      var preli = document.createElement('button');
+      preli.setAttribute('id', 'js-pagination')
+      preli.setAttribute('class', 'page_el')
+      preli.setAttribute('page_index', `prev`);
+      preli.setAttribute('page_data_num', `${first - 1}`);
+      preli.insertAdjacentHTML("beforeend", `&lt;`);
+        // preli.insertAdjacentHTML("beforeend", `<id='prev' class='page_el'>&lt;`);
+  
+        fragmentPage.appendChild(allpreli);
+        fragmentPage.appendChild(preli);
+    }
+      
+    for (var i = first; i <= last; i++) {
+      const li = document.createElement("button");
+      li.setAttribute('id', 'js-pagination')
+      li.setAttribute('class', `purchase_page page_el`);
+      li.setAttribute('page_index', `${i}`);
+      li.setAttribute('page_data_num', `${i}`);
+      li.insertAdjacentHTML("beforeend", `${i}`);
+    //   li.insertAdjacentHTML("beforeend", `<id='page-${i}' class='page_el' data-num='${i}'>${i}`);
+      fragmentPage.appendChild(li);
+    }
+  
+    if (last < totalPage) {
+      var allendli = document.createElement('button');
+      allendli.setAttribute('id', 'js-pagination');
+      allendli.setAttribute('class', 'page_el');
+      allendli.setAttribute('page_index', 'allnext');
+      allendli.setAttribute('page_data_num', `${totalPage}`);
+      allendli.insertAdjacentHTML("beforeend", `&gt;&gt;`);
+    //   allendli.insertAdjacentHTML("beforeend", `<id='allnext' class='page_el'>&gt;&gt;`);
+  
+      var endli = document.createElement('button');
+      endli.setAttribute('id', 'js-pagination');
+      endli.setAttribute('class', 'page_el');
+      endli.setAttribute('page_index', 'next');
+      endli.setAttribute('page_data_num', `${last+1}`);
+      endli.insertAdjacentHTML("beforeend", `&gt;`);
+    //   endli.insertAdjacentHTML("beforeend", `<id='next' class='page_el'>&gt;`);
+  
+      fragmentPage.appendChild(endli);
+      fragmentPage.appendChild(allendli);
+    }
+
+    document.getElementById('purchase_history_pagenation').appendChild(fragmentPage);
+  // 페이지 목록 생성
+
+  document.querySelector(`.page_el`).classList.remove("active");
+
+  document.querySelector(`[page_data_num="${currentPage}"]`).classList.add("active");
+
+};  
+
 function setPurchaseHistory(result) {
     result.forEach(element => {
         const order_id = element.order_number;
-        let cart_id = element.cartnum;
+        let cart_id = element.cartnum; 
         let prodnum = element.prodnum;
         let image_src = element.image;
         let item_name = element.name;

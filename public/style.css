@@ -11,6 +11,14 @@ body {
     
 }
 
+li {
+    list-style:none;
+}
+
+.li_login_toggle {
+    display: none;
+}
+
 
 
 
@@ -27,7 +35,7 @@ body {
 
 .btn:hover, .cate_btn:hover, .cart_handle_btn:hover, .cart_modal_ctl_btn:hover, 
 .checkout_ctl_btn:hover, .guest_checkout_edit_btn:hover,
-.shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, .shipping_info_make_default_btn:hover, .purchase_page_btn:hover {
+.shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, .shipping_info_make_default_btn:hover, .purchase_page_btn:hover, .item_link:hover {
     cursor: pointer;
     transform: scale(1.1);
 }
@@ -43,6 +51,10 @@ body {
 
 .cate_btn:active, .online_title_label:active, .cart_modal_ctl_btn:active {
     border: 1px solid var(--subcolor)
+}
+
+.item_link:active {
+    border: 1px solid var(--maincolor)
 }
 
 
@@ -133,6 +145,7 @@ nav {
 #user_info {
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .user_info:hover {
@@ -142,13 +155,26 @@ nav {
     
 }
 
-.change_password_container {
-    display: none;
+#general_info_box {
+    width: 62%;
 }
 
-.change_password_container.pw_active {
-    display: block;
+.change_password_container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    text-align: left;
+}
 
+.change_password_box {
+    width: 100%;
+    margin-bottom: 0.8rem;
+}
+
+.change_password_input {
+    width: 100%;
+    height: 1.8rem;
+    border: 0.5px solid lightgrey;
 }
 
 #login_btn {
@@ -157,6 +183,7 @@ nav {
     align-items: center;
    
 }
+
 
 
 
@@ -300,8 +327,8 @@ nav {
     display: none;
     width: 350px;
     position: absolute;
-    right: 20px;
-    top: 70px;
+    right: -40px;
+    top: 65px;
     background: var(--subcolor);
     border-radius: 2px;
     opacity: 1;
@@ -463,6 +490,11 @@ nav {
     margin-left: 4rem;
 }
 
+#sign_up_form_name_box {
+    display: flex;
+    width: 82%;
+}
+
 .sign_up_input_box {
     
     width: 80%;
@@ -473,8 +505,16 @@ nav {
     margin-bottom: 0.8rem;
 }
 
+/* .sign_up_input_name_box {
+    width: 50%;
+} */
+
+#sign_up_user_first_name {
+    margin-right: 0.5rem;
+}
+
 #sign_up_submit_btn {
-    width: 80%;
+    width: 82%;
     height: 2.5rem;
     background-color:rgb(98, 31, 31);
     border-radius: 0.2rem;
@@ -498,6 +538,10 @@ nav {
 
 .user_profile_greet, .user_profile_name, .user_profile_cart, .user_profile_log_out {
     color: black;
+}
+
+.user_profile_greet, .user_profile_name {
+    padding-left: 0.5rem;
 }
 
 .q_btn_container {
@@ -654,6 +698,7 @@ nav {
     padding-left: 0;
     font-size: 1.5rem;
     font-weight: 500;
+    align-items: center;
 
 }
 
@@ -768,7 +813,7 @@ nav {
     position: relative;
 }
 
-#item_count {
+.item_count {
     position: absolute;
     left: 16px;
     top: -22px;
@@ -776,7 +821,7 @@ nav {
     font-weight: 800;
 }
 
-#go_cart_box {
+.go_cart_box {
     position: absolute;
     top: -18px;
 }
@@ -891,7 +936,7 @@ nav {
 
 
 
-.navbar_toggleBtn {position:absolute; right: 32px; float:right; width:30px; height:30px; -webkit-box-sizing:border-box; box-sizing:border-box; visibility: hidden;}
+.navbar_toggleBtn {position:absolute; /*right: 32px;*/ float:right; width:30px; height:60px; -webkit-box-sizing:border-box; box-sizing:border-box; visibility: hidden;}
 .navbar_toggleBtn:before, 
 .navbar_toggleBtn:after {display:block; content:""; position:absolute; left:50%; top:50%; width:36px; height:3px; background:#000; -webkit-transform:translateX(-50%); transform:translateX(-50%); -webkit-transition:all 0.8s cubic-bezier(0.23, 1, 0.32, 1); transition:all 0.8s cubic-bezier(0.23, 1, 0.32, 1);}
 .navbar_toggleBtn:before {margin-top:-8px;}
@@ -973,7 +1018,7 @@ nav {
     margin-bottom: 0.5rem;
 }
 
-.btn_submit, .q_btn, #track_my_order_check_btn {
+.btn_submit, .q_btn, #track_my_order_check_btn, #find_password_submit_btn {
     width: 6rem;
     height: 3.5rem;
     background-color:rgb(98, 31, 31);
@@ -983,9 +1028,10 @@ nav {
     color: white;
 }
 
-#track_my_order_check_btn {
+#track_my_order_check_btn, #find_password_submit_btn {
     width: 100%;
     height: 2.2rem;
+    margin-top: 1rem;
 }
 
 .q_btn {
@@ -993,7 +1039,8 @@ nav {
     margin: 1rem;
 }
 
-.btn_submit:hover, .q_btn:hover, #sign_up_submit_btn:hover, .check_out_btn:hover, #proceed_order_btn:hover, #user_checkout_submit_button:hover, #guest_checkout_submit_button:hover, #track_my_order_check_btn:hover {
+.btn_submit:hover, .q_btn:hover, #sign_up_submit_btn:hover, .check_out_btn:hover, #proceed_order_btn:hover, 
+#user_checkout_submit_button:hover, #guest_checkout_submit_button:hover, #track_my_order_check_btn:hover, #find_password_submit_btn:hover {
     background-color: burlywood;
     cursor: pointer;
 }
@@ -1221,8 +1268,8 @@ nav {
     border: 0.5px solid var(--maincolor);
     width: 7rem;
     height: 3rem;
-    font-size: medium;
-    margin: 0.5rem;
+    font-size: large;
+    /* margin: 0.5rem; */
 }
 /* 
 #guest_checkout_submit_button {
@@ -1247,20 +1294,26 @@ nav {
     margin: 0rem 10rem;
 } */
 
+#online_place_order_item_grandtotal {
+    font-size: 1.2rem;
+    font-weight: 600;
+
+}
 
 #online_place_order_item_proceed {
     padding-left: 10rem;
-    margin-top: 3rem;
+    margin-top: 5rem;
 }
 
 #proceed_order_btn {
-    width: 11rem;
+    width: 100%;
+    margin-top: 1.5rem;
 }
 
 
 #online_place_order_item  {
-    width: 35rem;
-    height: 10rem;
+    width: 40rem;
+    height: auto;
     margin-bottom: 2rem;
     display: flex;
     align-items: center;
@@ -1283,7 +1336,7 @@ nav {
     display: flex;
     justify-content: flex-start;
     flex-direction: column;   
-    padding-left: 2rem;
+    /* padding-left: 2rem; */
     width: 100%;
 }
 
@@ -1291,10 +1344,20 @@ nav {
     display: flex;
 }
 
+.online_place_order_item_container {
+    margin-top: 2rem;
+}
+
+.online_place_order_item_price_Box {
+    margin-top: 0.5rem;
+}
+
 #online_place_order_item_name_box {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    border-bottom: 0.5px solid grey;
+    margin-bottom: 0.5rem;
 }
 
 #online_place_order_item_delete_btn {
@@ -1310,6 +1373,15 @@ nav {
     font-weight: 600;
 }
 
+#buy_now_btn {
+    background-color: var(--maincolor);
+    color: white;
+}
+
+#buy_now_btn:hover {
+    background-color: burlywood;
+    color: var(--maincolor);
+}
 
 
 /* /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
@@ -1320,7 +1392,7 @@ nav {
     display: flex;
     align-items: flex-start;
     flex-direction: row;
-    /* margin-top: 2rem; */
+    margin-top: 1rem;
 }
 
 
@@ -1353,6 +1425,7 @@ nav {
 
 .user_checkout_submit_container {
     width: 40%;
+    margin-top: 1rem;
 }
 
 .user_checkout_billing_info, .user_checkout_shipping_info, .user_shipping_method_container, .user_checkout_cover {
@@ -1375,6 +1448,10 @@ nav {
     display: flex;
     flex-direction: row;
 
+}
+
+.user_checkout_shipping_info_address2 {
+    margin-left: 0.5rem;
 }
 
 
@@ -1463,6 +1540,7 @@ nav {
     display: flex;
     align-items: center;
     justify-content: center;
+    
 }
 
 #check_out_item_name_box {
@@ -1470,6 +1548,8 @@ nav {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    border-bottom: 0.5px solid grey;
+    margin-bottom: 0.8rem;
 }
 
 
@@ -1572,13 +1652,14 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
 }
 
 /* ///////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
-
+/* /////////////////////////////////////////////////////////  cart modal window /////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 
 #cart_modal_container {
     display: none;
     width: 28rem;
-    height: 12rem;
+    height: 11rem;
     background-color: var(--maincolor);
     position: absolute;
     right: -100px;
@@ -1600,7 +1681,7 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
 
 #cart_modal_items_slider_box {
     width:400px;
-    height: 140px;
+    height: 120px;
     margin: 0 auto;
 }
 
@@ -1629,7 +1710,7 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 2rem;
+    /* margin-left: 2rem; */
 }
 
 .cart_modal_items_container_pic {
@@ -1638,19 +1719,49 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
 
 .cart_modal_item_content {
     width: 13rem;
-    /* margin-left: 1rem; */
+    margin-left: 1rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding-left: 1rem;
+    /* padding-left: 1rem; */
     color: var(--subcolor);
+    justify-content: space-evenly;
+    height: 4.5rem;
+}
+
+.cart_modal_ctl_btn {
+    color: white;
+}
+
+.cart_modal_item_name {
+    font-weight: 600;
+    width: 10rem;
+    color: white;
+}
+
+.cart_modal_item_name:hover {
+    transform: scale(1.1);
+}
+
+.cart_modal_item_name:active {
+    border-bottom: 0.5px solid white;
 }
 
 
-.cart_modal_quantity_control_box, .cart_modal_item_name_box {
+.cart_modal_quantity_control_box, .cart_modal_item_name_box, .cart_modal_item_price_box {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0rem 0.5rem;
+}
+
+.cart_modal_item_name_box {
+    width: 95%;
+    justify-content: space-between;
+}
+
+.cart_modal_item_quantity_flag {
+    display: none;
 }
 
 
@@ -1764,7 +1875,8 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     width: 100%;
 }
 
-#guest_checkout_shipping_infomation_container_cover_contents, #guest_checkout_shipping_method_container_cover_contents, #guest_checkout_billing_info_form_cover_contents {
+#guest_checkout_shipping_infomation_container_cover_contents, #guest_checkout_shipping_method_container_cover_contents, 
+#guest_checkout_billing_info_form_cover_contents {
     font-size: 1rem;
     border-top: 0.5px solid lightgrey;
     padding: 1rem 0rem 0rem 1rem;
@@ -1774,7 +1886,8 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
 
 
 
-#guest_checkout_shipping_infomation_container_cover, #guest_checkout_billing_info_form_cover, #guest_checkout_shipping_method_container_cover {
+#guest_checkout_shipping_infomation_container_cover, #guest_checkout_billing_info_form_cover, 
+#guest_checkout_shipping_method_container_cover {
     font-size: 2rem;
     font-weight: 600;
     height: 3rem;
@@ -2031,9 +2144,9 @@ padding-right: 1px; */
 @media (min-width: 750px) {
 
 
-.guest_checkout_form_container {
-    height: 100%;
-}
+    .guest_checkout_form_container {
+        height: 100%;
+    }
 
 /* .container .form-row .field.full-width {
     width: 460px;
@@ -2047,31 +2160,51 @@ padding-right: 1px; */
   
 
 
-#track_my_order_title {
+#track_my_order_title, #find_password_title {
     font-size: larger;
     font-weight: 600;
 }
 
-#track_my_order {
+#track_my_order, #find_password_box {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 2rem;
 }
 
-#track_my_order_form {
+#track_my_order_form, #find_password_form {
     display: flex;
     flex-direction: column;
     margin: 1rem;
     text-align: left;
 }
 
-.track_my_order_input {
+.track_my_order_input, .find_password_input {
     border: 0.5px solid lightgrey;
     width: 25rem;
     height: 1.8rem;
     margin-bottom: 1.8rem;
 }
+
+.find_password_container{
+    display: flex;
+    justify-content: center;
+}
+
+.find_password_context {
+    width: 68%;
+    text-align: left;
+    margin-top: 1rem;
+}
+
+
+.find_password_name_input {
+    width: 12.2rem;
+}
+
+
+
+
 
 
 /* ///////////////////////////////////////////////// order confirmation page //////////////////////////////////////////////////////////////
@@ -2407,7 +2540,15 @@ ul.tabs li.current{
     flex-direction: row;
 }
 
-.shipping_info_edit_btn, .shipping_info_delete_btn, .shipping_info_make_default_btn, .billing_info_make_default_btn, .billing_info_delete_btn, .account_info_submit_btn, .shipping_info_cancel_btn, .set_default_method_btn   {
+#general_info_change_button_container {
+    margin: 0rem 0rem 1rem 0.7rem;
+}
+
+
+
+.shipping_info_edit_btn, .shipping_info_delete_btn, .shipping_info_make_default_btn, 
+.billing_info_make_default_btn, .billing_info_delete_btn, .account_info_submit_btn, 
+.shipping_info_cancel_btn, .set_default_method_btn, .general_info_change_btn   {
     border: 0.5px solid gray;
     width: 6rem;
     height: auto;
@@ -2416,13 +2557,26 @@ ul.tabs li.current{
 }
 
 .shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, .shipping_info_make_default_btn:hover,
-.shipping_info_add_btn:hover, .billing_info_add_btn:hover, .billing_info_make_default_btn:hover, .billing_info_delete_btn:hover, .account_info_submit_btn:hover, .shipping_info_cancel_btn:hover, .set_default_method_btn:hover  {
+.shipping_info_add_btn:hover, .billing_info_add_btn:hover, .billing_info_make_default_btn:hover, 
+.billing_info_delete_btn:hover, .account_info_submit_btn:hover, .shipping_info_cancel_btn:hover, 
+.set_default_method_btn:hover, .general_info_change_btn:hover  {
     background-color: var(--maincolor);
     color: var(--subcolor);
 }
 
+.general_info_change_btn {
+    width: 9.2rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
 .shipping_info_edit_btn, .billing_info_delete_btn {
     margin: 0rem 0.8rem;
+}
+
+.change_pswd_extra {
+    margin-top: 1rem;
+    color: red;
 }
 
 .billing_info_make_default_btn, .billing_info_delete_btn, .account_info_submit_btn, .shipping_info_cancel_btn{
@@ -2488,6 +2642,8 @@ ul.tabs li.current{
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    width: 100%;
+    margin-bottom: 1rem;
 }
 
 .billing_info_box, .shipping_info_box {
@@ -2658,6 +2814,37 @@ ul.tabs li.current{
 .purchase_header_page_btn:disabled :hover {
     background-color: #000;
     
+}
+
+#purchase_history_pagenation {
+    display: flex;
+    justify-content: center;
+}
+
+.page_el {
+    margin-right: 0.8rem;
+    font-size: 1.1rem;
+    background-color: rgba(0,0,0,0);
+}
+
+.page_el:hover {
+    background-color: var(--subcolor);
+    border-radius: 5rem;
+    transform: scale(1.1);
+}
+
+.page_el:active {
+    /* background-color: black; */
+    border-radius: 5rem;
+    border: 1px solid;
+}
+
+.purchase_page.page_el.active {
+    font-size: 1.5rem;
+    color: white;
+    background-color: var(--maincolor);
+    border-radius: 5rem;
+    width: 2.2rem;
 }
 
 
@@ -2848,11 +3035,6 @@ ul.tabs li.current{
         /* height: 100%;  */
     }
 
-    .navbar_icons {
-        display: none;
-        width: 100%;  
-        justify-content: center;
-    } 
 
     .navbar_nav_list li {
         font-size: xx-large;
@@ -3042,6 +3224,18 @@ ul.tabs li.current{
 
 @media screen and (max-width: 600px) {
 
+
+    .navbar_w4 {
+    
+        display:block;
+        /* justify-content: space-between;
+        align-items: center; */
+        /* background-color : var(--subcolor); */
+        /* background-color:aquamarine; */
+        padding: 8px 0px;
+        /* height: 100%; */
+    } 
+
     .navbar_or {
         flex-direction: column;
         align-items: flex-start;
@@ -3050,20 +3244,145 @@ ul.tabs li.current{
         height: 80%;
     }
 
+    /* .lorem {
+        margin-top: 2rem;
+    } */
+
+
+    .navbar_logo {
+        /* width: 60%;    */
+        margin-right: 30px;            
+    }
+
+    .navbar_toggleBtn {        
+        margin-left: 1rem;
+    }
+
+    .logo_btn {
+        background: url(images/logo_only.png) left/cover no-repeat;
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+    }
+
+    /* .account_modal_pop_btn_id {
+        display: none;
+    } */
+
+    .li_login_toggle {
+        display: block;
+        margin-right: 1.5rem;
+    }
+
+
+    /* .login {
+        position: absolute;
+        right: 55px;
+        top: 20px;
+    } */
+
+    .navbar_icons {
+        position: absolute;
+        top: 80px;
+        right: -3px;
+    }
+
+    .go_cart_box {
+        top: -60px;
+        right: 20px;
+    }
+
+    .item_count {
+        top: -60px;
+        right: 30px;
+        left: revert;
+    }
+
+    #user_profile_container {
+        position: unset;
+    }
+
+
+
+
+    #shop_category_container {
+        display: none;
+    }
+
+    .online_main_items {
+        display: block;
+    }
+
+    #online_item_detail_container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #online_item_detail_contents{
+        margin-left: revert;
+    }
+
+    #online_item_detail_name  {
+        font-size: 1.3rem;
+       
+    }
+
+    #online_item_detail_description  {
+        margin-left: 3rem;
+        width: unset;
+        padding-left: revert;
+        padding-right: 1rem;
+    }
+
+    .shop_detail_btn {
+        font-size: small;
+        width: 5.5rem;
+    }
+    
+/*     
+    .navbar_or {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+       
+        height: 80%;
+    
+    }
+
+    .navbar_w4 {
+        width: auto;
+    }
+
     .lorem {
         margin-top: 2rem;
     }
 
 
     .navbar_logo {
-        width: 60%;   
+
         margin: revert;             
+    }
+
+    .logo_btn {
+        background: url(images/logo_only.png) left/cover no-repeat;
+        width: 50px;
+        height: 50px;
+    }
+
+    .account_modal_pop_btn_id {
+        display: none;
     }
 
     .navbar_toggleBtn {
         
         margin:revert;
-    }
+    } */
+
+
+
+
+    
 /*     
     .logo_button {    
        
@@ -3089,7 +3408,7 @@ ul.tabs li.current{
         flex-direction: column;
         margin-left: 0;
         
-    }background
+    }
 
         
     .pic1,.pic2,.pic3 {
@@ -3161,10 +3480,11 @@ ul.tabs li.current{
     
     .footer_second {
         display: flex;
-        width: 80%;
+        width: 90%;
         justify-content: space-evenly;
         margin-left: revert;
-        flex-direction: column;
+        flex-direction: row;
+        align-items: center;
     }
     
     .footer_left {
@@ -3198,9 +3518,9 @@ ul.tabs li.current{
     
     .footer_right {
         display: flex;
-        padding-top: 1rem;
-        width: 85%;
-        align-items: center;
+        /* padding-top: 1rem; */
+        width: 100%;
+        align-items: flex-start;
     }
     
     .foot_icons {

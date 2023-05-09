@@ -19,7 +19,7 @@ export default class {
     three_days_rate = 0;
     next_day_rate = 0;
 
-    shipping_rate_flag = true;
+    shipping_rate_flag = false;
 
 
     setShippingGroundRate(param) {
@@ -114,6 +114,8 @@ export default class {
             // check_out_items_container _plus_quantity_btn
             if(e.target && (e.target.id) == `${item_attribute}_plus_quantity_btn`) {
                 console.log(`${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn ${item_attribute}_plus_quantity_btn`)
+                console.log(this.shipping_rate_flag)
+                console.log("this.shipping_rate_flag")
                 let tmp_cart = JSON.parse(sessionStorage.getItem("cart"));
                 /////////////// rendering item subtotal /////////////////////////
                 let item_number = e.target.parentElement.getAttribute('quantity-box-itemid');
@@ -156,19 +158,19 @@ export default class {
                         
                     
                         /////////////guest cart add up
-                        console.log(`check_out_cart : ${check_out_cart}`);
-                        console.log(`${check_out_cart}`);
+                        // console.log(`check_out_cart : ${check_out_cart}`);
+                        // console.log(`${check_out_cart}`);
                         check_out_cart.forEach(element => {
-                            console.log('element');
-                            console.log(element);
+                            // console.log('element');
+                            // console.log(element);
             
                             if (element.c_item_no == item_number) {
-                                console.log(item_number)
+                                // console.log(item_number)
                                 element.c_item_quantity++;
 
                                 tmp_cart.forEach(ele => {
-                                    console.log('ele');
-                                    console.log(ele);
+                                    // console.log('ele');
+                                    // console.log(ele);
                                     ele.c_item_no == element.c_item_no ? ele.c_item_quantity++ : false;
                                 })
                             }
@@ -690,7 +692,7 @@ export default class {
         const $item_link = document.createElement('a');
         $item_link.setAttribute('class', `${item_attribute}_link`);  
         $item_link.setAttribute('link-data-itemid', `${prodnum}`);  
-        // ItemLink.setAttribute('href', '/shop/view/item/' + prodnum);
+        $item_link.setAttribute('href', '/shop/view/item/' + prodnum);
         document.querySelector(`[image-itemid="${prodnum}"]`).appendChild($item_link);
         
         this.setItemImage(prodnum, image_src, item_attribute);
@@ -719,15 +721,30 @@ export default class {
         $item_name_box.setAttribute('class', `${item_attribute}_name_box item_name_box`);
         $item_name_box.setAttribute('name-box-itemid',`${prodnum}`); 
         document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild($item_name_box);
-        this.setItemName(prodnum, item_name, item_attribute);
+        this.setItemNameLink(prodnum, item_name, item_attribute);
+        // this.setItemName(prodnum, item_name, item_attribute);
         this.setItemDelete(prodnum, item_attribute);
+    }
+
+    setItemNameLink(prodnum, item_name, item_attribute) {
+        const $item_name_link = document.createElement('a');
+        $item_name_link.setAttribute('class', `${item_attribute}_link item_link`);  
+        $item_name_link.setAttribute('link-name-itemid', `${prodnum}`);  
+        $item_name_link.setAttribute('href', '/shop/view/item/' + prodnum);
+        document.querySelector(`[name-box-itemid="${prodnum}"]`).appendChild($item_name_link);
+        
+        this.setItemName(prodnum, item_name, item_attribute);
+        // setItemPrice(prodnum, item_price);
+        // setItemName(prodnum, item_name);
+        
+        
     }
 
     setItemName(prodnum, item_name, item_attribute) {
         const $item_name = document.createElement('div');
         $item_name.setAttribute('id', `${item_attribute}_name`);
         $item_name.setAttribute('class', `${item_attribute}_name`);
-        document.querySelector(`[name-box-itemid="${prodnum}"]`).appendChild($item_name);
+        document.querySelector(`[link-name-itemid="${prodnum}"]`).appendChild($item_name);
         $item_name.innerText = item_name;
     }
 
@@ -737,7 +754,7 @@ export default class {
         $item_price.setAttribute('class', `${item_attribute}_price`);
         $item_price.setAttribute('price-itemid',`${prodnum}`);    
         document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild($item_price);
-        $item_price.innerText = '$'+item_price;
+        $item_price.innerText = '$'+ parseFloat(item_price).toFixed(2);
     }
 
     setItemQuantityControlBox(prodnum, item_quantity, item_attribute) {
@@ -783,6 +800,7 @@ export default class {
         item_deleteb_tn.setAttribute('id', `${item_attribute}_delete_btn`);
         item_deleteb_tn.setAttribute('class', `${item_attribute}_delete_btn checkout_ctl_btn`);
         document.querySelector(`[name-box-itemid="${prodnum}"]`).appendChild(item_deleteb_tn);
+        // item_deleteb_tn.innerText = 'X';
         item_deleteb_tn.innerText = '✖';
     }
 

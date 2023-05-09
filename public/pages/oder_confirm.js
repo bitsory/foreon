@@ -452,7 +452,7 @@ export default class {
                     // console.log(data)
                     // const shipping_info = this.getUserDefaultShippingInfo();
                     // console.log(shipping_info);
-                    document.getElementById('user_checkout_shipping_info_detail_box_cover').innerText = data.recipient + '\n' + data.address1 + '\n' + data.city + ', ' + data.state + ' ' + data.zip;
+                    document.getElementById('user_checkout_shipping_info_detail_box_cover').innerText = data.recipient + '\n' + data.address1 + ' '+ data.address2 +'\n' + data.city + ', ' + data.state + ' ' + data.zip;
                 
                     this.getShippingRate(this.check_out_box.user_shipping_info);
                     this.check_out_box.shipping_rate_flag = true;

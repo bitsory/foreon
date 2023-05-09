@@ -21,7 +21,7 @@ export default class {
                 <div id="grand_total_label" class="grand_total_label"></div>
                 <div class='grand_total'></div>
                 <div id="grand_total_est">
-                ESTIMATED ORDER TOTAL</br>
+                
                 Shipping and taxes will be applied at checkout
                 </div>
 
@@ -714,7 +714,7 @@ export default class {
                     (order_cart.filter(item => {
                     return item.c_item_name == element.name})[0].c_item_quantity) : element.quantity;
                 
-                setOrderItemContainer(element.prodnum, element.price_sell, element.name, quantity, element.image);
+                setOrderItemContainer(element.prodnum, element.price_sell, element.name, quantity, element.image, element.content);
                 
                 // setOrderItemContainer(element.prodnum, element.price_sell, element.name, 
                 //     (this.user_name === "GUEST") ? 
@@ -729,20 +729,9 @@ export default class {
             tmp_order_cart = order_cart;
             setGrandTotalContainer();
             if (total_amount !=0) getGrandTotal(total_amount);
-            
-            console.log(`tmp_order_cart : `)
-            console.log(`${tmp_order_cart}`)
-        
-        } else {
-            
-            // const empty_cart_modal = document.createElement('div');
-            // empty_cart_modal.setAttribute('id', `empty_cart_modal`);
-            // empty_cart_modal.setAttribute('class', `empty_cart_modal`);
-            
-            // // document.querySelector('.user_info').style.display = "block";
-            // document.querySelector('.user_info').appendChild(empty_cart_modal);
-            // empty_cart_modal.innerText = "cart is empty";
-
+                    
+        } else {            
+         
             document.querySelector('.online_main').innerHTML = 
             `Your Cart is empty<br><br>
             Sign in to your account<br>
@@ -758,12 +747,8 @@ export default class {
 let user_id = '';
 let g_total = 0;
 let tmp_order_cart = [];
-let tmp_total = 0;
 
-
-
-
-function setOrderItemContainer(prodnum, price, name, quantity, image) {
+function setOrderItemContainer(prodnum, price, name, quantity, image, description) {
     const orderItemContainer = document.createElement('div');
     orderItemContainer.setAttribute('id', `online_place_order_item`);
     orderItemContainer.setAttribute('class', `online_place_order_item`);
@@ -773,7 +758,7 @@ function setOrderItemContainer(prodnum, price, name, quantity, image) {
         
     setOrderItemCheckBtn(prodnum);
     setOrderItemImageContainer(prodnum, image);
-    setOrderItemContentContainer(prodnum, price, name, quantity);
+    setOrderItemContentContainer(prodnum, price, name, quantity, description);
     
 }
 
@@ -789,14 +774,14 @@ function setOrderItemCheckBtn(prodnum) {
     orderItemCheckBtn.checked = true;
 }
 
-function setOrderItemContentContainer(prodnum, price, name, quantity) {
+function setOrderItemContentContainer(prodnum, price, name, quantity, description) {
     const orderItemContentContainer = document.createElement('div');
     orderItemContentContainer.setAttribute('class', `online_place_order_item_content`);
     orderItemContentContainer.setAttribute('contents-data-itemid',`${prodnum}`);
     document.querySelector(`[itemid="${prodnum}"]`).appendChild(orderItemContentContainer);
     setOrderItemNameBox(prodnum, name);
-    setOrderItemOptions(prodnum);
-    setShipmentInfo(prodnum);    
+    setOrderItemOptions(prodnum, description);
+    // setShipmentInfo(prodnum);    
     setOrderItemPriceBox(prodnum, price);
     setOrderItemQuantityHandler(prodnum, quantity);    
     getSubTotal(prodnum);
@@ -811,9 +796,6 @@ function setOrderItemImageContainer(prodnum, image_src) {
     
     setOrderItemLink(prodnum, image_src);
     
-    // setItemName(prodnum, item_name);
-    // setItemPrice(prodnum, item_price);
-    
 }
 
 
@@ -822,14 +804,10 @@ function setOrderItemLink(prodnum, image_src) {
     const orderItemLink = document.createElement('a');
     orderItemLink.setAttribute('class', `online_place_order_item_link`);  
     orderItemLink.setAttribute('link-data-itemid', `${prodnum}`);  
-    // ItemLink.setAttribute('href', '/shop/view/item/' + prodnum);
+    orderItemLink.setAttribute('href', '/shop/view/item/' + prodnum);
     document.querySelector(`[image-itemid="${prodnum}"]`).appendChild(orderItemLink);
     
-    setOrderItemImage(prodnum, image_src);
-    // setItemPrice(prodnum, item_price);
-    // setItemName(prodnum, item_name);
-    
-     
+    setOrderItemImage(prodnum, image_src);     
 }
 
 function setOrderItemImage(prodnum, image_src) {
@@ -845,15 +823,25 @@ function setOrderItemNameBox(prodnum, item_name) {
     orderItemNameBox.setAttribute('class', `online_place_order_item_name_box`);
     orderItemNameBox.setAttribute('namebox-itemid', `${prodnum}`);  
     document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemNameBox);
-    setOrderItemName(prodnum, item_name);
+    setOrderItemNameLink(prodnum, item_name);  
     setOrderItemDelete(prodnum);
+}
+
+function setOrderItemNameLink(prodnum, item_name) {
+    const orderItemNameLink = document.createElement('a');
+    orderItemNameLink.setAttribute('class', `online_place_order_item_name_link item_link`);  
+    orderItemNameLink.setAttribute('link-order-name-itemid', `${prodnum}`);  
+    orderItemNameLink.setAttribute('href', '/shop/view/item/' + prodnum);
+    document.querySelector(`[namebox-itemid="${prodnum}"]`).appendChild(orderItemNameLink);
+    
+    setOrderItemName(prodnum, item_name);  
 }
 
 function setOrderItemName(prodnum, item_name) {
     const orderItemName = document.createElement('div');
     orderItemName.setAttribute('id', `online_place_order_item_name`);
     orderItemName.setAttribute('class', `online_place_order_item_name`);
-    document.querySelector(`[namebox-itemid="${prodnum}"]`).appendChild(orderItemName);
+    document.querySelector(`[link-order-name-itemid="${prodnum}"]`).appendChild(orderItemName);
     orderItemName.innerText = item_name;
 }
 
@@ -954,16 +942,16 @@ function setShipmentInfo(prodnum) {
     shipmentInfo.setAttribute('id', `shipmentInfo`);
     shipmentInfo.setAttribute('class', `shipmentInfo`);
     document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(shipmentInfo);
-    shipmentInfo.innerText = `shipment infomation`;
+    shipmentInfo.innerText = `In store pick up available`;
 
 }
 
-function setOrderItemOptions(prodnum) {
+function setOrderItemOptions(prodnum, description) {
     const orderItemOptions = document.createElement('div');
     orderItemOptions.setAttribute('id', `orderItemOptions`);
     orderItemOptions.setAttribute('class', `orderItemOptions`);
     document.querySelector(`[contents-data-itemid="${prodnum}"]`).appendChild(orderItemOptions);
-    orderItemOptions.innerText = `order item option & summary`;
+    orderItemOptions.innerText = description;
 
 }
 
