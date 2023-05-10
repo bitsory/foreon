@@ -133,7 +133,7 @@ export function getGuestOrderConfirm() {
         <div id="guest_checkout_container" class="guest_checkout_container">
         
             <div id="guest_checkout_form_container" class="guest_checkout_form_container">            
-                <form id="payment-form">
+                <form id="guest_payment_form">
                     * All fields are required to GUEST mode checkout.                         
 
                     <div id="guest_checkout_shipping_infomation_container_cover" class="guest_checkout_shipping_infomation_container">
@@ -151,7 +151,7 @@ export function getGuestOrderConfirm() {
 
                         <div class="guest_checkout_shipping_info_recipient">
                             <div class="guest_checkout_shipping_info_form_row">
-                                <div id="recipient_first_name" class="field recipient_first_name">
+                                <div id="recipient_first_name_box" class="field recipient_first_name_box">
                                 <input type="text" name="recipient_first_name" id="input_recipient_first_name" class="input_recipient_first_name guest_checkout_input_shipping guest_checkout_input_shipping_recipient" placeholder="First Name" required>
                                 </div>
                             </div>
@@ -175,7 +175,7 @@ export function getGuestOrderConfirm() {
                             </div>
                         </div>
 
-                        <div class="shipping_info_csz">
+                        <div class="guest_checkout_shipping_info_csz">
                             <div class="guest_checkout_shipping_info_form_row csz">
                                 <div id="shipping_address" class="field shipping_addres_city">
                                 <input type="text" name="shipping_address_city" id="input_shipping_address_city" class="input_shipping_address_city guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="City" required>
@@ -339,7 +339,7 @@ export function getGuestOrderConfirm() {
                             </div>
                         </div>
 
-                        <div class="shipping_info_csz">
+                        <div class="guest_checkout_billing_info_csz">
                             <div class="guest_checkout_shipping_info_form_row csz">
                                 <div id="shipping_address" class="field shipping_addres_city">
                                 <input type="text" name="billing_address_city" id="input_billing_address_city" class="input_shipping_address_city guest_checkout_input_shipping guest_checkout_input_shipping_csz" placeholder="City" required>
@@ -433,18 +433,18 @@ export function getGuestOrderConfirm() {
                         </div>
 
 
-                        <div class="order_info_title">Payment Infomation</div>                            
-
-                        <div class="form-row top-row">
-                            <div id="card-number" class="field card-number"></div>
-                            <div class="input-errors" id="card-number-errors" role="alert"></div>
-                        </div>
-
+                        <div class="order_info_title">Payment Infomation</div>    
+                        
                         <div class="form-row">
                             <div id="card-name" class="field card-name">
                             <input type="text" name='card_name' class="input_card_name" placeholder="Cardholder Name">
                             </div>
-                        </div>                    
+                        </div>   
+
+                        <div class="form-row top-row">
+                            <div id="card-number" class="field card-number"></div>
+                            <div class="input-errors" id="card-number-errors" role="alert"></div>
+                        </div>                                         
 
                         <div class="form-row">
                             <div id="card-date" class="field third-width"></div>
@@ -463,7 +463,7 @@ export function getGuestOrderConfirm() {
                         <div id="card-response" role="alert"></div>
 
                         <div id="continue_to_place_order_btn_box" class="continue_to_place_order_btn_box">
-                            <button type="submit" form="payment-form" id="continue_to_place_order_btn" class="continue_to_place_order_btn">Continue to Place Order</button>
+                            <button type="submit" form="guest_payment_form" id="continue_to_place_order_btn" class="continue_to_place_order_btn">Continue to Place Order</button>
                         </div>
                         
                     </div>

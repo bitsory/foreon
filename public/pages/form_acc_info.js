@@ -382,13 +382,13 @@ export function addBillingInfoBox() {
                     <div class="order_info_title">Billing Address</div>  
                     <div class="form-row change_profile_shipping_info_row">
                         <div id="shipping_address" class="field shipping_address">
-                        <input type="text" name="billing_address_street_line1" class="input_shipping_address_line1 input_change_profile_shipping_info" placeholder="Shipping Address Street Line 1" required>
+                        <input type="text" name="billing_address_street_line1" class="input_shipping_address_line1 input_change_profile_shipping_info" placeholder="Billing Address Street Line 1" required>
                         </div>
                     </div>
 
                     <div class="form-row change_profile_shipping_info_row">
                         <div id="shipping_address" class="field shipping_address">
-                        <input type="text" name="billing_address_street_line2" class="input_shipping_address_line2 input_change_profile_shipping_info" placeholder="Shipping Address Street Line 2">
+                        <input type="text" name="billing_address_street_line2" class="input_shipping_address_line2 input_change_profile_shipping_info" placeholder="Billing Address Street Line 2">
                         </div>
                     </div>
 
@@ -478,18 +478,18 @@ export function addBillingInfoBox() {
                     </div>
 
 
-                    <div class="order_info_title">Payment method</div>                    
-
-                    <div class="form-row top-row change_profile_billing_info_row">
-                        <div id="card-number" class="field card-number"></div>
-                        <div class="input-errors" id="card-number-errors" role="alert"></div>
-                    </div>
-
+                    <div class="order_info_title">Payment method</div>   
+                    
                     <div class="form-row change_profile_billing_info_row">
                         <div id="card-name" class="field card-name">
                         <input type="text" name="card_name" class="input_card_name input_change_profile_billing_info" placeholder="Cardholder Name">
                         </div>
-                    </div>                    
+                    </div> 
+
+                    <div class="form-row top-row change_profile_billing_info_row">
+                        <div id="card-number" class="field card-number"></div>
+                        <div class="input-errors" id="card-number-errors" role="alert"></div>
+                    </div>                                       
 
                     <div class="form-row change_profile_billing_info_row">
                         <div id="card-date" class="field third-width"></div>

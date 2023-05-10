@@ -224,6 +224,7 @@ export default class {
                         const orderConfirm = new OrderConfirm(user_id, check_out_cart);
                         document.getElementById("online_main").innerHTML = CheckoutOrderForm.getGuestOrderConfirm();
                         orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
+                        document.getElementById('input_recipient_first_name').focus();
                         ItemCounter.item_counter('GUEST');
                         })
                 } else {  ///////////////////// user check out proceed
@@ -273,9 +274,10 @@ export default class {
                         })
 
                         const orderConfirm = new OrderConfirm(user_id, proceed_checkout_selected_order_cart);
-                        document.getElementById("online_main").innerHTML = CheckoutOrderForm.getUserOrderConfirm();
-                        
+                        document.getElementById("online_main").innerHTML = CheckoutOrderForm.getUserOrderConfirm();                        
                         orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
+                        
+                        
                         ItemCounter.item_counter(user_id);
 
                     })

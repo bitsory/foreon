@@ -53,8 +53,8 @@ li {
     border: 1px solid var(--subcolor)
 }
 
-.item_link:active {
-    border: 1px solid var(--maincolor)
+.item_link:active, .logo_btn:active {
+    border: 0.5px solid var(--maincolor)
 }
 
 
@@ -1479,6 +1479,10 @@ nav {
     font-weight: bolder;
 }
 
+.continue_to_place_order_btn_box {
+    width: 100%;
+}
+
   
 
 #checkout_submit_term {
@@ -1812,6 +1816,11 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     color: var(--maincolor);
 }
 
+#go_cart_page_btn:active, #cart_modal_items_back_btn:active ,#cart_modal_items_next_btn:active {
+    background-color: var(--subcolor);
+    color: var(--maincolor);
+}
+
 #cart_modal_items_back_btn ,#cart_modal_items_next_btn {
     font-weight: 500;
     background-color: var(--maincolor);
@@ -1899,6 +1908,7 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     font-size: 1.2rem;
     display: flex;
     justify-content: space-around;
+    align-items: center;
 }
 
 
@@ -1925,13 +1935,13 @@ padding-right: 1px; */
     font-size: 14px;
   }
 
-  #payment-form {
+  #guest_payment_form {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  #payment-form > div {
+  #guest_payment_form > div {
     /* display: flex; 
     flex-basis: calc(50% - 14px);  
     justify-content: center;
@@ -1942,14 +1952,7 @@ padding-right: 1px; */
     margin: 0.5rem; */
     margin-left: 2px;
   }
-/* 
-  #payment-form > div:last-child {
-    display: flex; 
-  margin-top: 8px;
-  flex-basis: calc(100% - 24px);  
-  justify-content: center;
-  flex-direction: column;
-  } */
+
 
 
   
@@ -2009,6 +2012,12 @@ padding-right: 1px; */
     margin-bottom: 0.5rem;
 
   }
+
+  .guest_checkout_shipping_info_csz, .guest_checkout_billing_info_csz {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
   
   .guest_checkout_input_shipping_recipient {
     width: 8.6rem;
@@ -2985,9 +2994,11 @@ ul.tabs li.current{
     
 
     .navbar_w4 {
-        flex-direction: column;
+        display: block;
+
+        /* flex-direction: column;
         align-items: flex-start;
-        justify-content: center;
+        justify-content: center; */
         width: 100%; 
         /* background-color: brown; */
         /* height: 800px; */
@@ -3003,9 +3014,31 @@ ul.tabs li.current{
         height: 100%;
     }
 
-    .navbar_logo {
+    /* .navbar_logo {
         
         margin-left: 2rem;
+    } */
+
+    .logo_btn {
+      
+        margin: 0 auto;
+    }
+
+    .navbar_icons {
+        position: absolute;
+        top: 80px;
+        right: -3px;
+    }
+
+    .go_cart_box {
+        top: -60px;
+        right: 20px;
+    }
+
+    .item_count {
+        top: -60px;
+        right: 32px;
+        left: revert;
     }
 
     .welcome {
@@ -3013,6 +3046,49 @@ ul.tabs li.current{
         color: white;
         
     }
+
+    #cart_modal_container {
+        right: 10px;
+        width: 350px;
+    }
+
+    #cart_modal_items_slider_box, .cart_modal_items_slider {
+        width: 350px;
+    }
+
+    #cart_modal_items_back_btn {
+        height: 2.5rem;
+        bottom: 20px;
+        right: 0px;
+    }
+
+    #cart_modal_items_next_btn {
+        height: 2.5rem;
+        bottom: 20px;
+        left: unset;
+        right: -275px;
+    }
+
+    .cart_modal_item_container {
+        width: 350px;
+        justify-content: unset;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  
     .main_background {
         aspect-ratio: 16/8;
@@ -3249,10 +3325,6 @@ ul.tabs li.current{
     } */
 
 
-    .navbar_logo {
-        /* width: 60%;    */
-        margin-right: 30px;            
-    }
 
     .navbar_toggleBtn {        
         margin-left: 1rem;
@@ -3294,7 +3366,7 @@ ul.tabs li.current{
 
     .item_count {
         top: -60px;
-        right: 30px;
+        right: 32px;
         left: revert;
     }
 
@@ -3304,6 +3376,14 @@ ul.tabs li.current{
 
 
 
+    #online_title {
+        z-index: 10;
+        position: sticky;
+    }
+
+    #online_title_label {
+        font-size: smaller;
+    }
 
     #shop_category_container {
         display: none;
@@ -3339,8 +3419,300 @@ ul.tabs li.current{
         font-size: small;
         width: 5.5rem;
     }
+
+    .check_go_cart {
+        font-size: small;
+        width: 80%;
+        margin: 0 auto;
+    }
+
+    #cart_modal_container{
+       
+        width: 300px;
+        right: 10px;
+        top: -0.8rem;
+    }
+
+    .cart_modal_items_slider {
+        width: 300px;
+    }
+    #cart_modal_items_slider_box {
+        width: 300px;
+    }
+
+ 
+
+    .cart_modal_slider_next  {
+        right: -225px;
+        left: unset;
+    }
+
+    .cart_modal_slider_back {
+        right: 0px;
+    }
+
+    .cart_modal_item_pic {
+        width: 3.5rem;
+    }
+
+    .cart_modal_item_container {
+        justify-content:unset;
+        /* margin-left: 1rem; */
+        margin-top: 0.5rem;
+        width: 300px;
+    }
+
+    .cart_modal_item_box {
+        justify-content:unset;
+        width: 300px;
+        margin-left: 1rem;
+    }
+
+    #go_cart_page_btn {
+        width: 15rem;
+    }
+
+    .modal_slider_btn {
+        height: 2.5rem;
+        bottom: 20px;
+
+    }
+
+    #cart_modal_items_next_btn {
+        right: -225px;
+        left: unset;
+    }
+
+    #online_place_order_page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .online_place_order_item_container {
+        width: 20rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+    }
+
+    #online_place_order_item {
+        width: fit-content;
+        flex-direction: column;
+    }
+
+    #online_place_order_item_pic_container {
+        margin: 1rem 0rem;
+    }
+
+    #online_place_order_item_proceed {
+        padding-left: unset;
+        margin-top: 2rem;
+    }
+
+    #guest_checkout_page { 
+        margin-top:unset;
+    }
+
+    #guest_checkout_container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .guest_checkout_form_container {
+        width: unset;
+    }
+
+    .guest_checkout_submit_container {
+        width: unset;
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .checkout_submit_term{
+        width: 60%; 
+        margin: 0 auto;
+    }
+
+    .checkout_submit_summary_container {
+        width: 17rem;
+        margin: 0 auto;
+    }
+
+    .check_out_item_pic {
+        width: 5.5rem;
+    }
+
+    .check_out_item_content{
+        width: 11rem;
+    margin-left: revert;
+    }
+
+    #guest_checkout_billing_info_form {
+        /* display: flex; */
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .input_card_name {
+        width: 17.6rem;
+    }
+
+    .guest_checkout_container_cover_title {
+        font-size: 0.8rem;
+        justify-content: space-between;
+    }
+
+    .shipping_method_box {
+        font-size: 0.9rem;
+        margin: 1rem 0rem;
+    }
+
+    #order_confirm_container {
+        flex-direction: column;
+        align-items: center;
+        width: 16rem;
+    }
+
+    .order_confirm_box {
+        width: 100%;
+    }
+
+    .order_confirm_thanks_box{
+        font-size: 1rem;
+    }
+
+    .order_confirm_thanks_detail {
+        margin-top: 1rem;
+    }
+
+    #order_confirm_summary_box {
+        width: 16rem;
+        margin-top: unset;
+    }
+
+    #purchase_history {
+        width: 80vw;
+        margin: 0 auto;
+        margin-bottom: 1.5rem;
+        border-color: black;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+    }
+
+    #purchase_history_item_pq {
+        display: flex;
+        flex-direction: row;
+       
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .purchase_history_item_description {
+        display: none;
+    }
+
+    .purchase_page_btn {
+        border-bottom: 0.5px solid grey;
+    }
+
+    #purchase_history_head {     
+        flex-direction: column;
+        align-items: flex-start;
+        margin-left: 2rem;
+    }
+    #purchase_history_item {
+        flex-direction: column;
+    }
+
+    #purchase_history_item_extrabox {
+        margin: revert;
+    }
+
+
+    #user_checkout_page {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        margin-top: 1rem;
+    }
+
+    .user_checkout_container {
+        width: auto;
+        margin: revert;
+    }
+
+    /* .user_checkout_info_title {
+        font-size: smaller;
+    } */
+
+    .user_checkout_submit_container {
+        width: auto;
+    }
+    .check_out_item_container {
+        justify-content: center;
+    }
+
+    #user_checkout_billing_info_context, #user_checkout_billing_info_container_cover_context {
+        font-size: 0.9rem;
+    }
+
+    .input_promotion_code {
+        width: 75%;
+    }
+
+    #user_checkout_shipping_info_title_box, #user_checkout_billing_info_title_box, #user_checkout_shipping_method_container_cover_title {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        align-content: stretch;
+    }
+
+    .user_checkout_edit_btn, .user_checkout_change_payment_method_btn , .user_checkout_shipping_method_container_change_btn {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .tabs {
+        display: flex;
+        height: 3rem;
+        align-items: center;
+    }
+
+    .change_profile_shipping_info, .change_profile_billing_info {
+        width: 20rem;
+        margin: 0 auto;
+    }
+
+    .shipping_info_edit_btn_container {
+        display: flex;
+
+    }
+
+    .shipping_info_make_default_btn, .shipping_info_edit_btn, .shipping_info_delete_btn {
+        width: 5rem;
+    }
+
+    .info_add_btn_container {
+        width: 90%;
+    }
+
+    .shipping_info_add_btn, .billing_info_add_btn {
+        font-size: 1.3rem;
+    }
     
-/*     
+
+
+    /* .guest_checkout_shipping_info_csz {
+        margin-left: 0.6rem;
+    } */
+    
+
+    /*
     .navbar_or {
         flex-direction: column;
         align-items: flex-start;
@@ -3473,7 +3845,7 @@ ul.tabs li.current{
     
     .footer_first {
         display: flex;
-        width: 105%;
+        width: 114%;
         margin-left: revert;
         justify-content: space-evenly;
     }
@@ -3531,6 +3903,7 @@ ul.tabs li.current{
     i.fa-solid.fa-angles-up {
         display: block;
         padding-left: 1rem;
+        margin-top: 1rem;
     }
 
     .main_background {

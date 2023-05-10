@@ -30,8 +30,21 @@ export default class {
             console.log(e.target)
             console.log(user_id)
             console.log(check_out_cart);
+            
+            let IMAGE_WIDTH = 0;//한번 이동 시 IMAGE_WIDTH만큼 이동한다. // once move size
 
-            const IMAGE_WIDTH = 400;//한번 이동 시 IMAGE_WIDTH만큼 이동한다. // once move size
+            if (matchMedia("screen and (max-width: 600px)").matches) {
+                IMAGE_WIDTH = 300;
+                // under 600px 
+            } else if (matchMedia("screen and (max-width: 768px)").matches) {
+                IMAGE_WIDTH = 350;
+              
+            } else {
+                IMAGE_WIDTH = 400;
+                // over 600px 
+            }
+
+            
                         
             const backBtn = document.getElementById("cart_modal_items_back_btn");
             const nextBtn = document.getElementById("cart_modal_items_next_btn");

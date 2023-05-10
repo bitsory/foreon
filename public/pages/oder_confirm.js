@@ -397,7 +397,7 @@ export default class {
                 // document.getElementById('set_default_payment_method_btn') && document.getElementById('set_default_payment_method_btn').value == "on" ?
                 document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').getAttribute('value') == "off" ?
                     document.getElementById('user_checkout_change_payment_method_btn').style.display = "none" : 
-                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "flex";
                 
                     
                 document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
@@ -405,10 +405,10 @@ export default class {
                 document.getElementById('user_checkout_shipping_method_container').style.display = "none";
                 document.getElementById('user_select_this_shipping_method_btn').style.display = "none";
                 
-                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "flex";
                 document.getElementById('user_checkout_shipping_method_container_change_btn').value = "off";
                 
-                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "flex";
 
                 
                 // document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";
@@ -427,7 +427,7 @@ export default class {
                     if (this.user_default_billing_info.cardholder) {
                         document.getElementById('user_checkout_billing_info_next_btn').value == 'on' ?
                             document.getElementById('user_checkout_billing_info_next_btn').style.display = "block" : false;
-                        document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                        document.getElementById('user_checkout_change_payment_method_btn').style.display = "flex";
                         document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";   
                     }
                 });
@@ -457,6 +457,8 @@ export default class {
                     this.getShippingRate(this.check_out_box.user_shipping_info);
                     this.check_out_box.shipping_rate_flag = true;
                 });
+
+                document.getElementById('user_continue_to_payment_btn').focus();
                 
             }
 
@@ -473,7 +475,7 @@ export default class {
 
                 document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').getAttribute('value') == "off" ?
                     document.getElementById('user_checkout_change_payment_method_btn').style.display = "none" : 
-                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "flex";
                 
                     // if (document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').getAttribute('value') == "off" ) {
                     //     console.log("if (document.getElementById('user_checkout_billing_info_context') && document.getElementById('user_checkout_billing_info_context').value == off ) {")
@@ -487,7 +489,7 @@ export default class {
                 document.getElementById('user_checkout_shipping_method_container').style.display = "none";
                 document.getElementById('user_checkout_billing_info').style.display = "block";
                 // document.getElementById('user_checkout_billing_info_cover').style.display = "none";
-                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block";                             
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "flex";                             
 
                 this.check_out_box.setShippingMethodCoverContents(user_id);
                 const shipping_rate = this.check_out_box.checkShippingRate();
@@ -498,7 +500,7 @@ export default class {
                     console.log(this.user_default_billing_info.cardholder);
                     if (this.user_default_billing_info.cardholder) {
                         document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
-                        document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                        document.getElementById('user_checkout_change_payment_method_btn').style.display = "flex";
                         document.getElementById('user_checkout_billing_info_container_change_btn').style.display = "block";   
                     }
                 });
@@ -509,10 +511,10 @@ export default class {
             }            
 
             if(e.target && e.target.id == 'user_checkout_billing_info_next_btn') {
-                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+                document.getElementById('user_checkout_shipping_info_change_btn').style.display = "flex";
                 document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
 
-                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block"; 
+                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "flex"; 
 
                 document.getElementById('user_checkout_billing_info_next_btn').setAttribute('value', 'off');
                 document.getElementById('user_checkout_billing_info_select_btn').setAttribute('value', 'off');
@@ -572,7 +574,7 @@ export default class {
                 document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "block";
                 document.getElementById('guest_checkout_shipping_method_container_cover').style.height = "auto";
                 document.getElementById('guest_checkout_billing_info_form_cover').style.display = "none";
-                document.getElementById('guest_checkout_billing_info_form').style.display = "block";
+                document.getElementById('guest_checkout_billing_info_form').style.display = "flex";
                 // document.getElementById('guest_checkout_shipping_method_container_cover_contents').innerText = "test shipping rate"
                 document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "block";
 
@@ -586,7 +588,7 @@ export default class {
             }
 
             if (e.target && e.target.id == 'guest_checkout_shipping_infomation_container_change_btn') {
-                document.getElementById('guest_checkout_shipping_info').style.display = "block";
+                document.getElementById('guest_checkout_shipping_info').style.display = "flex";
                 document.getElementById('guest_checkout_shipping_infomation_container_cover').style.display = "none";
                 // document.getElementById('guest_checkout_shipping_infomation_container_cover').style.height = "auto";
                 // document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
@@ -647,9 +649,9 @@ export default class {
 
     }
 
-
+ 
     makeUserCheckOutForm(u_id, proceed_checkout_total, proceed_checkout_selected_order_cart) {
-
+        
         ///////////////////////////  set item box     ///////////////////////
         console.log('makeUserCheckOutForm(u_id, proceed_checkout_total, proceed_checkout_selected_order_cart)')
         console.log(u_id)
@@ -736,6 +738,7 @@ export default class {
                 
 
             }
+            document.getElementById('user_checkout_shipping_info_next_btn').focus();
         });
         
         console.log(parseInt(user_total_amount))
@@ -871,7 +874,7 @@ export default class {
             const displayCardCvvError = document.getElementById('card-cvv-errors');
             const displayCardPostalCodeError = document.getElementById('card-postal-code-errors');
             // const guest_checkout_submit_btn = document.getElementById('guest_checkout_submit_button');
-            const payment_form = document.getElementById('payment-form');
+            const payment_form = document.getElementById('guest_payment_form');
             // const amount = document.querySelector('.payment_amount');
         
 
@@ -1174,7 +1177,7 @@ function cloverTokenHandler(token, items, ship_rate) {
     console.log(ship_rate);
     const shipping_rate = ship_rate;
     // Insert the token ID into the form so it gets submitted to the server
-    var form = document.getElementById('payment-form');
+    var form = document.getElementById('guest_payment_form');
    
     if (document.getElementById("cloverToken")) {       
         form.removeChild(document.getElementById("cloverToken"));

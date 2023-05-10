@@ -1756,6 +1756,7 @@ function setShippingInfoDefaultBtn(sh_num, default_check) {
 function setShippingInfoEditBtn(sh_num) {
     const shipping_info_edit_btn_container = document.createElement('div');
     shipping_info_edit_btn_container.setAttribute('id', `shipping_info_edit_btn_container SHN${sh_num}`);
+    shipping_info_edit_btn_container.setAttribute('class', `shipping_info_edit_btn_container SHN${sh_num}`);
     document.querySelector(`.shipping_info_detial.SHN${sh_num}`).appendChild(shipping_info_edit_btn_container);
 
     const shipping_info_make_default_btn = document.createElement('button');

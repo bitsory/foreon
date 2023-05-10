@@ -107,7 +107,7 @@ function modalClose(param) {
 
 document.addEventListener('click', function(e){    
    
-    const user_info_btn_icon =  document.getElementById('user_info_btn_icon');
+    
     const user_info_btn_id =  document.getElementById('user_info_btn_id');   
     const user_profile_container =  document.querySelector('.user_profile_container');
     const account_modal_pop_btn_id = document.getElementById('account_modal_pop_btn_id');
@@ -118,6 +118,9 @@ document.addEventListener('click', function(e){
     const cart_modal_items_next_btn = document.getElementById('cart_modal_items_next_btn');
     const view_cart_btn = document.getElementById('view_cart_btn');
     const cart_modal_items_slider_box = document.getElementById('cart_modal_items_slider_box');
+    const user_info_btn_icon = document.getElementById('user_info_btn_icon');
+    const login_id = document.getElementById('user_info_btn_id');
+
     
     // const account_modal_pop_container = document.getElementById("account_modal_pop_container");
     
@@ -127,7 +130,10 @@ document.addEventListener('click', function(e){
     console.log("document.addEventListener('click', function(e){")
     console.log(toggleBtn.classList.toggle);
     // if (e.target != document.getElementById('navbar')) {
-    if (e.target != document.getElementById('navbar') && toggleBtn.classList.toggle == 'on') {
+    // if (e.target != document.getElementById('navbar') && toggleBtn.classList.contains('on') == true) {
+    if (e.target != toggleBtn && e.target != menu && e.target != login_id && e.target != user_info_btn_id && toggleBtn.classList.contains('on') == true) {
+        console.log(e.target)
+        console.log(toggleBtn.classList.contains('on'))
         console.log("if (e.target != document.getElementById('navbar') && toggleBtn.classList.toggle == 'on') {")
         WEBS.toggleFunc();
     }
@@ -190,11 +196,29 @@ document.addEventListener('click', function(e){
     }
 
     if (e.target && e.target == view_cart_btn) {    
+        if (document.location.href == 'http://localhost:8080/') {
+            console.log("if (document.location.href == 'http://localhost:8080/') {")
+            // cart_modal_container.style.top = '0 rem';
+            if (matchMedia("screen and (max-width: 600px)").matches) {
+                // IMAGE_WIDTH = 300;
+                // under 600px 
+            } else if (matchMedia("screen and (max-width: 768px)").matches) {
+                cart_modal_container.style.transform = `translateY(-40px)`;
+              
+            } else {
+                // IMAGE_WIDTH = 400;
+                // over 600px 
+            }
+           
+        }
+
         cart_modal_container.style.display = "block";        
         cart_modal_container.innerHTML = setCartModalBox();
         setCartModalPageDetail();
-
-        
+        // WEBS.toggleFunc();
+        if (toggleBtn.classList.contains('on') == true) {
+            WEBS.toggleFunc();
+        }
         
         // view_cart();
         console.log("view cart click page move")
@@ -205,6 +229,7 @@ document.addEventListener('click', function(e){
             console.log(e.currentTarget);
             console.log(e.target);
             cart_modal_container.style.display = "none";
+            cart_modal_container.style.transform = 'unset';
             console.log("cart modal close pop up")
     }
 
@@ -219,6 +244,7 @@ document.addEventListener('click', function(e){
     if(e.target && e.target.id == 'go_cart_page_btn') {
         view_cart();
         cart_modal_container.style.display = 'none';
+        cart_modal_container.style.transform = 'unset';
     }
 
     // if (e.target && e.target.id == 'admin_btn') {        
@@ -714,6 +740,7 @@ function view_cart(param) {
                     document.querySelector(".online_main").innerHTML = place_order.getOrder();
         
                     place_order.getOrderDetail(order_list, order_list);
+                    
                     ItemCounter.item_counter(user_id);
                     (param == 'go_back') ? false : history.pushState(null, null, `/shop/cart/member`);
                 })  
