@@ -696,24 +696,25 @@ nav {
     list-style: none;
     justify-content: left;
     padding-left: 0;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 500;
     align-items: center;
 
 }
 
 .navbar_nav_list li{
-    padding: 8px 20px;
+    padding: 8px 10px;
     position: relative; display: inline-block; margin: 0.5rem; text-align: center; line-height: 30px; cursor: pointer;
 }
 
 .navbar_nav_list li::after {position: absolute; content:""; display: block; border-bottom: 3px solid var(--maincolor); transition: width 250ms ease-out; left: auto; right: auto;  width: 0;}
 .navbar_nav_list li:hover::after {width: 100%; left: 10; right: 1000;}
 
-/* .header_logo {
-    width: 50%;
-    height: 50%;
-} */
+#li_login_toggle {
+    margin-left: 2rem;
+    margin-right: unset;
+    padding-right: unset;
+}
 
 .about_article {
     text-align: left;
@@ -1414,11 +1415,11 @@ nav {
     border-bottom: 0.5px solid grey;
 }
 
-.user_checkout_edit_btn {
-    /* font-weight: 100; */
+.user_checkout_edit_btn {    
     width: auto;
     height: auto;
     background-color: rgba(0,0,0,0);
+    align-items: center;
    
 }
 
@@ -2172,6 +2173,7 @@ padding-right: 1px; */
 #track_my_order_title, #find_password_title {
     font-size: larger;
     font-weight: 600;
+    margin: 1rem 0rem;
 }
 
 #track_my_order, #find_password_box {
@@ -2186,6 +2188,7 @@ padding-right: 1px; */
     flex-direction: column;
     margin: 1rem;
     text-align: left;
+    
 }
 
 .track_my_order_input, .find_password_input {
@@ -2201,7 +2204,7 @@ padding-right: 1px; */
 }
 
 .find_password_context {
-    width: 68%;
+    width: 70%;
     text-align: left;
     margin-top: 1rem;
 }
@@ -2606,6 +2609,10 @@ ul.tabs li.current{
     /* width: 80%; */
 }
 
+#user_shipping_info {
+    width: auto;
+}
+
 
 
 #user_checkout_billing_info_context, #user_checkout_billing_info_container_cover_context {
@@ -2724,9 +2731,9 @@ ul.tabs li.current{
 }
 
 .info_add_btn_container {
-    border: 0.5px solid lightgray;
+    /* border: 0.5px solid lightgray; */
     width: auto;
-    width: 87%;
+    /* width: 87%; */
     text-align: center;
     margin: auto;
 
@@ -2876,7 +2883,32 @@ ul.tabs li.current{
         
     }
 
+    #online_place_order_item {
+        width: 30rem;
+    }
 
+    #online_place_order_item_proceed {
+        padding-left: 4rem;
+        
+    }
+
+    #order_confirm_container {
+        width: 60rem;
+    }
+
+    .user_checkout_container {
+        width: 30rem;
+        margin-right: 1.5rem;
+
+    }
+
+    .user_checkout_submit_container {
+        width: auto;
+    }
+
+    /* .billing_info, .shipping_info {
+        width: auto;
+    } */
 }
 
 
@@ -2894,6 +2926,76 @@ ul.tabs li.current{
         }
     }
     */
+
+    /* .user_checkout_container {
+        width: 30rem;
+
+    } */
+
+    #online_place_order_item {
+        width: 30rem;
+    }
+    .user_checkout_container {
+        width: 25rem;
+    }
+
+    .check_out_item_content {
+        width: 14rem;
+        margin-left: 0rem;
+    }
+
+    .online_item_detail_pic {
+        width: 18rem;
+        height: auto;
+    }
+
+    .online_main_item_pic {
+        width: 10rem;
+        height: 10rem;
+    }
+
+    .online_main_items {
+        display: grid;
+        grid-template-columns: 15rem 15rem 15rem;
+    }
+
+    #online_item_detail_contents {
+        margin-left: unset;
+    }
+
+    #online_place_order_item_proceed {
+        padding-left: 2rem;
+    }
+
+    .shipping_info_add_btn {
+        font-size: 1.2rem;
+    }
+
+    #user_checkout_shipping_info_title_box, #user_checkout_billing_info_title_box, #user_checkout_shipping_method_container_cover_title {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        align-content: stretch;
+    }
+
+    .user_checkout_edit_btn, .user_checkout_change_payment_method_btn , .user_checkout_shipping_method_container_change_btn {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .guest_checkout_form_container {
+        width: 25rem;
+    }
+
+    .guest_checkout_submit_container {
+        width: 25rem;
+    }
+   
+
+
+
+
+
     .navbar_nav_list li {
         font-size: 1rem;
         padding: 2px 5px;
@@ -2973,6 +3075,11 @@ ul.tabs li.current{
 }
 
 @media screen and (max-width: 900px) {
+
+    .navbar_nav_list li {
+        font-size: 0.8rem;
+    }
+
     .navbar_nav_list {
         display: flex;
         list-style: none;
@@ -2983,7 +3090,61 @@ ul.tabs li.current{
     }
 
     .logo_btn {
+        width: 13rem;
+    }
+
+    #online_place_order_item_proceed {
+        padding-left: 3rem;
+        width: 13rem;
+    }
+
+    .online_place_order_item_pic {
+        width: 6rem;
+        height: 6rem;
+    }
+
+    #online_place_order_item {
+        width: 26rem;
+    }
+
+    .user_checkout_container {
+        margin-right: 1rem;
+    }
+
+    .checkout_submit_summary_container, .user_checkout_submit_button_container {
+        width: 20rem;
+    }
+
+    #purchase_history { 
+        width: 45rem;
+    }
+
+    .online_item_detail_pic {
         width: 15rem;
+    }
+
+    #online_item_detail_contents {
+        width: 28rem;
+    }
+
+    #order_confirm_container {
+        flex-direction: column;
+        align-items: center;
+        width: 30rem;
+    }
+
+    #order_confirm_summary_box {
+        width: 30rem;
+        margin-top: unset
+    }
+
+    .check_out_item_content {
+        width: 10rem;
+        margin-left: 0rem;
+    }
+
+    .guest_checkout_submit_container {
+        width: 22rem;
     }
 }
 
@@ -3035,6 +3196,12 @@ ul.tabs li.current{
         right: 20px;
     }
 
+    #li_login_toggle {
+        margin-left: -1rem;
+        margin-right: revert;
+        padding-right: revert;
+    }
+
     .item_count {
         top: -60px;
         right: 32px;
@@ -3074,22 +3241,124 @@ ul.tabs li.current{
         justify-content: unset;
     }
 
+    .online_main_items {
+        grid-template-columns: 18rem 18rem;
+    }
 
+    #online_item_detail_container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
+    #online_item_detail_contents {
+        margin-left: unset; 
+        text-align: unset;
+        width: auto;
+    }
 
+    #online_item_detail_name, #online_item_detail_shipment_info, #online_item_detail_description {
+        padding-left: unset;
+        width: auto;
+    }
 
+    .check_go_cart {
+        width: 80%;
+        margin: 0 auto;
+    }
 
+    #online_place_order_page {
+        display: flex;
+        justify-content: center;
+        /* margin-top: 2.5rem; */
+        flex-direction: column;
+        align-items: center;
+        width: 80%;
 
-
-
-
-
-
-
-
-
-
+    }
  
+    #online_place_order_item {
+        width: auto;
+    }
+
+    #online_place_order_item_proceed {
+        padding-left: unset;
+        margin-top: 3rem;
+    }
+
+    #guest_checkout_container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .guest_checkout_submit_container {
+        margin-top: 2.5rem;
+    }
+
+    #guest_payment_form > div {
+       
+       margin-left: unset;
+    }
+
+    #guest_payment_form {
+     
+        align-items: flex-end;
+    }
+
+    #order_confirm_container {
+        flex-direction: column;
+        align-items: center;
+        width: 25rem;
+    }
+
+    #order_confirm_summary_box {
+        width: 25rem;
+        margin-top: unset;
+    }
+
+    #user_profile_container {
+        position: unset;
+
+    }
+
+    #purchase_history {
+        width: 80vw;
+    }
+
+
+    .purchase_history_item_description {
+        display: none;
+    }
+
+    #user_checkout_page {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        margin-top: 1rem;
+    }
+
+    .user_checkout_container {
+        width: 30rem;
+        margin: revert;
+    }
+
+    .user_checkout_submit_container {
+        width: auto;
+    }
+
+    .order_confirm_thanks_detail {
+        margin-top: 1rem;
+    }
+
+
+
+
+
+
+
+
+
+
     .main_background {
         aspect-ratio: 16/8;
     }
@@ -3374,6 +3643,30 @@ ul.tabs li.current{
         position: unset;
     }
 
+    #track_my_order, #find_password_box {
+        width: 20rem;
+        margin: 0 auto;
+    }
+
+    #track_my_order_form, #find_password_form, .track_my_order_input, .find_password_input {
+        width: 18rem;
+    }
+
+    .track_my_order_subtitle,.find_password_context {
+        font-size: 0.8rem;
+    }
+
+    .find_password_name {
+        display: flex;
+    }
+
+    .find_password_last_name {
+        margin-left: 0.5rem;
+    }
+
+    .find_password_context {
+        width: 85%;
+    }
 
 
     #online_title {
@@ -3422,8 +3715,7 @@ ul.tabs li.current{
 
     .check_go_cart {
         font-size: small;
-        width: 80%;
-        margin: 0 auto;
+        
     }
 
     #cart_modal_container{

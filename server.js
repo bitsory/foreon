@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-// const Clover = require("clover-ecomm-sdk");
 const session = require('express-session');
 const JSEncrypt = require('nodejs-jsencrypt').default;
 const CryptoJS = require("crypto-js");
@@ -11,7 +10,7 @@ const schedule = require('node-schedule');
 const nodemailer = require('nodemailer');
 
 require('dotenv').config({ override: true });
-// import fetch from 'node-fetch';
+
 
 
 

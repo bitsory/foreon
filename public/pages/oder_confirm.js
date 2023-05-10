@@ -622,7 +622,7 @@ export default class {
                 // document.getElementById('guest_checkout_billing_info_form_cover_contents').innerText = 
                 // '**********' + card_info.last4 + ' ' + card_info.brand + ' ' + card_info.exp;
                 
-                document.getElementById('guest_checkout_billing_info_form').style.display = "block";
+                document.getElementById('guest_checkout_billing_info_form').style.display = "flex";
                 document.getElementById('guest_checkout_submit_button').setAttribute("disabled", "true");
 
                 

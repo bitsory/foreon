@@ -1605,6 +1605,7 @@ export function renderBillingInfo(result) {
 
 function setShippingInfo(sh_num, recipient, address1, address2, city, state, zip, phone, email, default_check) {
     const shippingInfo = document.createElement('div');
+    shippingInfo.setAttribute('id', `user_shipping_info`);
     shippingInfo.setAttribute('class', `shipping_info SHN${sh_num}`);
     document.querySelector('.shipping_info_box').appendChild(shippingInfo);
     setShippingInfoDetail(sh_num, recipient, address1, address2, city, state, zip, phone, email, default_check);
