@@ -2993,6 +2993,9 @@ ul.tabs li.current{
    
 
 
+    #cart_modal_container {
+        right: -60px;
+    }
 
 
 
@@ -3684,6 +3687,10 @@ ul.tabs li.current{
 
     .online_main_items {
         display: block;
+    }
+
+    #online_main_item_contatiner {
+        margin: 2rem 0rem -1rem 0rem;
     }
 
     #online_item_detail_container {

@@ -29,14 +29,14 @@ app.listen(process.env.PORT, function() {
         const options = {
         method: 'POST',
         headers: {
-            Authorization: 'Basic ' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
-            'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+            Authorization: 'Basic ' + Buffer.from(`${process.env.UPS_MID}:${process.env.UPS_SECRET}`).toString('base64'),
+            'x-merchant-id': `${process.env.UPS_MID}`,
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body : new URLSearchParams(formData).toString()
         // body : 'grant_type=authorization_code&code=Wjg1RjZNSFotVTJGc2RHVmtYMSt2UnJhalVzVDBoTWRROEQ2dTdrdThGNXB6aTExcEpaeXBVenlmRTRRYURCUTJ5QmdaNFVzVU5WOCttRm82YlhkN0pZcW9zS3ZDNVE9PQ=='
         }
-        fetch('https://wwwcie.ups.com/security/v1/oauth/token?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com', options)
+        fetch(`https://wwwcie.ups.com/security/v1/oauth/token?client_id=${process.env.UPS_MID}&redirect_uri=https://www.thecafefore.com`, options)
         // fetch('https://wwwcie.ups.com/api/security/v1/oauth/token', options)
         .then(response => 
             response.json())
@@ -64,7 +64,7 @@ app.set('view engine', 'ejs');
 
 app.use(session({
     key: 'loginData',
-    secret: 'blackcatdoubleattack',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     HttpOnly:true,
@@ -78,18 +78,7 @@ app.use(cookieParser("secret"));
 const uuid4 = require('uuid');
 
 
-app.get('/',(req,res) => {
-    // fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
-    // .then(response => response.json())
-    // .then(response => {
-
-    //     console.log("response")
-    //     console.log(response)
-    //     res.redirect(`https://www.ups.com/lasso/signin?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com&response_type=code&scope=read&type=ups_com_api`);
-     
-    // })
-   
-
+app.get('/',(req,res) => { 
     console.log("home home home");
   
     if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
@@ -216,13 +205,7 @@ app.get('/shop/checkout/:id/item_num=:item_no', (req,res) => {
 
 
 app.post('/sign_in', function (req,res) {
-    // res.sendFile(__dirname + "/public/login.html");
-    console.log("sign in")
-
-    console.log(req.body);
-    console.log(`req.originalUrl: ${req}`);
-    console.log(req.url);
-   
+      
     const aid = req.body.aid;
     const bpw = req.body.bpw;
     const remember_id = req.body.checked_remember;
@@ -233,8 +216,7 @@ app.post('/sign_in', function (req,res) {
 
     const decryptedText_a = decrypt.decrypt(aid);
     const decryptedText_b = decrypt.decrypt(bpw);
-    console.log(decryptedText_a)
-    console.log(decryptedText_b)
+ 
 
     const sign_in_id = decrypt.decrypt(aid);
     const sign_in_pw = decrypt.decrypt(bpw);
@@ -250,22 +232,19 @@ app.post('/sign_in', function (req,res) {
         con.query('SELECT salt from users where id = ?', [sign_in_id], (err, result) => { 
             if(err) next(err);
 
-            console.log('salt')
-            console.log(result)
             if (result.length == 1) {
                 makeKey(sign_in_pw, result[0].salt).then(key => {
-                    console.log('key')
-                    console.log(key)
+                  
                     con.query('SELECT *  from users where id = ? and pw = ?', [sign_in_id, key], (err, result) => {
                         if(err){
                             res.send(err);
-                            // con.end();
+                            
                         }
                         // else if(result[0] === 'false') {
                         else if(result[0] == undefined) {
                             console.log("Id & PW are not match")
                             res.send({check : 'not match'});
-                            // con.end();
+                           
                         } else {                                         
                             console.log(`${result}`);                              
                             updateLastLog(con, result[0].id, result[0].first_name, req, res, date, redirect_path, result[0].clv_id, remember_id);
@@ -314,9 +293,7 @@ app.post('/sign_up', (req,res) => {
 
 
     const salt = buf.toString('base64');
-    console.log('salt');
-    console.log(salt);
-
+    
     function makeKey() {
         return new Promise((resolve, reject) => {
                 crypto.pbkdf2(decryptedbpw, salt, 1000, 32, 'SHA512', (err, key) => {
@@ -328,14 +305,7 @@ app.post('/sign_up', (req,res) => {
     }
 
     makeKey(decryptedbpw, salt).then(key => {
-        console.log('key')
-        console.log(key)
-
-        // if (req.body.uname.length > 1) {
-        //     sign_up_first_name = req.body.uname[0];
-        //     sign_up_last_name = req.body.uname[1];
-        // } else sign_up_first_name = req.body.uname[0];
-
+       
         const sign_up_first_name = req.body.ufirstname;
         const sign_up_last_name = req.body.ulastname;           
                 
@@ -350,9 +320,6 @@ app.post('/sign_up', (req,res) => {
         db.getConnection((con)=>{
             con.query('select COALESCE(MAX(id), "false") AS id from users where id = ?', [sign_up_id], (err, result) => {
                 if(err) next(err); 
-
-        
-                console.log(result);
                 console.log("check repetition id")
                 if (result[0].id === 'false') {
 
@@ -384,8 +351,7 @@ app.post('/sign_up', (req,res) => {
                                 res.send(err);
                                   
                             } else {
-                                console.log("sign up complete!!");  
-                                console.log(result); 
+                                console.log("sign up complete!!");                           
 
                                 updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id, "signup");
                             }               
@@ -408,12 +374,7 @@ function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_
     let data = {id : u_id, name : u_name, clv_id : clv_id};
     let re_path = {url : url}
     request.session.loginData = data;
-    console.log('req.session.loginData');
-    console.log(request.session.loginData);
-
-
-    response.cookie("cafe_fore_t", "test-test-test", {maxAge: 360000});
-    response.cookie("cafe_fore_tt", "test-test-test", {maxAge: 3600000});
+      
     response.cookie(
         'cafefore',{
         name : request.session.loginData.name,
@@ -507,10 +468,7 @@ app.post('/g_sign_in', function (req,res) {
             ////// sign up/////////////////   
                 const signup_salt = buf.toString('base64');            
                 makeKey(decryptedbpw, signup_salt).then(key => {
-                    console.log('key')
-                    console.log(key)
                     const sign_up_pw = key;
-
                     const options = {
                     method: 'POST',
                     headers: {
@@ -518,8 +476,7 @@ app.post('/g_sign_in', function (req,res) {
                     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
                     },
                     body: JSON.stringify({
-                        emailAddresses: [{emailAddress: g_loginid}],
-                        // phoneNumbers: [{phoneNumber: sign_up_phone}],
+                        emailAddresses: [{emailAddress: g_loginid}],                     
                         firstName: first_name,
                         lastName: last_name
                         })
@@ -540,8 +497,7 @@ app.post('/g_sign_in', function (req,res) {
             } else if (result.length == 1){
                 //////////////////////////// log in////////////////////////
                 const login_salt = result[0].salt;
-                console.log("login_salt for google id")
-                console.log(login_salt)
+              
                 makeKey(decryptedbpw, login_salt).then(key => {
 
                     con.query('SELECT *  from users where id = ? and pw = ?',[g_loginid, key], (err, result) => {                                       
@@ -553,7 +509,7 @@ app.post('/g_sign_in', function (req,res) {
                             res.send({check : 'not match'});
                             
                         } else {                                         
-                            console.log(`${result}`);                        
+                                                
                             updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id);
                         }
                     })
@@ -595,15 +551,11 @@ app.post('/change_password', (req,res) => {
     const decrypted_new_pw = decrypt.decrypt(new_pw);
 
     const new_salt = buf.toString('base64');
-    console.log('new_salt');
-    console.log(new_salt);
-
+   
     db.getConnection((con)=>{
         con.query('SELECT salt from users where id = ?', [u_id], (err, result) => { 
             if(err) next(err);
 
-            console.log('salt')
-            console.log(result)
             if (result.length == 1) {
                 makeKey(decrypted_cur_pw, result[0].salt).then(key => {
                     console.log('key')
@@ -803,860 +755,6 @@ app.post('/get_user_info', (req,res) => {
     }
 });
     
-    
-
-
-/////////////////////////////////////////////// clover API test//////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-app.post('/test_apikey', (req,res) => { 
-
-    const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          authorization: 'Bearer 760328e0-a9c6-bdac-d792-163b9ab1d1f8'
-        }
-      };
-
-    fetch('https://scl-sandbox.dev.clover.com/pakms/apikey', options)
-    .then(response => response.json())
-    .then(response => console.log(response))
-    .catch(err => console.error(err));
-
-});
-
-
-app.post('/make_item_test', (req,res) => { 
-
- /*        
-    const options = {
-        method: 'POST',
-        headers: {accept: 'application/json', 'content-type': 'application/json', authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
-        body: JSON.stringify({
-          items: [
-            {
-              tax_rates: [{tax_rate_uuid: 'Q0NVFCYTZ4KYE', name: 'Jongho Kim'}],
-              inventory_id: 'DBWAF4CD2PVAE',
-              quantity: 3,
-              type: 'sku',
-              amount: 1800
-            }
-          ],
-        //   shipping: {
-        //     address: {
-        //       city: 'Buford',
-        //       country: 'US',
-        //       line1: '2742 Pearl Ridge Trce',
-        //       postal_code: '30519',
-        //       state: 'GA'
-        //     },
-        //     name: 'Jongho Kim'
-        //   },
-          currency: 'USD',
-          email: 'rangdad@gmail.com',
-        //   customer: 'ZGDVQHPESCMV6'
-        })
-      };
-      
-      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-
-*/
-        
-        
-    const options = {
-    method: 'POST',
-    headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
-    body: JSON.stringify({
-        hidden: 'false',
-        available: 'true',
-        autoManage: 'false',
-        defaultTaxRates: 'true',
-        isRevenue: 'true',
-        taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
-        id: '00001',
-        name: 'UPS Shipping',
-        sku: 'ea',
-        price: 990,
-        priceType: 'PER_UNIT',
-        unitName: 'ea',
-        priceWithoutVat: 990
-    })
-    };
-
-fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
-  .then(response => response.json())
-  .then(response => console.log(response))
-  .catch(err => console.error(err));
-  
-  
-})
-
-
-
-app.get('/list_of_orders', (req,res) => {
-    const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        }
-      };
-      
-      fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/orders?expand=customers', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-
-})
-
-
-app.get('/save_card', (req,res) => {
-    const options = {
-        method: 'PUT',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-        //   'idempotency-key' : uuid,
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
-            body: JSON.stringify({
-            ecomind: 'ecom',
-            "source": 'clv_1TSTSCqf2JsJjwDEu93JjDBR', 
-            "email" : 'rangdad@gmail.com'
-        })
-      };
-      
-      fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
-        // fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers/DYSFDV5WVK3S4', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-});
-
-
-// app.get('/create_customer', (req,res) => {
-
-//     let ACCESS_TOKEN = process.env.ACCESS_TOKEN;
-//     let ENVIRONMENT = process.env.ENVIRONMENT;
-
-//     const cloverInst = new Clover(ACCESS_TOKEN, {
-//     environment: ENVIRONMENT
-//     });
-
-//     let customer = cloverInst.customers.create({
-//         email:'sample.email@example.com',
-//         source:'clv_1TSTSAi4ESnkvfoBcpCA51UV'
-//     });
-// });
-
-// app.post('/delete_payment_method', (req,res) => {
-//     console.log('/delete_payment_method /delete_payment_method /delete_payment_method/delete_payment_method')
-//     let u_id = req.body.id;
-//     let c_number = req.body.card_index;
-//     let default_payment_check = req.body.default_payment;
-//     const outdate = getDate();
-//     console.log(req.session.loginData.id)
-
-//     if (u_id === req.session.loginData.id) {
-
-//         const mysql = require('mysql');
-
-//         const con = mysql.createConnection({
-//             host: '127.0.0.1',
-//             port: '3306',
-//             user: 'root',
-//             password: '111111',
-//             database: 'test1',            
-//         });        
-
-//         con.connect((err) => {
-//             if(err){
-//             console.log('Error connecting to Db');
-//             return;
-//             }
-//             console.log('Connection established');
-//         });
-
-//         if (default_payment_check === 'default') {
-
-
-
-//         }
-
-
-//         con.query('SELECT clv_id, cd_id FROM billing_info WHERE id = ? and bi_number = ?', [u_id, c_number], (err, result) => {
-//             if (err) {
-//                 res.send(err);
-//                 con.end();
-//             } else {
-//                 console.log(result);
-
-//                 console.log("delete card from DB")
-//                         con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
-//                         (err, result) => {
-//                             if (err) {
-//                                 res.send(err);
-//                                 con.end();
-//                             } else console.log(result);                    
-//                         });
-
-//                         res.send(result);
-//             } 
-        
-                
-
-//                 ///////////// clover API fetch //////////////////
-//                 /*
-//                 const options = {
-//                     method: 'DELETE',
-//                     headers: {
-//                       accept: 'application/json',
-//                       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-//                     }
-//                 };
-//                 fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${result[0].clv_id}/sources/${result[0].cd_id}`, options)
-//                 .then(response => response.json())
-//                 .then(response => {
-//                     console.log(response)
-//                     if (response.deleted === 'true') {
-//                         console.log("delete card from DB")
-//                         con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
-//                         (err, result) => {
-//                             if (err) {
-//                                 res.send(err);
-//                                 con.end();
-//                             } else console.log(result);                    
-//                         });
-
-//                         res.send(result);
-//                     } 
-//                 })
-//                 .catch(err => console.error(err));
-                
-//             }
-//             */
-//     })
-
-//     } else {
-//         res.send("check your ID");
-//     }
-
-// })
-
-
-app.get('/delete_card', (req,res) => {
-
-const options = {
-    method: 'DELETE',
-    headers: {
-      accept: 'application/json',
-      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-    }
-  };
-//   fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${customer_id}/sources/${customer_card_id}`, options)
-  fetch('https://scl-sandbox.dev.clover.com/v1/customers/W29TP8XFK9BH6/sources/9BKRRQKANF8Z0', options)
-    .then(response => response.json())
-    .then(response => console.log(response))
-    .catch(err => console.error(err));
-
-});
-
-
-
-        
-
-
-        
-      
-      
-
-
-
-
-
-
-app.get('/get_an_order_test', (req,res) => {
-    console.log('/get_an_order_test /get_an_order_test /get_an_order_test /get_an_order_test ')
-
-    const orderId = 'D0C0FKJWDDB20';
-    const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        }
-      };
-      
-      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${orderId}`, options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-})
-
-
-app.get('/get_order_test', (req,res) => {
-    const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        }
-      };
-      
-      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-
-
-})
-
-app.get('/create_item', (req,res) => {
-    console.log('/create_item /create_item /create_item /create_item')
-    
-    const options = {
-        method: 'POST',
-        headers: {
-            'content-type': 'application/json',
-            authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
-        body: JSON.stringify({
-            hidden: 'false',
-            available: 'true',
-            autoManage: 'false',
-            defaultTaxRates: 'true',
-            isRevenue: 'true',
-            taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
-            id: '00001',
-            name: 'UPS Shipping',
-            sku: 'ea',
-            price: 990,
-            priceType: 'PER_UNIT',
-            unitName: 'ea',
-            priceWithoutVat: 990
-        })
-        };
-    
-    fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
-      .then(response => response.json())
-      .then(response => console.log(response))
-      .catch(err => console.error(err));
-      
-})
-
-app.get('/get_single_customer', (req,res) => {
-
-    console.log('/get_single_customer get_single_customer get_single_customer /get_customer/get_customer/get_customer')
-
-    const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        }
-      };
-
-    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/ZGDVQHPESCMV6?expand=cards`, options)
-      .then(response => response.json())
-      .then(response => { 
-        console.log(response);
-        // console.log(response.cards.elements);
-
-        response.cards.elements.forEach(element => {console.log(element)
-            
-        });
-        
-      })
-      .catch(err => console.error(err));
-})
-
-
-app.get('/get_customer', (req,res) => {
-
-    console.log('/get_customer/get_customer/get_customer/get_customer')
-
-   
-
-    const options = {method: 'GET', headers: {accept: 'application/json', 
-    authorization: `Bearer ${process.env.ACCESS_TOKEN}`}};
-
-    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
-  .then(response => response.json())
-  .then(response => console.log(response))
-  .catch(err => console.error(err));
-})
-
-
-app.get('/create_card_token', (req,res) => {
-
-    console.log('/create_card_token')
-    const options = {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          apikey: process.env.API_KEY,
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          card: {
-            number: '4242424242424242',
-            exp_month: '01',
-            exp_year: '27',
-            cvv: '123',
-            last4: '4242',
-            first6: '424242',
-            name: 'Jongho Kim'
-          }
-        })
-      };
-      
-      fetch('https://token-sandbox.dev.clover.com/v1/tokens', options)
-        .then(response => response.json())
-        .then(response => {
-
-            console.log(response)
-            /*
-            const options = {
-                method: 'PUT',
-                headers: {
-                  accept: 'application/json',
-                  'content-type': 'application/json',
-                //   'idempotency-key' : uuid,
-                  authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
-                body: JSON.stringify({
-                    ecomind: 'ecom',
-                    "source": response.id, 
-                    "email" : 'rangdad@gmail.com'
-                })
-              };
-              
-              fetch('https://scl-sandbox.dev.clover.com/v1/customers/ZGDVQHPESCMV6', options)
-            //   fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
-                // fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers/DYSFDV5WVK3S4', options)
-                .then(response => response.json())
-                .then(response => console.log(response))
-                .catch(err => console.error(err));
-        
-
-            // const options = {
-            //     method: 'POST',
-            //     headers: {
-            //       accept: 'application/json',
-            //       'content-type': 'application/json',
-            //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-            //     },
-            //     body: JSON.stringify({
-            //       ecomind: 'ecom',
-            //       shipping: {
-            //         address: {
-            //           line1: '2428 Morgan Creek Rd',
-            //           city: 'Buford',
-            //           country: 'US',
-            //           postal_code: '30519',
-            //           state: 'GA'
-            //         }
-            //       },
-            //       email: 'rangdad@gmail.com',
-            //       name: 'Jongho Kim',
-            //       source: response.id,
-            //       phone: '4702636495'
-            //     })
-            //   };
-              
-            //   fetch('https://scl-sandbox.dev.clover.com/v1/customers', options)
-            //     .then(response => response.json())
-            //     .then(response => console.log(response))
-            //     .catch(err => console.error(err));
-
-*/
-
-        })            
-        .catch(err => console.error(err));
-        
-})
-
-app.get('/pay_order_test', (req,res) => {
-
-    const options = {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        },
-        body: JSON.stringify({"source":"ZGDVQHPESCMV6",
-        "email":"rangdad@gmail.com",
-        "stored_credentials":{
-        "sequence": "SUBSEQUENT",
-        "is_scheduled": false,
-        "initiator": "CARDHOLDER"}})
-      };
-      
-      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/NZQ8GJPSF4BXW/pay`, options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-
-    // const uuid = uuid4.v4();
-    // console.log('pay_order_test pay_order_test pay_order_test pay_order_test ')
-    // const options = {
-    //     method: 'POST',
-    //     headers: {
-    //       accept: 'application/json',
-    //       'content-type': 'application/json',
-    //       'idempotency-key' : uuid,
-    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-    //     },
-    //     body: JSON.stringify({"amount":2300,
-    //     "currency":"usd",
-    //     "source":"DYSFDV5WVK3S4"})
-    //   };
-      
-    //   fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
-    //     .then(response => response.json())
-    //     .then(response => console.log(response))
-    //     .catch(err => console.error(err));
-
-
-
-})
-
-
-app.get('/create_customer_test', (req,res) => {
-
-    console.log('/create_customer_test /create_customer_test /create_customer_test /create_customer_test ')
-
-
-    const options = {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        },
-        body: JSON.stringify({firstName: 'Ted', lastName: 'Chang',})
-      };
-      
-      fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-
-
-})
-
-
-app.get('/create_order_test', (req,res) => {
-    console.log("/create_order_test /create_order_test /create_order_test /create_order_test")
-
-    const options = {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        },
-        body: JSON.stringify({
-          items: [
-            {
-        
-              amount:1800,
-                currency:"usd",
-                description:"Ginger Bottle 16oz",
-                quantity:1,
-                type:"sku",
-                tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
-            //   inventory_id: '010001'
-            }
-          ],
-          shipping: {
-            address: {
-              city: 'LAS VEGAS',
-              line1: '6594 HULME END AVE',
-              postal_code: '89139',
-              state: 'Nevada',
-              country:"US"
-            },
-            name: 'Jongho Kim',
-            phone: '4702636495'
-          },
-          currency: 'usd',
-          email: 'rangdad@gmail.com',
-        //   customer: 'W29TP8XFK9BH6'
-        })
-      };
-      
-      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
-        .then(response => response.json())
-        .then(response => {
-            console.log("make order")
-            console.log(response)
-
-            const options = {
-                method: 'POST',
-                headers: {
-                  accept: 'application/json',
-                  'content-type': 'application/json',
-                  authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                },
-                body: JSON.stringify({"source":"clv_1TSTSavUDzP5gBJFbMrPe2wK",
-                // body: JSON.stringify({"source":"clv_1TSTSk1pBwk66yF3NoDwwH9f",
-                "email":"rangdad@gmail.com",
-                "stored_credentials":{
-                    "sequence": "SUBSEQUENT",
-                    "is_scheduled": false,
-                    "initiator": "CARDHOLDER"}})
-              };
-              
-              fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
-                .then(response => response.json())
-                .then(response => {
-                    console.log(`make payment for created order ${response.id}`)
-                    console.log(response)
-                })
-                .catch(err => console.error(err));
-
-
-            
-            
-            
-        })
-        .catch(err => console.error(err));
-})
-
-
-
-
-
-
-
-app.get('/refund_test', (req,res) => {
-    console.log("/refund_test  /refund_test /refund_test /refund_test");
-    // const options = {
-    //     method: 'POST',
-    //     headers: {accept: 'application/json', 
-    //     'content-type': 'application/json',
-    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-    //     },
-    //     body: JSON.stringify({
-    //       "items":[{"parent":"2TXDF6YD2BW3J","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
-    //     })
-    //   };
-
-    // fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
-    //     .then(response => response.json())
-    //     .then(response => console.log(response))
-    //     .catch(err => console.error(err));
-
-
-    // const options = {
-    //     method: 'POST',
-    //     headers: {accept: 'application/json', 
-    //     'content-type': 'application/json',
-    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-    //     },
-    //     body: JSON.stringify({
-    //       "items":[{"parent":"2TXDF6YD2BW3J,","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
-    //     })
-    //   };
-      
-    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
-    //     .then(response => response.json())
-    //     .then(response => console.log(response))
-    //     .catch(err => console.error(err));
-        
-
-    const options = {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        },
-        body: JSON.stringify({charge: '651JCRHYRPAWT'})
-      };
-      
-      fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-
-
-    // const options = {
-    //     method: 'POST',
-    //     headers: {
-    //       accept: 'application/json',
-    //       'content-type': 'application/json',
-    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-    //     },
-        
-    //   };
-      
-    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/QQFTV1JD0AJDE/returns', options)
-    //     .then(response => response.json())
-    //     .then(response => console.log(response))
-    //     .catch(err => console.error(err));
-
-   
-});
-
-app.get('/get_charges', (req,res) => {
-    console.log("/get_charge /get_charge /get_charge  ");
-
-    const options = {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        }
-      };
-      
-      fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-
-});
-
-app.get('/submit_payment_test', (req,res) => {
-    console.log("/order_test /order_test /order_test /order_test");
-    const uuid = uuid4.v4();
-
-    // create card token
-    const sdk = require('api')('@clover-platform/v3#g4lh1ylawketdl');
-
-        sdk.createToken(
-            { card: { number: "6011361000006668",exp_month: "12", exp_year: "2023",cvv: "123",brand: "DISCOVER"}}, 
-            { apikey: `${process.env.API_KEY}`})
-           
-
-        .then(({ data }) => {
-        console.log(data.id)
-
-        ///////////////////////////////////////////////////////////
-        // make charge
-        const options = {
-            method: 'POST',
-            headers: {
-            accept: 'application/json',
-            'content-type': 'application/json',
-            'idempotency-key' : uuid,
-            authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-            },
-            body: JSON.stringify({
-                ecomind: 'ecom',
-                currency: 'usd',
-                amount: 1300,
-                source: 
-                data.id,
-                
-                tax_rate_uuid: process.env.TAX_UUID
-            })
-        };
-
-        console.log(options);
-        
-        fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
-            .then(response => response.json())
-            .then(response => console.log(response))
-            .catch(err => console.error(err));
-
-
-        }).catch(err => console.error(err));
-    
-    res.send("app.get('/test', (req,res)")
-
-
-})
-
-
-
-
-
-
-// app.get('/shop/view/item/:item_no',(req,res) => {
-    
-//     var product_number = parseInt(req.params.item_no);
-//     var member_name = '';
-
-//     console.log(`/shop/view/item:id: ${product_number}`);
-//     if (req.session.loginData) {member_name = req.session.loginData.name;}
-//     const mysql = require('mysql');
-
-//     const con = mysql.createConnection({
-//         host: '127.0.0.1',
-//         port: '3306',
-//         user: 'root',
-//         password: '111111',
-//         database: 'test1',
-        
-//     });
-
-//     con.connect((err) => {
-//         if(err){
-//         console.log('Error connecting to Db');
-//         return;
-//         }
-//         console.log('Connection established');
-//     });
-
-
-//     // const sign_in_id = req.body.sign_in_id;
-//     // const sign_in_pw = req.body.sign_in_pw;
-//     // const redirect_path = req.url.substring(req.url.lastIndexOf('=') + 1);
-//     // console.log(redirect_path);
-
-//     var date;
-//     date = new Date();
-//     date = date.getFullYear() + '-' +
-//     ('00' + (date.getMonth()+1)).slice(-2) + '-' +
-//     ('00' + date.getDate()).slice(-2) + ' ' + 
-//     ('00' + date.getHours()).slice(-2) + ':' + 
-//     ('00' + date.getMinutes()).slice(-2) + ':' + 
-//     ('00' + date.getSeconds()).slice(-2);
-    
-        
-//     con.query('SELECT * from product where prodnum = ?', [product_number]
-//         , (err, result) => {
-//                 if(err){
-//                     res.send(err);
-//                     con.end();
-//                 // }
-//                 //  else if(result[0].no === 'false') {
-//                 //     res.send('check your ID and PW');
-//                 //     con.end();
-//                 } else {
-
-//                     // console.log("SELECT * from product where prodnum = ");
-//                     // console.log(`${result[0].prodnum}`);
-                    
-//                     // res.send(result[0].name);
-//                     if(member_name) {
-//                         res.render('shop_detail.ejs', { 
-//                             post : member_name,
-//                             product : result
-                          
-//                         })
-//                     } else {
-
-//                         res.render('shop_detail.ejs', { 
-//                             post : "GUEST",
-//                             product : result
-                           
-//                         })
-//                     }
-//                 }
-//             });  
-
-// });
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 
 
@@ -4326,20 +3424,12 @@ app.post('/get_admin_check_orders_shipment',(req, res) => {
 
 function setUPSShipment(shipto, service_code, items, res, order_id, cart_num) {
 
-    // let service_code = {};
-    // console.log(shipto);
-    // if (rate == "flat") service_code = { Code: 'XS', Description: 'SimpleRateDescription' }
-    // else if (rate == "ground") service_code = { Code: '03', Description: 'Ground' };
-    // else if (rate == "3days") service_code = { Code: '12', Description: '3 Day Select' };
-    // else if (rate == "nextday") service_code = { Code: '13', Description: 'Next Day Air Saver' };
+  
     console.log("ups shipment")
     console.log(shipto)
     console.log(service_code)
     console.log(items)
-    // SimpleRate: {
-    //             Description: 'SimpleRateDescription',
-    //             Code: 'XS'
-    //             },
+   
     const ship = {
         ShipmentRequest: {
             Request: {
@@ -4389,29 +3479,7 @@ function setUPSShipment(shipto, service_code, items, res, order_id, cart_num) {
             },
             Service: service_code,
             Package: items
-            // {
-            //     Description: 'Nails',
-            //     Packaging: {
-            //         Code: '02',
-            //         Description: 'Nails'
-            //     },
-            //     Dimensions: {
-            //         UnitOfMeasurement: {
-            //             Code: 'IN',
-            //             Description: 'Inches'
-            //     },
-            //     Length: '50',
-            //     Width: '50',
-            //     Height: '50'
-            //     },
-            //     PackageWeight: {
-            //     UnitOfMeasurement: {
-            //         Code: 'LBS',
-            //         Description: 'Pounds'
-            //     },
-            //     Weight: '15'
-            //     }
-            // }
+           
             },
             LabelSpecification: {
             LabelImageFormat: {
@@ -4537,31 +3605,6 @@ function getDate() {
     return date;
 }
 
-app.post('/order-confirm-test', (req, res) => { 
-
-    const confirm_info = {
-        status : "complete",
-        paid_items_number : "paid_items_number",
-        name : "recipient",
-        order_number : "order_num",
-        email : "req.body.order_contact_email",
-        recipient : "recipient",
-        address : "req.body.address",
-        phone : "req.body.order_contact_phone",
-        type : "response.source.brand",
-        ending4 : "response.source.last4",
-        billing_address : "default_shipping_info.address1",
-        cardholder : "cardholder",
-        subtotal : "response.amount - response.tax_amount", 
-        tax : "response.tax_amount",
-        grandtotal : "response.amount"
-    };
-
-    res.send(confirm_info)
-
-
-});
-
 
 
 
@@ -4573,29 +3616,24 @@ app.get('/test_ups_toke', (req, res) => {
     const options = {
     method: 'POST',
     headers: {
-        Authorization: 'Basic ' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
-        'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
+        Authorization: 'Basic ' + Buffer.from(`${process.env.UPS_MID}:${process.env.UPS_SECRET}`).toString('base64'),
+        'x-merchant-id': `${process.env.UPS_MID}`,
         'Content-Type': 'application/x-www-form-urlencoded'
     },
-    body : new URLSearchParams(formData).toString()
-    // body : 'grant_type=authorization_code&code=Wjg1RjZNSFotVTJGc2RHVmtYMSt2UnJhalVzVDBoTWRROEQ2dTdrdThGNXB6aTExcEpaeXBVenlmRTRRYURCUTJ5QmdaNFVzVU5WOCttRm82YlhkN0pZcW9zS3ZDNVE9PQ=='
+    body : new URLSearchParams(formData).toString()    
     }
-    fetch('https://wwwcie.ups.com/security/v1/oauth/token?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com', options)
-    // fetch('https://wwwcie.ups.com/api/security/v1/oauth/token', options)
+    fetch(`https://wwwcie.ups.com/security/v1/oauth/token?client_id=${process.env.UPS_MID}&redirect_uri=https://www.thecafefore.com`, options)
+    
     .then(response => 
         response.json())
     .then(response => {
-        console.log("response")
-        console.log(response)
-        // process.env['UPS_API_KEY'] = 'test';
-        // process.env['UPS_API_KEY2'] = 'test';
-        require("dotenv").config({ path: ".env2" });    
-      
-
-        process.env.UPS_AUTH_TOKEN = response.access_token;
-        updateEnv(envItems);
-
-        res.send(response)
+       
+        if (response.status == 'approved') {
+            require("dotenv").config({ path: ".env2" }); 
+            process.env.UPS_AUTH_TOKEN = response.access_token;
+            updateEnv(envItems); 
+            res.send({result : "token updated"});         
+        }
     });
 
     const fs = require('fs');
@@ -4609,121 +3647,7 @@ app.get('/test_ups_toke', (req, res) => {
 });
 
 
-app.get('/test_ups_token', (req, res) => {
 
-    // const options = 
-    // {
-    // method: 'POST',
-    // headers: {
-    //     Authorization: 'Basic ' + Buffer.from('<zohola>:<Yeohae120817!>').toString('base64'),
-    //     'x-merchant-id': 'GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19',
-    //     'Content-Type': 'application/x-www-form-urlencoded'
-    // },
-    // body: 'grant_type=authorization_code&code=[SG82Q2kxZkEtVTJGc2RHVmtYMTljdk93aE5zZ2JIclpLMWh3cUFIenl4ZnZyS29ZVm9oWXlOdjB2aVFrbDVZcm15U2VVUGErdDZ4Y0orOWhZYUdqcENMUi85bmJONWc9PQ==]'
-    // }
-
-    // fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
-    // .then(response => response.json())
-    //   .then(response => {
-    //       console.log("response")
-    //       console.log(response)
-    //       res.send(response);
-    //   });
-
-    const formData = {
-        grant_type: 'client_credentials'
-      };
-
-    const options = {
-    method: 'POST',
-    headers: {
-        Authorization: 'Basic ' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
-        'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
-        'Content-Type': 'application/x-www-form-urlencoded'
-    },
-
-    // headers: {
-    //     Authorization: 'Basic ' + Buffer.from('pCzllAA1qfZV84RQGazP6na9nRViTSp31ERBfBR4gvX94zVJ:yWO4aUy8rxbtHbXomonhBnuMiNu4hvcrGCMJEf5GDSc6xt2bP34g3DLWQi6K61QO').toString('base64'),
-    //     'x-merchant-id': 'pCzllAA1qfZV84RQGazP6na9nRViTSp31ERBfBR4gvX94zVJ',
-    //     'Content-Type': 'application/x-www-form-urlencoded'
-    // },
-    body : new URLSearchParams(formData).toString()
-    // body : 'grant_type=authorization_code&code=Wjg1RjZNSFotVTJGc2RHVmtYMSt2UnJhalVzVDBoTWRROEQ2dTdrdThGNXB6aTExcEpaeXBVenlmRTRRYURCUTJ5QmdaNFVzVU5WOCttRm82YlhkN0pZcW9zS3ZDNVE9PQ=='
-    }
-    // fetch('https://wwwcie.ups.com/security/v1/oauth/token?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com', options)
-    fetch('https://onlinetools.ups.com/api/security/v1/oauth/token', options)
-    .then(response => {
-        console.log(response);    
-        response.json()})
-    .then(response => {
-        console.log("response")
-        console.log(response) 
-
-        res.send(response)
-    });
-
-
-});
-
-app.post('/test_ups_ref', (req, res) => {
-    console.log("/test_ups_ref /test_ups_ref /test_ups_ref/test_ups_ref")
-
-    console.log(process.env.TEST);
-    process.env.TEST = 'test';
-    console.log(process.env.TEST);
-    const buf = Buffer.from('BASIC=basic')
-    const dotenv = require('dotenv')
-    // require('dotenv').config({ override: true });
-    const config = dotenv.parse(buf) // will return an object
-    console.log(typeof config, config)
-    require("dotenv").config({ path: ".env2" });
-
-    const fs = require('fs');
-    const envItems = ['UPS_AUTH_TOKEN'];
-
-    function updateEnv(items = [], eol = '\n'){
-        const envContents = items.map(item => `${item}=${process.env[item]}`).join(eol)
-        fs.writeFileSync('.env2', envContents);
-      } 
-
-    process.env.UPS_AUTH_TOKEN = 'test89';
-    updateEnv(envItems);
-
-    /*
-    const formData = {
-        grant_type: 'refresh_token',
-        refresh_token: 'eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODE2Njc5NjgsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxNjgyMzY4LCJpYXQiOjE2ODE2Njc5NjgsImp0aSI6Ijk2Mjk0Y2FjLWI0N2YtNGI3Zi1iZWFjLTE5YTdiN2FhNTMyZSJ9.1d77dbPCzqYLcMB7MwZt2vrdS8ALKnpnaVNHPqOKo5PuLrmEH-MgcYOYsW3i6Y8LZBVWQMZ7jIR_gXDMJJuHC0Pi46Pkh1m5FWeZvS8dERLeYoTl70-wbck_YWZol0qN1gnZctkBYla9ZMz2giD5RK2OFSETvoaNDJryB67sMhHxUqkTYeJfMgRNwIzT7xAo7_3z-7l9oN3kxLWeW7cEmtZq-soZbNwJRqzAGQzpxjKQl_djd8yjdlO5Maxw6Kx0-n9rDv79MUBzsl9lBWDRc12yDF7xULU7b3GOYYZVSARmcdLTltYI_qQ09KPIjzuylP5JyUpjxZjJHRHDAW8S4oH8GxWXtoUAcIlTopWwOyC99VDz1RJl5Dm493Pw-ciEQkUThkVYtmqPpvhun_CSnq7F2_qAe6G4utX8X9-13_dWgLOSz4fOnBnH7cyCATJS3pms3XNz4ojOytVILVh6TlkXF_X0pCRCcEhItTCPHhKiRDbHtUgPZoFsnogodlY8-rJFYU2HGDnNmL-1phlUzFOnUN1OZydEIJTX2h4Itl8coDBrH6rk1IpnXJVcHIT0i-5tBVKiPk9KWBd4dULbUuQczpzim6-GOxQDF9NpeoEReAsA41-Sl7j6VDd75juRxo_PFZrhhTj-vIcx4xHexqs7TzvGNtg84PNLH3XoqYM'
-      };
-
-      const test = new URLSearchParams(formData).toString();
-      console.log(test);
-
-    const options = {
-    method: 'POST',
-    headers: {
-        Authorization: 'Basic' + Buffer.from('Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11:Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB').toString('base64'),
-        'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
-        'Content-Type': 'application/x-www-form-urlencoded'
-        },
-    body : test    
-    }
-
-    console.log(options)
-
-    fetch(`https://wwwcie.ups.com/api/security/v1/oauth/refresh`, options)
-    .then(response => {console.log(response)
-        console.log(response.Response.urlList)
-        console.log(response.Response.urlList[0])
-        response.json()})
-    .then(response => {
-        console.log("response")
-        console.log(response)
-        res.send(response)
-    });
-    */
-    
-
-});
 
 app.post('/test_ups_ship', (req, res) => {
 
@@ -4791,77 +3715,6 @@ app.post('/test_ups_ship', (req, res) => {
                     Description: '3 day'
                 },
 
-                // Package: [                    
-                //     {                        
-                //       PackageWeight: {
-                //         Weight: '10',
-                //         UnitOfMeasurement: {
-                //           Description: 'desc',
-                //           Code: 'LBS'
-                //         }
-                //       },
-                //       Dimensions: {
-                //         Height: '2',
-                //         Width: '2',
-                //         Length: '02',
-                //         UnitOfMeasurement: {
-                //           Description: 'desc',
-                //           Code: 'IN'
-                //         }
-                //       },
-                //       Packaging: {
-                //         Description: 'desc',
-                //         Code: '02'
-                //       },
-                //       Description: 'moon lamp'
-                //     },        
-                //     {
-                //       PackageWeight: {
-                //         Weight: '10',
-                //         UnitOfMeasurement: {
-                //           Description: 'desc',
-                //           Code: 'LBS'
-                //         }
-                //       },
-                //       Dimensions: {
-                //         Height: '2',
-                //         Width: '2',
-                //         Length: '02',
-                //         UnitOfMeasurement: {
-                //           Description: 'desc',
-                //           Code: 'IN'
-                //         }
-                //       },
-                //       Packaging: {
-                //         Description: 'desc',
-                //         Code: '02'
-                //       },
-                //       Description: 'ginger'
-                //     },        
-                //     {
-                //       Description: 'play mat',
-                //       Packaging: {
-                //         Code: '02',
-                //         Description: 'desc'
-                //       },
-                //       Dimensions: {
-                //         UnitOfMeasurement: {
-                //           Code: 'IN',
-                //           Description: 'desc'
-                //         },
-                //         Length: '02',
-                //         Width: '2',
-                //         Height: '2'
-                //       },
-                //       PackageWeight: {
-                //         UnitOfMeasurement: {
-                //           Code: 'LBS',
-                //           Description: 'desc'
-                //         },
-                //         Weight: '5'
-                //       }
-                //     }
-                //   ],
             Package: 
             {
                 SimpleRate: {
@@ -5101,6 +3954,7 @@ app.post('/test_ups_ship', (req, res) => {
 
 });
 
+/*
 app.get('/test_ups_cancel', (req, res) => {
 
     require("dotenv").config({ path: ".env2" });
@@ -5129,10 +3983,8 @@ app.get('/test_ups_cancel', (req, res) => {
           // console.log(response.ShipmentResults.)
           res.send(response)
       });
-  
-
-
 })
+*/
 
 
 app.get('/test_ups_track', (req, res) => {
@@ -5193,14 +4045,6 @@ app.get('/test_ups_valid', (req, res) => {
 
 
 app.get('/test_ups_rating', (req, res) => {
-//  fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
-//     .then(response => response.json())
-//     .then(response => {
-
-//         console.log("response")
-//         console.log(response)
-//         res.redirect(`https://www.ups.com/lasso/signin?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com&response_type=code&scope=read&type=ups_com_api`);
-//     });
 
 const data = {
         RateRequest: {
@@ -5314,8 +4158,8 @@ const options =
         'Content-Type': 'application/json',
         transId: 'test01trs',
         transactionSrc: 'testing',
-        Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibWVyX2lkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwiaXNzIjoiaHR0cHM6XC9cL2FwaXMudXBzLmNvbSIsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJzaWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJhdWQiOiJjYWZlIEZvcmUiLCJuYmYiOjE2ODEzMTcyMDAsIkRpc3BsYXlOYW1lIjoiY2FmZSBGb3JlIiwiZXhwIjoxNjgxMzMxNjAwLCJpYXQiOjE2ODEzMTcyMDAsImp0aSI6IjY2MDZhZGVjLTFhNTUtNDA5Ni04MjU0LTUzNjk5MWZlYjVkMSJ9.Y7F6dObaXBN3qnFyA7uQRpOKZbVBpMU4eYH1Rxdt_jhMkCvImU_zgRNJpo1ToqF7kDbkWsOUIgJUPgXs0qPuhKL09hSXJhCblI2n6K-gOFRN0h8aH8YgywBp5M_llzv1WUaa0VTXH-6Bj9DMhRhz7jVdHMnOhz4yLwZ8KEfzs7TXFlKZrOjeKcBnQ9y9ydfp73xR8n4kvn1WpSQoQCWbjMKtq2NkCDfKJnckN3JjJo2LBQeFMucSHlk9wpusjmsnG5jBFCH3Q0-Z51pdp2ji1wiwNTL8gSN-Z5L9Veab7qgg5c-VCnxs6a2eDj7if7ySUJIPVFe2YzCDZWnw06Hv1dz37Loa-1xo50na88OodqKlNsv6jWgkeb1pWnT4fkegA0m7zjJDt74jgSa9Kp2ytb-zmkgAXQlGrEfONB7IDdntwBS98TN1ohSJP-X3GjAJupWcUcTLx2v-0rfyrmTiWMkRiCxj6WfQCXoZhqd3R9UInAPLJSpWM62quKNF6jzik-_X3iKWpAnvOAv3-ezznpxEsL7T1gpynpNRZX9YKjPQlGVLxDD5xSGW2QSP4fd8M9sXiBR4YXAdbfUUM2hDibRruiIPyRIQH-IKd445qqhZZEIidaE7WaipMjY2rfqa6D--9TsbF_QEZxXe03bE0XdYXgbwOqbxLhOREamd2ps'
-        // Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgxMjQwNDE2LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODEyNTQ4MTYsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODEyNDA0MTYsImp0aSI6ImRmNjYxNThmLTBmYTEtNDU0OC04OTczLTczNTUyOGQxMzBhZSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.asOY41WovUTGTv_3VEjY_IWteO88lAvQBUBmvI5jGPiV4psfg5LfQa6J-1Ok3ahf_35homGR6yvgPt-89TXJPAVKiW-IjrneFJajmVsr2WUjpbzrgYZowmPce4EQyHCwfau9rriILPkOF2phLdvtcEMt277HxhTBbHY3t3ADMY6vOnkgjPOw0alMaxqGFQ-UxneesVk24QsL2nqnt8r0mPV3BF163ZeFINbzeWknL_j1RhIryheJ4v0H7_4amkeVS1f4DvvpUeAId4mJ4sP2FYIhpX4l3yVpHkhThwB54ZQ3If9DAAy25JXteFmn8GI3V-HxODlMGjAOUEVNs6Ujhmzj3c_mCI0nFgNZ1dleiKywM5cppHo3g_Cf9lURkdQkrr5s8Piqnqn3lCuhuqj13gx_TH9uWDFsbkUi6vtKfCeS8KEoA2wCRCZI0NwLwET96ZCeCNS6QXKixx7XoP7JRB8O_te3CW-jHocXAb7g_UqaSQsLbpPwwezp92DI1s8pd5CUdMndxj1No_1ZMPApPKBbME-mJkp1RUqqHvERs2tEddhFPR692oHYXLLnsDZY5eekVoNYrrCcywi-hemPEpR0wVJLNlgXIRoP4weqOYDCZy1h3XDfx2NzWqgSzOulQPArFteC7VSVK5x_GUUNXvz3M9PF4tCmbsccL4_If3E'
+        Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
+        
       },
       body: JSON.stringify(data)
     }
@@ -5334,503 +4178,3 @@ fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?${query}`, 
 });
 
     
-
-app.get('/test_shipment',(req,res) => {
-    console.log("/test_log/test_log/test_log/test_log");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_/test_lost_log/test_log/log/test_lg");
-    
-    const ship = {
-        ShipmentRequest: {
-            Request: {
-            SubVersion: '1801',
-            RequestOption: 'nonvalidate',
-            TransactionReference: {CustomerContext: ''}
-            },
-            Shipment: {
-            Description: 'Ship WS test',
-            Shipper: {
-                Name: 'ShipperName',
-                AttentionName: 'ShipperZs Attn Name',
-                TaxIdentificationNumber: '123456',
-                Phone: {
-                Number: '1115554758',
-                Extension: ' '
-                },
-                ShipperNumber: ' ',
-                FaxNumber: '8002222222',
-                Address: {
-                AddressLine: '2311 York Rd',
-                City: 'Timonium',
-                StateProvinceCode: 'MD',
-                PostalCode: '21093',
-                CountryCode: 'US'
-                }
-            },
-            ShipTo: {
-                Name: 'Happy Dog Pet Supply',
-                AttentionName: '1160b_74',
-                Phone: {Number: '9225377171'},
-                Address: {
-                AddressLine: '123 Main St',
-                City: 'timonium',
-                StateProvinceCode: 'MD',
-                PostalCode: '21030',
-                CountryCode: 'US'
-                },
-                Residential: ' '
-            },
-            ShipFrom: {
-                Name: 'T and T Designs',
-                AttentionName: '1160b_74',
-                Phone: {Number: '1234567890'},
-                FaxNumber: '1234567890',
-                Address: {
-                AddressLine: '2311 York Rd',
-                City: 'Alpharetta',
-                StateProvinceCode: 'GA',
-                PostalCode: '30005',
-                CountryCode: 'US'
-                }
-            },
-            PaymentInformation: {
-                ShipmentCharge: {
-                Type: '01',
-                BillShipper: {AccountNumber: ' '}
-                }
-            },
-            Service: {
-                Code: '03',
-                Description: 'Express'
-            },
-            Package: {
-                Description: ' ',
-                Packaging: {
-                Code: '02',
-                Description: 'Nails'
-                },
-                Dimensions: {
-                UnitOfMeasurement: {
-                    Code: 'IN',
-                    Description: 'Inches'
-                },
-                Length: '10',
-                Width: '30',
-                Height: '45'
-                },
-                PackageWeight: {
-                UnitOfMeasurement: {
-                    Code: 'LBS',
-                    Description: 'Pounds'
-                },
-                Weight: '5'
-                }
-            }
-            },
-            LabelSpecification: {
-            LabelImageFormat: {
-                Code: 'GIF',
-                Description: 'GIF'
-            },
-            HTTPUserAgent: 'Mozilla/4.5'
-            }
-        }
-    }
-
-
-    const options = {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Basic Rm1mblFEdVYtVTJGc2RHVmtYMTltZnRUMFFjRENWQU1lZEd2Z2hwb2ZKQ3B3YVN5d3FpNkoxOU9tWE1ZYkZORWhHUExDREV6d2hqMCtVOEFMNzZIbjJHUjJuTElCN3c9PQ',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'grant_type=authorization_code&code=[Auth-Code]'
-    }
-
-    fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
-    .then(response => response.json())
-    .then(response => {
-        console.log("response")
-        console.log(response)
-        res.send(response);
-    });
-});
-
-app.get('/test_rate',(req,res) => {
-    console.log("/test_ship /test_ship /test_ship /test_ship");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
-   
-    const data = {
-        "accountNumber": {
-          "value": "740561073"
-        },
-        "requestedShipment": {
-          "shipper": {
-            "address": {
-              "postalCode": 30062,
-              "countryCode": "US"
-            }
-          },
-          "recipient": {
-            "address": {
-              "postalCode": 89139,
-              "countryCode": "US"
-            }
-          },
-          "pickupType": "DROPOFF_AT_FEDEX_LOCATION",
-          "rateRequestType": [
-            "ACCOUNT",
-            "LIST"
-          ],
-          "requestedPackageLineItems": [
-            {
-              "weight": {
-                "units": "LB",
-                "value": 15
-              }
-            }
-          ]
-        }
-      }
-    const options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-locale' : 'en_US',          
-          Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJDWFMiXSwiUGF5bG9hZCI6eyJjbGllbnRJZGVudGl0eSI6eyJjbGllbnRLZXkiOiJsNzg0MDA5ODBkZWNiYTQ1ODdiMDMxZDY0ZDA0ZWViYmY2In0sImF1dGhlbnRpY2F0aW9uUmVhbG0iOiJDTUFDIiwiYWRkaXRpb25hbElkZW50aXR5Ijp7InRpbWVTdGFtcCI6IjA4LUFwci0yMDIzIDEwOjQ4OjU3IEVTVCIsImdyYW50X3R5cGUiOiJjbGllbnRfY3JlZGVudGlhbHMiLCJhcGltb2RlIjoiU2FuZGJveCIsImN4c0lzcyI6Imh0dHBzOi8vY3hzYXV0aHNlcnZlci1zdGFnaW5nLmFwcC5wYWFzLmZlZGV4LmNvbS90b2tlbi9vYXV0aDIifSwicGVyc29uYVR5cGUiOiJEaXJlY3RJbnRlZ3JhdG9yX0IyQiJ9LCJleHAiOjE2ODA5NzI1MzcsImp0aSI6IjFiZTllNDJjLWEwN2MtNDU1Yi04YmZlLTJjZTJiMWUzNzU2MCJ9.AL1opn8_KXV-1xN8XyOj3_Rf1oRDdpPp0szRdUWBDD5ZCHLrwLYhytUl1v2zYMaYCr_d1dIaVGNLBV8rfILSuxKttXZrLX4uQosWY29hg6uBdckCkdQnkzMz_U0VMD0Y0aalJFobFjPOtNdqh7lEPvHG64lHdLKrjAE95p0oKAhvP2wB92kzfqVxSz_megbzF63THkaiUi0gcKNOvNEHEH8LEVvrTMougBuQoS04Qe4waktnvLHKq_WyJRcb0te3kwAQjB89PfeLsR6EoRbZQ3UaBuIPD_hjSmNcFlDe6iSejLFR0aVKTjaSyTqKsrrK4opcsUyCQ6QOu7pts1GrJPmXx36cT3DIAvPUMoPa3W8J5mvjwm84Febgkm84PiE_7VznRcL8TRE7KiyRL7Oz9kXQ8M7ueXE4gtR76pHZxr5THZiikXT4FDfREtKgadyrECi46gn1UT7sVSZ9ixKLEhuq9RbWp0f2y37KMDleqeEzIhuJHNaOLY5L00vbepCQEDNRVKVFfgq_cPnJDS_rNuZIk5ZiHdvqZTH-TqyWD2Mre-WfHTOsEK0Eg2KKWTtTCDDixkef0Bn2ALHdvU8ED_WrzvtJTyrihfRKQ7Ax5UNZGsqESBaUT54hhrhX9vivVLxnzK7j0R9mrouVJU9tKza5vDCwY1UGXUkADuShdnY'
-        },
-        body: JSON.stringify({data})
-    }
-          
-
-      fetch(`https://apis-sandbox.fedex.com/rate/v1/rates/quotes`, options)
-    .then(response => response.json())
-    .then(response => {
-        console.log("response")
-        console.log(response)
-        res.send(response);
-    });
-
-});
-   
-app.get('/test_fedex_ship',(req,res) => {
-    console.log("/test_fedex_ship /test_fedex_ship /test_fedex_ship");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
-    
-
-    const data = 
-{
-    "requestedShipment": {
-      "shipper": {
-        "contact": {
-          "personName": "cafe FORE",
-          "phoneNumber": 4702636495
-        },
-        "address": {
-          "streetLines": [
-            "4400 Roswell Rd"
-          ],
-          "city": "Marietta",
-          "stateOrProvinceCode": "GA",
-          "postalCode": 30062,
-          "countryCode": "US"
-        }
-      },
-      "recipients": [
-        {
-          "contact": {
-            "personName": "Joe Kim",
-            "phoneNumber": 4702636499
-          },
-          "address": {
-            "streetLines": [
-              "6594 Hulme end ave"
-            ],
-            "city": "Las Vegas",
-            "stateOrProvinceCode": "NV",
-            "postalCode": 89139,
-            "countryCode": "US"
-          }
-        }
-      ],
-      "shipDatestamp": "2023-04-06",
-      "pickupType": "CONTACT_FEDEX_TO_SCHEDULE",
-      "serviceType": "FEDEX_GROUND",
-      "packagingType": "YOUR_PACKAGING",
-      "shippingChargesPayment": {
-        "paymentType": "SENDER",
-        "payor": {
-          "responsibleParty": {
-            "accountNumber": {
-              "value": "740561073"
-            }
-          }
-        }
-      },
-      "shipmentSpecialServices": {
-        "specialServiceTypes": [
-          "RETURN_SHIPMENT"
-        ],
-        "returnShipmentDetail": {
-          "returnType": "FEDEX_TAG"
-        }
-      },
-      "blockInsightVisibility": false,
-      "pickupDetail": {
-        "readyPickupDateTime": "2023-04-06T09:00:00Z",
-        "latestPickupDateTime": "2023-04-06T14:00:00Z"
-      },
-      "requestedPackageLineItems": [
-        {
-          "itemDescription": "Item description",
-          "weight": {
-            "units": "LB",
-            "value": 10
-          }
-        }
-      ]
-    },
-    "accountNumber": {
-      "value": "740561073"
-    }
-  }
-
-    const options = {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        'X-locale' : 'en_US',          
-        Authorization: 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJDWFMiXSwiUGF5bG9hZCI6eyJjbGllbnRJZGVudGl0eSI6eyJjbGllbnRLZXkiOiJsNzg0MDA5ODBkZWNiYTQ1ODdiMDMxZDY0ZDA0ZWViYmY2In0sImF1dGhlbnRpY2F0aW9uUmVhbG0iOiJDTUFDIiwiYWRkaXRpb25hbElkZW50aXR5Ijp7InRpbWVTdGFtcCI6IjA4LUFwci0yMDIzIDEwOjQ4OjU3IEVTVCIsImdyYW50X3R5cGUiOiJjbGllbnRfY3JlZGVudGlhbHMiLCJhcGltb2RlIjoiU2FuZGJveCIsImN4c0lzcyI6Imh0dHBzOi8vY3hzYXV0aHNlcnZlci1zdGFnaW5nLmFwcC5wYWFzLmZlZGV4LmNvbS90b2tlbi9vYXV0aDIifSwicGVyc29uYVR5cGUiOiJEaXJlY3RJbnRlZ3JhdG9yX0IyQiJ9LCJleHAiOjE2ODA5NzI1MzcsImp0aSI6IjFiZTllNDJjLWEwN2MtNDU1Yi04YmZlLTJjZTJiMWUzNzU2MCJ9.AL1opn8_KXV-1xN8XyOj3_Rf1oRDdpPp0szRdUWBDD5ZCHLrwLYhytUl1v2zYMaYCr_d1dIaVGNLBV8rfILSuxKttXZrLX4uQosWY29hg6uBdckCkdQnkzMz_U0VMD0Y0aalJFobFjPOtNdqh7lEPvHG64lHdLKrjAE95p0oKAhvP2wB92kzfqVxSz_megbzF63THkaiUi0gcKNOvNEHEH8LEVvrTMougBuQoS04Qe4waktnvLHKq_WyJRcb0te3kwAQjB89PfeLsR6EoRbZQ3UaBuIPD_hjSmNcFlDe6iSejLFR0aVKTjaSyTqKsrrK4opcsUyCQ6QOu7pts1GrJPmXx36cT3DIAvPUMoPa3W8J5mvjwm84Febgkm84PiE_7VznRcL8TRE7KiyRL7Oz9kXQ8M7ueXE4gtR76pHZxr5THZiikXT4FDfREtKgadyrECi46gn1UT7sVSZ9ixKLEhuq9RbWp0f2y37KMDleqeEzIhuJHNaOLY5L00vbepCQEDNRVKVFfgq_cPnJDS_rNuZIk5ZiHdvqZTH-TqyWD2Mre-WfHTOsEK0Eg2KKWTtTCDDixkef0Bn2ALHdvU8ED_WrzvtJTyrihfRKQ7Ax5UNZGsqESBaUT54hhrhX9vivVLxnzK7j0R9mrouVJU9tKza5vDCwY1UGXUkADuShdnY'
-        },
-        body: JSON.stringify({data})
-    }
-        
-
-    fetch(`https://apis-sandbox.fedex.com/ship/v1/shipments/packages/validate`, options)
-    .then(response => response.json())
-    .then(response => {
-        console.log("response")
-        console.log(response)
-        res.send(response);
-    });
-})
-
-app.get('/test_upst',(req,res) => {
-    console.log("/test_log/test_log/test_log/test_log");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
-    const formData = {
-        grant_type: 'client_credentials'
-      };
-
-    //   const resp = fetch(
-    //     `https://wwwcie.ups.com/api/security/v1/oauth/token`,
-    //     {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/x-www-form-urlencoded',
-    //         'x-merchant-id': 'string',
-    //         Authorization: 'Basic ' + btoa('<zohola>:<Yeohae120817!>')
-    //       },
-    //       body: new URLSearchParams(formData).toString()
-    //     }
-    //   );
-      
-    //   const data = resp.text();
-    //   console.log(data);
-
-      const input = 
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'x-merchant-id': 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
-        //   Authorization: 'Basic PHpvaG9sYT46PFllb2hhZTEyMDgxNyE+'
-          Authorization: 'Basic ' + Buffer.from('<Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11>:<Stn6Dox0uRs2GovzBhyyNgkL3pt5NaqSfRsAgFR72VsKoE3Q0tEdS1EDJBwUroFB>').toString('base64')
-        },
-        body: JSON.stringify({grant_type: 'client_credentials'})
-      }
-      console.log(input);
-      fetch(`https://wwwcie.ups.com/api/security/v1/oauth/token`, input)
-      .then(response => response.json())
-      .then(response => {
-          console.log("response")
-          console.log(response)
-          res.send(response);
-      });
-      
-
-
-
-});
-
-app.get('/test_get_ups',(req,res) => {
-    console.log("/test_log/test_log/test_log/test_log");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
-    const query = new URLSearchParams({
-        client_id: 'Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11',
-        redirect_uri: 'https://www.thecafefore.com'
-      }).toString();
-
-    //   fetch(`https://onlinetools.ups.com/api/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
-    fetch(`https://wwwcie.ups.com/security/v1/oauth/validate-client?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com`)
-        .then(response => response.json())
-        .then(response => {
-
-            console.log("response")
-            console.log(response)
-            res.redirect(`https://www.ups.com/lasso/signin?client_id=Zb9MRQzxT1d7IUEryBsDpnpkigFES3pCqqd0XfcKbW4Vxy11&redirect_uri=https://www.thecafefore.com&response_type=code&scope=read&type=ups_com_api`);
-        });
-
-
-
-});
-   
-/*
-app.get('/test_ups_token',(req,res) => {
-    console.log("/test_log/test_log/test_log/test_log");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
-    
-    const options = 
-    {
-    method: 'POST',
-    headers: {
-        Authorization: 'Basic ' + Buffer.from('<zohola>:<Yeohae120817!>').toString('base64'),
-        'x-merchant-id': 'GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19',
-        'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: 'grant_type=authorization_code&code=[SG82Q2kxZkEtVTJGc2RHVmtYMTljdk93aE5zZ2JIclpLMWh3cUFIenl4ZnZyS29ZVm9oWXlOdjB2aVFrbDVZcm15U2VVUGErdDZ4Y0orOWhZYUdqcENMUi85bmJONWc9PQ==]'
-    }
-
-    fetch('https://wwwcie.ups.com/security/v1/oauth/token', options)
-    .then(response => response.json())
-      .then(response => {
-          console.log("response")
-          console.log(response)
-          res.send(response);
-      });
-
-});
-*/
-
-app.get('/test_utttu',(req,res) => {
-    console.log("/test_log/test_log/test_log/test_log");
-    console.log("/test_log/test_log/test_log/test_lost_log/test_log/test_log/test_lg");
-   
-    
-
-  const version = 'v1';
-  const requestoption = 'Rate';
-  
-    const options = 
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        transId: '20230407trs',
-        transactionSrc: 'testing',
-        Authorization: 'Bearer eyJraWQiOiI0YzYwMDI1Ny0zZWNlLTRhOTMtYWNkZS1iNzU5OWE0NDc2OWQiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzM4NCJ9.eyJzdWIiOiJyYW5nZGFkQGdtYWlsLmNvbSIsImF1ZCI6ImNhZmUgRm9yZSIsImNsaWVudGlkIjoiWmI5TVJRenhUMWQ3SVVFcnlCc0RwbnBraWdGRVMzcENxcWQwWGZjS2JXNFZ4eTExIiwibmJmIjoxNjgwOTI5MzY0LCJEaXNwbGF5TmFtZSI6ImNhZmUgRm9yZSIsImlzcyI6Imh0dHBzOlwvXC9hcGlzLnVwcy5jb20iLCJleHAiOjE2ODA5NDM3NjQsInV1aWQiOiIzQzUwNUE5My1GNDVDLTE1NDAtODBENS0wMDQ4M0ZGNjAwOTEiLCJpYXQiOjE2ODA5MjkzNjQsImp0aSI6IjBhY2Q4ZTEzLTUxMWYtNDQ5ZC05ZDc3LWU5ZTcwNDJlYzljOSIsInNpZCI6IjRjNjAwMjU3LTNlY2UtNGE5My1hY2RlLWI3NTk5YTQ0NzY5ZCJ9.12xip3sX3xlAewFcuT21t79UykiOiKmEe5Yjz_c9mrm4ru6Tu52StWmgXGFB8f3q6ny6ILKpAXwrYPHDSfjbFYbQ4ZfVF0kvEsnPGR5QnrTbfOjxNiX27FQWpreYWhnevW4_JjH016szrQzOJZVcsiXoKEjYFbSWkMfe53pduoCFua67JUqXqoUawC7M2hHv3DEelL7iY6d5nM_IHesvm_Up8_ONt3AZfcaLd2hxORHFv_i_cibNaTSk5nJBNW1wfKEKHlsRwUsiDN_on5AkjsqH2_CuSriDI8gWTzxxKVnXCMK4DkwL0WfKw3ulaQQBzAQsuAQf28_LPJODaqi_Pl3ZRnfJoR17YdpHspZfyp3Ba3oKvCE80C3WGi34Jrub0iqvH0aRCmT7n67bEVnmZIg4WUG7IxctqNcwyOSw0ORSrK8F-OgNXN5vD2m87WAjkV2Hag4VK-IswMP2B_2uTyKHKh0H8pX-FYBcV-pmsFLnWenLmbCFGLiy1DenqPIHj0qhxXDka-oD_L-dKpvcc2JPwYmPputdWssyABk8U8AoVTp_6k3majVSs5TlfoJkz_4ZrG0bS8dxeLxfXxu1vyfyeD4CmFjDmW1bbtyWJxXuJ3e4Zye4l8yQxiHXpSLai2jIcMRzkpr1dmTnvpMFI3-h5eHVs8mjFafBD6is7T4'
-      },
-      body: JSON.stringify({
-        RateRequest: {
-          Request: {
-            TransactionReference: {
-              CustomerContext: 'CustomerContext',
-              TransactionIdentifier: 'TransactionIdentifier'
-            }
-          },
-          Shipment: {
-            Shipper: {
-              Name: 'cafe fore',
-              ShipperNumber: 'B98W48',
-              Address: {
-                AddressLine: '4400 Roswell Rd',
-                City: 'Roswell',
-                StateProvinceCode: 'GA',
-                PostalCode: '30062',
-                CountryCode: 'US'
-              }
-            },
-            ShipTo: {
-              Name: 'Jay Kim',
-              Address: {
-                AddressLine: '6594 hulme end ave',
-                City: 'Las Vegas',
-                StateProvinceCode: 'NV',
-                PostalCode: '89139',
-                CountryCode: 'US'
-              }
-            },
-            ShipFrom: {
-              Name: 'cafe fore',
-              Address: {
-                AddressLine: '4400 Roswell Rd',
-                City: 'Roswell',
-                StateProvinceCode: 'GA',
-                PostalCode: '30062',
-                CountryCode: 'US'
-              }
-            },
-            PaymentDetails: {
-              ShipmentCharge: {
-                Type: '01',
-                BillShipper: {
-                  AccountNumber: 'B98W48'
-                }
-              }
-            },
-            Service: {
-              Code: '03',
-              Description: 'Ground'
-            },
-            NumOfPieces: '5',
-            Package: [
-              {
-                SimpleRate: {
-                  Description: 'SimpleRateDescription',
-                  Code: 'XS'
-                },
-                PackagingType: {
-                  Code: '02',
-                  Description: 'Packaging'
-                },
-                Dimensions: {
-                  UnitOfMeasurement: {
-                    Code: 'IN',
-                    Description: 'Inches'
-                  },
-                  Length: '10',
-                  Width: '10',
-                  Height: '10'
-                },
-                PackageWeight: {
-                  UnitOfMeasurement: {
-                    Code: 'LBS',
-                    Description: 'Pounds'
-                  },
-                  Weight: '15'
-                }
-              }
-            ]
-          }
-        }
-      })
-    }
-
-    fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?Rate`, options)
-    .then(response => response.json())
-    .then(response => { 
-        console.log(response);
-        // console.log(response.RateResponse.response.ResponseStatus[0]);
-        // console.log(response.RateResponse.response.Alert[0]);
-        // console.log(response.RateResponse.response.TransactionReference[0]);
-        // console.log("response.RateResponse.RatedShipment");
-        // console.log(response.RateResponse.RatedShipment.Service[0]);
-        // console.log(response.RateResponse.RatedShipment.RatedShipmentAlert[0]);
-        // console.log(response.RateResponse.RatedShipment.TotalCharges[0]);
-        res.send(response);
-    });
-  
-  
-
-
-});
