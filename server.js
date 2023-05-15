@@ -77,53 +77,19 @@ app.use(cookieParser("secret"));
 
 const uuid4 = require('uuid');
 
-
-
-
-
-    const axios = require('axios');
-
-// Config Set Up
-const targetEnv = 'https://sandbox.dev.clover.com'; // Pointing to Sandbox Environment
-// const targetEnv = 'https://www.clover.com'; // Pointing to Prod Environment
-
-const appID = 'DRXJ3XYX3VZXT'; // Input your app ID here
-const appSecret = '6b39c8ef-a361-95b9-e24e-7cb7c1fe551a'; // Input your app secret here
-
-app.get('/', (req, res) => authenticate(req, res));
-console.log("home home home");
-
-// Steps 1 & 2 - Request merchant authorization to receive authorization code
-const authenticate = async (req, res) => {
-  const url = `${targetEnv}/oauth/authorize?client_id=${appID}`;
-
-  /* If there is no code parameter in the query string of the current url
-  redirect user for authentication. If there isn't then request API token */
-  !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
-}
-
-// Steps 3 & 4 - Request and serve up API token using the received authorization code
-const requestAPIToken = async (res, query) => {
-  const url = `${targetEnv}/oauth/token?client_id=${appID}&client_secret=${appSecret}&code=${query.code}`;
-
-  // Request
-  await axios.get(url)
-    .then(({ data }) => res.send(data))
-    .catch(err => res.send(err.message));
-}
   
-// app.get('/',(req,res) => { 
-//     console.log("home home home");
-//     if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
-//         res.render('admin.ejs', {post : "ADMIN"});
-//     }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
-//         console.log("login data exist");        
-// 		res.render('index.ejs', {post : req.session.loginData.name});
-// 	} else {
-//         console.log("login data nothing");
-// 		res.sendFile(__dirname + "/public/index.html");
-// 	}
-// });
+app.get('/',(req,res) => { 
+    console.log("home home home");
+    if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
+        res.render('admin.ejs', {post : "ADMIN"});
+    }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
+        console.log("login data exist");        
+		res.render('index.ejs', {post : req.session.loginData.name});
+	} else {
+        console.log("login data nothing");
+		res.sendFile(__dirname + "/public/index.html");
+	}
+});
 
 
 
