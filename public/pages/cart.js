@@ -1903,7 +1903,8 @@ function renderPagination(_totalCount, currentPage) {
     let last = pageGroup * pageCount;    // 화면에 보여질 마지막 페이지 번호 // last number in current page group
     if (last > totalPage) last = totalPage;
     // let first = last - (pageCount - 1) <= 0 ? 1 : last - (pageCount - 1);    // 화면에 보여질 첫번째 페이지 번호
-    let first = pageGroup == 1 ? 1 : currentPage - currentPage % pageCount + 1;  //하단 최초 숫자
+    // let first = pageGroup == 1 ? 1 : currentPage - currentPage % pageCount + 1;  //하단 최초 숫자
+    let first = pageGroup == 1 ? 1 : last - (pageCount - 1);
     console.log("first");
     console.log(first);
     const next = last + 1;

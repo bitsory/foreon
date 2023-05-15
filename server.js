@@ -78,19 +78,52 @@ app.use(cookieParser("secret"));
 const uuid4 = require('uuid');
 
 
-app.get('/',(req,res) => { 
-    console.log("home home home");
+
+
+
+    const axios = require('axios');
+
+// Config Set Up
+const targetEnv = 'https://sandbox.dev.clover.com'; // Pointing to Sandbox Environment
+// const targetEnv = 'https://www.clover.com'; // Pointing to Prod Environment
+
+const appID = 'DRXJ3XYX3VZXT'; // Input your app ID here
+const appSecret = '6b39c8ef-a361-95b9-e24e-7cb7c1fe551a'; // Input your app secret here
+
+app.get('/', (req, res) => authenticate(req, res));
+console.log("home home home");
+
+// Steps 1 & 2 - Request merchant authorization to receive authorization code
+const authenticate = async (req, res) => {
+  const url = `${targetEnv}/oauth/authorize?client_id=${appID}`;
+
+  /* If there is no code parameter in the query string of the current url
+  redirect user for authentication. If there isn't then request API token */
+  !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
+}
+
+// Steps 3 & 4 - Request and serve up API token using the received authorization code
+const requestAPIToken = async (res, query) => {
+  const url = `${targetEnv}/oauth/token?client_id=${appID}&client_secret=${appSecret}&code=${query.code}`;
+
+  // Request
+  await axios.get(url)
+    .then(({ data }) => res.send(data))
+    .catch(err => res.send(err.message));
+}
   
-    if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
-        res.render('admin.ejs', {post : "ADMIN"});
-    }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
-        console.log("login data exist");        
-		res.render('index.ejs', {post : req.session.loginData.name});
-	} else {
-        console.log("login data nothing");
-		res.sendFile(__dirname + "/public/index.html");
-	}
-});
+// app.get('/',(req,res) => { 
+//     console.log("home home home");
+//     if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
+//         res.render('admin.ejs', {post : "ADMIN"});
+//     }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
+//         console.log("login data exist");        
+// 		res.render('index.ejs', {post : req.session.loginData.name});
+// 	} else {
+//         console.log("login data nothing");
+// 		res.sendFile(__dirname + "/public/index.html");
+// 	}
+// });
 
 
 
@@ -118,6 +151,14 @@ app.get('/account_modal_pop', (req,res) => {
 app.post('/get_api_key', (req,res) => { 
     if (req.body.u_id == 'getkey') {
         const key = {key : process.env.API_KEY};       
+        res.send(key);
+    }
+})
+
+
+app.post('/get_glogin_key', (req,res) => { 
+    if (req.body.u_id == 'getkey') {
+        const key = {key : process.env.G_LOGIN};       
         res.send(key);
     }
 })
@@ -3627,7 +3668,7 @@ app.get('/test_ups_toke', (req, res) => {
     .then(response => 
         response.json())
     .then(response => {
-       
+        console.log(response);
         if (response.status == 'approved') {
             require("dotenv").config({ path: ".env2" }); 
             process.env.UPS_AUTH_TOKEN = response.access_token;
@@ -4176,5 +4217,772 @@ fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?${query}`, 
 
 
 });
+
+
+
+/////////////////////////////////////////////// clover API test//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.post('/test_apikey', (req,res) => { 
+
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: 'Bearer 760328e0-a9c6-bdac-d792-163b9ab1d1f8'
+        }
+      };
+
+    fetch('https://scl-sandbox.dev.clover.com/pakms/apikey', options)
+    .then(response => response.json())
+    .then(response => console.log(response))
+    .catch(err => console.error(err));
+
+});
+
+
+app.post('/make_item_test', (req,res) => { 
+
+ /*        
+    const options = {
+        method: 'POST',
+        headers: {accept: 'application/json', 'content-type': 'application/json', authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+        body: JSON.stringify({
+          items: [
+            {
+              tax_rates: [{tax_rate_uuid: 'Q0NVFCYTZ4KYE', name: 'Jongho Kim'}],
+              inventory_id: 'DBWAF4CD2PVAE',
+              quantity: 3,
+              type: 'sku',
+              amount: 1800
+            }
+          ],
+        //   shipping: {
+        //     address: {
+        //       city: 'Buford',
+        //       country: 'US',
+        //       line1: '2742 Pearl Ridge Trce',
+        //       postal_code: '30519',
+        //       state: 'GA'
+        //     },
+        //     name: 'Jongho Kim'
+        //   },
+          currency: 'USD',
+          email: 'rangdad@gmail.com',
+        //   customer: 'ZGDVQHPESCMV6'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+*/
+        
+        
+    const options = {
+    method: 'POST',
+    headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+    body: JSON.stringify({
+        hidden: 'false',
+        available: 'true',
+        autoManage: 'false',
+        defaultTaxRates: 'true',
+        isRevenue: 'true',
+        taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
+        id: '00001',
+        name: 'UPS Shipping',
+        sku: 'ea',
+        price: 990,
+        priceType: 'PER_UNIT',
+        unitName: 'ea',
+        priceWithoutVat: 990
+    })
+    };
+
+fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+  
+  
+})
+
+
+
+app.get('/list_of_orders', (req,res) => {
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/orders?expand=customers', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+
+})
+
+
+app.get('/save_card', (req,res) => {
+    const options = {
+        method: 'PUT',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        //   'idempotency-key' : uuid,
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+            body: JSON.stringify({
+            ecomind: 'ecom',
+            "source": 'clv_1TSTSCqf2JsJjwDEu93JjDBR', 
+            "email" : 'rangdad@gmail.com'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
+        // fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers/DYSFDV5WVK3S4', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+});
+
+
+// app.get('/create_customer', (req,res) => {
+
+//     let ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+//     let ENVIRONMENT = process.env.ENVIRONMENT;
+
+//     const cloverInst = new Clover(ACCESS_TOKEN, {
+//     environment: ENVIRONMENT
+//     });
+
+//     let customer = cloverInst.customers.create({
+//         email:'sample.email@example.com',
+//         source:'clv_1TSTSAi4ESnkvfoBcpCA51UV'
+//     });
+// });
+
+// app.post('/delete_payment_method', (req,res) => {
+//     console.log('/delete_payment_method /delete_payment_method /delete_payment_method/delete_payment_method')
+//     let u_id = req.body.id;
+//     let c_number = req.body.card_index;
+//     let default_payment_check = req.body.default_payment;
+//     const outdate = getDate();
+//     console.log(req.session.loginData.id)
+
+//     if (u_id === req.session.loginData.id) {
+
+//         const mysql = require('mysql');
+
+//         const con = mysql.createConnection({
+//             host: '127.0.0.1',
+//             port: '3306',
+//             user: 'root',
+//             password: '111111',
+//             database: 'test1',            
+//         });        
+
+//         con.connect((err) => {
+//             if(err){
+//             console.log('Error connecting to Db');
+//             return;
+//             }
+//             console.log('Connection established');
+//         });
+
+//         if (default_payment_check === 'default') {
+
+
+
+//         }
+
+
+//         con.query('SELECT clv_id, cd_id FROM billing_info WHERE id = ? and bi_number = ?', [u_id, c_number], (err, result) => {
+//             if (err) {
+//                 res.send(err);
+//                 con.end();
+//             } else {
+//                 console.log(result);
+
+//                 console.log("delete card from DB")
+//                         con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
+//                         (err, result) => {
+//                             if (err) {
+//                                 res.send(err);
+//                                 con.end();
+//                             } else console.log(result);                    
+//                         });
+
+//                         res.send(result);
+//             } 
+        
+                
+
+//                 ///////////// clover API fetch //////////////////
+//                 /*
+//                 const options = {
+//                     method: 'DELETE',
+//                     headers: {
+//                       accept: 'application/json',
+//                       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+//                     }
+//                 };
+//                 fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${result[0].clv_id}/sources/${result[0].cd_id}`, options)
+//                 .then(response => response.json())
+//                 .then(response => {
+//                     console.log(response)
+//                     if (response.deleted === 'true') {
+//                         console.log("delete card from DB")
+//                         con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
+//                         (err, result) => {
+//                             if (err) {
+//                                 res.send(err);
+//                                 con.end();
+//                             } else console.log(result);                    
+//                         });
+
+//                         res.send(result);
+//                     } 
+//                 })
+//                 .catch(err => console.error(err));
+                
+//             }
+//             */
+//     })
+
+//     } else {
+//         res.send("check your ID");
+//     }
+
+// })
+
+
+app.get('/delete_card', (req,res) => {
+
+const options = {
+    method: 'DELETE',
+    headers: {
+      accept: 'application/json',
+      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    }
+  };
+//   fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${customer_id}/sources/${customer_card_id}`, options)
+  fetch('https://scl-sandbox.dev.clover.com/v1/customers/W29TP8XFK9BH6/sources/9BKRRQKANF8Z0', options)
+    .then(response => response.json())
+    .then(response => console.log(response))
+    .catch(err => console.error(err));
+
+});
+
+
+
+        
+
+
+        
+      
+      
+
+
+
+
+
+
+app.get('/get_an_order_test', (req,res) => {
+    console.log('/get_an_order_test /get_an_order_test /get_an_order_test /get_an_order_test ')
+
+    const orderId = 'D0C0FKJWDDB20';
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${orderId}`, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+})
+
+
+app.get('/get_order_test', (req,res) => {
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+
+})
+
+app.get('/create_item', (req,res) => {
+    console.log('/create_item /create_item /create_item /create_item')
+    
+    const options = {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+        body: JSON.stringify({
+            hidden: 'false',
+            available: 'true',
+            autoManage: 'false',
+            defaultTaxRates: 'true',
+            isRevenue: 'true',
+            taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
+            id: '00001',
+            name: 'UPS Shipping',
+            sku: 'ea',
+            price: 990,
+            priceType: 'PER_UNIT',
+            unitName: 'ea',
+            priceWithoutVat: 990
+        })
+        };
+    
+    fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err));
+      
+})
+
+app.get('/get_single_customer', (req,res) => {
+
+    console.log('/get_single_customer get_single_customer get_single_customer /get_customer/get_customer/get_customer')
+
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+
+    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/ZGDVQHPESCMV6?expand=cards`, options)
+      .then(response => response.json())
+      .then(response => { 
+        console.log(response);
+        // console.log(response.cards.elements);
+
+        response.cards.elements.forEach(element => {console.log(element)
+            
+        });
+        
+      })
+      .catch(err => console.error(err));
+})
+
+
+app.get('/get_customer', (req,res) => {
+
+    console.log('/get_customer/get_customer/get_customer/get_customer')
+
+   
+
+    const options = {method: 'GET', headers: {accept: 'application/json', 
+    authorization: `Bearer ${process.env.ACCESS_TOKEN}`}};
+
+    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+})
+
+
+app.get('/create_card_token', (req,res) => {
+
+    console.log('/create_card_token')
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          apikey: process.env.API_KEY,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          card: {
+            number: '4242424242424242',
+            exp_month: '01',
+            exp_year: '27',
+            cvv: '123',
+            last4: '4242',
+            first6: '424242',
+            name: 'Jongho Kim'
+          }
+        })
+      };
+      
+      fetch('https://token-sandbox.dev.clover.com/v1/tokens', options)
+        .then(response => response.json())
+        .then(response => {
+
+            console.log(response)
+            /*
+            const options = {
+                method: 'PUT',
+                headers: {
+                  accept: 'application/json',
+                  'content-type': 'application/json',
+                //   'idempotency-key' : uuid,
+                  authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+                body: JSON.stringify({
+                    ecomind: 'ecom',
+                    "source": response.id, 
+                    "email" : 'rangdad@gmail.com'
+                })
+              };
+              
+              fetch('https://scl-sandbox.dev.clover.com/v1/customers/ZGDVQHPESCMV6', options)
+            //   fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
+                // fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers/DYSFDV5WVK3S4', options)
+                .then(response => response.json())
+                .then(response => console.log(response))
+                .catch(err => console.error(err));
+        
+
+            // const options = {
+            //     method: 'POST',
+            //     headers: {
+            //       accept: 'application/json',
+            //       'content-type': 'application/json',
+            //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            //     },
+            //     body: JSON.stringify({
+            //       ecomind: 'ecom',
+            //       shipping: {
+            //         address: {
+            //           line1: '2428 Morgan Creek Rd',
+            //           city: 'Buford',
+            //           country: 'US',
+            //           postal_code: '30519',
+            //           state: 'GA'
+            //         }
+            //       },
+            //       email: 'rangdad@gmail.com',
+            //       name: 'Jongho Kim',
+            //       source: response.id,
+            //       phone: '4702636495'
+            //     })
+            //   };
+              
+            //   fetch('https://scl-sandbox.dev.clover.com/v1/customers', options)
+            //     .then(response => response.json())
+            //     .then(response => console.log(response))
+            //     .catch(err => console.error(err));
+
+*/
+
+        })            
+        .catch(err => console.error(err));
+        
+})
+
+app.get('/pay_order_test', (req,res) => {
+
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({"source":"ZGDVQHPESCMV6",
+        "email":"rangdad@gmail.com",
+        "stored_credentials":{
+        "sequence": "SUBSEQUENT",
+        "is_scheduled": false,
+        "initiator": "CARDHOLDER"}})
+      };
+      
+      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/NZQ8GJPSF4BXW/pay`, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+    // const uuid = uuid4.v4();
+    // console.log('pay_order_test pay_order_test pay_order_test pay_order_test ')
+    // const options = {
+    //     method: 'POST',
+    //     headers: {
+    //       accept: 'application/json',
+    //       'content-type': 'application/json',
+    //       'idempotency-key' : uuid,
+    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({"amount":2300,
+    //     "currency":"usd",
+    //     "source":"DYSFDV5WVK3S4"})
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+
+
+
+})
+
+
+app.get('/create_customer_test', (req,res) => {
+
+    console.log('/create_customer_test /create_customer_test /create_customer_test /create_customer_test ')
+
+
+    const options = {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({firstName: 'Ted', lastName: 'Chang',})
+      };
+      
+      fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+
+})
+
+
+app.get('/create_order_test', (req,res) => {
+    console.log("/create_order_test /create_order_test /create_order_test /create_order_test")
+
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({
+          items: [
+            {
+        
+              amount:1800,
+                currency:"usd",
+                description:"Ginger Bottle 16oz",
+                quantity:1,
+                type:"sku",
+                tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
+            //   inventory_id: '010001'
+            }
+          ],
+          shipping: {
+            address: {
+              city: 'LAS VEGAS',
+              line1: '6594 HULME END AVE',
+              postal_code: '89139',
+              state: 'Nevada',
+              country:"US"
+            },
+            name: 'Jongho Kim',
+            phone: '4702636495'
+          },
+          currency: 'usd',
+          email: 'rangdad@gmail.com',
+        //   customer: 'W29TP8XFK9BH6'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(response => {
+            console.log("make order")
+            console.log(response)
+
+            const options = {
+                method: 'POST',
+                headers: {
+                  accept: 'application/json',
+                  'content-type': 'application/json',
+                  authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                },
+                body: JSON.stringify({"source":"clv_1TSTSavUDzP5gBJFbMrPe2wK",
+                // body: JSON.stringify({"source":"clv_1TSTSk1pBwk66yF3NoDwwH9f",
+                "email":"rangdad@gmail.com",
+                "stored_credentials":{
+                    "sequence": "SUBSEQUENT",
+                    "is_scheduled": false,
+                    "initiator": "CARDHOLDER"}})
+              };
+              
+              fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
+                .then(response => response.json())
+                .then(response => {
+                    console.log(`make payment for created order ${response.id}`)
+                    console.log(response)
+                })
+                .catch(err => console.error(err));
+
+
+            
+            
+            
+        })
+        .catch(err => console.error(err));
+})
+
+
+
+
+
+
+
+app.get('/refund_test', (req,res) => {
+    console.log("/refund_test  /refund_test /refund_test /refund_test");
+    // const options = {
+    //     method: 'POST',
+    //     headers: {accept: 'application/json', 
+    //     'content-type': 'application/json',
+    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({
+    //       "items":[{"parent":"2TXDF6YD2BW3J","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
+    //     })
+    //   };
+
+    // fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+
+
+    // const options = {
+    //     method: 'POST',
+    //     headers: {accept: 'application/json', 
+    //     'content-type': 'application/json',
+    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({
+    //       "items":[{"parent":"2TXDF6YD2BW3J,","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
+    //     })
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+        
+
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({charge: '651JCRHYRPAWT'})
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+
+    // const options = {
+    //     method: 'POST',
+    //     headers: {
+    //       accept: 'application/json',
+    //       'content-type': 'application/json',
+    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+        
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/QQFTV1JD0AJDE/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+
+   
+});
+
+app.get('/get_charges', (req,res) => {
+    console.log("/get_charge /get_charge /get_charge  ");
+
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+});
+
+app.get('/submit_payment_test', (req,res) => {
+    console.log("/order_test /order_test /order_test /order_test");
+    const uuid = uuid4.v4();
+
+    // create card token
+    const sdk = require('api')('@clover-platform/v3#g4lh1ylawketdl');
+
+        sdk.createToken(
+            { card: { number: "6011361000006668",exp_month: "12", exp_year: "2023",cvv: "123",brand: "DISCOVER"}}, 
+            { apikey: `${process.env.API_KEY}`})
+           
+
+        .then(({ data }) => {
+        console.log(data.id)
+
+        ///////////////////////////////////////////////////////////
+        // make charge
+        const options = {
+            method: 'POST',
+            headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'idempotency-key' : uuid,
+            authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            },
+            body: JSON.stringify({
+                ecomind: 'ecom',
+                currency: 'usd',
+                amount: 1300,
+                source: 
+                data.id,
+                
+                tax_rate_uuid: process.env.TAX_UUID
+            })
+        };
+
+        console.log(options);
+        
+        fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
+            .then(response => response.json())
+            .then(response => console.log(response))
+            .catch(err => console.error(err));
+
+
+        }).catch(err => console.error(err));
+    
+    res.send("app.get('/test', (req,res)")
+
+
+})
 
     

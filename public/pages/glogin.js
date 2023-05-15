@@ -1,17 +1,36 @@
 
 console.log("google login initialize")
-google.accounts.id.initialize({
-    client_id: "848599037536-2qfs9feovnsi0bf2fs6brch8jvqrcj44.apps.googleusercontent.com",
-    callback: handleCredentialResponse
-});
-    google.accounts.id.renderButton(
-    document.getElementById("google_login"),
-    // {theme: "dark", size: "medium", locale: "en", border: "none", width: "long"}  // customization attributes
-    {theme: "outfilled", size: "medium", shape: "square", width: "360", height: "50" ,locale: "en"}
-);
-    // google.accounts.id.prompt(); // also display the One Tap dialog
 
+getKey();
 
+function getKey () {    
+
+    const send_data = {u_id : 'getkey'};
+
+    const data = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'            
+            },
+        body: JSON.stringify(send_data)
+    };
+    console.log(data);
+
+    fetch(`/get_glogin_key`, data)
+    .then((res) => res.json())
+    .then(result => {
+        const key = result.key;           
+        
+        google.accounts.id.initialize( {client_id: key, callback: handleCredentialResponse} );
+
+        google.accounts.id.renderButton(
+            document.getElementById("google_login"),
+            // {theme: "dark", size: "medium", locale: "en", border: "none", width: "long"}  // customization attributes
+            {theme: "outfilled", size: "medium", shape: "square", width: "360", height: "50" ,locale: "en"}
+        );
+    });
+    
+}
 
 
 function handleCredentialResponse(response) {

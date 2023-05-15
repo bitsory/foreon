@@ -16,8 +16,6 @@ import * as ShopPageForm from "./pages/form_shop_page.js";
 import * as CheckoutOrderForm from "./pages/form_checkout_order.js";
 import * as WEBS from "./pages/form_webs.js";
 
-
-
 const toggleBtn = document.querySelector('.navbar_toggleBtn');
 const menu = document.querySelector('.navbar_nav_list');
 const icons = document.querySelector('.navbar_icons');
@@ -37,9 +35,6 @@ const modal = document.getElementById('modal');
 const modal_page = document.getElementById("modal_page");
 let loginpage = {};
 let loginpage_flag = false;
-
-let page = {};
-
 
 let shop_detail_page = {};
 let shop_detail_page_flag = false;
@@ -72,9 +67,8 @@ toggleBtn.addEventListener('click', (e) => {
 
 console.log("index.js");
 
-navbar_logo.addEventListener('click', () => {
-    console.log("goto home");
-    window.location.href = "http://127.0.0.1:5500/cafefore";
+navbar_logo.addEventListener('click', () => {  
+    window.location.href = "http://localhost:8080";
 });
 
 foot_logo.addEventListener('click', () => {
@@ -122,19 +116,8 @@ document.addEventListener('click', function(e){
     const login_id = document.getElementById('user_info_btn_id');
 
     
-    // const account_modal_pop_container = document.getElementById("account_modal_pop_container");
-    
-    // const sign_in_btn = document.getElementById("sign_in_btn");
-    // const account_modal = document.getElementById("account_modal");
-
-    console.log("document.addEventListener('click', function(e){")
-    console.log(toggleBtn.classList.toggle);
-    // if (e.target != document.getElementById('navbar')) {
-    // if (e.target != document.getElementById('navbar') && toggleBtn.classList.contains('on') == true) {
     if (e.target != toggleBtn && e.target != menu && e.target != login_id && e.target != user_info_btn_id && toggleBtn.classList.contains('on') == true) {
-        console.log(e.target)
-        console.log(toggleBtn.classList.contains('on'))
-        console.log("if (e.target != document.getElementById('navbar') && toggleBtn.classList.toggle == 'on') {")
+      
         WEBS.toggleFunc();
     }
     

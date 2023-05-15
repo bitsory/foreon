@@ -132,13 +132,18 @@ export function getGuestOrderConfirm() {
         <h2>Check Out</h2>
         <div id="guest_checkout_container" class="guest_checkout_container">
         
-            <div id="guest_checkout_form_container" class="guest_checkout_form_container">            
-                <form id="guest_payment_form">
+            <div id="guest_checkout_form_container" class="guest_checkout_form_container">   
+                <div id="guest_checkout_notice" class="guest_checkout_notice">
                     * All fields are required to GUEST mode checkout.                         
+                </div>         
+                <form id="guest_payment_form">
+                    
 
                     <div id="guest_checkout_shipping_infomation_container_cover" class="guest_checkout_shipping_infomation_container">
-                        <div id="guest_checkout_shipping_infomation_container_cover_title" class="guest_checkout_shipping_infomation_container_cover_title guest_checkout_container_cover_title">
+                        <div id="guest_checkout_shipping_infomation_container_cover_title_box" class="guest_checkout_shipping_infomation_container_cover_title_box">
+                            <div id="guest_checkout_shipping_infomation_container_cover_title" class="guest_checkout_shipping_infomation_container_cover_title">
                             Shipping Infomation
+                            </div>
                             <button id="guest_checkout_shipping_infomation_container_change_btn" class="guest_checkout_shipping_infomation_container_change_btn guest_checkout_edit_btn">Edit Shipping Address</button>
                         </div>
 
@@ -268,6 +273,8 @@ export function getGuestOrderConfirm() {
                             </div>
                         </div>
 
+                        <div id="guest_checkout_shipping_info_extra_box" class="guest_checkout_shipping_info_extra_box"></div>
+
                         <div id="guest_checkout_shipping_info_next_box" class="guest_checkout_shipping_info_next_box">
                             <button type="button" id="guest_checkout_shipping_info_next_btn" class="guest_checkout_shipping_info_next_btn" title="continue to shipping method">Continue to Select Shipping Method</button>
                         </div>
@@ -276,8 +283,10 @@ export function getGuestOrderConfirm() {
                     </div> 
 
                     <div id="guest_checkout_shipping_method_container_cover" class="guest_checkout_shipping_method_container_cover">
-                        <div id="guest_checkout_shipping_method_container_cover_title" class="guest_checkout_shipping_method_container_cover_title guest_checkout_container_cover_title">
-                        Shipping Method
+                        <div id="guest_checkout_shipping_method_container_cover_title_box" class="guest_checkout_shipping_method_container_cover_title_box guest_checkout_container_cover_title_box">
+                            <div id="guest_checkout_shipping_method_container_cover_title" class="guest_checkout_shipping_method_container_cover_title">
+                            Shipping Method
+                            </div>
                             <button id="guest_checkout_shipping_method_container_change_btn" class="guest_checkout_shipping_method_container_change_btn guest_checkout_edit_btn">Edit Shipping Method</button>
                         </div>
                     
@@ -316,8 +325,10 @@ export function getGuestOrderConfirm() {
                     </div>
                     
                     <div id="guest_checkout_billing_info_form_cover" class="billing_info">
-                        <div id="guest_checkout_billing_infomation_container_cover_title" class="guest_checkout_billing_infomation_container_cover_title guest_checkout_container_cover_title">
-                        Billing Infomation
+                        <div id="guest_checkout_billing_infomation_container_cover_title_box" class="guest_checkout_billing_infomation_container_cover_title guest_checkout_container_cover_title_box">
+                            <div id="guest_checkout_billing_infomation_container_cover_title" class="guest_checkout_billing_infomation_container_cover_title guest_checkout_container_cover_title">
+                            Billing Infomation
+                            </div>
                             <button id="guest_checkout_billing_infomation_container_change_btn" class="guest_checkout_billing_infomation_container_change_btn guest_checkout_edit_btn">Edit Payment Infomation</button>
                         </div>
                     

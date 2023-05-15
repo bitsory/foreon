@@ -275,9 +275,7 @@ export default class {
 
                         const orderConfirm = new OrderConfirm(user_id, proceed_checkout_selected_order_cart);
                         document.getElementById("online_main").innerHTML = CheckoutOrderForm.getUserOrderConfirm();                        
-                        orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);
-                        
-                        
+                        orderConfirm.makeUserCheckOutForm(user_id, proceed_checkout_total, proceed_checkout_selected_order_cart);                                                
                         ItemCounter.item_counter(user_id);
 
                     })

@@ -48,6 +48,7 @@ export default class {
         // this.spinner = new Spinner(opts);
         
         this.check_out_box = new setItemBox(this.user_id, 'check_out_item', proceed_checkout_selected_order_cart);
+        
       
         
         this.online_main.addEventListener('click', (e) => {
@@ -547,38 +548,78 @@ export default class {
 
 
             if(e.target && e.target.id == 'guest_checkout_shipping_info_next_btn') {
+                const guest_checkout_shipping_info_extra_box = document.getElementById('guest_checkout_shipping_info_extra_box');
+                if (!document.getElementById('input_recipient_first_name').value) {
+                    showNotification('please input recipient first name...', 'input_recipient_first_name');                    
+                } else if (!document.getElementById('input_recipient_last_name').value) {
+                    showNotification('please input recipient last name...', 'input_recipient_last_name');     
+                } else if (!document.getElementById('input_shipping_address_line1').value) {
+                    showNotification('please input shipping address...', 'input_shipping_address_line1'); 
+                } else if (!document.getElementById('input_shipping_address_city').value) {
+                    showNotification('please input shipping address...', 'input_shipping_address_city'); 
+                } else if (!document.getElementById('input_shipping_address_city').value) {
+                    showNotification('please input shipping address...', 'input_shipping_address_zip'); 
+                } else if (!document.getElementById('input_shipping_contact_phone').value) {
+                    showNotification('please input contact number...', 'input_shipping_contact_phone'); 
+                } else if (!document.getElementById('input_shipping_contact_email').value) {
+                    showNotification('please input contact email...', 'input_shipping_contact_email'); 
+                } else {              
                 
-                document.getElementById('guest_checkout_shipping_info').style.display = "none";
-                document.getElementById('guest_checkout_shipping_infomation_container_cover').style.display = "block";
-                document.getElementById('guest_checkout_shipping_infomation_container_cover').style.height = "auto";
-                document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
-                document.getElementById('guest_shipping_method_container').style.display = "block";
-                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "block";
-                
-                this.getShippingRate('GUEST');
-                this.check_out_box.shipping_rate_flag = true;
+                    document.getElementById('guest_checkout_shipping_info').style.display = "none";
+                    document.getElementById('guest_checkout_shipping_infomation_container_cover').style.display = "block";
+                    document.getElementById('guest_checkout_shipping_infomation_container_cover').style.height = "auto";
+                    document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
+                    document.getElementById('guest_shipping_method_container').style.display = "block";
+                    document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "flex";
+                    
+                    this.getShippingRate('GUEST');
+                    this.check_out_box.shipping_rate_flag = true;
 
-                const data = {
-                    recipient : document.getElementById('input_recipient_first_name').value + ' ' +document.getElementById('input_recipient_last_name').value,
-                    address : document.getElementById('input_shipping_address_line1').value + ' ' + document.getElementById('input_shipping_address_line2').value,
-                    city : document.getElementById('input_shipping_address_city').value,
-                    state : document.getElementById('shipping_address_state').value,
-                    zip : document.getElementById('input_shipping_address_zip').value,
+                    const data = {
+                        recipient : document.getElementById('input_recipient_first_name').value + ' ' +document.getElementById('input_recipient_last_name').value,
+                        address : document.getElementById('input_shipping_address_line1').value + ' ' + document.getElementById('input_shipping_address_line2').value,
+                        city : document.getElementById('input_shipping_address_city').value,
+                        state : document.getElementById('shipping_address_state').value,
+                        zip : document.getElementById('input_shipping_address_zip').value,
+                    }
+                    document.getElementById('guest_checkout_shipping_info_next_btn').setAttribute('value','off');
+                    document.getElementById('guest_checkout_shipping_infomation_container_change_btn').setAttribute('value','off');
+                    document.getElementById('continue_to_payment_btn').style.display = "block"; 
+                    // document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "flex";
+
+                    document.getElementById('guest_checkout_shipping_infomation_container_cover_contents').innerText = data.recipient + '\n' + data.address + '\n' + data.city + ', ' + data.state + ' ' + data.zip;
                 }
 
-                document.getElementById('guest_checkout_shipping_infomation_container_cover_contents').innerText = data.recipient + '\n' + data.address + '\n' + data.city + ', ' + data.state + ' ' + data.zip;
+                function showNotification(param_innertext, param_id) {
+                    guest_checkout_shipping_info_extra_box.classList.add('show');
+                    guest_checkout_shipping_info_extra_box.innerText = param_innertext;
+                    document.getElementById(param_id).focus();
+                    setTimeout(() => {
+                        guest_checkout_shipping_info_extra_box.classList.remove('show');
+                    }, 3000)
+                  }
 
             }
             if(e.target && e.target.id == 'continue_to_payment_btn') {
+                document.getElementById('guest_checkout_shipping_method_container_change_btn').setAttribute('value','off');
+                document.getElementById('continue_to_payment_btn').setAttribute('value','off');
                 document.getElementById('guest_shipping_method_container').style.display = "none";
                 document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "block";
                 document.getElementById('guest_checkout_shipping_method_container_cover').style.height = "auto";
+
                 document.getElementById('guest_checkout_billing_info_form_cover').style.display = "none";
                 document.getElementById('guest_checkout_billing_info_form').style.display = "flex";
                 // document.getElementById('guest_checkout_shipping_method_container_cover_contents').innerText = "test shipping rate"
-                document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "block";
+                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "flex";
+                document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "flex";
+                document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "flex";
+                
+                
 
                 this.check_out_box.setShippingMethodCoverContents("GUEST");
+                const shipping_rate = this.check_out_box.checkShippingRate();
+                
+                this.check_out_box.rerenderTotal(this.check_out_box.getTotal('GUEST'), shipping_rate[1]);
             }
             
             if (e.target && e.target.id == 'guest_checkout_submit_button') {
@@ -588,28 +629,49 @@ export default class {
             }
 
             if (e.target && e.target.id == 'guest_checkout_shipping_infomation_container_change_btn') {
+                document.getElementById('guest_checkout_shipping_info_next_btn').setAttribute('value','on');
+                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').setAttribute('value','on');
+                document.getElementById('guest_checkout_shipping_method_container_change_btn').setAttribute('value','on');
+                
+                document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
+                document.getElementById('guest_shipping_method_container').style.display = "block"; /////////////////////////
+                document.getElementById('continue_to_payment_btn').style.display = "none";
+                
+                document.getElementById('guest_checkout_submit_button').setAttribute('disabled','true');
                 document.getElementById('guest_checkout_shipping_info').style.display = "flex";
                 document.getElementById('guest_checkout_shipping_infomation_container_cover').style.display = "none";
-                // document.getElementById('guest_checkout_shipping_infomation_container_cover').style.height = "auto";
-                // document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
-                // document.getElementById('guest_shipping_method_container').style.display = "block";
+               
                 document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "none";
+                document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "none";
+                document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "none";
+
+                if (document.getElementById('continue_to_place_order_btn').getAttribute('value') == 'on') {
+                    document.getElementById('guest_checkout_billing_info_form_cover').style.display = "block";
+                    document.getElementById('guest_checkout_billing_info_form').style.display = "none";                    
+                }
+                
                 
                 document.getElementById('input_recipient_first_name').focus();
-                window.scrollTo({
-                    top: 0,
-                    left: 0,
-                    behavior: 'smooth'});
+               
             }
 
             if (e.target && e.target.id == 'guest_checkout_shipping_method_container_change_btn') {
                 document.getElementById('guest_shipping_method_container').style.display = "block";
+                document.getElementById('guest_checkout_submit_button').setAttribute('disabled','true');
+                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').setAttribute('value','off');
+                document.getElementById('guest_checkout_shipping_method_container_change_btn').setAttribute('value','on');
+                document.getElementById('continue_to_payment_btn').setAttribute('value','on');
                 document.getElementById('guest_checkout_shipping_method_container_cover').style.display = "none";
                 // document.getElementById('guest_checkout_shipping_method_container_cover').style.height = "auto";
                 document.getElementById('guest_checkout_billing_info_form_cover').style.display = "block";
                 document.getElementById('guest_checkout_billing_info_form').style.display = "none";
                 // document.getElementById('guest_checkout_shipping_method_container_cover_contents').innerText = "test shipping rate"
+                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "none";
                 document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "none";
+                document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "none";
+                if (document.getElementById('continue_to_place_order_btn').getAttribute('value') == 'on') {
+                    document.getElementById('guest_checkout_billing_info_form').style.display = "none";                    
+                }
 
                 document.getElementById('guest_shipping_method_container').focus();
                 
@@ -618,6 +680,8 @@ export default class {
             if (e.target && e.target.id == 'guest_checkout_billing_infomation_container_change_btn') {
                 document.getElementById('guest_checkout_billing_info_form_cover').style.display = "none";
                 // document.getElementById('guest_checkout_billing_info_form_cover').style.height = "auto";
+                document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "none";
+                document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "none";
                 document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "none";
                 // document.getElementById('guest_checkout_billing_info_form_cover_contents').innerText = 
                 // '**********' + card_info.last4 + ' ' + card_info.brand + ' ' + card_info.exp;
@@ -735,10 +799,13 @@ export default class {
             } else {
                 setUserCheckoutShippingInfo();
 
-                
-
             }
-            document.getElementById('user_checkout_shipping_info_next_btn').focus();
+            // document.getElementById('user_checkout_shipping_info_title_box').focus();
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'});
+
         });
         
         console.log(parseInt(user_total_amount))
@@ -769,6 +836,10 @@ export default class {
         console.log(this.check_out_box);
         console.log(check_out_cart)
         console.log(checked_order_list)
+        document.getElementById('guest_checkout_shipping_infomation_container_change_btn').setAttribute('value', 'on');
+        document.getElementById('guest_checkout_shipping_method_container_change_btn').setAttribute('value', 'on');
+        document.getElementById('guest_checkout_billing_infomation_container_change_btn').setAttribute('value', 'on');
+        document.getElementById('continue_to_place_order_btn').setAttribute('value', 'on');
 
         // let key = {};
         const send_data = {u_id : 'getkey'};
@@ -943,14 +1014,26 @@ export default class {
                         }
                         
                         console.log(result.token)
+
+                        document.getElementById('continue_to_place_order_btn').setAttribute('value','off');
                         document.getElementById('guest_checkout_billing_info_form_cover').style.display = "block";
-                        document.getElementById('guest_checkout_billing_info_form_cover').style.height = "auto";
-                        document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "block";
+                        document.getElementById('guest_checkout_billing_info_form_cover').style.height = "auto";                        
+
+                        document.getElementById('guest_checkout_shipping_infomation_container_change_btn').style.display = "flex";
+                        document.getElementById('guest_checkout_shipping_method_container_change_btn').style.display = "flex";
+                        document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "flex";
+
                         document.getElementById('guest_checkout_billing_info_form_cover_contents').innerText = 
                         '**********' + card_info.last4 + ' ' + card_info.brand + ' ' + card_info.exp;
                         
                         document.getElementById('guest_checkout_billing_info_form').style.display = "none";
-                        document.getElementById('guest_checkout_submit_button').disabled = false;
+                        if (document.getElementById('guest_checkout_shipping_info_next_btn').getAttribute('value') == 'off'){
+                            document.getElementById('guest_checkout_submit_button').disabled = false;                            
+                        } 
+                        if (document.getElementById('guest_checkout_shipping_infomation_container_change_btn').getAttribute('value') == 'on' ||
+                            document.getElementById('guest_checkout_shipping_method_container_change_btn').getAttribute('value') == 'on' ) {
+                            document.getElementById('guest_checkout_billing_infomation_container_change_btn').style.display = "none";
+                        }
                         document.getElementById('guest_checkout_submit_button').focus();
                         
                         cloverTokenHandler(result.token, order_items, shipping_rate);

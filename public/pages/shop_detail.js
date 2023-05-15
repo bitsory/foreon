@@ -448,6 +448,7 @@ document.addEventListener('click', (e) => {
 
                 const orderConfirm = new OrderConfirm(user_id, check_out_cart);
                 document.getElementById("online_main").innerHTML = CheckoutOrderForm.getGuestOrderConfirm();
+                document.getElementById('input_recipient_first_name').focus();
                 orderConfirm.makeGuestCheckOutForm(check_out_cart, checked_order_list); 
                 })
         } else {  ///////////////////// user check out proceed
