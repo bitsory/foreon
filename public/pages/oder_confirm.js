@@ -1609,137 +1609,8 @@ function setUserCheckoutShippingInfo(user_checkout_shipping_info) {
         user_checkout_shipping_info_next_btn.style.display = 'none';
         document.getElementById('user_checkout_shipping_info_detail_box_cover').innerHTML = AIF.setUpShippingAddressForm();
     }
-    // user_checkout_shipping_info_select_btn.innerText = "Select This Shipping Address";
+   
 }
-
-
-/*
-function Spinner(){
-	Spinner.element=document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-	let c=document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	Spinner.element.setAttribute('width','50');
-	Spinner.element.setAttribute('height','50');	
-	c.setAttribute('viewBox','0 0 50 50');
-	c.setAttribute('cx','25');
-	c.setAttribute('cy','25');
-	c.setAttribute('r','21');
-	c.setAttribute('stroke-width','8');
-	c.setAttribute('stroke','#983131');
-    // c.setAttribute('stroke','#2196f3');
-	c.setAttribute('fill','transparent');
-	Spinner.element.appendChild(c);
-	Spinner.element.style.cssText='position:absolute;left:calc(50% - 25px);top:calc(50% - 25px)';
-	Spinner.element.style.zIndex = 999999;
-	document.body.appendChild(Spinner.element);
-}
-Spinner.id=null;
-Spinner.element=null;
-Spinner.show=function(){
-	if(Spinner.element == null) Spinner();
- 
-	const c=264,m=15;
-	Spinner.element.style.display='block';
-	move1();
-	function move1(){
-		let i=0,o=0;
-		move();
-		function move(){
-			if(i==c)move2();
-			else{
-				i+=4;o+=8;
-				Spinner.element.setAttribute('stroke-dasharray',i+' '+(c-i));
-				Spinner.element.setAttribute('stroke-dashoffset',o)
-				Spinner.id=setTimeout(move,m)
-			}
-		}
-	}
-	function move2(){
-		let i=c,o=c*2;
-		move();
-		function move(){
-			if(i==0)move1();
-			else{
-				i-=4;o+=4;
-				Spinner.element.setAttribute('stroke-dasharray',i+' '+(c-i));
-				Spinner.element.setAttribute('stroke-dashoffset',o)
-				Spinner.id=setTimeout(move,m)
-			}
-		}
-	}
-};
-Spinner.hide=function(){
-	Spinner.element.style.display='none';
-	if(Spinner.id){
-		clearTimeout(Spinner.id);
-		Spinner.id=null
-	}
-	Spinner.element.setAttribute('stroke-dasharray','0 264');
-	Spinner.element.setAttribute('stroke-dashoffset','0')
-};
-*/
-
-
-
-
- 
-
-/*
-document.addEventListener('click',function(e){  
-
-    console.log(e.target);
-
-    if(e.target && e.target.className == 'user_checkout_submit_button') {
-        
-        console.log("user_checkout_submit_button hit");
-        
-        const ready_for_place_order_item = document.querySelectorAll('.check_out_item_container');
-        const selected_items_number_list = [];
-        ready_for_place_order_item.forEach((el) => {
-                        console.log(el)
-                        
-                            selected_items_number_list.push(el.getAttribute('itemid'));
-                        
-                    });
-                    console.log(selected_items_number_list);
-
-
-
-        // let test = ready_for_place_order_cart;
-        // console.log('ready_for_place_order_cart');
-        // console.log(test);
-        
-        
-        let user_total_amount = 1900;
-        const data = {
-            amount : user_total_amount
-        
-        };
-
-        
-
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'               
-                },
-            body: JSON.stringify(data)
-        };
-        console.log(options);
-
-        fetch('/user_checkout_submit', options)
-        .then(response => response.json())
-        .then(response => console.log(response))
-        .catch(err => console.error(err)); 
-        
-        
-
-
-    }
-});
-*/
-
-
-
 
 
 
@@ -1748,6 +1619,7 @@ document.addEventListener('click',function(e){
 //////////////////////////////////  API TEST/////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 document.addEventListener('click',function(e){  
     
     
@@ -1965,7 +1837,7 @@ document.addEventListener('click',function(e){
 
         // console.log(insert_cart_value)
 
-    /*
+    
 
           let order_items_number = data.forEach(element => {
             console.log(element.description)                            
@@ -1996,7 +1868,7 @@ document.addEventListener('click',function(e){
 
         sessionStorage.setItem("cart", JSON.stringify(guest_cart)); // set left over cart
 
-        */
+        
         
         
 
@@ -2093,3 +1965,4 @@ document.addEventListener('click',function(e){
 
    
 });
+*/

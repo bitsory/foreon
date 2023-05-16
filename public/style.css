@@ -4023,6 +4023,10 @@ ul.tabs li.current{
     .shipping_info_add_btn, .billing_info_add_btn {
         font-size: 1.3rem;
     }
+
+    .contact_sendmail {
+        margin-left: 0.5rem;
+    }
     
 
 

@@ -113,7 +113,7 @@ export default class {
                             </div><br><br>
                                 <div class="form-row">
                                     <div class="col-md-12">
-                                        <div class="form-group">
+                                        <div class="form-group contact_sendmail">
                                             <div class="contact_lb">
                                             <label class="contact_box_lb">Message *<br></label>
                                             </div>

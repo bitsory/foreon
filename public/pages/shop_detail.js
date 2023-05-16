@@ -138,7 +138,7 @@ document.addEventListener('click', (e) => {
                 history.pushState(null, null, `/shop/checkout/GUEST/item_num=${item_number}`); // url change
                 let guest_buy_now_checkout_cart = [];
 
-                n_cart.c_item_image = "http://localhost:8080"+buy_now_checkout_cart[0].image;
+                n_cart.c_item_image = "https://gocafefore.com"+buy_now_checkout_cart[0].image;
                 n_cart.c_item_name = buy_now_checkout_cart[0].name;
                 n_cart.c_item_no = buy_now_checkout_cart[0].prodnum;
                 n_cart.c_item_price = buy_now_checkout_cart[0].price_sell;
@@ -257,7 +257,7 @@ document.addEventListener('click', (e) => {
                     n_cart.c_item_no = item_number;
                     n_cart.c_item_name = added_cart[0].name;
                     n_cart.c_item_price = added_cart[0].price_sell;
-                    n_cart.c_item_image = "http://localhost:8080"+added_cart[0].image;
+                    n_cart.c_item_image = "https://gocafefore.com"+added_cart[0].image;
                     n_cart.c_item_quantity = order_quantity;
                     n_cart.c_item_code = added_cart[0].item_code;
 
@@ -385,7 +385,7 @@ document.addEventListener('click', (e) => {
                     // document.querySelector(".shop_test").innerHTML = result.name;
                     // document.querySelector('.cart_time_remaining').innerText = cart_time_remaining;
                 } else { 
-                    this.location.href = "http://localhost:8080/shop/order"
+                    this.location.href = "https://gocafefore.com/shop/order"
                 }
 
                 

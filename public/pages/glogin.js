@@ -1,6 +1,4 @@
 
-console.log("google login initialize")
-
 getKey();
 
 function getKey () {    
@@ -14,7 +12,7 @@ function getKey () {
             },
         body: JSON.stringify(send_data)
     };
-    console.log(data);
+    
 
     fetch(`/get_glogin_key`, data)
     .then((res) => res.json())

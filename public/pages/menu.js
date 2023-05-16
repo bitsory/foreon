@@ -273,7 +273,7 @@ export default class {
         
         <div class="menu_back">
 
-            <img class="menu_back1" src="http://localhost:8080/images/menu_smoothie_under_final.gif" style="position: relative; left: 0%; top: 1rem;">
+            <img class="menu_back1" src="/images/menu_smoothie_under_final.gif" style="position: relative; left: 0%; top: 1rem;">
             <img class="menu_back2" src="/images/menu_3kbops_BOP.gif" style="position: relative; left:0%; top: 1rem;">
         </div>
             <div class="our_menu">OUR MENU</div>

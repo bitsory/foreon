@@ -68,7 +68,7 @@ toggleBtn.addEventListener('click', (e) => {
 console.log("index.js");
 
 navbar_logo.addEventListener('click', () => {  
-    window.location.href = "http://localhost:8080";
+    window.location.href = "https://gocafefore.com";
 });
 
 foot_logo.addEventListener('click', () => {
@@ -173,13 +173,13 @@ document.addEventListener('click', function(e){
 
     if (e.target && e.target.className == 'user_logout_btn') { 
         console.log("user log out");
-        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT; domain=localhost;path=/;';
+        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT; domain=gocafefore.com;path=/;';
         console.log("user log out user log out user log out user log out user log out ");
         ItemCounter.item_counter('GUEST');
     }
 
     if (e.target && e.target == view_cart_btn) {    
-        if (document.location.href == 'http://localhost:8080/') {
+        if (document.location.href == 'https://gocafefore.com/') {
             console.log("if (document.location.href == 'http://localhost:8080/') {")
             // cart_modal_container.style.top = '0 rem';
             if (matchMedia("screen and (max-width: 600px)").matches) {
@@ -230,14 +230,7 @@ document.addEventListener('click', function(e){
         cart_modal_container.style.transform = 'unset';
     }
 
-    // if (e.target && e.target.id == 'admin_btn') {        
-    //     // view_cart();
-    //     const admin_page = new Admin();
-    //     document.getElementById('lorem').innerHTML = admin_page.getHtml();
-    //     console.log("admin page")
-    // } 
-    
-
+   
 });
 
 
@@ -349,16 +342,14 @@ const router = async () => {
             if(main_background) main_background.style.display = "none";
         }
 
-        if(match.route.path == "/menu") {
-            console.log("menu selector");
+        if(match.route.path == "/menu") {            
             page.menuSelector();
             page.menuEventListener();
         
         }
 
         if(match.route.path == "/shop") {
-            // shop_page = page;
-            // shop_page_flag = true;
+           
             let shop_data = { name : "shop/post"};        
             const data = {
                 method: 'POST',
@@ -369,7 +360,7 @@ const router = async () => {
             fetch('/shop', data)
             .then((res) => res.json())
             .then(result => {
-                console.log(result)                   
+                          
                 for (var i = 0 ; i < result.length ; i++) {
                     page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell);                        
                 }            
@@ -378,15 +369,12 @@ const router = async () => {
 
         if (menu.classList.length == 2) { // menu button toggle back
 
-            console.log("length 2");
-            console.log("toggle on");
-            
             main.classList.toggle('on');
             menu.classList.toggle('on');
             icons.classList.toggle('on');
             footer.classList.toggle('on');
             toggleBtn.classList.toggle('on');
-            console.log(`menu.classList.length: ${menu.classList.length}`);
+          
         }
 
     }  
@@ -442,12 +430,11 @@ document.addEventListener("DOMContentLoaded", () => { // run first
             e.preventDefault();
             history.pushState(null, null, e.target.href); // change url address
             // history.pushState(null, null, "http://localhost:8080/about");
-            router();
-            console.log("data - link router after");
+            router();           
            
         }
     });
-    console.log("data - link router router");
+   
     router();
 
 
@@ -923,7 +910,7 @@ function setCheckoutIndivItemPage(param) {
                         
                     let guest_buy_now_checkout_cart = [{
                         c_id : "GUEST",
-                        c_item_image : "http://localhost:8080"+buy_now_checkout_cart[0].image,
+                        c_item_image : "https://gocafefore.com"+buy_now_checkout_cart[0].image,
                         c_item_name : buy_now_checkout_cart[0].name,
                         c_item_no : buy_now_checkout_cart[0].prodnum,
                         c_item_price : buy_now_checkout_cart[0].price_sell,
@@ -1121,7 +1108,7 @@ function setCheckoutIndivItemPage(param) {
                         
                         let guest_buy_now_checkout_cart = [{
                             c_id : "GUEST",
-                            c_item_image : "http://localhost:8080"+buy_now_checkout_cart[0].image,
+                            c_item_image : "https://gocafefore.com"+buy_now_checkout_cart[0].image,
                             c_item_name : buy_now_checkout_cart[0].name,
                             c_item_no : buy_now_checkout_cart[0].prodnum,
                             c_item_price : buy_now_checkout_cart[0].price_sell,
