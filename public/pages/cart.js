@@ -311,7 +311,7 @@ export default class Cart {
         .then(result => {              
             
             if (result.id == 'GUEST') {
-                document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT; domain=localhost;path=/;';
+                document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
                 this.c_id = 'GUEST'; 
                 this.c_name = 'GUEST';
                 ItemCounter.item_counter('GUEST');

@@ -396,7 +396,7 @@ function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_
             id : request.session.loginData.id
         }, {maxAge: 360000000, credentials: true, authorized : true, signed: true});
     } else if (remember_id == "signup") {
-        re_path = {url : "http://localhost:8080"};
+        re_path = {url : "https://gocafefore.com"};
         response.cookie(
             'saveid',{            
             id : ''
@@ -517,7 +517,7 @@ app.post('/g_sign_in', function (req,res) {
                             
                         } else {                                         
                                                 
-                            updateLastLog(con, result[0].id, result[0].name, req, res, date, redirect_path, result[0].clv_id);
+                            updateLastLog(con, result[0].id, result[0].first_name, req, res, date, redirect_path, result[0].clv_id);
                         }
                     })
                 })

@@ -94,7 +94,7 @@ window.addEventListener('click', (e) => {
 })
 
 function modalClose(param) {
-    document.body.style.overflow = 'auto';
+    // document.body.style.overflow = 'auto';
     document.getElementById(param).remove();
     
 }
@@ -173,7 +173,7 @@ document.addEventListener('click', function(e){
 
     if (e.target && e.target.className == 'user_logout_btn') { 
         console.log("user log out");
-        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT; domain=gocafefore.com;path=/;';
+        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
         console.log("user log out user log out user log out user log out user log out ");
         ItemCounter.item_counter('GUEST');
     }

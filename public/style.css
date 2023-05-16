@@ -30,7 +30,10 @@ li {
 }
 
 
-
+input[type="text"],input[type="password"],input[type="email"],input[type="search"],input[type="image"],input[type="tel"],input[type="submit"],textarea {
+    -webkit-appearance: none; 
+    -webkit-border-radius: 0; 
+}
 
 
 /* .hidden {height:100%; min-height:100%; overflow:hidden !important; touch-action:none;} */
@@ -1016,6 +1019,10 @@ nav {
     width: 60%;
     margin: 3rem;
     
+}
+
+.contact_sendmail {
+    margin-left: 0.5rem;
 }
 
 #senderEmail,
@@ -4024,9 +4031,7 @@ ul.tabs li.current{
         font-size: 1.3rem;
     }
 
-    .contact_sendmail {
-        margin-left: 0.5rem;
-    }
+    
     
 
 

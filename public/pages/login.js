@@ -250,7 +250,7 @@ export default class {
     modalClose() {
         document.getElementById('modal_body').remove();
         this.modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
+        // document.body.style.overflow = 'auto';
         
     }
 
