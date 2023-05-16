@@ -1279,7 +1279,7 @@ document.addEventListener('click',function(e){
 
                 console.log(e.target.parentElement.getAttribute('head_orderid'));
                 const user_id = u_id ? u_id : 'GUEST';
-                const page_num = parseInt(document.querySelector(`.purchase_page.page_el.active`).getAttribute('page_data_num'));
+                const page_num = document.querySelector(`.purchase_page`)? parseInt(document.querySelector(`.purchase_page.page_el.active`).getAttribute('page_data_num')) : 0;
                 const send_data = {
                     user_id : user_id,
                     order_number : e.target.parentElement.getAttribute('head_orderid'),
@@ -1307,8 +1307,8 @@ document.addEventListener('click',function(e){
 
                     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
                     setPurchaseHistory(result.result);
-                    renderPagination(result.total_purchase, page_num ? page_num : 1)
-                    // viewPurchaseHistory(send_data);
+                    page_num != 0 ? renderPagination(result.total_purchase, page_num ? page_num : 1) : false;
+                  
 
                 });
             }
@@ -1340,7 +1340,7 @@ document.addEventListener('click',function(e){
                 // const cart_number = e.target.getAttribute('cart-itemid');
                 // const user_id = u_id;
                 const user_id = u_id ? u_id : 'GUEST';
-                const page_num = parseInt(document.querySelector(`.purchase_page.page_el.active`).getAttribute('page_data_num'));
+                const page_num = document.querySelector(`.purchase_page`)? parseInt(document.querySelector(`.purchase_page.page_el.active`).getAttribute('page_data_num')) : 0;
                 console.log(page_num)
                 // const order_number = ;
                 const send_data = {
@@ -1370,7 +1370,7 @@ document.addEventListener('click',function(e){
                     }
                     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
                     setPurchaseHistory(result.result);
-                    renderPagination(result.total_purchase, page_num ? page_num : 1)
+                    page_num != 0 ? renderPagination(result.total_purchase, page_num ? page_num : 1) : false;
                 
                 });
             }

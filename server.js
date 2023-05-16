@@ -2556,7 +2556,7 @@ function checkGuestPurchaseHistory(order_number, con, res) {
         if(err){                        
             res.send(err);                
         } else {            
-            res.send(result);      
+            res.send({result : result});      
         }
     });
     
@@ -4258,7 +4258,7 @@ app.post('/make_item_test', (req,res) => {
         autoManage: 'false',
         defaultTaxRates: 'true',
         isRevenue: 'true',
-        taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
+        taxRates: [{name: '0W36NQP309NSG', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
         id: '00001',
         name: 'UPS Shipping',
         sku: 'ea',
@@ -4269,7 +4269,7 @@ app.post('/make_item_test', (req,res) => {
     })
     };
 
-fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
+fetch('https://sandbox.dev.clover.com/v3/merchants/NMJJ2NYZTDPN1/items', options)
   .then(response => response.json())
   .then(response => console.log(response))
   .catch(err => console.error(err));

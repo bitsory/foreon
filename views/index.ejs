@@ -9,7 +9,7 @@
     <meta content="yes" name="apple-mobile-web-app-capable" />  
     <meta content="minimum-scale=1.0, width=device-width, maximum-scale=1, user-scalable=no" name="viewport" />
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1"> -->
-    <link rel="stylesheet" href="http://localhost:8080/style.css">
+    <link rel="stylesheet" href="style.css">
 	<title>Cafe FORE</title>    
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jost:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -20,7 +20,7 @@
     <script src="https://kit.fontawesome.com/ad06c7c185.js" crossorigin="anonymous"></script>
     <script src="https://cdn.polyfill.io/v3/polyfill.min.js"></script>
     <script src="https://checkout.sandbox.dev.clover.com/sdk.js"></script>   
-    <script type="text/javascript" src="http://localhost:8080/pages/jsencrypt.min.js"></script>    
+    <script type="text/javascript" src="../pages/jsencrypt.min.js"></script>    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
@@ -48,7 +48,7 @@
             <div id="navbar_w4" class="navbar_w4">
                 <a href="javascript:;" class="navbar_toggleBtn"></a>
                 <div id="navbar_logo" class="navbar_logo">
-                    <a href="http://localhost:8080" class="logo_btn"></a>
+                    <a href="https://gocafefore.com" class="logo_btn"></a>
                     <!-- <a href="./cafeFORE">Cafe FORE</a> -->
                 </div>
 
@@ -66,7 +66,7 @@
 
                         <div in="login" class="login">
                             <div id="login_btn" class="login_btn">
-                                <img src="http://localhost:8080/images/login.png" id="account_modal_pop_btn" class="account_modal_pop_btn" title="Sign In" width="40px">
+                                <img src="../images/login.png" id="account_modal_pop_btn" class="account_modal_pop_btn" title="Sign In" width="40px">
                                 <div id="account_modal_pop_btn_id" class="account_modal_pop_btn_id" title="Log In">GUEST</div>
                             </div>
                            
@@ -77,7 +77,7 @@
                         <% if (post != "GUEST") { %>
                         <div id="login" class="login">
                             <div id="user_info" class="user_info">
-                                <img src="http://localhost:8080/images/login.png" id="user_info_btn_icon" class="user_info_btn" title="member info" width="40px">
+                                <img src="../images/login.png" id="user_info_btn_icon" class="user_info_btn" title="member info" width="40px">
                                 <div id="user_info_btn_id" class="user_info_btn"><%= post %></div>
                             </div>
                             <div id="user_profile_container" class="user_profile_container">
@@ -98,7 +98,7 @@
             <div id="navbar_icons" class="navbar_icons">
                     <div id="item_count" class="item_count"></div>
                     <div id="go_cart_box" class="go_cart_box">
-                        <img src="http://localhost:8080/images/cart.png" id="view_cart_btn" class="view_cart_btn" title="view cart" width="38px">
+                        <img src="../images/cart.png" id="view_cart_btn" class="view_cart_btn" title="view cart" width="38px">
                         
                     </div>
                     <div id="cart_modal_container" class="cart_modal_container">
@@ -179,7 +179,7 @@
     <div id="gmap_script" class="gmap_script"></div>
     <div id="gmld_script" class="gmld_script"></div>
 	
-    <script type="module" src="http://localhost:8080/index.js"></script>
+    <script type="module" src="../index.js"></script>
     
     
 

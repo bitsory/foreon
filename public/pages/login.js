@@ -197,7 +197,7 @@ export default class {
                             track_my_order_form.track_my_order_number.focus();
                         } else {
                             this.lorem.innerHTML = PurchaseHistory.makePurchaseHistoryContainer();
-                            PurchaseHistory.setPurchaseHistory(result);
+                            PurchaseHistory.setPurchaseHistory(result.result);
                         }
                     })
                 }                
@@ -240,7 +240,7 @@ export default class {
         script.setAttribute('class', 'glogin'); 
         script.setAttribute('id', 'glogin'); 
         script.type = 'text/javascript';
-        script.src = "http://localhost:8080/pages/glogin.js";   
+        script.src = "../pages/glogin.js";   
         
         glogin_script.appendChild(script);
 
