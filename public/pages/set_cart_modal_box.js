@@ -913,6 +913,19 @@ export default class {
     setCartModalItems(param) {
         this.cart_modal_items = param;
     }
+
+    setCartModalGoShopBtn() {
+        const cart_modal = document.getElementById('cart_modal_items_slider_box');
+        cart_modal.innerHTML = `
+        <div id="cart_modal_go_shop_box" class="cart_modal_go_shop_box">
+            <div id="cart_modal_go_shop_title" class="cart_modal_go_shop_title"> 
+            You don't have any items in cart.<br>
+            Would you like to move to shop?
+            </div>
+            <a href="/shop" data-link-T><button id="cart_modal_go_shop_btn" class="cart_modal_go_shop_btn" >Go Online Shop</button></a>
+        </div>
+        `
+    }
 }
 
 // let g_total = 0;

@@ -523,7 +523,8 @@ function setCartModalPageDetail() {
                         cart_modal_page.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "cart_modal_items_container", "cart_modal_item");
                     });
                     cart_modal_page.initPage();
-                    setInvisibleModalCtlBtn()
+                    setInvisibleModalCtlBtn();
+                    order_list.length == 0 ? cart_modal_page.setCartModalGoShopBtn() : false;
                 } else {        
                     cart_modal_page_flag = true;        
                     cart_modal_page = new setCartBox("GUEST", "cart_modal_item", order_cart);
@@ -531,7 +532,8 @@ function setCartModalPageDetail() {
                     order_cart.forEach(element => {                    
                         cart_modal_page.setItemContainer(element.c_item_no, element.c_item_price, element.c_item_name, element.c_item_quantity, element.c_item_image, "cart_modal_items_container", "cart_modal_item");
                     });
-                    setInvisibleModalCtlBtn()
+                    setInvisibleModalCtlBtn();
+                    order_list.length == 0 ? cart_modal_page.setCartModalGoShopBtn() : false;
                 }
 
             });
@@ -566,7 +568,8 @@ function setCartModalPageDetail() {
                             cart_modal_page.setItemContainer(element.prodnum, element.price_sell, element.name, element.quantity, element.image, "cart_modal_items_container", "cart_modal_item");
                         });
                         cart_modal_page.initPage();
-                        setInvisibleModalCtlBtn()
+                        setInvisibleModalCtlBtn();
+                        order_list.length == 0 ? cart_modal_page.setCartModalGoShopBtn() : false;
                     } else {        
                         cart_modal_page_flag = true;        
                         cart_modal_page = new setCartBox(user_id, "cart_modal_item", order_list);
@@ -574,7 +577,8 @@ function setCartModalPageDetail() {
                         order_list.forEach(element => {                    
                             cart_modal_page.setItemContainer(element.prodnum, element.price_sell, element.name, element.quantity, element.image, "cart_modal_items_container", "cart_modal_item");
                         });
-                        setInvisibleModalCtlBtn()
+                        setInvisibleModalCtlBtn();
+                        order_list.length == 0 ? cart_modal_page.setCartModalGoShopBtn() : false;
                     }
 
                 }) 

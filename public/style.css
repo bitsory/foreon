@@ -1836,6 +1836,32 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
     border-bottom: 0.5px solid white;
 }
 
+.cart_modal_go_shop_box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.cart_modal_go_shop_title {
+    width: 80%;
+    color: white;
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.cart_modal_go_shop_btn {
+    margin-top: 1rem;
+    width: 12rem;
+    height: auto;
+    font-size: 1.3rem;
+    font-weight: 600;
+    background-color: rgba(0,0,0,0);
+    border: 1px solid white;
+    color: white;
+}
+
+
 
 .cart_modal_quantity_control_box, .cart_modal_item_name_box, .cart_modal_item_price_box {
     display: flex;
@@ -4146,6 +4172,11 @@ ul.tabs li.current{
         font-size: 1.3rem;
     }
 
+    .coffee_button, .smoothie_button, .kbop_button, .acai_button, .wellness_button {    
+        max-width: 100%;
+        max-height: 70%;
+    }
+    
     
     
 
@@ -4467,13 +4498,14 @@ ul.tabs li.current{
 
     .btn:hover, .cate_btn:hover, .cart_handle_btn:hover, .cart_modal_ctl_btn:hover, 
     .checkout_ctl_btn:hover, .guest_checkout_edit_btn:hover,
-    .shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, .shipping_info_make_default_btn:hover, .purchase_page_btn:hover, .item_link:hover {
+    .shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, 
+    .shipping_info_make_default_btn:hover, .purchase_page_btn:hover, .item_link:hover, .cart_modal_go_shop_btn :hover {
         cursor: pointer;
         transform: scale(1.1);
     }
 
         #guest_checkout_shipping_info_next_btn:hover, #user_continue_to_payment_btn:hover, #continue_to_payment_btn:hover, #continue_to_place_order_btn:hover, 
-    .user_checkout_shipping_info_next_btn:not(.disabled):hover, #user_checkout_billing_info_next_btn:hover, .user_checkout_select_option_btn:hover{
+    .user_checkout_shipping_info_next_btn:not(.disabled):hover, #user_checkout_billing_info_next_btn:hover, .user_checkout_select_option_btn:hover, .cart_modal_go_shop_btn :hover{
         background-color: var(--subcolor);
         color: black;
         cursor: pointer;
