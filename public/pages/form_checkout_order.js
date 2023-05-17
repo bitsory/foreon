@@ -536,26 +536,5 @@ export function getGuestOrderConfirm() {
 
     </div>
 
-    <div class="button-container-test">
-        <button class="submit_payment_test">Submit Payment Test</button>
-        <button class="get_charges_test">get_charges test</button>
-        <button class="submit_refund_test">Refund test</button>
-        <button class="submit_create_order_test">create order test</button>
-        <button class="submit_create_customer_test">create customer test</button><br>
-        <button class="submit_create_card_token_test">create card token test</button>
-        <button class="submit_create_get_customer_test">create get customer test</button>
-        <button class="submit_create_item_test">create item test</button>
-        <button class="submit_create_get_order_test">get_order_test</button>
-        <button class="submit_get_an_order_test">get_an_order_test</button>
-        <button class="pay_order_test">pay_order_test</button>
-        <button class="create_customer">create_customer</button>
-        <button class="get_single_customer">get_single_customer</button>
-        <button class="delete_card">delete_card</button>
-        <button class="save_card">save_card</button>
-        <button class="guest_test_submit">guest_test_submit</button>
-        <button class="check_guest_cart">check_guest_cart</button>
-        <button class="crypto_test">crypto_test</button>
-        <button class="make_item_test">make_item_test</button>
-    </div>
     `;
 }

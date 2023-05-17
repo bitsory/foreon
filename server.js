@@ -19,7 +19,7 @@ require('dotenv').config({ override: true });
 
 app.listen(process.env.PORT, function() {
     console.log('listening on 8080');
-    // console.log(session);
+    console.log(getDate);
     schedule.scheduleJob('0 0 */3 * * *', function(){
         console.log(new Date() + ' scheduler running!');
         const formData = {
@@ -662,7 +662,7 @@ app.post('/find_password', (req,res) => {
                         // send mail with defined transport object
                         let info = await transporter.sendMail({
                           from: `"cafe FORE" <${process.env.NODEMAILER_USER}>`,                       
-                          to: 'jonghk8111@gmail.com',
+                          to: u_id,
                           subject: 'cafe FORE Temporary password',
                           text: `cafe FORE Temporary password ${tmp_pass}` ,
                         //   html: `<b>${generatedAuthNumber}</b>`,
@@ -2850,6 +2850,7 @@ app.post('/user_checkout_submit', (req,res) => {
                             grandtotal : response.amount / 100
                             };
                             console.log(confirm_info);
+                            sendOrderConfirmMail(billing_email, default_shipping_info.recipient, order_number, date);  
                             setOrders(response, confirm_info, default_shipping_info, billing_email, billing_phone, billing_address.zip, order_items_count);    
                                                                 
                         } else res.send(response);                       
@@ -2972,6 +2973,9 @@ app.post('/guest_order_checkout', (req,res) => {
             .then(response => {
                 if (response.status == 'paid') {
                     
+                    
+
+
                     console.log("order paid")
                     console.log(response)
 
@@ -3072,7 +3076,8 @@ app.post('/guest_order_checkout', (req,res) => {
                                     grandtotal : response.amount / 100
                                 };
 
-                                console.log(confirm_info)                    
+                                console.log(confirm_info);
+                                sendOrderConfirmMail(billing_email, recipient, order_num, date);                  
                                 res.send(confirm_info);
                             }
                         });
@@ -3136,6 +3141,38 @@ app.post('/guest_order_checkout', (req,res) => {
 
     }
 });
+
+const sendOrderConfirmMail = async (recipient_email, recipient, order_num, date) => {
+    let transporter = nodemailer.createTransport({
+        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+            user: process.env.NODEMAILER_USER,
+            pass: process.env.NODEMAILER_PSWD
+        },
+    });
+  
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: `"cafe FORE" <${process.env.NODEMAILER_USER}>`,                       
+      to: recipient_email,
+      subject: 'cafe FORE online Receipt',
+      text: `
+      Thank you for your order, ${recipient}
+      
+      When your order ships, we'll send you a confirmation email with your tracking information.
+                         
+      
+      Your order number : ${order_num}
+      order date : ${date}
+      cafe FORE
+      
+      ` ,
+    //   html: `<b>${generatedAuthNumber}</b>`,
+    });
+}
 
 app.post('/get_shipping_rate', (req, res) => {
     
@@ -3615,7 +3652,7 @@ function getDate() {
 
 
 
-app.get('/test_ups_toke', (req, res) => {
+app.get('/get_ups_toke', (req, res) => {
     const formData = {
         grant_type: 'client_credentials'
       };

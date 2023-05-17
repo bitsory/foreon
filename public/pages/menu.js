@@ -7,16 +7,16 @@ export default class {
     }
 
     menuIconClickEvent (event) {
-        event.target.style.backgroundColor = 'cornflowerblue';
-        event.target.style.borderRadius = '20% 20% 20% 20%';
+        event.target.style.border = '5px solid var(--maincolor)';
+        event.target.style.borderRadius = '30%';
     }
 
     menuIconClickEvent2 () {
-        this.coffee_btn.style.backgroundColor = '';
-        this.smoothie_btn.style.backgroundColor = '';
-        this.kbop_btn.style.backgroundColor = '';
-        this.acai_btn.style.backgroundColor = '';
-        this.wellness_btn.style.backgroundColor = '';
+        this.coffee_btn.style.border = 'none';
+        this.smoothie_btn.style.border = 'none';
+        this.kbop_btn.style.border = 'none';
+        this.acai_btn.style.border = 'none';
+        this.wellness_btn.style.border = 'none';
     }
 
     menuSelector() {
@@ -273,10 +273,11 @@ export default class {
         
         <div class="menu_back">
 
-            <img class="menu_back1" src="/images/menu_smoothie_under_final.gif" style="position: relative; left: 0%; top: 1rem;">
+            <img class="menu_back1" src="http://localhost:8080/images/menu_smoothie_under_final.gif" style="position: relative; left: 0%; top: 1rem;">
             <img class="menu_back2" src="/images/menu_3kbops_BOP.gif" style="position: relative; left:0%; top: 1rem;">
         </div>
-            <div class="our_menu">OUR MENU</div>
+            <div id="menu_box" class="menu_box">
+                <div class="our_menu">OUR MENU</div>
                 <div class="menu_button">
                     <div class="sqs" id="sqs_coffee">
                         <button class="coffee_button mn_btn"></button>
@@ -302,7 +303,8 @@ export default class {
                     <a href="#" data-link-T style="color: white";>ORDER</a></button>
                     <button type="button" class="q_call q_btn">
                     <a href='tel:470-263-6495' style="color: white";>CALL</a></button>
-                </div>    
+                </div>  
+            </div>  
                 `           
                            
     }

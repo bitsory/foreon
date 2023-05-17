@@ -912,6 +912,12 @@ nav {
     font-size: 1.5rem;
 }
 
+.our_menu {
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 3rem;
+}
+
 
 
 .sqs {
@@ -923,6 +929,56 @@ nav {
     align-items: center;
 }
 
+
+.coffee_button {    
+
+    max-width: 60%;
+    width: 100%;
+    height: 100%;
+    background: url(images/ic_coffee.png) center/cover no-repeat;
+    background-size: contain;
+    
+    
+}
+
+.smoothie_button {    
+    max-width: 60%;
+    min-height: 60%;
+    width: 100%;
+    height: 100%;
+    background: url(images/ic_smoothie.png) center/cover no-repeat;
+    background-size: contain;
+}
+
+.kbop_button {    
+    max-width: 60%;
+    width: 100%;
+    height: 100%;
+    background: url(images/ic_kbop.png) center/cover no-repeat;
+    background-size: contain;
+    /* margin-bottom: 10px; */
+}
+
+.acai_button {    
+    max-width: 50%;
+    min-width: 65%;
+    width: 100%;
+    height: 100%;
+    background: url(images/ic_acai.png) center/cover no-repeat;
+    background-size: contain;
+}
+
+.wellness_button {    
+    
+    max-width: 35%;
+    min-width: 65%;
+    width: 100%;
+    height: 100%;
+    background: url(images/ic_wellness.png) center/cover no-repeat;
+    background-size: contain;
+}
+
+/* 
 .coffee_button {    
 
     max-width: 45%;
@@ -969,7 +1025,7 @@ nav {
     height: 80%;
     background: url(images/wellness.png) center/cover no-repeat;
     background-size: contain;
-}
+} */
 
 
 
@@ -3472,6 +3528,56 @@ ul.tabs li.current{
         border-radius: 0 10% 10% 10%;
         
     }
+
+
+    .coffee_button {    
+
+        max-width: 60%;
+        width: 60%;
+        height: 60%;
+        background: url(images/ic_coffee.png) center/cover no-repeat;
+        background-size: contain;
+        
+    }
+    
+    .smoothie_button {    
+        max-width: 60%;
+        min-height: 60%;
+        width: 60%;
+        height: 60%;
+        background: url(images/ic_smoothie.png) center/cover no-repeat;
+        background-size: contain;
+    }
+    
+    .kbop_button {    
+        max-width: 60%;
+        width: 65%;
+        height: 65%;
+        background: url(images/ic_kbop.png) center/cover no-repeat;
+        background-size: contain;
+        /* margin-bottom: 10px; */
+    }
+    
+    .acai_button {    
+        max-width: 50%;
+        min-width: 65%;
+        width: 60%;
+        height: 60%;
+        background: url(images/ic_acai.png) center/cover no-repeat;
+        background-size: contain;
+    }
+    
+    .wellness_button {    
+        
+        max-width: 35%;
+        min-width: 70%;
+        width: 70%;
+        height: 70%;
+        background: url(images/ic_wellness.png) center/cover no-repeat;
+        background-size: contain;
+    }
+
+/*
     .coffee_button {    
 
         max-width: 45%;
@@ -3518,6 +3624,9 @@ ul.tabs li.current{
         background: url(images/wellness.png) center/cover no-repeat;
         background-size: contain;
     }
+
+*/
+
     .footer {
         display: flex;
         background-color: hsl(32deg 87% 97%);
