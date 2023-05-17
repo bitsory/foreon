@@ -233,6 +233,7 @@ document.addEventListener('click', function(e) {
             const item_name = result.name;
             const item_price = result.price_sell;
             const item_content = result.content;
+            const item_instock = result.instock;
 
             if (shop_detail_page_flag) {
                 document.querySelector(".online_main").innerHTML = 
@@ -242,7 +243,12 @@ document.addEventListener('click', function(e) {
                 shop_detail_page_flag = true;
                 document.querySelector(".online_main").innerHTML = 
                 shop_detail_page.getHtml(item_image, item_num, item_name, item_price, item_content);
-            }            
+            }    
+            
+            if (item_instock == 'n') {
+                document.getElementById('buy_now_btn').setAttribute('disabled','true');
+                document.getElementById('buy_now_btn').innerText = 'Sold Out';
+            }
             
         });
     }

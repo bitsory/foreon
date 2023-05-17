@@ -9,14 +9,20 @@ export default class {
     menuIconClickEvent (event) {
         event.target.style.border = '5px solid var(--maincolor)';
         event.target.style.borderRadius = '30%';
+        event.target.style.backgroundColor = 'var(--subcolor)';
     }
 
     menuIconClickEvent2 () {
         this.coffee_btn.style.border = 'none';
+        this.coffee_btn.style.backgroundColor = 'rgba(0,0,0,0)';
         this.smoothie_btn.style.border = 'none';
+        this.smoothie_btn.style.backgroundColor = 'rgba(0,0,0,0)';
         this.kbop_btn.style.border = 'none';
+        this.kbop_btn.style.backgroundColor = 'rgba(0,0,0,0)';
         this.acai_btn.style.border = 'none';
+        this.acai_btn.style.backgroundColor = 'rgba(0,0,0,0)';
         this.wellness_btn.style.border = 'none';
+        this.wellness_btn.style.backgroundColor = 'rgba(0,0,0,0)';
     }
 
     menuSelector() {
@@ -273,7 +279,7 @@ export default class {
         
         <div class="menu_back">
 
-            <img class="menu_back1" src="http://localhost:8080/images/menu_smoothie_under_final.gif" style="position: relative; left: 0%; top: 1rem;">
+            <img class="menu_back1" src="/images/menu_smoothie_under_final.gif" style="position: relative; left: 0%; top: 1rem;">
             <img class="menu_back2" src="/images/menu_3kbops_BOP.gif" style="position: relative; left:0%; top: 1rem;">
         </div>
             <div id="menu_box" class="menu_box">

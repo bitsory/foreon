@@ -832,7 +832,7 @@ nav {
 
 .menu_button {
     width: 100%;
-    
+    max-width: 80vw;    
     background-size: contain;
     display: flex;
     justify-content: space-between;
@@ -2469,7 +2469,7 @@ i.fa-solid.fa-angles-up {
     display: none;
     /* padding-left: 1rem; */
 }
-
+/* 
 .mn_btn {
     animation:scaleBounce .7s alternate infinite;
     
@@ -2496,6 +2496,12 @@ i.fa-solid.fa-angles-up {
 @keyframes scaleBounce{
 	from {transform:scale(0.95)}
 	to {transform:scale(1.15)}
+} */
+
+.menu_box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .q_btn {
