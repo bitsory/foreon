@@ -1,7 +1,6 @@
 export default class {
     constructor() {
-        document.title = "Cafe FORE";
-        console.log("contact page");
+        document.title = "Cafe FORE";        
     }
 
     gmap() {
@@ -10,7 +9,6 @@ export default class {
             gmap_script.removeChild(gmap_script.firstChild);
         }
 
-        console.log("gmap loaded");
         var script = document.createElement('script');
         script.setAttribute('class', 'gmp'); 
         script.type = 'text/javascript';
@@ -19,42 +17,60 @@ export default class {
         
     }
 
-    gmLoad() {
+    gmLoad(gmapkey) {
         const gmld_script = document.getElementById('gmld_script');
 
         while (gmld_script.hasChildNodes()) {
             gmld_script.removeChild(gmld_script.firstChild);
         }
     
-
-        console.log("gmLoad loaded");
         var script = document.createElement('script');
         script.setAttribute('class', 'gmp'); 
         script.type = 'text/javascript';
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAmfFYREUjt0w1Tzuz-WAd3Y-dNW19j7BI&callback=myMap&';
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${gmapkey}&callback=myMap&'`;
         gmld_script.appendChild(script);
-        // if (gmap_flag == false) {
-        //     document.body.appendChild(script);        
-        //     gmap_flag = true;
-        // }
+       
         
     }
 
     sendmail() {
         let script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = '#';
+        script.src = 'pages/sendmail.js';
         document.body.appendChild(script);
-        console.log("contact test");
-        
+      
     }
 
-    async getHtml() {  
-        this.gmap();
-        this.gmLoad();
-        this.sendmail();
-        
+    getContactKey() {
+       
+        const send_data = {u_id : 'getkey'};
 
+        const data = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'            
+                },
+            body: JSON.stringify(send_data)
+        };
+        console.log(data);
+
+        fetch(`/get_contact_key`, data)
+        .then((res) => res.json())
+        .then(result => {
+            const key = result;
+            console.log(key);
+            // resolve(key);
+            this.gmap();
+            this.gmap();
+            this.gmLoad(key.gmap_key);
+            this.sendmail();
+            document.getElementById('emailForm').action=`https://script.google.com/macros/s/${key.sendmail_key}/exec`
+        });
+     
+    }
+
+    async getHtml() {      
+           
         return `
             <div id="online_title" class="online_title">
                 <a href="/shop" id="online_title_label" class="online_title_label" data-link-T>Cafe FORE Online Shop</a>
@@ -79,7 +95,7 @@ export default class {
             </div>
             <section id="contact">
                 <div class="contact_us">Contact us<br><br>
-                    <div class="contact_adr">cafefore4400@gmail.com<br>
+                    <div class="contact_adr">cafefore@gocafefore.com<br>
                         (470)263-6495
                     </div>
                 </div>
@@ -87,7 +103,7 @@ export default class {
 
                 <div class='contact_email_form'>
                     <form id="emailForm" class="gform" method="POST" data-email="cafefore4400@gmail.com" 
-                    action="#"
+                    
                     onsubmit="return handleFormSubmit(event)">
                         <div class="form-row">
                             <div class="contact_name_email">
@@ -102,7 +118,7 @@ export default class {
                                 </div>
                                 <div class="form-row-nm-em">
                                     <div class="col-md-12">
-                                        <div class="form-group contact_sendmail">
+                                        <div class="form-group">
                                             <div class="contact_lb">
                                             <label class="contact_box_lb">Email *<br></label>
                                             </div>
@@ -139,14 +155,7 @@ export default class {
                 
                 <div id="googleMap"></div>
             </section>
-            
-            
-            
-        `
+        `    
     }
-   
     
 }
-
-// let gmap_flag = false;
-

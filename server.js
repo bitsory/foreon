@@ -1,5 +1,4 @@
 const express = require('express');
-const app = express();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -8,10 +7,11 @@ const CryptoJS = require("crypto-js");
 const db = require('./public/service/db.js');
 const schedule = require('node-schedule');
 const nodemailer = require('nodemailer');
-
+const uuid4 = require('uuid');
+const AWS = require('aws-sdk');
 require('dotenv').config({ override: true });
 
-
+const app = express();
 
 
 
@@ -34,7 +34,7 @@ app.listen(process.env.PORT, function() {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body : new URLSearchParams(formData).toString()
-        // body : 'grant_type=authorization_code&code=Wjg1RjZNSFotVTJGc2RHVmtYMSt2UnJhalVzVDBoTWRROEQ2dTdrdThGNXB6aTExcEpaeXBVenlmRTRRYURCUTJ5QmdaNFVzVU5WOCttRm82YlhkN0pZcW9zS3ZDNVE9PQ=='
+        
         }
         fetch(`https://wwwcie.ups.com/security/v1/oauth/token?client_id=${process.env.UPS_MID}&redirect_uri=https://www.thecafefore.com`, options)
         // fetch('https://wwwcie.ups.com/api/security/v1/oauth/token', options)
@@ -75,7 +75,7 @@ app.use(session({
 
 app.use(cookieParser("secret"));
 
-const uuid4 = require('uuid');
+
 
   
 app.get('/',(req,res) => { 
@@ -128,6 +128,17 @@ app.post('/get_glogin_key', (req,res) => {
         res.send(key);
     }
 })
+
+app.post('/get_contact_key', (req,res) => { 
+    if (req.body.u_id == 'getkey') {
+        const mail_key = process.env.SENDMAILKEY;       
+        const map_key = process.env.GMAPKEY;
+        const key = {sendmail_key : mail_key, gmap_key : map_key}        
+        res.send(key);
+    }
+})
+
+
 
 
 
@@ -2850,7 +2861,8 @@ app.post('/user_checkout_submit', (req,res) => {
                             grandtotal : response.amount / 100
                             };
                             console.log(confirm_info);
-                            sendOrderConfirmMail(billing_email, default_shipping_info.recipient, order_number, date);  
+                            sendMailSES(billing_email, default_shipping_info.recipient, order_number, date);
+                            // sendOrderConfirmMail(billing_email, default_shipping_info.recipient, order_number, date);  
                             setOrders(response, confirm_info, default_shipping_info, billing_email, billing_phone, billing_address.zip, order_items_count);    
                                                                 
                         } else res.send(response);                       
@@ -3077,7 +3089,8 @@ app.post('/guest_order_checkout', (req,res) => {
                                 };
 
                                 console.log(confirm_info);
-                                sendOrderConfirmMail(billing_email, recipient, order_num, date);                  
+                                sendMailSES(billing_email, recipient, order_num, date);
+                                // sendOrderConfirmMail(billing_email, recipient, order_num, date);                  
                                 res.send(confirm_info);
                             }
                         });
@@ -3141,6 +3154,72 @@ app.post('/guest_order_checkout', (req,res) => {
 
     }
 });
+
+
+function sendMailSES(toAddress, recipient, order_num, date) {
+    AWS.config.update({
+        credentials: {
+        "accessKeyId": process.env.AWS_ACCESS_KEY_ID, 
+        "secretAccessKey": process.env.AWS_SECRET_ACCESS_KEY,
+        },
+        "region": process.env.AWS_REGION
+    });
+
+    // Create sendEmail params 
+    var params = {
+    Destination: { /* required */
+        CcAddresses: [
+            toAddress,
+        /* more items */
+        ],
+        ToAddresses: [
+            toAddress,
+        /* more items */
+        ]
+    },
+    Message: { /* required */
+        Body: { /* required */
+        //   Html: {
+        //    Charset: "UTF-8",
+        //    Data: "HTML_FORMAT_BODY"
+        //   },
+        Text: {
+        Charset: "UTF-8",
+        Data: `
+            Thank you for your order, ${recipient}
+        
+            When your order ships, we'll send you a confirmation email with your tracking information.                                
+            
+            Your order number : ${order_num}
+            order date : ${date}
+            cafe FORE
+            `
+        }
+        },
+        Subject: {
+        Charset: 'UTF-8',
+        Data: 'cafe FORE online Receipt'
+        }
+        },
+    Source: 'cafefore@gocafefore.com', /* required */
+    ReplyToAddresses: [
+        'cafefore@gocafefore.com',
+        /* more items */
+    ],
+    };
+
+    // Create the promise and SES service object
+    var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+
+    // Handle promise's fulfilled/rejected states
+    sendPromise.then(
+    function(data) {
+        console.log(data.MessageId);
+    }).catch(
+        function(err) {
+        console.error(err, err.stack);
+    });
+}
 
 const sendOrderConfirmMail = async (recipient_email, recipient, order_num, date) => {
     let transporter = nodemailer.createTransport({

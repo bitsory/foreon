@@ -915,7 +915,7 @@ export default class {
     }
 
     setCartModalGoShopBtn() {
-        const cart_modal = document.getElementById('cart_modal_items_slider_box');
+        const cart_modal = document.getElementById('cart_modal_container');
         cart_modal.innerHTML = `
         <div id="cart_modal_go_shop_box" class="cart_modal_go_shop_box">
             <div id="cart_modal_go_shop_title" class="cart_modal_go_shop_title"> 

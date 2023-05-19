@@ -246,8 +246,14 @@ document.addEventListener('click', function(e) {
             }    
             
             if (item_instock == 'n') {
-                document.getElementById('buy_now_btn').setAttribute('disabled','true');
-                document.getElementById('buy_now_btn').innerText = 'Sold Out';
+                const but_now_btn = document.getElementById('buy_now_btn')
+                but_now_btn.setAttribute('disabled','true');
+                but_now_btn.innerText = 'Sold Out';
+                but_now_btn.style.backgroundColor = 'grey'
+                document.getElementById('add_cart_btn').setAttribute('disabled','true');
+                document.getElementById('add_cart_btn').style.backgroundColor = 'grey';
+                // document.getElementById('add_cart_btn').innerText = 'Sold Out';
+                
             }
             
         });
