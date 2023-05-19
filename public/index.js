@@ -347,6 +347,9 @@ const router = async () => {
             page.menuEventListener();
         
         }
+        if(match.route.path == "/contact") {           
+            page.getContactKey();        
+        }
 
         if(match.route.path == "/shop") {
            
@@ -362,7 +365,7 @@ const router = async () => {
             .then(result => {
                           
                 for (var i = 0 ; i < result.length ; i++) {
-                    page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell);                        
+                    page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell, result[i].item_instock);                        
                 }            
             });  
         }
@@ -1191,19 +1194,36 @@ function setShopDetailPage() {
         const item_name = result.name;
         const item_price = result.price_sell;
         const item_content = result.content;
+        const item_instock = result.instock;
 
         document.getElementById('lorem').innerHTML = ShopPageForm.setOnlineContainerPage();                       
             
         if (shop_detail_page_flag) {
             document.getElementById("online_main").innerHTML = 
-            shop_detail_page.getHtml(item_image, item_num, item_name, item_price, item_content);
+            shop_detail_page.getHtml(item_image, item_num, item_name, item_price, item_content, item_instock);
+            soldOutItemMarker(item_instock)
         } else {
-            shop_detail_page = new ShopDetail(item_num, item_name, item_price, item_image, item_content);
+            shop_detail_page = new ShopDetail(item_num, item_name, item_price, item_image, item_content, item_instock);
             shop_detail_page_flag = true;
             document.getElementById("online_main").innerHTML = 
-            shop_detail_page.getHtml(item_image, item_num, item_name, item_price, item_content);
+            shop_detail_page.getHtml(item_image, item_num, item_name, item_price, item_content, item_instock);
+            soldOutItemMarker(item_instock)
         }        
     });
+}
+
+function soldOutItemMarker(item_instock) {
+    if (item_instock == 'n') {
+        document.getElementById('online_item_detail_price').style.textDecoration = 'line-through';
+        const but_now_btn = document.getElementById('buy_now_btn')
+        but_now_btn.setAttribute('disabled','true');
+        but_now_btn.innerText = 'Sold Out';
+        but_now_btn.style.backgroundColor = 'grey';
+        const add_cart_btn = document.getElementById('add_cart_btn');
+        add_cart_btn.setAttribute('disabled','true');
+        add_cart_btn.style.backgroundColor = 'grey';
+        add_cart_btn.style.color = 'white';
+    }
 }
 
 

@@ -2,6 +2,7 @@ import * as AIF from "./form_acc_info.js";
 import * as ItemCounter from "./item_counter.js";
 import * as SPINNER from "./spinner.js";
 import * as WEBS from "./form_webs.js";
+import * as PurchaseHistory from "./form_purchase_history.js";
 
 
 
@@ -1300,13 +1301,35 @@ document.addEventListener('click',function(e){
                     console.log(result);
                     SPINNER.turnOnDisplay();
 
+                    const refund_images = result.result.filter(element => {
+                        return element.order_number == send_data.order_number && element.refund == 'y'           
+                        }).map(element => element.image);
+
+                    console.log('refund_images')
+                    console.log(refund_images)
+                    
+                    let swal_html_images = '';
+                    for (let i in refund_images) {
+                        swal_html_images = swal_html_images + `<img src="https://gocafefore.com${refund_images[i]}"  height="60" width="60">`
+                    }
+                    console.log(swal_html_images)
+                    const swal_html = swal_html_images + '<br></br>'+'Your order items has been cancelled.'
+                
+                    Swal.fire({                       
+                        html: swal_html,                    
+                        imageAlt: 'Custom image',
+                        width:400,
+                        confirmButtonColor: '#983131',               
+                    })
+                    
+
                     const lorem = document.getElementById('lorem');
                     while (lorem.hasChildNodes()) {	
                         lorem.removeChild(lorem.firstChild);
                     }
 
                     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
-                    setPurchaseHistory(result.result);
+                    PurchaseHistory.setPurchaseHistory(result.result);
                     page_num != 0 ? renderPagination(result.total_purchase, page_num ? page_num : 1) : false;
                   
 
@@ -1364,12 +1387,26 @@ document.addEventListener('click',function(e){
                 .then(result => {
                     console.log(result);
                     SPINNER.turnOnDisplay();
+
+                    const image_orderid = send_data.cart_number+send_data.prodnum;
+                    const imaUrl = document.querySelector(`[image_orderid="${image_orderid}"]`).getAttribute('src');
+                    // console.log(imaUrl)
+                    Swal.fire({     
+                        text: 'Your order item has been cancelled.',
+                        imageUrl: imaUrl,
+                        imageWidth: 70,
+                        imageHeight: 70,
+                        imageAlt: 'Custom image',          
+                        width:400,
+                        confirmButtonColor: '#983131',               
+                    })
+
                     const lorem = document.getElementById('lorem');
                     while (lorem.hasChildNodes()) {	
                         lorem.removeChild(lorem.firstChild);
                     }
                     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();
-                    setPurchaseHistory(result.result);
+                    PurchaseHistory.setPurchaseHistory(result.result);
                     page_num != 0 ? renderPagination(result.total_purchase, page_num ? page_num : 1) : false;
                 
                 });
@@ -1860,7 +1897,7 @@ function viewPurchaseHistory(param, page_num) {
         .then((res) => res.json())
         .then(result => {
             console.log(result)
-            setPurchaseHistory(result.result);
+            PurchaseHistory.setPurchaseHistory(result.result);
             // const page_info = pageAlgo(result.length, 5, 10, 1);
             // console.log(page_info)
 
@@ -2096,6 +2133,7 @@ function setPurchaseHistoryItemImage(cart_id, prodnum, image_src) {
     const purchase_history_item_image = document.createElement('img');
     purchase_history_item_image.setAttribute('id', `purchase_history_item_image`);
     purchase_history_item_image.setAttribute('class', `purchase_history_item_image`);
+    purchase_history_item_image.setAttribute('image_orderid', `${cart_id}${prodnum}`);
     purchase_history_item_image.setAttribute('src', `${image_src}`);
     document.querySelector(`[imagebox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_image);   
 

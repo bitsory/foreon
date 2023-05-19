@@ -132,6 +132,7 @@ function setPurchaseHistoryItemImage(cart_id, prodnum, image_src) {
     const purchase_history_item_image = document.createElement('img');
     purchase_history_item_image.setAttribute('id', `purchase_history_item_image`);
     purchase_history_item_image.setAttribute('class', `purchase_history_item_image`);
+    purchase_history_item_image.setAttribute('image_orderid', `${cart_id}${prodnum}`);
     purchase_history_item_image.setAttribute('src', `${image_src}`);
     document.querySelector(`[imagebox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_image);   
 

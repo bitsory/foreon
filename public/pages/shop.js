@@ -120,7 +120,7 @@ export default class {
         
     }
 
-    setItemContainer(prodnum, image_src, item_name, item_price) {
+    setItemContainer(prodnum, image_src, item_name, item_price, item_instock) {
         const ItemContainer = document.createElement('div');
         ItemContainer.setAttribute('id', `online_main_item_contatiner`);
         ItemContainer.setAttribute('class', `online_main_item_container`);
@@ -128,7 +128,7 @@ export default class {
         ItemContainer.setAttribute('itemid', `${prodnum}`);
         document.querySelector('.online_main_items').appendChild(ItemContainer);    
         
-        this.setItemImageContainer(prodnum, image_src, item_name, item_price);
+        this.setItemImageContainer(prodnum, image_src, item_name, item_price, item_instock);
                          
     }
     
@@ -143,7 +143,7 @@ export default class {
         
     }
     
-    setItemLink(prodnum, image_src, item_name, item_price) {
+    setItemLink(prodnum, image_src, item_name, item_price, item_instock) {
         const ItemLink = document.createElement('a');
         ItemLink.setAttribute('id', `online_main_item_link`);
         ItemLink.setAttribute('class', `online_main_item_link`);  
@@ -153,7 +153,7 @@ export default class {
         // document.querySelector(`.online_main_item_pic_container.c${prodnum}`).appendChild(ItemLink);
         
         this.setItemImage(prodnum, image_src);
-        this.setItemPrice(prodnum, item_price);
+        this.setItemPrice(prodnum, item_price, item_instock);
         this.setItemName(prodnum, item_name);
         // this.setAddItemButton(prodnum);
          
@@ -176,12 +176,19 @@ export default class {
         ItemName.innerText = item_name;
     }
     
-    setItemPrice(prodnum, item_price) {
+    setItemPrice(prodnum, item_price, item_instock) {
         const ItemPrice = document.createElement('div');
         ItemPrice.setAttribute('id', `online_main_item_price`);
         ItemPrice.setAttribute('class', `online_main_item_price online_main_item_link`);
         document.querySelector(`[link_data_itemid="${prodnum}"]`).appendChild(ItemPrice);
         ItemPrice.textContent = '$'+ parseFloat(item_price).toFixed(2);
+        if (item_instock == 'n') {
+            ItemPrice.style.textDecoration = 'line-through';
+            const ItemPriceSoldout = document.createElement('span');
+            ItemPriceSoldout.setAttribute('class', `online_main_item_price_soldout online_main_item_link`);
+            document.querySelector(`[link_data_itemid="${prodnum}"]`).appendChild(ItemPriceSoldout);
+            ItemPriceSoldout.textContent = ' ' + 'sold out';
+        }
     }
 
     setAddItemButton(prodnum) {
@@ -246,13 +253,15 @@ document.addEventListener('click', function(e) {
             }    
             
             if (item_instock == 'n') {
+                document.getElementById('online_item_detail_price').style.textDecoration = 'line-through';
                 const but_now_btn = document.getElementById('buy_now_btn')
                 but_now_btn.setAttribute('disabled','true');
                 but_now_btn.innerText = 'Sold Out';
-                but_now_btn.style.backgroundColor = 'grey'
-                document.getElementById('add_cart_btn').setAttribute('disabled','true');
-                document.getElementById('add_cart_btn').style.backgroundColor = 'grey';
-                // document.getElementById('add_cart_btn').innerText = 'Sold Out';
+                but_now_btn.style.backgroundColor = 'grey';
+                const add_cart_btn = document.getElementById('add_cart_btn');
+                add_cart_btn.setAttribute('disabled','true');
+                add_cart_btn.style.backgroundColor = 'grey';
+                add_cart_btn.style.color = 'white';
                 
             }
             

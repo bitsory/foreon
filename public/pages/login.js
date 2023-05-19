@@ -240,7 +240,7 @@ export default class {
         script.setAttribute('class', 'glogin'); 
         script.setAttribute('id', 'glogin'); 
         script.type = 'text/javascript';
-        script.src = "../pages/glogin.js";   
+        script.src = "https://gocafefore.com/pages/glogin.js";   
         
         glogin_script.appendChild(script);
 

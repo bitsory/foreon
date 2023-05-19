@@ -2493,36 +2493,8 @@ padding-right: 1px; */
 
 i.fa-solid.fa-angles-up {
     display: none;
-    /* padding-left: 1rem; */
+   
 }
-/* 
-.mn_btn {
-    animation:scaleBounce .7s alternate infinite;
-    
-}
-
-
-
-.smoothie_button.mn_btn {
-    animation-delay: 0.2s;
-}
-
-.kbop_button.mn_btn {
-    animation-delay: 0.4s;
-}
-
-.acai_button.mn_btn {
-    animation-delay: 0.6s;
-}
-
-.wellness_button.mn_btn {
-    animation-delay: 0.8s;
-}
-
-@keyframes scaleBounce{
-	from {transform:scale(0.95)}
-	to {transform:scale(1.15)}
-} */
 
 .menu_box {
     display: flex;
@@ -3562,101 +3534,41 @@ ul.tabs li.current{
     }
 
 
-    .coffee_button {    
+
+    .mn_btn {
+        max-width: 77%; 
+    }
+
+    /* .coffee_button {    
 
         max-width: 60%;
-         /* width: 60%;
-        height: 60%; 
-        background: url(images/ic_coffee.png) center/cover no-repeat;
-        background-size: contain; */
-        
+  
     }
     
     .smoothie_button {    
         max-width: 60%;
         min-height: 60%;
-        /* width: 60%;
-        height: 60%;
-        background: url(images/ic_smoothie.png) center/cover no-repeat;
-        background-size: contain; */
+      
     }
     
     .kbop_button {    
         max-width: 60%;
-        /* width: 65%;
-        height: 65%;
-        background: url(images/ic_kbop.png) center/cover no-repeat;
-        background-size: contain; */
+      
        
     }
     .acai_button {    
         max-width: 50%;
         min-width: 65%;
-        /* width: 60%;
-        height: 60%;
-        background: url(images/ic_acai.png) center/cover no-repeat;
-        background-size: contain; */
+    
     }
     
     .wellness_button {    
         
         max-width: 35%;
         min-width: 70%;
-        /* width: 70%;
-        height: 70%;
-        background: url(images/ic_wellness.png) center/cover no-repeat;
-        background-size: contain; */
-    }
+       
+    } */
 
-/*
-    .coffee_button {    
-
-        max-width: 45%;
-        width: 50%;
-        height: 50%;
-        background: url(images/cf_coffee_btn.png) center/cover no-repeat;
-        background-size: contain;
-        
-    }
-    
-    .smoothie_button {    
-        max-width: 43%;
-        min-height: 60%;
-        width: 50%;
-        height: 50%;
-        background: url(images/smoothie.png) center/cover no-repeat;
-        background-size: contain;
-    }
-    
-    .kbop_button {    
-        max-width: 60%;
-        width: 65%;
-        height: 65%;
-        background: url(images/kbop.png) center/cover no-repeat;
-        background-size: contain;
-        margin-bottom: 10px;
-    }
-    
-    .acai_button {    
-        max-width: 50%;
-        min-width: 65%;
-        width: 50%;
-        height: 50%;
-        background: url(images/acai.png) center/cover no-repeat;
-        background-size: contain;
-    }
-    
-    .wellness_button {    
-        
-        max-width: 35%;
-        min-width: 65%;
-        width: 40%;
-        height: 40%;
-        background: url(images/wellness.png) center/cover no-repeat;
-        background-size: contain;
-    }
-
-*/
 
     .footer {
         display: flex;
@@ -4171,11 +4083,17 @@ ul.tabs li.current{
         font-size: 1.3rem;
     }
 
-    .coffee_button, .smoothie_button, .kbop_button, .acai_button, .wellness_button {    
+    .mn_btn {
+        max-width: 100%;
+        max-height: 70%; 
+    }
+    
+    
+    /* .coffee_button, .smoothie_button, .kbop_button, .acai_button, .wellness_button {    
         max-width: 100%;
         max-height: 70%;
     }
-    
+     */
     
     
 
@@ -4417,7 +4335,7 @@ ul.tabs li.current{
     .our_menu {
         font-size: 2rem;
         font-weight: 900;
-        margin: 3rem;
+        margin: 1rem;
     }
 
     .menu_category {
