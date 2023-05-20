@@ -132,13 +132,13 @@ export default class {
                          
     }
     
-    setItemImageContainer(prodnum, image_src, item_name, item_price) {
+    setItemImageContainer(prodnum, image_src, item_name, item_price, item_instock) {
         const ItemImageContainer = document.createElement('div');
         ItemImageContainer.setAttribute('id', `online_main_item_pic_container`);                          
         ItemImageContainer.setAttribute('class', `online_main_item_pic_container`);                    
         document.querySelector(`[itemid="${prodnum}"]`).appendChild(ItemImageContainer);
         
-        this.setItemLink(prodnum, image_src, item_name, item_price);
+        this.setItemLink(prodnum, image_src, item_name, item_price, item_instock);
         
         
     }

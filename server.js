@@ -218,6 +218,26 @@ app.get('/shop/checkout/:id/item_num=:item_no', (req,res) => {
     res.render('index.ejs', { post : member_name });  
 });
 
+app.get('/purchase-history', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
+app.get('/account/user-info', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
+app.get('/account/billing-infomation', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
+app.get('/account/shipping-infomation', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
 
 
 
@@ -754,7 +774,7 @@ app.post('/get_user_info', (req,res) => {
     
     const u_id = req.body.id;
     console.log(u_id);
-    console.log(req.session.loginData.id);
+    // console.log(req.session.loginData.id);
 
     if (req.session.loginData && req.session.loginData.id == u_id) {     
         db.getConnection((con)=>{

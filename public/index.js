@@ -15,6 +15,7 @@ import * as ItemCounter from "./pages/item_counter.js";
 import * as ShopPageForm from "./pages/form_shop_page.js";
 import * as CheckoutOrderForm from "./pages/form_checkout_order.js";
 import * as WEBS from "./pages/form_webs.js";
+import * as PurchaseHistoryInCart from "./pages/cart.js";
 
 const toggleBtn = document.querySelector('.navbar_toggleBtn');
 const menu = document.querySelector('.navbar_nav_list');
@@ -282,12 +283,27 @@ const router = async () => {
 
     console.log(routes);
       
-    if (path_name.substring(0, 8) == '/account') {  
-        user_cart.changeProfile();
-    }
-    else if (path_name.substring(0, 17) == '/purchase-history') {  
+   
+    if (path_name.substring(0, 18) == '/account/user-info') {  
+        const user_id = user_cart.c_id;
+        PurchaseHistoryInCart.setUserProfileChangePage(user_id);  
+        history.pushState(null, null, `/account/user-info`);   
+
+    } else if (path_name.substring(0, 16) == '/account/billing') {
+        
         const user_id = user_cart.c_id;  
-        user_cart.viewPurchaseHistory(user_id);
+        PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
+        PurchaseHistoryInCart.chooseTabLink(`tab-2`, 'go_back');
+
+    } else if (path_name.substring(0, 17) == '/account/shipping') {
+       
+        const user_id = user_cart.c_id;  
+        PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
+        PurchaseHistoryInCart.chooseTabLink(`tab-3`, 'go_back');
+
+    } else if (path_name.substring(0, 17) == '/purchase-history') {  
+        const user_id = user_cart.c_id;  
+        goPurchaseHistory(user_id);
     }
     else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
         console.log("라우터 고 카트 or go order")
@@ -389,12 +405,26 @@ window.addEventListener("popstate", (e) => {
     console.log("popstate");
    
     let path_name = location.pathname;    
-    if (path_name.substring(0, 8) == '/account') {  
-        user_cart.changeProfile();
-    }
-    else if (path_name.substring(0, 17) == '/purchase-history') {  
+    
+    if (path_name.substring(0, 18) == '/account/user-info') {  
+        const user_id = user_cart.c_id;
+        PurchaseHistoryInCart.setUserProfileChangePage(user_id);     
+
+    } else if (path_name.substring(0, 16) == '/account/billing') {
+        console.log("path_name.substring(0, 16) == '/account/billing")  
         const user_id = user_cart.c_id;  
-        user_cart.viewPurchaseHistory(user_id);
+        PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
+        PurchaseHistoryInCart.chooseTabLink(`tab-2`, 'go_back');
+
+    } else if (path_name.substring(0, 17) == '/account/shipping') {
+        console.log("path_name.substring(0, 17) == '/account/shipping")  
+        const user_id = user_cart.c_id;  
+        PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
+        PurchaseHistoryInCart.chooseTabLink(`tab-3`, 'go_back');
+
+    } else if (path_name.substring(0, 17) == '/purchase-history') {  
+        const user_id = user_cart.c_id;  
+        goPurchaseHistory(user_id, 'go_back');
     }
     else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
         console.log("뒤로가기 카트")
@@ -587,6 +617,14 @@ function setCartModalPageDetail() {
                 }) 
         }
     });
+}
+
+function goPurchaseHistory(user_id, param) {
+    
+    (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
+    PurchaseHistoryInCart.viewPurchaseHistory({user_id:user_id});
+    WEBS.toggleFunc();
+    (param == 'go_back') ? false : history.pushState(null, null, `/purchase-history`);
 }
 
 function view_cart(param) {

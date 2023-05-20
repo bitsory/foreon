@@ -19,278 +19,6 @@ export default class Cart {
         this.c_name = this.getCookie()[0];
         this.c_id = this.getCookie()[1];
 
-        /*
-        this.navbar.addEventListener('click',function(e){ 
-            console.log("cart click double check navbar")
-            if(e.target && e.target.className == 'user_profile_change_btn') {
-
-                document.querySelector('.main_background__blink').style.display = "none";              
-                changeProfile();       
-                
-            }
-        
-            if(e.target && e.target.className == 'user_purchase_history_btn') {        
-
-                document.querySelector('.main_background__blink').style.display = "none";
-                viewPurchaseHistory(u_id);               
-        
-            }
-        });
-
-        this.lorem.addEventListener('click',function(e){ 
-            console.log("cart click double check lorem")
-            if(e.target && e.target.className == 'btn billing_info_add_btn') {
-                document.querySelector('.billing_info_box').innerHTML = addBillingInfoBox();
-                addBillingMethodForm();
-                document.querySelector('.billing_info_add_btn_container').style.display = "none";
-            }
-            if(e.target && e.target.className == 'btn shipping_info_add_btn') {
-                document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();
-                document.querySelector('.shipping_info_add_btn_container').style.display = "none";
-                addShippingInfo();
-            }
-        
-        
-            if(e.target && e.target.className == 'tab-link') {
-                let tab_id = e.target.getAttribute('data-tab');
-                let tab_links = document.querySelectorAll('li.tab-link');
-                let tab_contents = document.querySelectorAll('div.tab-content');
-        
-                for (const element of tab_links) {
-                    element.classList.remove('current');                
-                }
-                for (const element of tab_contents) {             
-                    element.classList.remove('current');
-                }
-                
-                e.target.classList.add('current');
-                document.getElementById(tab_id).classList.add('current');
-        
-                if (tab_id === 'tab-2') {
-                    const billing_info_box = document.querySelector('.billing_info_box');
-                    while (billing_info_box.hasChildNodes()) {	
-                        billing_info_box.removeChild(billing_info_box.firstChild);
-                    }
-        
-                    // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
-                    document.querySelector('.billing_info_add_btn_container').style.display = "block";
-                    fetch('/get_user_billing_info') // get billiing info from DB
-                    .then((res) => res.json())
-                    .then(result => {
-                        console.log(result);
-                        if (result.length > 0) {
-                            console.log(result)        
-                            renderBillingInfo(result);
-                        }
-                    })
-        
-        
-                } else if (tab_id === 'tab-3') {            
-                    
-                    const shipping_info_box = document.querySelector('.shipping_info_box');
-                    while (shipping_info_box.hasChildNodes()) {	
-                        shipping_info_box.removeChild(shipping_info_box.firstChild);
-                    }
-        
-                    // document.querySelector('.shipping_info_box').innerHTML.removeChild();
-                    document.querySelector('.shipping_info_add_btn_container').style.display = "block";
-                    fetch('/get_user_shipping_info') // get shipping info from DB
-                    .then((res) => res.json())
-                    .then(result => {
-                        renderShippingInfo(result)
-                    });
-                }
-            }
-        
-            // if(e.target && e.target == 'billing_info_delete_btn') {
-            //     console.log("'billing_info_delete_btn' 'billing_info_delete_btn' 'billing_info_delete_btn'")
-            //     let str = e.target.className;
-            //     console.log(str.indexOf("BIN"));
-            // }
-        
-            if(e.target && e.target.value == 'make_default_billing_info') {
-                let str = e.target.className;
-                
-                let uid = u_id;
-                let new_default_billing_index = str.substring(str.indexOf("BIN")+3);
-                // let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
-                const data = {id : uid, billing_index : new_default_billing_index}
-        
-                const option = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'                
-                        },
-                    body: JSON.stringify(data)
-                };
-                console.log(option);
-        
-                fetch('/make_default_billing_info', option)
-                .then((res) => res.json())
-                .then(result => {
-                    const billing_info_box = document.querySelector('.billing_info_box');
-                    while (billing_info_box.hasChildNodes()) {	
-                        billing_info_box.removeChild(billing_info_box.firstChild);
-                      }
-                    renderBillingInfo(result);
-        
-                });
-            }
-        
-            if(e.target && e.target.value == 'delete_payment_method') {
-                console.log("Delete 'billing_info_delete_btn' 'billing_info_delete_btn' 'billing_info_delete_btn'")
-                let str = e.target.className;
-                console.log(str.indexOf("BIN"));
-                console.log(str.substring(str.indexOf("BIN")+3))
-                
-            
-                let uid = u_id;
-                let delete_card_index = str.substring(str.indexOf("BIN")+3);
-                let default_payment_indicate = document.getElementById(`billing_info_default_btn BIN${delete_card_index}`).value;
-        
-                const data = {id : uid, card_index : delete_card_index, default_payment : default_payment_indicate}
-        
-                const option = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'                
-                        },
-                    body: JSON.stringify(data)
-                };
-                console.log(option);
-        
-                fetch('/delete_payment_method', option)
-                .then((res) => res.json())
-                .then(result => {
-                    console.log(result)
-                    const billing_info_box = document.querySelector('.billing_info_box');
-                    while (billing_info_box.hasChildNodes()) {	
-                        billing_info_box.removeChild(billing_info_box.firstChild);
-                    }
-                    renderBillingInfo(result);
-                    // const delete_node = document.getElementById(`billing_info BIN${delete_card_index}`);
-                    // document.querySelector('.billing_info_box').removeChild(delete_node);
-        
-                });
-            }
-        
-        /////////////////////// edit shipping info //////////////////////////////////////////
-        
-            if(e.target && e.target.value == 'edit_shipping_info') {
-                console.log("edit_shipping_info edit_shipping_info")
-        
-                let str = e.target.className;
-                let uid = u_id;
-                let edit_shipping_index = str.substring(str.indexOf("SHN")+3);
-        
-                let recipient = (document.querySelector(`.shipping_info_recipient.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_recipient.SHN${edit_shipping_index}`).innerText : '';
-                let address1 = (document.querySelector(`.shipping_info_address1.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_address1.SHN${edit_shipping_index}`).innerText : '';
-                let address2 = (document.querySelector(`.shipping_info_address2.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_address2.SHN${edit_shipping_index}`).innerText : '';
-                let city = (document.querySelector(`.shipping_info_city.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_city.SHN${edit_shipping_index}`).innerText : '';
-                let state = (document.querySelector(`.shipping_info_state.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_state.SHN${edit_shipping_index}`).innerText : '';
-                let zip = (document.querySelector(`.shipping_info_zip.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_zip.SHN${edit_shipping_index}`).innerText : '';
-                let phone = (document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_phone.SHN${edit_shipping_index}`).innerText : '';
-                let email = (document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`)) ? document.querySelector(`.shipping_info_email.SHN${edit_shipping_index}`).innerText : '';
-                
-                document.querySelector('.shipping_info_box').innerHTML = addShippingInfoBox();        
-                document.querySelector('.shipping_info_add_btn_container').style.display = "none";
-                
-                document.querySelector('.input_recipient').value = recipient;
-                document.querySelector('.input_shipping_address_line1').value = address1;
-                document.querySelector('.input_shipping_address_line2').value = address2;
-                document.querySelector('.input_shipping_address_city').value = city;
-                
-                let selected_state = document.getElementById('change_profile_state');        
-        
-                for (let i = 0 ; i < selected_state.options.length ; i++) {
-                    if (selected_state.options[i].value == state) {
-                        selected_state.options[i].selected = true;                
-                    }
-                }
-        
-                document.querySelector('.input_shipping_address_zip').value = zip;
-                document.querySelector('.input_shipping_address_phone').value = phone;
-                document.querySelector('.input_shipping_address_email').value = email;
-        
-                let edit_form = document.getElementById('change_profile_shipping_info_form');
-                var hiddenInput = document.createElement('input');
-                hiddenInput.setAttribute('type', 'hidden');
-                hiddenInput.setAttribute('name', 'shipping_index');
-                hiddenInput.setAttribute('value', edit_shipping_index);
-                edit_form.appendChild(hiddenInput);
-        
-                editShippingInfo();
-        
-            }
-            
-        
-            if(e.target && e.target.value == 'delete_shipping_info') {
-        
-        
-                // console.log("delete_shipping_info delete_shipping_info")
-                let str = e.target.className;
-                
-                let uid = u_id;
-                let delete_shipping_index = str.substring(str.indexOf("SHN")+3);
-                let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
-               
-                const data = {id : uid, shipping_index : delete_shipping_index, default_address : default_addr}
-        
-                const option = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'                
-                        },
-                    body: JSON.stringify(data)
-                };
-                console.log(option);
-        
-                fetch('/delete_shipping_info', option)
-                .then((res) => res.json())
-                .then(result => {
-                    console.log(result)
-                    const shipping_info_box = document.querySelector('.shipping_info_box');
-                    while (shipping_info_box.hasChildNodes()) {	
-                        shipping_info_box.removeChild(shipping_info_box.firstChild);
-                      }
-                    renderShippingInfo(result);
-        
-                });
-        
-            }
-        
-            if(e.target && e.target.value == 'make_default_shipping_info') {
-                let str = e.target.className;
-                
-                let uid = u_id;
-                let new_default_shipping_index = str.substring(str.indexOf("SHN")+3);
-                // let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
-                const data = {id : uid, shipping_index : new_default_shipping_index}
-        
-                const option = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'                
-                        },
-                    body: JSON.stringify(data)
-                };
-                console.log(option);
-        
-                fetch('/make_default_shipping_info', option)
-                .then((res) => res.json())
-                .then(result => {
-                    const shipping_info_box = document.querySelector('.shipping_info_box');
-                    while (shipping_info_box.hasChildNodes()) {	
-                        shipping_info_box.removeChild(shipping_info_box.firstChild);
-                      }
-                    renderShippingInfo(result);
-                });
-            }
-
-
-
-        });
-        */
 
     }
 
@@ -393,14 +121,133 @@ export default class Cart {
         `
     }
 
-    // changeProfileTap() {    
-    //     document.getElementById('lorem').innerHTML = AIF.mekeChangePrifileTap();    
-    // }
 
 }
 
 let u_id = '';
 
+export function setUserProfileChangePage(u_id) {
+    WEBS.toggleFunc();
+       
+        (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
+        console.log(u_id)
+
+        if (u_id == 'GUEST') {
+            document.getElementById('lorem').innerText = 'Login Please...';
+        } else {
+            changeProfile();
+
+            const data = {id : u_id}
+
+            const option = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'                
+                    },
+                body: JSON.stringify(data)
+            };
+            console.log(option);
+
+            fetch('/get_user_info', option)
+            .then((res) => res.json())
+            .then(result => {
+                console.log(result)
+
+                document.getElementById('input_general_first_name').innerText = result.first_name;
+                document.getElementById('input_general_last_name').innerText = result.last_name; 
+                document.getElementById('input_general_phone').value = result.phone;
+                document.getElementById('input_general_email').value = result.email;
+                document.getElementById('input_general_address_street_line1').value = result.address1;
+                document.getElementById('input_general_address_street_line2').value = result.address2;
+                document.getElementById('input_general_address_city').value = result.city;
+                document.getElementById('change_profile_general_state').value = result.state;
+                document.getElementById('input_general_address_zip').value = result.zip;         
+                
+            });
+        }
+
+
+}
+
+export function chooseTabLink(target, param) {
+    let tab_id = '';
+    let tab_links = '';
+    let tab_contents = '';
+    
+    
+    if (param != 'go_back') {
+        tab_id = target.getAttribute('data-tab');
+        tab_links = document.querySelectorAll('li.tab-link');
+        tab_contents = document.querySelectorAll('div.tab-content');
+
+        for (const element of tab_links) {
+            element.classList.remove('current');                
+        }
+        for (const element of tab_contents) {             
+            element.classList.remove('current');
+        }
+        
+        target.classList.add('current');
+        document.getElementById(tab_id).classList.add('current');
+    } else {
+        tab_id = target;
+        tab_links = document.querySelectorAll('li.tab-link');
+        tab_contents = document.querySelectorAll('div.tab-content');
+
+        for (const element of tab_links) {
+            element.classList.remove('current');                
+        }
+        for (const element of tab_contents) {             
+            element.classList.remove('current');
+        }
+        
+        let li_target = document.querySelector(`[data-tab="${target}"]`)
+        li_target.classList.add('current');
+        document.getElementById(tab_id).classList.add('current');
+        
+    } 
+        if (tab_id === 'tab-1') {
+            (param == 'go_back') ? false : history.pushState(null, null, `/account/user-info`);
+        } else if (tab_id === 'tab-2') {
+            (param == 'go_back') ? false : history.pushState(null, null, `/account/billing-infomation`);
+            const billing_info_box = document.querySelector('.billing_info_box');
+            while (billing_info_box.hasChildNodes()) {	
+                billing_info_box.removeChild(billing_info_box.firstChild);
+            }
+
+            // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
+            document.querySelector('.billing_info_add_btn_container').style.display = "block";
+            fetch('/get_user_billing_info') // get billiing info from DB
+            .then((res) => res.json())
+            .then(result => {
+                console.log(result);
+                if (result.length > 0) {
+                    console.log(result)
+
+                    renderBillingInfo(result);
+                }
+            })
+
+
+        } else if (tab_id === 'tab-3') { 
+            console.log("(tab_id === 'tab-3')");
+
+            (param == 'go_back') ? false : history.pushState(null, null, `/account/shipping-infomation`);
+            
+            const shipping_info_box = document.querySelector('.shipping_info_box');
+            while (shipping_info_box.hasChildNodes()) {	
+                shipping_info_box.removeChild(shipping_info_box.firstChild);
+            }
+
+            // document.querySelector('.shipping_info_box').innerHTML.removeChild();
+            document.querySelector('.shipping_info_add_btn_container').style.display = "block";
+            fetch('/get_user_shipping_info') // get shipping info from DB
+            .then((res) => res.json())
+            .then(result => {
+                renderShippingInfo(result)
+            });
+        }
+}
 
 
 document.addEventListener('click',function(e){ 
@@ -409,39 +256,9 @@ document.addEventListener('click',function(e){
     
         
     if(e.target && e.target.id == 'user_profile_change_btn' || e.target && e.target.id == 'general_info_change_pswd_cancel_btn') {
-
-        WEBS.toggleFunc();
-        history.pushState(null, null, `/account`); // url change
-        (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
-      
-        changeProfile();
-        const data = {id : u_id}
-
-        const option = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'                
-                },
-            body: JSON.stringify(data)
-        };
-        console.log(option);
-
-        fetch('/get_user_info', option)
-        .then((res) => res.json())
-        .then(result => {
-            console.log(result)
-
-            document.getElementById('input_general_first_name').innerText = result.first_name;
-            document.getElementById('input_general_last_name').innerText = result.last_name; 
-            document.getElementById('input_general_phone').value = result.phone;
-            document.getElementById('input_general_email').value = result.email;
-            document.getElementById('input_general_address_street_line1').value = result.address1;
-            document.getElementById('input_general_address_street_line2').value = result.address2;
-            document.getElementById('input_general_address_city').value = result.city;
-            document.getElementById('change_profile_general_state').value = result.state;
-            document.getElementById('input_general_address_zip').value = result.zip;         
-            
-        });
+        
+        setUserProfileChangePage(u_id);
+        history.pushState(null, null, `/account/user-info`);
 
         
     }
@@ -577,40 +394,8 @@ document.addEventListener('click',function(e){
         }
     }
 
-    // if(e.target && e.target.id == 'general_info_change_pswd_cancel_btn') {
-    //     document.getElementById('general_info_box').innerHTML = AIF.changePasswordForm();
-    //     document.getElementById('general_info_change_button_container').innerHTML = AIF.makeChangePasswordBtnContainer();
-    
-
-    // }
-
     if(e.target && e.target.id == 'billing_info_add_btn') {
 
-        // const target = document.getElementById("billing_info_add_btn");
-
-        // // const t_offset = target.offsetTop();
-        // const targetTop = target.getBoundingClientRect().top;
-        // const abTop = window.pageYOffset + target.getBoundingClientRect().top;
-        // const ttt = window.pageYOffset;
-        // const tttt = e.pageY;
-
-        // // const sp = document.getElementById('billing_info_add_btn').offsetHeight;
-        // // console.log(e);
-        // // console.log(e.pageY);
-        // // console.log(sp);
-
-        // console.log(target);
-        // console.log(target.getBoundingClientRect());
-
-       
-        // console.log(targetTop);
-        // console.log(ttt);
-        // console.log(tttt);
-        // console.log(abTop);
-        // console.log(window.pageYOffset);        
-
-        
-        console.log("e.target && e.target.id == 'billing_info_add_btn'")
         document.querySelector('.billing_info_box').innerHTML = AIF.addBillingInfoBox();
         addBillingMethodForm();
         document.querySelector('.billing_info_add_btn_container').style.display = "none";
@@ -636,6 +421,10 @@ document.addEventListener('click',function(e){
 
 
     if(e.target && e.target.className == 'tab-link') {
+
+        chooseTabLink(e.target);
+
+        /*
         let tab_id = e.target.getAttribute('data-tab');
         let tab_links = document.querySelectorAll('li.tab-link');
         let tab_contents = document.querySelectorAll('div.tab-content');
@@ -689,6 +478,7 @@ document.addEventListener('click',function(e){
                 renderShippingInfo(result)
             });
         }
+        */
     }
 
     if(e.target && e.target.value == 'make_default_billing_info') {
