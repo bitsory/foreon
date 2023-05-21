@@ -1829,6 +1829,43 @@ app.post('/shop/view/item/:item_number',(req,res) => {
 });
 
 
+app.post('/shop_category',(req,res) => {
+    console.log(`/shop_category /shop_category`);  
+    console.log(req.body);   
+    
+    let kind = "";
+  switch (req.body.shop_category){
+    case 'wellness': 
+        kind = 'wellness';
+      break; 
+    case 'dessert':
+        kind = 'dessert';
+      break;
+    case 'kids':
+        kind = 'kids'; 
+      break;
+    case 'gift':
+        kind = 'gift'; 
+      break; 
+  }
+    
+    db.getConnection((con)=>{   
+        con.query('SELECT * from product WHERE useyn="y" and kind = ?', [kind],(err, result) => {
+            if(err){
+                res.send(err);
+                console.log(err);
+                // con.end();        
+            } else {
+               
+                res.send(result);                
+            }                        
+        });    
+        con.release();
+    });
+});
+
+
+
 app.post('/overwrite_cart', (req,res) => {
     console.log('/overwrite_cart/overwrite_cart /overwrite_cart/overwrite_cart')
     console.log(req.body);

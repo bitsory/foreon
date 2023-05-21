@@ -240,12 +240,15 @@ function setPurchaseHistoryItemReorder(cart_id, prodnum) {
     purchase_history_item_reorder_btn.innerText = 'But It Again';
 }
 
-function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {
+function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {    
+
+    const track_id = track_number ? "track_number" : ''; 
     const purchase_history_item_track_btn = document.createElement('button');
     purchase_history_item_track_btn.setAttribute('id', `purchase_history_item_track_btn`);
     purchase_history_item_track_btn.setAttribute('class', `purchase_history_item_track_btn purchase_page_btn`);
     purchase_history_item_track_btn.setAttribute('title', `item track`);    
-    purchase_history_item_track_btn.setAttribute('track-itemid', `${track_number}`);
+    purchase_history_item_track_btn.setAttribute('track-itemid', `${track_id}`);
+    purchase_history_item_track_btn.setAttribute('cart-itemid', `${cart_id}`);
     document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_track_btn);
     purchase_history_item_track_btn.innerText = 'Item Track';
 }
