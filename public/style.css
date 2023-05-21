@@ -43,7 +43,7 @@ input[type="text"],input[type="password"],input[type="email"],input[type="search
 
 .no_action {pointer-events : none; height:100%; min-height:100%; overflow:hidden !important; touch-action:none;}
 
-.btn, .cate_btn, .cart_handle_btn, 
+.btn, .category_btn, .cart_handle_btn, 
 .checkout_ctl_btn, .cart_modal_ctl_btn, .guest_checkout_edit_btn, .purchase_page_btn
 {    
     background-color: rgba(0,0,0,0);
@@ -55,12 +55,12 @@ input[type="text"],input[type="password"],input[type="email"],input[type="search
     border: 1px solid #000;
 }
 
-.cate_btn, .online_title_label {
+.category_btn, .online_title_label {
     color: var(--subcolor);
     font-size: medium;
 }
 
-.cate_btn:active, .online_title_label:active, .cart_modal_ctl_btn:active {
+.category_btn:active, .online_title_label:active, .cart_modal_ctl_btn:active {
     border: 1px solid var(--subcolor)
 }
 
@@ -4256,17 +4256,17 @@ ul.tabs li.current{
       
     }
 
-    .btn:hover, .cate_btn:hover, .cart_handle_btn:hover, .cart_modal_ctl_btn:hover, 
+    .btn:hover, .category_btn:hover, .cart_handle_btn:hover, .cart_modal_ctl_btn:hover, 
     .checkout_ctl_btn:hover, .guest_checkout_edit_btn:hover,
     .shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, 
     .shipping_info_make_default_btn:hover, .purchase_page_btn:hover, .item_link:hover, 
-    .cart_modal_go_shop_btn :hover, .admin_shipping_check_button:hover {
+    .cart_modal_go_shop_btn:hover, .admin_shipping_check_button:hover {
         cursor: pointer;
         transform: scale(1.1);
     }
 
         #guest_checkout_shipping_info_next_btn:hover, #user_continue_to_payment_btn:hover, #continue_to_payment_btn:hover, #continue_to_place_order_btn:hover, 
-    .user_checkout_shipping_info_next_btn:not(.disabled):hover, #user_checkout_billing_info_next_btn:hover, .user_checkout_select_option_btn:hover, .cart_modal_go_shop_btn :hover{
+    .user_checkout_shipping_info_next_btn:not(.disabled):hover, #user_checkout_billing_info_next_btn:hover, .user_checkout_select_option_btn:hover, .cart_modal_go_shop_btn:hover{
         background-color: var(--subcolor);
         color: black;
         cursor: pointer;

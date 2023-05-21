@@ -891,8 +891,6 @@ export default class {
             this.user_item_total_weight = weight; 
             console.log(this.user_item_total_weight);
         }
-        
-
     }
 
     setReadyCart(cart) {
@@ -920,16 +918,14 @@ export default class {
         <div id="cart_modal_go_shop_box" class="cart_modal_go_shop_box">
             <div id="cart_modal_go_shop_title" class="cart_modal_go_shop_title"> 
             You don't have any items in cart.<br>
-            Would you like to move to shop?
+            Would you like to move to the online shop?
             </div>
-            <a href="/shop" data-link-T><button id="cart_modal_go_shop_btn" class="cart_modal_go_shop_btn" >Go Online Shop</button></a>
+            <a href="/shop" data-link-T><button id="cart_modal_go_shop_btn" class="cart_modal_go_shop_btn">Go Online Shop</button></a>
         </div>
         `
     }
 }
 
-// let g_total = 0;
-// let tmp_order_cart = {};
 let user_checkout_ready_cart = [];
 
 

@@ -231,8 +231,19 @@ document.addEventListener('click', function(e){
         cart_modal_container.style.transform = 'unset';
     }
 
+    if(e.target && e.target.className == 'category_btn') {
+        console.log("(e.target && e.target.id == 'shop_wellness_btn')")
+        const shop_category = e.target.getAttribute('value');
+        console.log(shop_category);
+        setShopCategoryPage(shop_category);
+
+    }
+
+
    
 });
+
+
 
 
 function getCookie() {
@@ -316,9 +327,15 @@ const router = async () => {
         console.log("라우터 체크아웃 카트 or 오더 체크아웃")
         setCheckoutPage();
                  
-    } else if (path_name.substring(0, 15) == '/shop/view/item') { // back to item detail page
+    } else if (path_name.substring(0, 15) == '/shop/view/item') { 
         console.log("라우터 뷰 아이템 샵 디테일 페이지")
         setShopDetailPage();
+        
+    } else if (path_name.substring(0, 14) == '/shop/category') { 
+        console.log("뒤로가기 뷰 아이템 카테고리 페이지")
+        const category_param = location.pathname.substring(15);
+        console.log(category_param)
+        setShopCategoryPage(category_param);
 
     } else {
 
@@ -439,6 +456,13 @@ window.addEventListener("popstate", (e) => {
     } else if (path_name.substring(0, 15) == '/shop/view/item') { // back to item detail page
         console.log("뒤로가기 뷰 아이템 디테일 페이지")
         setShopDetailPage();
+
+    } else if (path_name.substring(0, 14) == '/shop/category') { 
+        console.log("뒤로가기 뷰 아이템 카테고리 페이지")
+        const category_param = location.pathname.substring(15);
+        console.log(category_param)
+        setShopCategoryPage(category_param, 'go_back');
+
     } else {
         console.log("뒤로가기 일반 페이지")
         router();
@@ -1262,6 +1286,34 @@ function soldOutItemMarker(item_instock) {
         add_cart_btn.style.backgroundColor = 'grey';
         add_cart_btn.style.color = 'white';
     }
+}
+
+
+function setShopCategoryPage(category_param, param) {
+    let shop_data = { shop_category : category_param};        
+    const data = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(shop_data)
+    };
+                
+    fetch('/shop_category', data)
+    .then((res) => res.json())
+    .then(result => {
+        console.log("shop category result");
+        console.log(result)   
+        
+        let shop_category_page = new Shop();
+        (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
+        document.getElementById("lorem").innerHTML = shop_category_page.getHtml(); 
+
+        for (let i = 0 ; i < result.length ; i++) {
+            shop_category_page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell, result[i].instock);                        
+        } 
+        document.getElementById('online_main_label').innerText = category_param;
+        (param == 'go_back') ? false : history.pushState(null, null, `/shop/category/${category_param}`);  
+
+    });  
 }
 
 

@@ -228,6 +228,11 @@ app.get('/account/shipping-infomation', (req,res) => {
     res.render('index.ejs', { post : member_name });  
 });
 
+app.get('/shop/category/:id', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
 
 
 
@@ -241,10 +246,6 @@ app.post('/sign_in', function (req,res) {
     const decrypt = new JSEncrypt();
     
     decrypt.setPrivateKey(process.env.RSA_PRIVATE_KEY)
-
-    const decryptedText_a = decrypt.decrypt(aid);
-    const decryptedText_b = decrypt.decrypt(bpw);
- 
 
     const sign_in_id = decrypt.decrypt(aid);
     const sign_in_pw = decrypt.decrypt(bpw);
