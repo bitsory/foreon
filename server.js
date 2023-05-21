@@ -74,9 +74,6 @@ app.use(session({
 }))
 
 app.use(cookieParser("secret"));
-
-
-
   
 app.get('/',(req,res) => { 
     console.log("home home home");
@@ -101,10 +98,7 @@ app.use(express.static('public'));
 
 app.get('/login_check', (req,res) => {
     console.log("/login_check  /login_check /login_check /login_check/login_check   ");
-    // const data = '';
-    console.log(req.session.loginData)
-    console.log(req.session)
-    console.log(req.sessionID)
+   
     const data = req.session.loginData ? req.session.loginData : {id : 'GUEST'};    
     res.send(data);
 })
@@ -151,8 +145,7 @@ app.post("/sign_out", function (req, res) {
 
 
 
-app.get('/home',(req,res) => {
-    console.log(`req home: ${req}`);
+app.get('/home',(req,res) => {    
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});	
     } else {
@@ -160,8 +153,7 @@ app.get('/home',(req,res) => {
 	}    
 });
 
-app.get('/about',(req,res) => {    
-    console.log(`req about: ${req}`);
+app.get('/about',(req,res) => {  
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
@@ -169,8 +161,7 @@ app.get('/about',(req,res) => {
 	}
 });
 
-app.get('/menu',(req,res) => {
-    console.log(`req menu: ${req}`);
+app.get('/menu',(req,res) => { 
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
@@ -178,8 +169,7 @@ app.get('/menu',(req,res) => {
 	}    
 });
 
-app.get('/contact',(req,res) => {
-    console.log(`req contact: ${req}`);
+app.get('/contact',(req,res) => {   
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
@@ -443,11 +433,11 @@ function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_
     
     if (u_id == "cafeforeadmin") {
         console.log("admin login")
-        response.sendFile(__dirname + "/public/admin.html");       
+        response.send(re_path); 
+        // response.sendFile("https://gocafefore.com/public/admin.html");       
     }
     else response.send(re_path);  
-    // connect.release();     
-    // connect.end();
+   
     
 }
 
@@ -2613,6 +2603,23 @@ app.post('/track_my_order', (req,res) => {
                 }                      
             }            
         });
+        con.release();
+    });
+});
+
+
+app.post('/get_track_number', (req,res) => {   
+    const user_id = req.body.user_id;
+    const cart_num = req.body.cart_number;
+    db.getConnection((con)=>{
+        con.query('SELECT track_number FROM cart WHERE cartnum = ? and u_id = ? ',[cart_num, user_id], (err, result) => {
+            if(err){                        
+                res.send(err);                       
+            } else {
+                console.log(result);
+                res.send(result[0]);
+            }
+        })
         con.release();
     });
 });

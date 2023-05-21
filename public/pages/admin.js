@@ -101,6 +101,7 @@ function setAdminCheckOrdersTableDetail(response) {
         newCell2.appendChild(newText2);
         const newText3 = document.createElement('button');
         newText3.setAttribute('id', `shipping_check_button`);
+        newText3.setAttribute('class', `admin_shipping_check_button`);
         newText3.setAttribute('value', `${element.order_number}`);
         newCell3.appendChild(newText3);
         newText3.innerText = 'shipping check';

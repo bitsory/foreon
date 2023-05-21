@@ -177,6 +177,9 @@ export default class {
     }
     
     setItemPrice(prodnum, item_price, item_instock) {
+        console.log('item_instock');
+        console.log(item_instock);
+        
         const ItemPrice = document.createElement('div');
         ItemPrice.setAttribute('id', `online_main_item_price`);
         ItemPrice.setAttribute('class', `online_main_item_price online_main_item_link`);

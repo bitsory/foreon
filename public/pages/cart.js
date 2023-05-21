@@ -738,8 +738,6 @@ document.addEventListener('click',function(e){
 
     if(e.target && e.target.className == 'shipping_info_cancel_btn') {
         
-       
-            
         
         const shipping_info_box = document.querySelector('.shipping_info_box');
         while (shipping_info_box.hasChildNodes()) {	
@@ -768,11 +766,7 @@ document.addEventListener('click',function(e){
                 }
             }
            
-});
-
-   
-        
-        
+        });
 
     }
     
@@ -1207,9 +1201,36 @@ document.addEventListener('click',function(e){
 
 
     if(e.target && e.target.id == 'purchase_history_item_track_btn') {
-        console.log(e.target.getAttribute('track-itemid'));
+        const track_number = e.target.getAttribute('track-itemid');              
+        if (track_number.length > 0) {
+            console.log("ups item track page open")
 
-       
+            const send_data = {
+                user_id : u_id,
+                cart_number : e.target.getAttribute('cart-itemid'),                
+                }
+            const option = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'                
+                    },
+                body: JSON.stringify(send_data)
+            };
+           
+            fetch('/get_track_number', option)
+            .then((res) => res.json())
+            .then(result => {
+                console.log(result);            
+                window.open(`https://wwwapps.ups.com/tracking/tracking.cgi?tracknum=${result.track_number}`);
+            });
+            
+        } else {  
+            Swal.fire({     
+                text: 'Your order item has not been shipped yet.',                   
+                width:300,
+                confirmButtonColor: '#983131',               
+            })
+        }       
     }
 
     if(e.target && e.target.id == 'js-pagination') {
@@ -1326,33 +1347,6 @@ function setBillingInfoDefaultBtn(bi_num, default_check) {
         billingInfoDefaultBtn.setAttribute('value', `default`);
     } 
 
-    // const choose_defualt_btn_container = document.createElement('div');
-    // choose_defualt_btn_container.setAttribute('class', `choose_defualt_btn_container BIN${bi_num}`);
-    // document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(choose_defualt_btn_container);
-    
-    // const billingInfoDefaultBtn = document.createElement('input');
-    // billingInfoDefaultBtn.setAttribute('id', `billing_info_default_btn BIN${bi_num}`);
-    // billingInfoDefaultBtn.setAttribute('class', `billing_info_default_btn BIN${bi_num}`);
-    // billingInfoDefaultBtn.setAttribute('type', `radio`);
-    // billingInfoDefaultBtn.setAttribute('name', `check_default_billing`);
-    // billingInfoDefaultBtn.setAttribute('value', ``);   
-    
-    // document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtn);
-    
-    // const billingInfoDefaultBtnLabel = document.createElement('label');
-    // billingInfoDefaultBtnLabel.setAttribute('class', `billing_info_default_label BIN${bi_num}`);
-    // billingInfoDefaultBtnLabel.setAttribute('for', `billing_info_default_btn BIN${bi_num}`);
-    
-    // document.querySelector(`.choose_defualt_btn_container.BIN${bi_num}`).appendChild(billingInfoDefaultBtnLabel);
-    // document.querySelector(`.billing_info_default_label.BIN${bi_num}`).innerHTML = "Default Payment";
-    // const default_check_radio = document.getElementById(`billing_info_default_btn BIN${bi_num}`);
-    // console.log(default_check_radio);
-    // console.log(default_check)
-    // if (default_check == "default") {
-    //     default_check_radio.checked = true;
-    //     billingInfoDefaultBtn.setAttribute('value', `default`);
-    // } 
-
 }
 
 function setBillingInfoEditBtn(bi_num) {
@@ -1360,13 +1354,6 @@ function setBillingInfoEditBtn(bi_num) {
     billing_info_edit_btn_container.setAttribute('id', `billing_info_edit_btn_container BIN${bi_num}`);
     billing_info_edit_btn_container.setAttribute('class', `billing_info_edit_btn_container BIN${bi_num}`);
     document.getElementById(`billing_info_detial BIN${bi_num}`).appendChild(billing_info_edit_btn_container);
-
-    // const billing_info_edit_btn = document.createElement('button');
-    // billing_info_edit_btn.setAttribute('class', `billing_info_edit_btn BIN${bi_num}`);
-    // billing_info_edit_btn.setAttribute('type', `button`);
-    // billing_info_edit_btn.setAttribute('value', `Edit`);
-    // billing_info_edit_btn.textContent = "Edit"
-    // document.querySelector(`.billing_info_edit_btn_container.BIN${bi_num}`).appendChild(billing_info_edit_btn);
 
     const billing_info_make_default_btn = document.createElement('button');
     billing_info_make_default_btn.setAttribute('class', `billing_info_make_default_btn BIN${bi_num}`);
@@ -1663,7 +1650,7 @@ export function renderShippingInfo(result) {
 }
 
 
-function viewPurchaseHistory(param, page_num) {
+export function viewPurchaseHistory(param, page_num) {
 
     console.log("view purchase History")
     document.getElementById('lorem').innerHTML = makePurchaseHistoryContainer();

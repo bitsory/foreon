@@ -381,7 +381,7 @@ const router = async () => {
             .then(result => {
                           
                 for (var i = 0 ; i < result.length ; i++) {
-                    page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell, result[i].item_instock);                        
+                    page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell, result[i].instock);                        
                 }            
             });  
         }
