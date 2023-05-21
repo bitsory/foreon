@@ -25,6 +25,7 @@ export function toggleFunc() {
     document.querySelector('.navbar_nav_list').classList.toggle('on');
     document.querySelector('.navbar_toggleBtn').classList.toggle('on');
     document.querySelector('.main').classList.toggle('on');
+    document.querySelector('.lorem').classList.toggle('on');
     document.querySelector('.footer').classList.toggle('on');
     document.querySelector('.navbar_icons').classList.toggle('on');
 }

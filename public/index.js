@@ -403,17 +403,18 @@ const router = async () => {
             });  
         }
 
-        if (menu.classList.length == 2) { // menu button toggle back
+        
 
-            main.classList.toggle('on');
-            menu.classList.toggle('on');
-            icons.classList.toggle('on');
-            footer.classList.toggle('on');
-            toggleBtn.classList.toggle('on');
-          
-        }
-
-    }  
+    } 
+    
+    if (menu.classList.length == 2) { // menu button toggle back
+        main.classList.toggle('on');
+        menu.classList.toggle('on');
+        icons.classList.toggle('on');
+        lorem.classList.toggle('on');
+        footer.classList.toggle('on');
+        toggleBtn.classList.toggle('on');      
+    }
     
 
 }; 

@@ -91,6 +91,7 @@ function setAdminCheckOrdersTableDetail(response) {
         const newCell1 = order_table_row.insertCell();
         const newCell2 = order_table_row.insertCell();
         const newCell3 = order_table_row.insertCell();
+        const newCell4 = order_table_row.insertCell();
         
 
         const newText0 = document.createTextNode(element.order_number);
@@ -99,13 +100,15 @@ function setAdminCheckOrdersTableDetail(response) {
         newCell1.appendChild(newText1);
         const newText2 = document.createTextNode(element.total_order_amount);
         newCell2.appendChild(newText2);
-        const newText3 = document.createElement('button');
-        newText3.setAttribute('id', `shipping_check_button`);
-        newText3.setAttribute('class', `admin_shipping_check_button`);
-        newText3.setAttribute('value', `${element.order_number}`);
+        const newText3 = document.createTextNode(element.u_id);
         newCell3.appendChild(newText3);
-        newText3.innerText = 'shipping check';
-        if (element.shipment == 'y') {newText3.setAttribute('disabled', 'true'); }
+        const newText4 = document.createElement('button');
+        newText4.setAttribute('id', `shipping_check_button`);
+        newText4.setAttribute('class', `admin_shipping_check_button`);
+        newText4.setAttribute('value', `${element.order_number}`);
+        newCell4.appendChild(newText4);
+        newText4.innerText = 'shipping check';
+        if (element.shipment == 'y') {newText4.setAttribute('disabled', 'true'); }
        
         newText3.onclick = shippingCheck;
     })
@@ -137,8 +140,14 @@ function shippingCheck(e) {
         const admin_label_container = document.getElementById('admin_label_container');
         admin_label_container.appendChild(image);
         
-        // window.open(image)
+        let newWindow = window.open("","","");
+        let img = newWindow.document.createElement("img"); 
+		img.setAttribute("src", image.src);  //이미지가 저장되어있는 경로를 src 안에 넣기
+		img.setAttribute("width", "50%");
+        img.setAttribute("height", "50%");
         
+		newWindow.document.body.appendChild(img);
+
         
     });
 

@@ -1197,6 +1197,43 @@ document.addEventListener('click',function(e){
             }
         });
     }
+
+    if (e.target && e.target.id == 'purchase_history_item_return_btn') {
+        console.log("item return page")
+        document.getElementById('lorem').innerHTML = PurchaseHistory.makePurchaseHistoryReturnPageContainer();
+        
+        const order_num = e.target.getAttribute('order-itemid');
+        const cart_num = e.target.getAttribute('cart-itemid');
+
+        console.log(order_num)
+        console.log(cart_num)
+        
+        
+        const send_data = {
+            order_number : order_num,
+            cart_number : cart_num,                
+            }
+        const option = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'                
+                },
+            body: JSON.stringify(send_data)
+        };
+       
+        fetch('/get_req_return_item_info', option)
+        .then((res) => res.json())
+        .then(result => {
+            console.log(result);   
+            PurchaseHistory.setPurchaseHistory(result);
+            document.getElementById('purchase_history_item_extrabox').style.display = 'none';
+            document.getElementById('purchase_history_head_order_total').style.display = 'none';
+            document.getElementById('purchase_history_order_has_shippment').style.display = 'none';
+          
+        });
+
+    }
+    
     
 
 
@@ -1789,6 +1826,7 @@ function renderPagination(_totalCount, currentPage) {
 
 };  
 
+/*
 function setPurchaseHistory(result) {
     result.forEach(element => {
         const order_id = element.order_number;
@@ -2043,6 +2081,7 @@ function setCancelOrderItem(cart_id, prodnum, order_id, refund) {
         purchase_history_item_order_cancel_btn.setAttribute('disabled', 'true'); 
     }
 }
+*/
 
 export function addBillingMethodForm() {
    

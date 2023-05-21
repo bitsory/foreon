@@ -2549,6 +2549,33 @@ function makeFullRefundFlag(ordernum, con) {
     });
 }
 
+app.post('/get_req_return_item_info', (req,res) => {
+    console.log('/get_req_return_item_info track_my_order')
+    console.log(req.body)
+
+
+    const order_number = req.body.order_number;
+    const cart_number = req.body.cart_number;
+
+    db.getConnection((con)=>{
+        con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where cart.order_number = ? and cart.cartnum = ?',[order_number, cart_number], (err, result) => {
+        
+            if(err){                        
+                res.send(err);                       
+            } else {
+                console.log(result);  
+                if (result.length == 0) {
+                    res.send({"result" : "nothing"});
+                } else {
+                    res.send(result);
+                }                      
+            }            
+        });
+        con.release();
+    });
+});
+
+
 
 app.post('/check_purchase_history', (req,res) => {
 
