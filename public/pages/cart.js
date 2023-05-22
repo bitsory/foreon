@@ -1270,13 +1270,10 @@ document.addEventListener('click',function(e){
                     .then(result => {
                         console.log(result);   
                         if (result.result == 'ok') {
-
                         document.getElementById('purchase_history_return_box').innerHTML = `
                         <div id="purchase_history_return_submit" class="purchase_history_return_submit">
-                            Your item return request has approved.<br>                          
-
-                        </div>          
-                        
+                            Your item return request has approved.<br>   
+                        </div>                                  
                         `;
                         }
                     }); 
@@ -1347,6 +1344,16 @@ document.addEventListener('click',function(e){
    
 
 });
+
+
+function showNotification(param_target_box, param_innertext, param_id) {
+    param_target_box.classList.add('show');
+    param_target_box.innerText = param_innertext;
+    param_id ? document.getElementById(param_id).focus() : false;
+    setTimeout(() => {
+        param_target_box.classList.remove('show');
+    }, 3000)
+}
 
 
 

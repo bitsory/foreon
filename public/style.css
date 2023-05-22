@@ -449,6 +449,16 @@ nav {
 }
 
 
+.item_return_btn {
+    border: 1px solid;
+    font-size: 1.2rem;
+}
+
+.purchase_history_return_cancel_btn  {
+    margin-left: 0.5rem;
+}
+
+
 
 
 #guest_checkout_shipping_info_next_btn:active {
@@ -3850,7 +3860,7 @@ ul.tabs li.current{
 
     #purchase_history {
         width: 80vw;
-        margin: 0 auto;
+        /* margin: 0 auto; */
         margin-bottom: 1.5rem;
         border-color: black;
         border-left: none;
@@ -4296,6 +4306,12 @@ ul.tabs li.current{
 
     .purchase_history_return_reason, .purchase_history_return_reason_etc_input {
         font-size: 1rem;
+    }
+
+    
+    .item_return_btn {
+        
+        font-size: 1.rem;
     }
 
 }

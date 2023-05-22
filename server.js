@@ -3508,6 +3508,94 @@ app.post('/get_shipping_rate', (req, res) => {
 });
 
 
+
+app.post('/get_admin_return_req',(req, res) => {
+    db.getConnection((con)=>{
+        con.query('select * from cart left join orders on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where item_return_req = "y" ORDER BY cart.indate DESC', (err, result) => { 
+            if (err) {
+                res.send(err);
+                // con.end();
+            } else {
+                console.log(result); 
+                res.send(result);
+            }
+        }); 
+        con.release();
+    });
+});
+
+app.post('/admin_refund_item',(req, res) => {    
+    const cartnum = req.body.cart_id;
+    const date = getDate();
+
+    db.getConnection((con)=>{
+        con.query('select * from cart left join orders on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where item_return_req = "y" and cart.refund = "n" and cart.cartnum = ?', [cartnum], (err, result) => { 
+            if(err){                        
+                res.send(err);
+                // con.end();        
+            } else {
+                console.log(result); 
+                const items = result.map(element => {
+                    return { 
+                        parent : element.item_code,
+                        amount : element.price_sell * 100 * element.quantity * 1.06,
+                        description : element.name,
+                        quantity : element.quantity,
+                        type:"sku"                            
+                    }                
+                });
+
+                const options = {
+                    method: 'POST',
+                    headers: {accept: 'application/json', 
+                    'content-type': 'application/json',
+                    authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                    "items":items
+                    })
+                };
+            
+                fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                .then(response => response.json())
+                .then(response => {                      
+                                        
+                    console.log(response);                       
+                    
+                    if (response.status == 'returned') {                            
+
+                        const returned_amount = response.items.map(element => {
+                            return element.amount / 100;                        
+                        });
+                        const prodnum = result.map(element => {return element.prodnum});
+                        
+                        const update_query_1 = "UPDATE cart SET refund = 'y', item_return_result = 'refunded', refund_date = ?, refund_amount = (CASE ";
+                        let update_query_2 = '';
+                        for (let i in returned_amount) {
+                            update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                        }                           
+                        const update_query = update_query_1 + update_query_2;
+                        console.log(update_query)
+                        con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[date, cartnum] ,(err, result) => {
+                        // con.query('UPDATE cart SET refund = "y", refund_amount = ? where cartnum = ? and prodnum = ?', [amount_returned, cartnum, last_refund[0].prodnum] ,(err, result) => { 
+                            if(err){                        
+                                res.send(err);
+                                // con.end();        
+                            } else {
+                                console.log("item return refund result");
+                                console.log(result);
+                                result.protocol41 == true ? res.send({result : "ok"}) : res.send({result : "We are very sorry...DB error occured. Can you try again?"})
+                            }
+                        })
+                    }
+                })
+            }
+        })
+        con.release();
+    });          
+});
+
+
 app.post('/get_admin_check_orders',(req, res) => {
     
     console.log("/get_admin_check_orders /get_admin_check_orders /get_admin_check_orders");
