@@ -403,8 +403,6 @@ const router = async () => {
             });  
         }
 
-        
-
     } 
     
     if (menu.classList.length == 2) { // menu button toggle back

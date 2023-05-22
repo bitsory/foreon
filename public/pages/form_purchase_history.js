@@ -11,10 +11,11 @@ export function makePurchaseHistoryContainer() {
 }
 
 export function makePurchaseHistoryReturnPageContainer() {
+    
     return `
     <div id="purchase_history_return_page_container" class="purchase_history_return_page_container">
         <div id="purchase_history_return_page" class="purchase_history_return_page">
-            <div id="purchase_history_return_title" class="purchase_history_return_title">Purchase Item Return</div>
+            <div id="purchase_history_return_title" class="purchase_history_return_title">Item Return Policy</div>
             <div id="purchase_history_return_policy" class="purchase_history_return_policy">
 
             We want you to love your purchase, but if you are not completely satisfied, 
@@ -31,8 +32,31 @@ export function makePurchaseHistoryReturnPageContainer() {
 
             Once we receive your item, a refund is initiated immediately.
             </div>
-            <div id="purchase_history_return_box" class="purchase_history_return_box"><br><br>
-            Would you like to return this item?<br>
+            <div id="purchase_history_return_box" class="purchase_history_return_box">
+                <div id="purchase_history_return_box_title" class="purchase_history_return_box_title">
+                    Would you like to return this item?<br>            
+
+                    <div id="purchase_history_return_btn_box" class="purchase_history_return_btn_box">
+                        <button id="purchase_history_return_submit_btn" class="purchase_history_return_submit_btn item_return_btn">Submit</button>
+                        <button id="purchase_history_return_cancel_btn" class="purchase_history_return_cancel_btn item_return_btn">Cancel</button>
+                    </div>
+                </div>
+
+                <div id="purchase_history_return_reason_select_box" class="purchase_history_return_reason_select_box">
+                    <select name="purchase_history_return_reason" id="purchase_history_return_reason" class="purchase_history_return_reason">
+                        <option value="">Please choose return reason</option>
+                        <option value="change_mind">I changed my mind. I don't need this item.</option>
+                        <option value="damage">The product was damaged or defective.</option>
+                        <option value="shippment">Late arrival, delivery issue</option>
+                        <option value="wrong_item">Wrong item delivered</option>
+                        <option value="etc">Input other reason</option>
+                        
+                    </select>
+                    <input type="text" name='etc' id='purchase_history_return_reason_etc_input' class='purchase_history_return_reason_etc_input'>
+                </div>    
+                <div id="purchase_history_return_extra_box" class="purchase_history_return_extra_box"></div>
+            </div>
+           
             <div id="purchase_history_box" class="purchase_history_box"></div>
 
             </div>
@@ -297,7 +321,9 @@ function setPurchaseHistoryItemTrack(cart_id, prodnum, track_number) {
     purchase_history_item_track_btn.innerText = 'Not Shipped Yet'
 }
 
+
 function setCancelOrderItem(cart_id, prodnum, order_id, refund, track_number, item_return_result) {
+
     if (track_number) {
         console.log("track number exist")
         const purchase_history_item_order_cancel_btn = document.createElement('button');
@@ -309,8 +335,11 @@ function setCancelOrderItem(cart_id, prodnum, order_id, refund, track_number, it
         purchase_history_item_order_cancel_btn.setAttribute('itemid', `${prodnum}`);
         document.querySelector(`[extrabox_orderid="${cart_id}${prodnum}"]`).appendChild(purchase_history_item_order_cancel_btn);
         purchase_history_item_order_cancel_btn.innerText = 'Return This Item';
-        if (item_return_result && item_return_result == 'y') {
-            purchase_history_item_order_cancel_btn.innerText = 'Item order Canceled';
+        if (item_return_result && item_return_result == 'submitted') {
+            purchase_history_item_order_cancel_btn.innerText = 'Return request approved';
+            purchase_history_item_order_cancel_btn.setAttribute('disabled', 'true'); 
+        } else if (item_return_result && item_return_result == 'refunded') {
+            purchase_history_item_order_cancel_btn.innerText = 'Refunded';
             purchase_history_item_order_cancel_btn.setAttribute('disabled', 'true'); 
         }
     } else {
@@ -330,3 +359,4 @@ function setCancelOrderItem(cart_id, prodnum, order_id, refund, track_number, it
         }
     }
 }
+

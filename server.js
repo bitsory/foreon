@@ -2576,6 +2576,33 @@ app.post('/get_req_return_item_info', (req,res) => {
 });
 
 
+app.post('/item_return', (req,res) => {
+    console.log('item_return item_return item_return')
+    console.log(req.body)
+    const order_number = req.body.order_number;
+    const cart_number = req.body.cart_number;
+    const return_reason = req.body.return_reason;
+    const return_reason_etc = req.body.return_reason_etc;
+    const set_reason = return_reason == 'etc' ? 'etc: ' + return_reason_etc : return_reason
+  
+
+    db.getConnection((con)=>{
+        con.query('UPDATE test1.cart SET item_return_req = "y", item_return_result = "submitted", item_return_reason = ? WHERE order_number = ? and cartnum = ?',[set_reason, order_number, cart_number], (err, result) => {
+        
+            if(err){                        
+                res.send(err);                       
+            } else {
+                console.log(result);
+                result.protocol41 == true ? res.send({result : "ok"}) : res.send({result : "We are very sorry...DB error occured. Can you try again?"})                  
+            }            
+        });
+        con.release();
+    });
+
+
+});
+
+
 
 app.post('/check_purchase_history', (req,res) => {
 

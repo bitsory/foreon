@@ -1198,6 +1198,8 @@ document.addEventListener('click',function(e){
         });
     }
 
+
+    
     if (e.target && e.target.id == 'purchase_history_item_return_btn') {
         console.log("item return page")
         document.getElementById('lorem').innerHTML = PurchaseHistory.makePurchaseHistoryReturnPageContainer();
@@ -1207,8 +1209,7 @@ document.addEventListener('click',function(e){
 
         console.log(order_num)
         console.log(cart_num)
-        
-        
+                
         const send_data = {
             order_number : order_num,
             cart_number : cart_num,                
@@ -1229,7 +1230,70 @@ document.addEventListener('click',function(e){
             document.getElementById('purchase_history_item_extrabox').style.display = 'none';
             document.getElementById('purchase_history_head_order_total').style.display = 'none';
             document.getElementById('purchase_history_order_has_shippment').style.display = 'none';
-          
+            
+            document.getElementById('purchase_history_return_reason').addEventListener("change", (event) => {
+                console.log(event.target.value)
+                if (event.target.value == 'etc') {
+                    document.getElementById('purchase_history_return_reason_etc').style.display = 'flex';
+
+                } else {
+                    document.getElementById('purchase_history_return_reason_etc').style.display = 'none';
+                    document.getElementById('purchase_history_return_reason_etc').value = '';
+                }
+            });
+
+            document.getElementById('purchase_history_return_submit_btn').addEventListener("click", (event) => {
+
+                const return_reason = document.getElementById('purchase_history_return_reason');
+                const purchase_history_return_extra_box = document.getElementById('purchase_history_return_extra_box');
+                const purchase_history_return_reason_etc = document.getElementById('purchase_history_return_reason_etc_input').value;
+                
+                if ((return_reason.value && return_reason.value != 'etc') || (return_reason.value == 'etc' && purchase_history_return_reason_etc != '')) {
+                    console.log("item return submit")
+
+                    const send_data = {
+                        order_number : order_num,
+                        cart_number : cart_num,
+                        return_reason : return_reason.value,
+                        return_reason_etc : purchase_history_return_reason_etc
+                        }
+                    const option = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'                
+                            },
+                        body: JSON.stringify(send_data)
+                    };
+                   
+                    fetch('/item_return', option)
+                    .then((res) => res.json())
+                    .then(result => {
+                        console.log(result);   
+                        if (result.result == 'ok') {
+
+                        document.getElementById('purchase_history_return_box').innerHTML = `
+                        <div id="purchase_history_return_submit" class="purchase_history_return_submit">
+                            Your item return request has approved.<br>                          
+
+                        </div>          
+                        
+                        `;
+                        }
+                    }); 
+        
+                } else if (return_reason.value == 'etc' && purchase_history_return_reason_etc == '') {           
+                    showNotification(purchase_history_return_extra_box, 'please input return reason...');
+                } else {
+                    showNotification(purchase_history_return_extra_box, 'please select return reason...');
+                }
+            });
+
+            document.getElementById('purchase_history_return_cancel_btn').addEventListener("click", (event) => {
+                history.pushState(null, null, `/purchase-history`); // url change
+                (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
+                viewPurchaseHistory({user_id:u_id});
+                WEBS.toggleFunc();
+            });
         });
 
     }
