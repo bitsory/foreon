@@ -133,7 +133,7 @@ export function setUserProfileChangePage(u_id) {
         console.log(u_id)
 
         if (u_id == 'GUEST') {
-            document.getElementById('lorem').innerText = 'Login Please...';
+            ddocument.getElementById('lorem').textContent = 'Login Please...';
         } else {
             changeProfile();
 
@@ -1234,11 +1234,11 @@ document.addEventListener('click',function(e){
             document.getElementById('purchase_history_return_reason').addEventListener("change", (event) => {
                 console.log(event.target.value)
                 if (event.target.value == 'etc') {
-                    document.getElementById('purchase_history_return_reason_etc').style.display = 'flex';
+                    document.getElementById('purchase_history_return_reason_etc_input').style.display = 'flex';
 
                 } else {
-                    document.getElementById('purchase_history_return_reason_etc').style.display = 'none';
-                    document.getElementById('purchase_history_return_reason_etc').value = '';
+                    document.getElementById('purchase_history_return_reason_etc_input').style.display = 'none';
+                    document.getElementById('purchase_history_return_reason_etc_input').value = '';
                 }
             });
 

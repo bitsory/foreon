@@ -464,31 +464,34 @@ export default class {
         </div>
         `;
     }
-
+    
     makeTrackMyOrderForm() {
         return `
             <div id="track_my_order_form_container" class="track_my_order_form_container">
                 <div id="track_my_order" class="track_my_order">
                     <div id="track_my_order_title" class="track_my_order_title">CHECK ORDER</div>
                     <div id="track_my_order_subtitle" class="track_my_order_subtitle">See your order even if you are not a registered user.<br> 
-                    Enter the order number and the billing address ZIP code.</div>
-                    <form id="track_my_order_form">
-                        Order Number *    
-                        <input type="text" id="track_my_order_number" class="track_my_order_number track_my_order_input" title="use your order number when you got order confirm" required>
-                        Order Email *
-                        <input type="text" id="track_my_order_email" class="track_my_order_email track_my_order_input" title="use your email when you order" required>
-                        Billing ZIP Code *
-                        <input type="text" id="track_my_order_zip" class="track_my_order_zip track_my_order_input" title="use your billing zip code when you order" required>
-                        <button type="button" id="track_my_order_check_btn" class="track_my_order_check_btn" title="check order status">
-                        CHECK STATUS
-                        </button>
-                    </form>
-                    <div id="track_my_order_alert_box" class="track_my_order_alert_box"></div>
+                    Enter the order number and the billing address ZIP code.<br><br>
+                    This page is tracking order for GUEST mode.<br>
+                    If you have a ID here web site, you can use purchase history page for your tracking order after sign in.
+                    
+                </div>
+                <form id="track_my_order_form">
+                    Order Number *    
+                    <input type="text" id="track_my_order_number" class="track_my_order_number track_my_order_input" title="use your order number when you got order confirm" required>
+                    Order Email *
+                    <input type="text" id="track_my_order_email" class="track_my_order_email track_my_order_input" title="use your email when you order" required>
+                    Billing ZIP Code *
+                    <input type="text" id="track_my_order_zip" class="track_my_order_zip track_my_order_input" title="use your billing zip code when you order" required>
+                    <button type="button" id="track_my_order_check_btn" class="track_my_order_check_btn" title="check order status">
+                    CHECK STATUS
+                    </button>
+                </form>
+                <div id="track_my_order_alert_box" class="track_my_order_alert_box"></div>
                 </div>
             </div>
         `;
     }
-
 
     makeFindPasswordForm() {
         return `

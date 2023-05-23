@@ -236,8 +236,23 @@ document.addEventListener('click', function(e){
         const shop_category = e.target.getAttribute('value');
         console.log(shop_category);
         setShopCategoryPage(shop_category);
+    }
+
+    if(e.target && e.target.id == 'item_search_btn') {
+        console.log("e.target && e.target.id == 'item_search_btn");
+        const item_search_name = document.getElementById('item_search_input').value;
+        console.log(item_search_name);
+        setShopSearchPage(item_search_name);
 
     }
+
+    document.getElementById('item_search_input').addEventListener('keyup', (e)=> {
+        if(e.target && e.target.id == 'item_search_input' && (e.keyCode == 13)) {  
+            const item_search_name = document.getElementById('item_search_input').value;
+            console.log(item_search_name);
+            setShopSearchPage(item_search_name);           
+        }
+    }) 
 
 
    
@@ -300,23 +315,22 @@ const router = async () => {
         PurchaseHistoryInCart.setUserProfileChangePage(user_id);  
         history.pushState(null, null, `/account/user-info`);   
 
-    } else if (path_name.substring(0, 16) == '/account/billing') {
-        
+    } else if (path_name.substring(0, 16) == '/account/billing') {        
         const user_id = user_cart.c_id;  
         PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
-        PurchaseHistoryInCart.chooseTabLink(`tab-2`, 'go_back');
-
-    } else if (path_name.substring(0, 17) == '/account/shipping') {
-       
+        (user_id && user_id != 'GUEST') ? PurchaseHistoryInCart.chooseTabLink(`tab-2`, 'go_back') : false;
+    } else if (path_name.substring(0, 17) == '/account/shipping') {       
         const user_id = user_cart.c_id;  
         PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
-        PurchaseHistoryInCart.chooseTabLink(`tab-3`, 'go_back');
-
+        (user_id && user_id != 'GUEST') ? PurchaseHistoryInCart.chooseTabLink(`tab-3`, 'go_back') : false;
     } else if (path_name.substring(0, 17) == '/purchase-history') {  
         const user_id = user_cart.c_id;  
         goPurchaseHistory(user_id);
-    }
-    else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
+
+    } else if (path_name.substring(0, 13) == '/track-orders') { 
+        goTrackMyOrder();
+
+    } else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
         console.log("라우터 고 카트 or go order")
         view_cart();   
     } else if (path_name.substring(0, 22) == '/shop/checkout/GUEST/i' || path_name.substring(0, 23) == '/shop/checkout/member/i') { // back to place order page
@@ -336,6 +350,10 @@ const router = async () => {
         const category_param = location.pathname.substring(15);
         console.log(category_param)
         setShopCategoryPage(category_param);
+    } else if (path_name.substring(0, 12) == '/shop/search') {  
+        console.log("뒤로가기 뷰 아이템 검색 페이지")
+        const search_param = location.pathname.substring(13);       
+        setShopSearchPage(search_param);
 
     } else {
 
@@ -358,15 +376,14 @@ const router = async () => {
         console.log("match :", match);
 
         let page = new match.route.view1();   
-        document.getElementById("lorem").innerHTML = await page.getHtml(); 
-        
-        
+        document.getElementById("lorem").innerHTML = await page.getHtml();         
         
         if(match.route.path == "/home" || match.route.path == "/" || match.route.path == "" || match.route.path == "/cafefore/" || match.route.path == "/cafeFORE/") {
             console.log(match.route.path);
             main_background.style.display = "flex";
             page.quickButton();
             page.quickBtnEventListener();
+            document.getElementById('online_title').style.display = 'none';
         
         }
 
@@ -417,7 +434,7 @@ const router = async () => {
 
 }; 
 
-window.addEventListener("popstate", (e) => {
+window.addEventListener("popstate", (e) => { // go back
     console.log("popstate");
    
     let path_name = location.pathname;    
@@ -427,22 +444,24 @@ window.addEventListener("popstate", (e) => {
         PurchaseHistoryInCart.setUserProfileChangePage(user_id);     
 
     } else if (path_name.substring(0, 16) == '/account/billing') {
-        console.log("path_name.substring(0, 16) == '/account/billing")  
+       
         const user_id = user_cart.c_id;  
         PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
-        PurchaseHistoryInCart.chooseTabLink(`tab-2`, 'go_back');
+        (user_id && user_id != 'GUEST') ? PurchaseHistoryInCart.chooseTabLink(`tab-2`, 'go_back'): false;      
 
     } else if (path_name.substring(0, 17) == '/account/shipping') {
-        console.log("path_name.substring(0, 17) == '/account/shipping")  
+       
         const user_id = user_cart.c_id;  
         PurchaseHistoryInCart.setUserProfileChangePage(user_id);   
-        PurchaseHistoryInCart.chooseTabLink(`tab-3`, 'go_back');
+        (user_id && user_id != 'GUEST') ? PurchaseHistoryInCart.chooseTabLink(`tab-3`, 'go_back') : false;
 
     } else if (path_name.substring(0, 17) == '/purchase-history') {  
         const user_id = user_cart.c_id;  
         goPurchaseHistory(user_id, 'go_back');
-    }
-    else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
+    } else if (path_name.substring(0, 13) == '/track-orders') { 
+        goTrackMyOrder('go_back');
+
+    } else if ((path_name.substring(0, 10) == '/shop/cart') || (path_name.substring(0, 11) == '/shop/order')){ // back to cart page
         console.log("뒤로가기 카트")
         view_cart('go_back');      
     } else if (path_name.substring(0, 22) == '/shop/checkout/GUEST/i' || path_name.substring(0, 23) == '/shop/checkout/member/i') { // back to place order page
@@ -461,38 +480,38 @@ window.addEventListener("popstate", (e) => {
         const category_param = location.pathname.substring(15);
         console.log(category_param)
         setShopCategoryPage(category_param, 'go_back');
+    } else if (path_name.substring(0, 12) == '/shop/search') {  
+        console.log("뒤로가기 뷰 아이템 검색 페이지")
+        const search_param = location.pathname.substring(13);       
+        setShopSearchPage(search_param, 'go_back');
 
     } else {
         console.log("뒤로가기 일반 페이지")
         router();
     }
+    
+    if (menu.classList.length == 2) { // menu button toggle back
+        main.classList.toggle('on');
+        menu.classList.toggle('on');
+        icons.classList.toggle('on');
+        lorem.classList.toggle('on');
+        footer.classList.toggle('on');
+        toggleBtn.classList.toggle('on');      
+    }
 });
 
 
 document.addEventListener("DOMContentLoaded", () => { // run first
-    // var link = document.location.href; 
-    // console.log(`link : ${link}`);
     
     document.body.addEventListener("click", (e) => { // menu link click
-        // var link = document.location.href; 
-        // console.log(`link : ${link}`);
         
-        // console.log(`index.js document.body.addEventListener(click, (e): ${JSON.stringify(e)}`);
-        // console.log(`index.js document.body.addEventListener(click, (e): ${e}`);
-        if (e.target.matches("[data-link-T]")) {
-            console.log("data - link router before");
-            console.log(e.target);
-            console.log(e.target.href);
+        if (e.target.matches("[data-link-T]")) {       
             e.preventDefault();
-            history.pushState(null, null, e.target.href); // change url address
-            // history.pushState(null, null, "http://localhost:8080/about");
-            router();           
-           
+            history.pushState(null, null, e.target.href); // change url address    
+            router();                      
         }
-    });
-   
+    });   
     router();
-
 
 });
 
@@ -642,13 +661,56 @@ function setCartModalPageDetail() {
     });
 }
 
+// function goPurchaseHistory(user_id, param) {
+    
+//     (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
+//     PurchaseHistoryInCart.viewPurchaseHistory({user_id:user_id});
+//     WEBS.toggleFunc();
+//     (param == 'go_back') ? false : history.pushState(null, null, `/purchase-history`);
+// }
+
+
+function goTrackMyOrder(param) {
+    (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
+   
+    if (loginpage_flag) { 
+        console.log(loginpage)            
+        modal_page.innerHTML = loginpage.makeSignInForm();
+        
+    } else {
+        loginpage = new Login();            
+        loginpage_flag = true;
+    }
+    document.getElementById('lorem').innerHTML = loginpage.makeTrackMyOrderForm();
+    (param == 'go_back') ? false : history.pushState(null, null, `/track-orders`);
+  
+    WEBS.toggleFunc();
+
+}
+
+
 function goPurchaseHistory(user_id, param) {
     
     (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
-    PurchaseHistoryInCart.viewPurchaseHistory({user_id:user_id});
+    if (user_id && user_id != 'GUEST') {
+        PurchaseHistoryInCart.viewPurchaseHistory({user_id:user_id});
+        (param == 'go_back') ? false : history.pushState(null, null, `/purchase-history`);
+    } else {  
+        if (loginpage_flag) { 
+            console.log(loginpage)            
+            modal_page.innerHTML = loginpage.makeSignInForm();
+          
+        } else {
+            loginpage = new Login();            
+            loginpage_flag = true;
+        }
+        document.getElementById('lorem').innerHTML = loginpage.makeTrackMyOrderForm();
+        (param == 'go_back') ? false : history.pushState(null, null, `/track-orders`);
+    }
     WEBS.toggleFunc();
-    (param == 'go_back') ? false : history.pushState(null, null, `/purchase-history`);
+    
 }
+
 
 function view_cart(param) {
     console.log("index.js go cart index.js go cart index.js go cart index.js go cart");
@@ -1285,6 +1347,36 @@ function soldOutItemMarker(item_instock) {
         add_cart_btn.style.backgroundColor = 'grey';
         add_cart_btn.style.color = 'white';
     }
+}
+
+function setShopSearchPage(search_param, param) {
+    let shop_data = { shop_search_item : search_param};        
+    const data = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(shop_data)
+    };
+                
+    fetch('/shop_search', data)
+    .then((res) => res.json())
+    .then(result => {
+        console.log("shop search result");
+        console.log(result)   
+        if (result.length > 0) {
+            let shop_category_page = new Shop();
+            (document.querySelector('.main_background__blink')) ? document.querySelector('.main_background__blink').style.display = "none" : false;
+            document.getElementById("lorem").innerHTML = shop_category_page.getHtml(); 
+
+            for (let i = 0 ; i < result.length ; i++) {
+                shop_category_page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell, result[i].instock);                        
+            } 
+        } else {
+            document.getElementById('page_main_part').innerText = `no result for '${search_param}'`;
+        }
+        
+        (param == 'go_back') ? false : history.pushState(null, null, `/shop/search/${search_param}`);  
+
+    });  
 }
 
 

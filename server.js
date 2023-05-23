@@ -228,10 +228,21 @@ app.get('/account/shipping-infomation', (req,res) => {
     res.render('index.ejs', { post : member_name });  
 });
 
+app.get('/track-orders', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
 app.get('/shop/category/:id', (req,res) => {
     const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
     res.render('index.ejs', { post : member_name });  
 });
+
+app.get('/shop/search/:id', (req,res) => {    
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
 
 
 
@@ -1857,6 +1868,30 @@ app.post('/shop_category',(req,res) => {
                 // con.end();        
             } else {
                
+                res.send(result);                
+            }                        
+        });    
+        con.release();
+    });
+});
+
+app.post('/shop_search', (req,res) => {
+    console.log("/shop_search /shop_search /shop_search ");
+    console.log(req.body)
+    const name = req.body.shop_search_item;
+
+    db.getConnection((con)=>{   
+        con.query('SELECT * from product WHERE useyn="y" and name LIKE ?', ['%' + name + '%'],(err, result) => {
+            if(err){
+                res.send(err);
+                console.log(err);
+                // con.end();        
+            } else {
+                if (result.length > 0) {
+               
+                console.log(`${result[0].prodnum}`);
+                }
+
                 res.send(result);                
             }                        
         });    

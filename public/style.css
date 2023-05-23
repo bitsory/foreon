@@ -458,6 +458,13 @@ nav {
     margin-left: 0.5rem;
 }
 
+.purchase_history_return_submit {
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-decoration: underline;
+    color: var(--maincolor);
+}
+
 
 
 
@@ -1100,10 +1107,12 @@ nav {
     /* justify-content: space-evenly; */
 }
 
-.form-row-nm-em {
-    width: 50%;
+.form-row-nm {
+    width: 47%;
     margin-right: 1rem;
-
+}
+.form-rowem {
+    width: 47%;  
 }
 
 .contact_lb {
@@ -1195,6 +1204,22 @@ nav {
 .shop_category {
     background-color: none;
     /* margin-left: 1rem; */
+}
+
+
+.item_search_btn {
+    width: 2rem;
+    height: 1.5rem;
+    background-color: rgba(0,0,0,0);
+    border: 1px solid white;
+}
+
+.fa-search {
+    color: white;
+}
+
+.item_search_input {
+    width: 10rem;
 }
 
 #online_main {
@@ -2196,6 +2221,12 @@ padding-right: 1px; */
     margin: 1rem;
     text-align: left;
     
+}
+
+.track_my_order_subtitle {
+    width: 26rem;
+    text-align: left;
+    margin-bottom: 1rem;
 }
 
 .track_my_order_input, .find_password_input {
@@ -3624,6 +3655,11 @@ ul.tabs li.current{
         font-size: 0.8rem;
     }
 
+    .track_my_order_subtitle {
+        width: auto;
+        padding-left: 1rem;
+    }
+
     .find_password_name {
         display: flex;
     }
@@ -4309,10 +4345,15 @@ ul.tabs li.current{
     }
 
     
-    .item_return_btn {
-        
-        font-size: 1.rem;
+    .item_return_btn {        
+        font-size: 1rem;
     }
+
+    .page_el { 
+        margin-right: 0.5rem;
+    }
+
+    
 
 }
 
@@ -4328,7 +4369,7 @@ ul.tabs li.current{
     .checkout_ctl_btn:hover, .guest_checkout_edit_btn:hover,
     .shipping_info_edit_btn:hover, .shipping_info_delete_btn:hover, 
     .shipping_info_make_default_btn:hover, .purchase_page_btn:hover, .item_link:hover, 
-    .cart_modal_go_shop_btn:hover, .admin_shipping_check_button:hover, .item_return_btn:hover {
+    .cart_modal_go_shop_btn:hover, .admin_shipping_check_button:hover, .item_return_btn:hover, .item_search_btn:hover {
         cursor: pointer;
         transform: scale(1.1);
     }

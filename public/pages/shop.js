@@ -9,77 +9,7 @@ export default class {
     // lorem = document.getElementById('lorem');
 
     constructor() {
-        document.title = "Cafe FORE";
-        console.log("shop page");
-
-
-        // this.n_cart = Main;    
-        /*
-        this.lorem.addEventListener('click', function(e) {
-
-            console.log( " shop page double up check shop page double up check shop page double up check ")
-
-            if (e.target && (e.target.className =='online_main_item_name' || e.target.className == 'online_main_item_pic' || e.target.className == 'online_main_item_price')) {
-                
-                let item_num = e.target.parentElement.getAttribute('link_data_itemid');
-                console.log('itemid');
-                console.log(item_num);
-
-                const send_data = { post : "item detail view"};
-                const data = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    
-                        },
-                    body: JSON.stringify(send_data)
-                };
-                console.log(data);
-
-                fetch(`/shop/view/item/${item_num}`, data)
-                // fetch('/shopview', data)
-                .then((res) => res.json())
-                .then(result => {
-                    
-                    console.log(result)  
-                    // console.log(this.n_cart);
-
-                    const item_image = result.image;
-                    const item_num = result.prodnum;
-                    const item_name = result.name;
-                    const item_price = result.price_sell;
-                    const item_content = result.content;
-                    const shop_detail = new ShopDetail(item_num, item_name, item_price, item_image, item_content);
-
-                    // document.querySelector(".online_main").innerHTML = 
-                    //     shop_detail.getHtml(item_image, item_num, item_name, item_price, item_content);
-
-                    if (typeof (history.pushState) != "undefined") { 
-                        history.pushState(null, null, `/shop/view/item/${result.prodnum}`); 
-                        console.log(result)
-                        // const place_order = new PlaceOrder();
-                        // PlaceOrder.test();
-                        document.querySelector(".online_main").innerHTML = 
-                        shop_detail.getHtml(item_image, item_num, item_name, item_price, item_content);
-                        // `<div class="online_item_pic_container">ITEM
-                        // </div>`
-                        
-                        // document.querySelector(".shop_test").innerHTML = result.name;
-                        // document.querySelector('.cart_time_remaining').innerText = cart_time_remaining;
-                    } else { 
-                        this.location.href = `http://localhost:8080/shop/view/item/${result.prodnum}`
-                    }
-                });
-            }
-
-            
-            if (e.target && e.target.className == 'shop_wellness_btn') {
-                console.log("shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn ");
-
-                document.querySelector('.test_container').innerText = "test";
-            }
-        })
-        */
+        document.title = "Cafe FORE";      
     }
 
     getHtml() {  
@@ -87,10 +17,10 @@ export default class {
         <div id="online_container" class="online_container">
             <div id="online_title" class="online_title">
                 <a href="/shop" id="online_title_label" class="online_title_label" data-link-T>Cafe FORE Online Shop</a>
-                <form class="example" action="#">
-                    <input type="text" placeholder="Search.." name="search">
-                    <button type="submit"><i class="fa fa-search"></i></button>
-                </form>
+                <div id="item_search_form">
+                    <input type="text" id="item_search_input" class="item_search_input" placeholder="Search..">
+                    <button type="button" id="item_search_btn" class="item_search_btn"><i class="fa fa-search"></i></button>
+                </div>
                 <div id="shop_category_container" class="shop_category_container">
                     <div id="shop_cat_wellness" class="shop_cat_wellness shop_category">
                         <button id="shop_wellness_btn" class="category_btn" value='wellness'>Wellness</button>
@@ -106,12 +36,13 @@ export default class {
                     </div>
                 </div>
             </div>
-
-            <div id="online_main" class="online_main">
-                <div id="online_main_label" class="online_main_label">
-                MD's Choice items
-                </div>
-                <div id="online_main_items" class="online_main_items">
+            <div id="page_main_part" class="page_main_part">
+                <div id="online_main" class="online_main">
+                    <div id="online_main_label" class="online_main_label">
+                    MD's Choice items
+                    </div>
+                    <div id="online_main_items" class="online_main_items">
+                    </div>
                 </div>
             </div>
         </div>
