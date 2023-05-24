@@ -1111,7 +1111,7 @@ nav {
     width: 47%;
     margin-right: 1rem;
 }
-.form-rowem {
+.form-row-em {
     width: 47%;  
 }
 
@@ -1220,6 +1220,8 @@ nav {
 
 .item_search_input {
     width: 10rem;
+    font-size: 0.9rem;
+    border: none;
 }
 
 #online_main {

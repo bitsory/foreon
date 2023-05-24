@@ -327,37 +327,34 @@ document.addEventListener('click',function(e){
 
     }
 
-    if(e.target && e.target.id == 'general_info_change_pswd_submit_btn') {        
+    if(e.target && e.target.id == 'general_info_change_pswd_submit_btn') {
+        const change_cur_pw = document.getElementById('input_general_current_password');
+        const change_new_pw = document.getElementById('input_general_new_password'); 
+        const change_new_pw_confirm = document.getElementById('input_general_new_password_cofirm');         
+
         const extra_box = document.getElementById('change_pswd_extra');
-        if (!(document.getElementById('input_general_current_password').value)) {
-            document.getElementById('change_pswd_extra').textContent = "Please Input your current password...";
-            document.getElementById('input_general_current_password').focus();
-            // WEBS.removeFadeOut( extra_box, 5000 );
-        } else if (!(document.getElementById('input_general_new_password').value)) {
-            document.getElementById('change_pswd_extra').textContent = "Please Input your new password...";
-            document.getElementById('input_general_new_password').focus();
-            // WEBS.removeFadeOut( extra_box, 5000 );
-        } else if (!(document.getElementById('input_general_new_password_cofirm').value)) {
-            document.getElementById('change_pswd_extra').textContent = "Please Input your new password once again...";
-            document.getElementById('input_general_new_password_cofirm').focus();
-            // WEBS.removeFadeOut( extra_box, 5000 );        
+        if (!(change_cur_pw.value)) {
+            extra_box.textContent = "Please Input your current password...";
+            change_cur_pw.focus();
+            
+        } else if (!(change_new_pw.value)) {
+            extra_box.textContent = "Please Input your new password...";
+            change_new_pw.focus();
+          
+        } else if (!(change_new_pw_confirm).value) {
+            extra_box.textContent = "Please Input your new password once again...";
+            change_new_pw_confirm.focus();
+             
         } else {
             WEBS.getPBKey().then(key => {
-                console.log(key);
 
-                const change_cur_pw = document.getElementById('input_general_current_password').value;
-                const change_new_pw = document.getElementById('input_general_new_password').value; 
-                const change_new_pw_confirm = document.getElementById('input_general_new_password_cofirm').value; 
-
-                if (change_new_pw === change_new_pw_confirm) {                
-                    console.log("sign up progress")
-                    // SPINNER.turnOffDisplay();
-                    
+                if (change_new_pw.value === change_new_pw_confirm.value) {                
+                  
                     const crypt = new JSEncrypt();
                     crypt.setPublicKey(key);         
 
-                    const encrypted_cur = crypt.encrypt(change_cur_pw);
-                    const encrypted_new = crypt.encrypt(change_new_pw);
+                    const encrypted_cur = crypt.encrypt(change_cur_pw.value);
+                    const encrypted_new = crypt.encrypt(change_new_pw.value);
                     const send_data = {
                     
                         id : u_id,                   
@@ -367,28 +364,41 @@ document.addEventListener('click',function(e){
                     
                     const data = {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                            // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                            },
-                        body: JSON.stringify(send_data),
-                        
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(send_data),                        
                     };
-                    console.log(data);
-        
                     fetch('/change_password', data)
                     .then((res) => res.json())
                     .then(result => {
                         // SPINNER.turnOnDisplay();
-                        console.log(result);
+                        
                         if (result.result == "ok") {
-                            alert("Password has changed!")
-                        } else {
-                            alert(result.result);
+                            // alert("Password has changed!")
+                            change_cur_pw.value = '';
+                            change_new_pw.value = '';
+                            change_new_pw_confirm.value = '';
+
+                            Swal.fire({                       
+                                // html: swal_html,                    
+                                text: 'Password has changed!',
+                                icon: 'success',
+                                width:400,
+                                confirmButtonColor: '#983131',               
+                            
+                            }).then(result => {
+                                window.location.href = "https://gocafefore.com";                              
+                            });
+                                    
+                        } else {                          
+                            Swal.fire({   
+                                text: result.result,
+                                width:400,
+                                confirmButtonColor: '#983131',               
+                            })
                         }
                     });
                 } else {
-                    document.getElementById('change_pswd_extra').innerText = "please make sure to confirm password"
+                    extra_box.innerText = "please make sure to confirm password"
                 }
             })
         }

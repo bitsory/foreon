@@ -356,6 +356,19 @@ app.post('/sign_up', (req,res) => {
         const sign_up_phone = req.body.uphone;
         const redirect_path = req.body.c_path; ///// need to update the welcome page 
         const date = getDate();    
+        const main_message = 
+            `
+            Hello. ${sign_up_first_name}
+            This is cafe FORE.
+
+            Thank you for join us.
+            Take a look around!
+
+            cafe FORE
+            
+            `;      
+                                
+        const subject_message = `cafe FORE sign up email`;
 
         db.getConnection((con)=>{
             con.query('select COALESCE(MAX(id), "false") AS id from users where id = ?', [sign_up_id], (err, result) => {
@@ -391,8 +404,8 @@ app.post('/sign_up', (req,res) => {
                                 res.send(err);
                                   
                             } else {
-                                console.log("sign up complete!!");                           
-
+                                console.log("sign up complete!!");    
+                                sendMailSESTemplate(sign_up_id, main_message, subject_message);
                                 updateLastLog(con, sign_up_id, sign_up_first_name, req, res, date, redirect_path, clv_id, "signup");
                             }               
                         }); 
@@ -496,6 +509,19 @@ app.post('/g_sign_in', function (req,res) {
 
     const g_loginid = decrypt.decrypt(aid);
     const decryptedbpw = decrypt.decrypt(bpw);
+    
+    const main_message = 
+        `
+        Hello. ${first_name}
+        This is cafe FORE.
+
+        Thank you for join us.
+        Take a look around!
+        
+        cafe FORE
+        `;      
+                                
+    const subject_message = `cafe FORE sign up email`;
  
 
     ///////////////////// DB sign up check //////////////////////////////////
@@ -529,7 +555,7 @@ app.post('/g_sign_in', function (req,res) {
                         const clv_id = response.id;
                         con.query('INSERT INTO users (id, pw, first_name, last_name, clv_id, email, phone, resi_date, last_log, salt, description) values (?,?,?,?,?,?,?,?,?,?,?)', 
                         [g_loginid, sign_up_pw, first_name, last_name, clv_id, g_loginid, "", date, date, signup_salt, "google"]);
-
+                        sendMailSESTemplate(g_loginid, main_message, subject_message);
                         updateLastLog(con, g_loginid, first_name, req, res, date, redirect_path, clv_id);
                     })
                 })
@@ -659,7 +685,7 @@ app.post('/find_password', (req,res) => {
     const u_id = req.body.email;
     const u_first_name = req.body.first_name;
     const u_last_name = req.body.last_name;
-
+    const date = getDate();
     const crypto = require('crypto');
     const buf = crypto.randomBytes(64);
 
@@ -711,8 +737,9 @@ app.post('/find_password', (req,res) => {
                                 res.send(err);
                                 // con.end();
                             } else {
-                                console.log(result);
-                                sendTmpPswdMail();                                 
+                                // console.log(result);
+                                // sendTmpPswdMail();  
+                                sendTMPMailSES(u_id, tmp_pass, date)                               
 
                                 res.send({"result" : "ok"});
                             }                    
@@ -741,6 +768,77 @@ app.post('/find_password', (req,res) => {
 
 
 });
+
+                
+function sendTMPMailSES(toAddress, tmp_pass, date) {
+    AWS.config.update({
+        credentials: {
+        "accessKeyId": process.env.AWS_ACCESS_KEY_ID, 
+        "secretAccessKey": process.env.AWS_SECRET_ACCESS_KEY,
+        },
+        "region": process.env.AWS_REGION
+    });
+
+    // Create sendEmail params 
+    var params = {
+    Destination: { /* required */
+        CcAddresses: [
+            toAddress,
+        /* more items */
+        ],
+        ToAddresses: [
+            toAddress,
+        /* more items */
+        ]
+    },
+    Message: { /* required */
+        Body: { /* required */
+        //   Html: {
+        //    Charset: "UTF-8",
+        //    Data: "HTML_FORMAT_BODY"
+        //   },
+        Text: {
+        Charset: "UTF-8",
+        Data: `
+
+            Hello.
+            This is cafe FORE.
+            
+            cafe FORE Temporary password ${tmp_pass}
+
+            After sign in using this Temporary password, please change password.
+
+            Thank you for choosing. 
+
+            cafe FORE
+            ${date}
+            `
+        }
+        },
+        Subject: {
+        Charset: 'UTF-8',
+        Data: 'cafe FORE Temporary password'
+        }
+        },
+    Source: 'cafefore@gocafefore.com', /* required */
+    ReplyToAddresses: [
+        'cafefore@gocafefore.com',
+        /* more items */
+    ],
+    };
+
+    // Create the promise and SES service object
+    var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+
+    // Handle promise's fulfilled/rejected states
+    sendPromise.then(
+    function(data) {
+        console.log(data.MessageId);
+    }).catch(
+        function(err) {
+        console.error(err, err.stack);
+    });
+}
 
 
 
@@ -2243,6 +2341,7 @@ app.post('/item_delete_v2', (req,res) => {
     }
 });
 
+/*
 app.post('/cancel_order', (req,res) => {
     console.log('/cancal_order cancal_order cancal_order ')
     console.log(req.body);
@@ -2319,6 +2418,118 @@ app.post('/cancel_order', (req,res) => {
         con.release();         
     })
 });
+*/
+
+
+app.post('/cancel_order', (req,res) => {
+    console.log('/cancal_order cancal_order cancal_order ')
+    console.log(req.body);
+    const order_num = req.body.order_number; 
+    const u_id = req.body.user_id;
+    const page_num = req.body.page_num;
+    
+    const date = getDate();
+    db.getConnection((con)=>{        
+        con.query('SELECT * FROM cart JOIN orders on cart.order_number = orders.order_number left join ups_ship_info on orders.order_number = ups_ship_info.order_number WHERE refund = "n" and cart.order_number = ? and cart.u_id = ?', [order_num, u_id] ,(err, result_param) => {
+            if(err){                        
+                res.send(err);
+                       
+            } else {
+                console.log("result_param");
+                console.log(result_param);
+                const left_over = result_param.map(element => {
+                    return element;
+                })
+                const cart_nums = result_param.map(element => {
+                    return element.cartnum;
+                })
+                const item_prodnums = result_param.map(element => {
+                    return element.prodnum;
+                })
+                const cancel_request_email = result_param[0].email;
+                const recipient = result_param[0].recipient;
+                const order_items_count = result_param[0].order_items_count;
+           
+
+                if (result_param.length == order_items_count) {
+                    console.log("result_param.length == order_items_count");
+                    const refund_amount_cancel_order_for_email = result_param[0].total_order_amount;
+                    console.log(refund_amount_cancel_order_for_email);
+                    con.query('SELECT clv_charge_id, product.name from orders JOIN cart on cart.order_number = orders.order_number left join product on product.prodnum = cart.prodnum WHERE shipment = "n" and orders.order_number = ?  and orders.u_id = ?', [order_num, u_id] ,(err, result) => {
+                    // con.query('SELECT clv_charge_id from orders WHERE shipment = "n" and order_number = ? and u_id = ?', [order_num, u_id] ,(err, result) => {        
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log(result);
+                            
+                            const options = {
+                                method: 'POST',
+                                headers: {
+                                accept: 'application/json',
+                                'content-type': 'application/json',
+                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                                },
+                                body: JSON.stringify({charge: result[0].clv_charge_id})
+                            };
+                            
+                            fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+                            .then(response => response.json())
+                            .then(response => {
+
+                                if (response.status == 'succeeded') { 
+                                    console.log(response)
+                                    const cancel_item_mes_1 = 
+                                    `Hello, ${recipient}.
+                                    This is cafe FORE.
+                                    
+                                    Your cancel request has been accepted.
+                                    
+                                    Cancel order amount total : $${parseFloat(refund_amount_cancel_order_for_email).toFixed(2)}
+
+                                    `;
+                                    let cancel_item_mes_2 = '';
+                                    for (let i in result) {
+                                        cancel_item_mes_2 = cancel_item_mes_2 + `item : '${result[i].name}'`+ `\n`;
+                                    }                           
+
+                                    const cancel_item_mes_3 = 
+                                    `
+                                    Refund may take 2-5 business days to appear in your account.
+
+                                    ${date}
+                                    Thank you for chooing cafe FORE.
+                                    `;
+                                    const main_message = cancel_item_mes_1 + cancel_item_mes_2 + cancel_item_mes_3;                      
+                                    const subject_message = `cafe FORE item order cancel has been accepted`; 
+                                    //////////////////// cancel order send email ///////////////////
+                                    sendMailSESTemplate(cancel_request_email, main_message, subject_message);
+
+                                    con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [order_num] ,(err, result) => { 
+                                        if(err){                        
+                                            res.send(err);                                               
+                                        } else {
+                                            console.log(result);
+                                            makeAllItemsRefundFlag(order_num, con);
+                                            (u_id == 'GUEST') ? checkGuestPurchaseHistory(order_num, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                                   
+                                        }
+                                    });
+                                    
+                                }
+                            })
+                            .catch(err => console.error(err));
+                        } 
+                    });   
+                } else {
+                    console.log("cancel order left over items")
+                    const cancel_order_flag = true;
+                    cancelOrderItems(left_over, u_id, order_num, cart_nums, item_prodnums, con, res, cancel_order_flag, page_num); 
+                }
+            }
+        });
+        con.release();         
+    })
+});
 
 
 app.post('/cancel_order_item', (req,res) => {
@@ -2331,7 +2542,8 @@ app.post('/cancel_order_item', (req,res) => {
     const page_num = req.body.page_num;
 
     db.getConnection((con)=>{
-        con.query('SELECT cartnum, orders.clv_order_id, shipping_fee FROM orders join cart on cart.order_number = orders.order_number WHERE refund = "n" and orders.order_number = ? and orders.u_id = ?', [ordernum, u_id] ,(err, result_param) => {
+        con.query('SELECT cartnum, orders.clv_order_id, shipping_fee, email, recipient FROM orders join cart on cart.order_number = orders.order_number left join ups_ship_info on orders.order_number = ups_ship_info.order_number WHERE refund = "n" and orders.order_number = ? and orders.u_id = ?', [ordernum, u_id] ,(err, result_param) => {
+        // con.query('SELECT cartnum, orders.clv_order_id, shipping_fee FROM orders join cart on cart.order_number = orders.order_number WHERE refund = "n" and orders.order_number = ? and orders.u_id = ?', [ordernum, u_id] ,(err, result_param) => {
             if(err){                        
                 res.send(err);            
             } else {
@@ -2378,6 +2590,237 @@ function getUPSLineItemID(order_num) {
 
 }
 
+
+
+function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, cancel_order_flag, page_num) {
+    console.log("cancelOrderItems(result_param,");
+    console.log(result_param);
+    console.log(result_param.length);
+    const cancel_request_email = result_param[0].email;
+    const recipient = result_param[0].recipient;
+    const date = getDate();
+    getUPSLineItemID(result_param[0].clv_order_id).then(data => {
+        const shipping_fee = data;        
+        console.log(shipping_fee)      
+
+        if (result_param.length > 1) {            
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum in (?) and u_id = ? and product.prodnum in (?)', [cartnum, u_id, prodnum] ,(err, result) => {
+            // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log(result); 
+                    let refund_amount_for_email = 0;                  
+                    result.forEach(element => {
+                        refund_amount_for_email = refund_amount_for_email + (element.price_sell * element.quantity) * 1.06; 
+                    });
+                    
+
+                    const items = result.map(element => {
+                        return { 
+                            parent : element.item_code,
+                            amount : element.price_sell * 100 * element.quantity * 1.06,
+                            description : element.name,
+                            quantity : element.quantity,
+                            type:"sku"                            
+                        }                
+                    });
+
+                    if (cancel_order_flag && cancel_order_flag == true) {
+                        items.push(shipping_fee);
+                        refund_amount_for_email = refund_amount_for_email + (shipping_fee.amount/100);
+                    }                  
+                    
+                    console.log(items);
+
+                    const options = {
+                        method: 'POST',
+                        headers: {accept: 'application/json', 
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({
+                        "items":items
+                        })
+                    };
+                
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    .then(response => response.json())
+                    .then(response => {                      
+                                            
+                        console.log(response);                       
+                        
+                        if (response.status == 'returned') { 
+                            const cancel_item_mes_1 = 
+                            `Hello, ${recipient}.
+                            This is cafe FORE.
+                            
+                            Your cancel item request has been accepted.
+                            
+                            Cancel order amount total : $${parseFloat(refund_amount_for_email).toFixed(2)}
+
+                            `;
+                            let cancel_item_mes_2 = '';
+                            for (let i in result) {
+                                cancel_item_mes_2 = cancel_item_mes_2 + `item : '${result[i].name}'`+ `\n`;
+                            }                           
+
+                            const cancel_item_mes_3 = 
+                            `
+                            Refund may take 2-5 business days to appear in your account.
+
+                            ${date}
+                            Thank you for chooing cafe FORE.
+                            `;
+                            const main_message = cancel_item_mes_1 + cancel_item_mes_2 + cancel_item_mes_3;                      
+                            const subject_message = `cafe FORE item order cancel has been accepted`; 
+                            ////////////////////////////  item order cancel email send //////
+                            sendMailSESTemplate(cancel_request_email, main_message, subject_message);
+
+                            const returned_amount = response.items.map(element => {
+                                return element.amount / 100;                        
+                            });
+
+                            const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
+                            let update_query_2 = '';
+                            for (let i in returned_amount) {
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                            }                           
+                            const update_query = update_query_1 + update_query_2;
+                            console.log(update_query)
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log("returned items DB updated"); 
+                                    makeFullRefundFlag(ordernum, con).then(e => {
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                    
+                                    });
+                                } 
+                            });   
+                        } else res.send("error : refund occur error");            
+                    })
+                    .catch(err => console.error(err));                   
+                } 
+            });
+        
+        } else if (result_param.length == 1) {
+            console.log("else if (result_param.length == 1)");
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum in (?) and u_id = ? and product.prodnum in (?)', [cartnum, u_id, prodnum] ,(err, result) => {           
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log(result);
+                    
+                    let refund_amount_for_email = 0;                  
+                    result.forEach(element => {
+                        refund_amount_for_email = refund_amount_for_email + (element.price_sell * element.quantity) * 1.06; 
+                    });
+                    const refund_amount_for_email_with_shipping_fee = refund_amount_for_email + (shipping_fee.amount/100);
+
+                    const items = result.map(element => {
+                        return { 
+                            parent : element.item_code,
+                            amount : element.price_sell * 100 * element.quantity * 1.06,
+                            description : element.name,
+                            quantity : element.quantity,
+                            type:"sku"                            
+                        }                
+                    });
+
+                    items.push(shipping_fee);
+                    console.log("items");
+                    console.log(items);
+                    
+                    const refunded = result.filter(element => {
+                        return element.refund == 'y';
+                    });
+                    console.log("refunded")
+                    console.log(refunded)
+
+                    let refunded_amount = 0;
+                    refunded.forEach(element => {
+                        refunded_amount = refunded_amount + element.refund_amount;                    
+                    })
+                    const options = {
+                        method: 'POST',
+                        headers: {accept: 'application/json', 
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({"items":items})
+                    };
+                
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    .then(response => response.json())
+                    .then(response => {                      
+                                            
+                        console.log(response);
+                        
+                        if (response.status == 'returned') {
+
+                            const cancel_item_mes_1 = 
+                            `Hello, ${recipient}.
+                            This is cafe FORE.
+                            
+                            Your cancel item request has been accepted.
+                            
+                            Cancel order amount total : $${parseFloat(refund_amount_for_email_with_shipping_fee).toFixed(2)}
+
+                            `;
+                            let cancel_item_mes_2 = '';
+                            for (let i in result) {
+                                cancel_item_mes_2 = cancel_item_mes_2 + `item : '${result[i].name}'`+ `\n`;
+                            }                           
+
+                            const cancel_item_mes_3 = 
+                            `
+                            Refund may take 2-5 business days to appear in your account.
+
+                            ${date}
+                            Thank you for chooing cafe FORE.
+                            `;
+                            const main_message = cancel_item_mes_1 + cancel_item_mes_2 + cancel_item_mes_3;                      
+                            const subject_message = `cafe FORE item order cancel has been accepted`; 
+                            ////////////////////////////  item order cancel email send //////
+                            sendMailSESTemplate(cancel_request_email, main_message, subject_message);
+
+                            const returned_amount = response.items.map(element => {
+                                return element.amount / 100;                        
+                            });
+
+                            const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
+                            let update_query_2 = '';
+                            for (let i in returned_amount) {
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                            }                           
+                            const update_query = update_query_1 + update_query_2;
+                            console.log(update_query)
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            // con.query('UPDATE cart SET refund = "y", refund_amount = ? where cartnum = ? and prodnum = ?', [amount_returned, cartnum, last_refund[0].prodnum] ,(err, result) => { 
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log(result);
+                                    makeFullRefundFlag(ordernum, con).then(e => {
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                    
+                                    });                                    
+                                } 
+                            });   
+                        } else res.send("error : refund occur error");              
+                    })
+                    .catch(err => console.error(err));                                
+                } 
+            });
+        } 
+    });
+}
+/*
 function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, cancel_order_flag, page_num) {
     console.log("cancelOrderItems(result_param,");
     console.log(result_param);
@@ -2537,6 +2980,7 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
         } 
     });
 }
+*/
 
 function makeAllItemsRefundFlag(ordernum, con) { 
     con.query('UPDATE cart SET refund = "y" where order_number = ?', [ordernum] ,(err, result) => { 
@@ -3309,6 +3753,65 @@ app.post('/guest_order_checkout', (req,res) => {
     }
 });
 
+       
+function sendMailSESTemplate(toAddress, main_message, subject_message) {
+    AWS.config.update({
+        credentials: {
+        "accessKeyId": process.env.AWS_ACCESS_KEY_ID, 
+        "secretAccessKey": process.env.AWS_SECRET_ACCESS_KEY,
+        },
+        "region": process.env.AWS_REGION
+    });
+
+    // Create sendEmail params 
+    var params = {
+    Destination: { /* required */
+        CcAddresses: [
+            toAddress,
+        /* more items */
+        ],
+        ToAddresses: [
+            toAddress,
+        /* more items */
+        ]
+    },
+    Message: { /* required */
+        Body: { /* required */
+        //   Html: {
+        //    Charset: "UTF-8",
+        //    Data: "HTML_FORMAT_BODY"
+        //   },
+        Text: {
+        Charset: "UTF-8",
+        Data: main_message
+        }
+        },
+        Subject: {
+        Charset: 'UTF-8',
+        Data: subject_message
+        }
+        },
+    Source: 'cafefore@gocafefore.com', /* required */
+    ReplyToAddresses: [
+        'cafefore@gocafefore.com',
+        /* more items */
+    ],
+    };
+
+    // Create the promise and SES service object
+    var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+
+    // Handle promise's fulfilled/rejected states
+    sendPromise.then(
+    function(data) {
+        console.log(data.MessageId);
+    }).catch(
+        function(err) {
+        console.error(err, err.stack);
+    });
+}
+
+
 
 function sendMailSES(toAddress, recipient, order_num, date) {
     AWS.config.update({
@@ -3559,17 +4062,20 @@ app.post('/get_admin_return_req',(req, res) => {
     });
 });
 
-app.post('/admin_refund_item',(req, res) => {    
+app.post('/admin_refund_item',(req, res) => {
+    console.log(req.body);
     const cartnum = req.body.cart_id;
     const date = getDate();
 
     db.getConnection((con)=>{
-        con.query('select * from cart left join orders on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where item_return_req = "y" and cart.refund = "n" and cart.cartnum = ?', [cartnum], (err, result) => { 
+        con.query('select * from test1.cart left join test1.orders on test1.cart.order_number = test1.orders.order_number left join test1.product on test1.cart.prodnum = test1.product.prodnum left join test1.ups_ship_info on test1.orders.order_number = test1.ups_ship_info.order_number where item_return_req = "y" and cart.refund = "n" and test1.cart.cartnum = ?', [cartnum], (err, result) => {        
             if(err){                        
                 res.send(err);
                 // con.end();        
             } else {
                 console.log(result); 
+                const email_addressto = result[0].order_email;
+                const recipient = result[0].recipient;
                 const items = result.map(element => {
                     return { 
                         parent : element.item_code,
@@ -3597,7 +4103,7 @@ app.post('/admin_refund_item',(req, res) => {
                                         
                     console.log(response);                       
                     
-                    if (response.status == 'returned') {                            
+                    if (response.status == 'returned') { 
 
                         const returned_amount = response.items.map(element => {
                             return element.amount / 100;                        
@@ -3611,15 +4117,43 @@ app.post('/admin_refund_item',(req, res) => {
                         }                           
                         const update_query = update_query_1 + update_query_2;
                         console.log(update_query)
-                        con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[date, cartnum] ,(err, result) => {
+                        con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[date, cartnum] ,(err, update_result) => {
                         // con.query('UPDATE cart SET refund = "y", refund_amount = ? where cartnum = ? and prodnum = ?', [amount_returned, cartnum, last_refund[0].prodnum] ,(err, result) => { 
                             if(err){                        
                                 res.send(err);
                                 // con.end();        
                             } else {
                                 console.log("item return refund result");
-                                console.log(result);
-                                result.protocol41 == true ? res.send({result : "ok"}) : res.send({result : "We are very sorry...DB error occured. Can you try again?"})
+                                // console.log(update_result);
+                                if (update_result.protocol41 == true) {
+                                    const cancel_item_mes_1 = 
+                                    `Hello, ${recipient}.
+                                    This is cafe FORE.
+                                    
+                                    Your return request has been accepted.
+                                    
+                                    Return order item amount total : $${parseFloat(returned_amount).toFixed(2)}
+        
+                                    `;
+                                    let cancel_item_mes_2 = '';
+                                    for (let i in result) {
+                                        cancel_item_mes_2 = cancel_item_mes_2 + `item : '${result[i].name}'`+ `\n`;
+                                    }                           
+            
+                                    const cancel_item_mes_3 = 
+                                    `
+                                    Refund may take 2-5 business days to appear in your account.
+        
+                                    ${date}
+                                    Thank you for chooing cafe FORE.
+                                    `;
+                                    const main_message = cancel_item_mes_1 + cancel_item_mes_2 + cancel_item_mes_3;                      
+                                    const subject_message = `cafe FORE item item return request has been accepted`;   
+                                                                
+                                    sendMailSESTemplate(email_addressto, main_message, subject_message);
+
+                                    res.send({result : "ok"}) 
+                                } else  res.send({result : "We are very sorry...DB error occured. Can you try again?"})
                             }
                         })
                     }
@@ -3629,7 +4163,6 @@ app.post('/admin_refund_item',(req, res) => {
         con.release();
     });          
 });
-
 
 app.post('/get_admin_check_orders',(req, res) => {
     
@@ -3661,12 +4194,14 @@ app.post('/get_admin_check_orders_shipment',(req, res) => {
     let total_weight = 0;
     let service_code = {};
     let cart_num = [];
+    let item_names = [];
 
 
     setOrderShipment().then(data => {
         console.log("data");
         console.log(data)
-        setUPSShipment(ups_ship_info, service_code, order_items, res, order_id, cart_num);
+        setUPSShipment(ups_ship_info, service_code, order_items, res, order_id, cart_num, item_names);
+        // setUPSShipment(shipto, service_code, items, res, order_id, cart_num, item_names)
     });
 
     function setOrderShipment() {
@@ -3683,6 +4218,7 @@ app.post('/get_admin_check_orders_shipment',(req, res) => {
                             console.log(element);
                             total_weight = total_weight + (element.quantity * element.weight);
                             cart_num.push(element.cartnum);
+                            item_names.push(element.name);
 
                         })
                         console.log(cart_num);
@@ -3769,7 +4305,8 @@ app.post('/get_admin_check_orders_shipment',(req, res) => {
                                     PostalCode: result[0].zip,
                                     CountryCode: 'US'
                                     },
-                                    Residential: ' '
+                                    Residential: ' ',
+                                    email : result[0].email
                                 }
                                 console.log(ups_ship_info);
                                 resolve(ups_ship_info);
@@ -3787,6 +4324,172 @@ app.post('/get_admin_check_orders_shipment',(req, res) => {
 
 
 
+function setUPSShipment(shipto, service_code, items, res, order_id, cart_num, item_names) {
+
+  
+    console.log("ups shipment")
+    console.log(shipto)
+    console.log(service_code)
+    console.log(item_names)
+    const addressto = shipto.email;
+   
+    const ship = {
+        ShipmentRequest: {
+            Request: {
+            SubVersion: '1801',
+            RequestOption: 'nonvalidate',
+            TransactionReference: {CustomerContext: 'cafefore'}
+            },
+            Shipment: {
+            Description: 'cafefore shipping',
+            Shipper: {
+                Name: 'cafe FORE LLC',
+                AttentionName: '',
+                TaxIdentificationNumber: '883952894',
+                Phone: {
+                Number: '4702636495',
+                Extension: ' '
+                },
+                ShipperNumber: 'B98W48',
+                FaxNumber: '',
+                Address: {
+                    AddressLine: '4400 Roswell RD Ste 126',
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                }
+            },
+            ShipTo: shipto,
+            ShipFrom: {
+                Name: 'cafe FORE LLC',
+                AttentionName: '',
+                Phone: {Number: '4702636495'},
+                FaxNumber: '',
+                Address: {
+                    AddressLine: '4400 Roswell RD Ste 126',
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                }
+            },
+            PaymentInformation: {
+                ShipmentCharge: {
+                Type: '01',
+                BillShipper: {AccountNumber: 'B98W48'}
+                }
+            },
+            Service: service_code,
+            Package: items
+           
+            },
+            LabelSpecification: {
+            LabelImageFormat: {
+                Code: 'GIF',
+                Description: 'GIF'
+            },
+            HTTPUserAgent: 'Mozilla/4.5'
+            }
+        }
+    }
+
+    require("dotenv").config({ path: ".env2" }); 
+
+    const options = {
+    method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        transId: 'cafeforetrid',
+        transactionSrc: 'cafeforetrsrc',
+        Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
+      },
+      body: JSON.stringify(ship)
+    }
+
+    console.log(ship);
+
+    const query = new URLSearchParams({
+        additionaladdressvalidation: 'Alpharetta'
+      }).toString();
+    
+      const version = 'v1';
+    //   fetch(`https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`, options)
+      
+    fetch(`https://wwwcie.ups.com/api/shipments/${version}/ship?${query}`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)  
+               
+        const track_number = response.ShipmentResponse.ShipmentResults.ShipmentIdentificationNumber;
+        console.log(track_number)
+
+        const update_query_1 = `
+        Hello, ${shipto.Name}.
+
+        Your order ${order_id} has been shipped!
+        
+        `;
+        
+        let update_query_2 = '';
+        for (let i in item_names) {
+            update_query_2 = update_query_2 + `item : '${item_names[i]}'` + `\n`;
+        }
+        const update_query_3 = 
+        `Tracking Number is ${track_number}.
+
+        You can track your package on UPS tracking site.
+        https://wwwapps.ups.com/tracking/tracking.cgi?tracknum=${track_number}
+
+        Thank you for choosing cafe FORE.
+    
+        `;
+        const main_message = update_query_1 + update_query_2 + update_query_3;
+        console.log(main_message)
+
+
+        const subject_message = `Your order has been shipped!`;
+
+        updateShipingTrackNumber().then((data) => {
+            console.log("updateShipingTrackNumber().then((data)")
+            console.log(data)
+            ////////////////////////// send email for produced track number
+            sendMailSESTemplate(addressto, main_message, subject_message)
+            res.send(response);
+        });
+
+        function updateShipingTrackNumber() {
+            return new Promise((resolve, reject) => {        
+            db.getConnection((con)=>{
+                    con.query('UPDATE orders SET shipment = "y", track_number = ? where order_number = ?', [track_number, order_id], (err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log('update set shipment & track number'); 
+                            console.log(result);   
+                            con.query('UPDATE cart SET result = "y", track_number = ? where order_number = ? and cartnum in (?)', [track_number, order_id, cart_num], (err, result) => {
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log('update set shipment & track number'); 
+                                    console.log(result);                              
+                                    resolve(result);                     
+                                }
+                            });
+                        }
+                    });
+                    con.release();
+                });
+            });
+        }  
+    });
+}
+
+
+/*
 function setUPSShipment(shipto, service_code, items, res, order_id, cart_num) {
 
   
@@ -3922,6 +4625,7 @@ function setUPSShipment(shipto, service_code, items, res, order_id, cart_num) {
 
 
 }
+*/
 
 
 function setOrders(order_number, u_id, response, date) {

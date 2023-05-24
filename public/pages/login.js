@@ -303,6 +303,76 @@ export default class {
 
     signUpSubmit() {
 
+        WEBS.getPBKey().then(key => {            
+          
+            const sign_up_ufirst_name = document.getElementById('sign_up_user_first_name').value;
+            const sign_up_ulast_name = document.getElementById('sign_up_user_last_name').value;
+            const sign_up_uemail = document.getElementById('sign_up_user_email').value;
+            const sign_up_upw = document.getElementById('sign_up_user_pw').value;
+            const sign_up_upw_confirm = document.getElementById('sign_up_user_pw_check').value; 
+            const sign_up_uphone = document.getElementById('sign_up_user_phone').value;    
+            const sign_up_form_extra = document.getElementById('sign_up_form_extra');    
+    
+            const current_path = document.location.href;
+    
+            if (sign_up_upw === sign_up_upw_confirm) {                
+                console.log("sign up progress")
+                SPINNER.turnOffDisplay();
+                
+                const crypt = new JSEncrypt();
+                crypt.setPublicKey(key);         
+
+                const encrypted1 = crypt.encrypt(sign_up_uemail);
+                const encrypted2 = crypt.encrypt(sign_up_upw);
+                const send_data = {
+                  
+                    ufirstname : sign_up_ufirst_name,
+                    ulastname : sign_up_ulast_name,
+                    uemail : encrypted1,
+                    bpw : encrypted2, 
+                    uphone : sign_up_uphone,                
+                    c_path : current_path
+                }
+                
+                const data = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                    body: JSON.stringify(send_data),
+                    redirect: "follow"
+                };
+                console.log(data);
+    
+                fetch('/sign_up', data)
+                .then((res) => res.json())
+                .then(result => {
+                    SPINNER.turnOnDisplay();
+                    
+                    if (result.key == 'use_other_id') {
+                        sign_up_form_extra.innerText = "please use different ID";
+                        document.sign_up_form.sign_up_user_email.focus();
+                    } else {
+                        Swal.fire({      
+                            text: 'welcome to cafe FORE!',
+                            icon: 'success',
+                            width:400,
+                            confirmButtonColor: '#983131',               
+                        
+                        }).then(result => {
+                            window.location.href = "https://gocafofore.com";                              
+                        });                     
+                    }
+                });
+            } else {
+                sign_up_form_extra.innerText = "please make sure to confirm password"     
+            }
+        })
+    }
+
+    signUpSubmit() {
+
         WEBS.getPBKey().then(key => {
             console.log(key);
 
@@ -464,7 +534,7 @@ export default class {
         </div>
         `;
     }
-    
+
     makeTrackMyOrderForm() {
         return `
             <div id="track_my_order_form_container" class="track_my_order_form_container">

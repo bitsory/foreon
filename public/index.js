@@ -2,7 +2,6 @@ import Home from "./pages/home.js";
 import About from "./pages/about.js";
 import Menu from "./pages/menu.js";
 import Contact from "./pages/contact.js";
-import NotFound from "./pages/notfound.js";
 import Login from "./pages/login.js";
 import Cart from "./pages/cart.js";
 import Shop from "./pages/shop.js";
@@ -10,7 +9,6 @@ import PlaceOrder from "./pages/place_order.js";
 import ShopDetail from "./pages/shop_detail.js";
 import OrderConfirm from "./pages/oder_confirm.js";
 import setCartBox from "./pages/set_cart_modal_box.js";
-import Admin from "./pages/admin.js";
 import * as ItemCounter from "./pages/item_counter.js";
 import * as ShopPageForm from "./pages/form_shop_page.js";
 import * as CheckoutOrderForm from "./pages/form_checkout_order.js";
@@ -24,13 +22,11 @@ const icons = document.querySelector('.navbar_icons');
 const main = document.querySelector('.main');
 const main_background = document.querySelector('.main_background__blink');
 const lorem = document.querySelector('.lorem');
-const mainback1 = document.querySelector('.mainback1');
 
 const footer = document.querySelector('.footer');
 const navbar_logo = document.querySelector('.navbar_logo');
 const foot_logo = document.querySelector('.foot_logo');
 const gotoTop = document.querySelector('.fa-angles-up');
-const user_info = document.querySelector('.user_info');
 
 const modal = document.getElementById('modal');
 const modal_page = document.getElementById("modal_page");
@@ -47,26 +43,16 @@ const user_cart = new Cart();
 user_cart.initCart(user_cart.c_id);
 export default user_cart;
 
-console.log("user cart")
-console.log(user_cart);
 
 
 toggleBtn.addEventListener('click', (e) => {
     menu.classList.toggle('on');
-    icons.classList.toggle('on');
-    // navbar.classList.toggle('on');
+    icons.classList.toggle('on');   
     main.classList.toggle('on');
     lorem.classList.toggle('on');
-    footer.classList.toggle('on');
-    // footer.classList.toggle('on');
-    // navbar_toggle.classList.toggle('on');
-    toggleBtn.classList.toggle('on');
-    // console.log("toggle");
-    // console.log(toggleBtn.classList);
-    // console.log(e);
+    footer.classList.toggle('on');   
+    toggleBtn.classList.toggle('on');  
 });
-
-console.log("index.js");
 
 navbar_logo.addEventListener('click', () => {  
     window.location.href = "https://gocafefore.com";
@@ -125,21 +111,17 @@ document.addEventListener('click', function(e){
     if(e.target == account_modal_pop_btn || e.target == account_modal_pop_btn_id) { // account modal pop
        
         modal.style.display = "block";
-        if (loginpage_flag) { 
-            console.log(loginpage)            
+        if (loginpage_flag) {                       
             modal_page.innerHTML = loginpage.makeSignInForm();
-            const user_id = getCookie();
-            console.log(user_id);
+            const user_id = getCookie();           
             document.getElementById('user_id').value = user_id;          
 
 
         } else {
-            loginpage = new Login(); 
-            // loginpage = loginpage_inst;
+            loginpage = new Login();           
             loginpage_flag = true;
             modal_page.innerHTML = loginpage.makeSignInForm();
-            const user_id = getCookie();
-            console.log(user_id);
+            const user_id = getCookie();           
             document.getElementById('user_id').value = user_id;
            
         }
@@ -147,41 +129,36 @@ document.addEventListener('click', function(e){
     }
 
     if((e.target == user_info_btn_id)) { // user info modal window show
-        console.log("user info");        
+           
         user_profile_container.style.display = "block";        
         document.querySelector(".user_profile").innerHTML = user_cart.getUserProfile();        
     }
 
 
     if((e.target == user_info_btn_icon)) { // user info modal window show
-        console.log("user info");        
+         
         user_profile_container.style.display = "block";        
         document.querySelector(".user_profile").innerHTML = user_cart.getUserProfile();        
     }
 
     if (user_profile_container && (e.target != user_info_btn_icon && e.target != user_info_btn_id)) // user info modal window off
-        if(e.target!= user_profile_container && user_profile_container.style.display == "block") {
-            // console.log(e.currentTarget);
-            user_profile_container.style.display = "none";
-            console.log("close pop up") 
+        if(e.target!= user_profile_container && user_profile_container.style.display == "block") {        
+            user_profile_container.style.display = "none";        
     }
 
     
     if (sign_in_form_extra && sign_in_form_extra.textContent && e.target && e.target.id != "sign_in_btn") {
-        console.log("document.getElementById('sign_in_form_extra').textContent = ''")
+    
         document.getElementById('sign_in_form_extra').textContent = '';
     }
 
-    if (e.target && e.target.className == 'user_logout_btn') { 
-        console.log("user log out");
-        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';
-        console.log("user log out user log out user log out user log out user log out ");
+    if (e.target && e.target.className == 'user_logout_btn') {     
+        document.cookie = 'cafefore' + '=; expires=Thu, 01 Jan 1999 00:00:10 GMT;';    
         ItemCounter.item_counter('GUEST');
     }
 
     if (e.target && e.target == view_cart_btn) {    
-        if (document.location.href == 'https://gocafefore.com/') {
-            console.log("if (document.location.href == 'http://localhost:8080/') {")
+        if (document.location.href == 'https://gocafefore.com/') {       
             // cart_modal_container.style.top = '0 rem';
             if (matchMedia("screen and (max-width: 600px)").matches) {
                 // IMAGE_WIDTH = 300;
@@ -203,23 +180,17 @@ document.addEventListener('click', function(e){
         if (toggleBtn.classList.contains('on') == true) {
             WEBS.toggleFunc();
         }
-        
-        // view_cart();
-        console.log("view cart click page move")
+      
     } 
 
     if (cart_modal_container && (e.target != view_cart_btn && e.target != cart_modal_items_slider_box && e.target.id != "cart_modal_item_minus_quantity_btn" && e.target.id != "cart_modal_item_plus_quantity_btn" && e.target.id != "cart_modal_item_delete_btn" && e.target != cart_modal_items_back_btn && e.target != cart_modal_items_next_btn && e.target.id != "go_cart_page_btn")) // user info modal window off
-        if(e.target!= cart_modal_container && cart_modal_container.style.display == "block") {
-            console.log(e.currentTarget);
-            console.log(e.target);
+        if(e.target!= cart_modal_container && cart_modal_container.style.display == "block") {          
             cart_modal_container.style.display = "none";
             cart_modal_container.style.transform = 'unset';
-            console.log("cart modal close pop up")
     }
 
-    if(e.target && e.target.id == 'purchase_history_item_reorder_btn') {
-        const reorder_itemid = e.target.getAttribute('itemid');
-        console.log(reorder_itemid);
+    if(e.target && e.target.id == 'purchase_history_item_reorder_btn') {        const reorder_itemid = e.target.getAttribute('itemid');
+      
         (user_cart.c_id == 'GUEST' || user_cart.c_id == '') ? history.pushState(null, null, `/shop/checkout/GUEST/item_num=${reorder_itemid}`) :
         history.pushState(null, null, `/shop/checkout/member/item_num=${reorder_itemid}`);
         setCheckoutIndivItemPage("reorder");
@@ -246,16 +217,13 @@ document.addEventListener('click', function(e){
 
     }
 
-    document.getElementById('item_search_input').addEventListener('keyup', (e)=> {
+    document.getElementById('item_search_input') && document.getElementById('item_search_input').addEventListener('keyup', (e)=> {
         if(e.target && e.target.id == 'item_search_input' && (e.keyCode == 13)) {  
             const item_search_name = document.getElementById('item_search_input').value;
             console.log(item_search_name);
             setShopSearchPage(item_search_name);           
         }
-    }) 
-
-
-   
+    });
 });
 
 
@@ -1369,10 +1337,11 @@ function setShopSearchPage(search_param, param) {
 
             for (let i = 0 ; i < result.length ; i++) {
                 shop_category_page.setItemContainer(result[i].prodnum, result[i].image, result[i].name, result[i].price_sell, result[i].instock);                        
-            } 
+            }             
+            document.getElementById('online_main_label').innerText = `'${search_param}' search result`;
         } else {
             document.getElementById('page_main_part').innerText = `no result for '${search_param}'`;
-        }
+        }   
         
         (param == 'go_back') ? false : history.pushState(null, null, `/shop/search/${search_param}`);  
 
