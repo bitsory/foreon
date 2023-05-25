@@ -218,7 +218,8 @@ document.addEventListener('click', function(e){
     }
 
     document.getElementById('item_search_input') && document.getElementById('item_search_input').addEventListener('keyup', (e)=> {
-        if(e.target && e.target.id == 'item_search_input' && (e.keyCode == 13)) {  
+        if(e.target && e.target.id == 'item_search_input' && (e.keyCode == 13)) {
+            e.preventDefault();
             const item_search_name = document.getElementById('item_search_input').value;
             console.log(item_search_name);
             setShopSearchPage(item_search_name);           

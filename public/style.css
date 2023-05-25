@@ -1564,12 +1564,17 @@ nav {
 
 
 .guest_checkout_submit_container {
-    width: 30rem;
+    width: 27rem;
 }
 
 .checkout_submit_summary_container {
     text-align: left;
-    margin-top: 1rem;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.guest_checkout_submit_button_container {
+    margin-bottom: 1rem;
 }
 
 .checkout_submit_summary_detail, .checkout_submit_summary_detail {
@@ -1641,8 +1646,8 @@ nav {
 }
 
 .check_out_item_content {
-    width: 18rem;
-    margin-left: 1rem;
+    /* width: 18rem; */
+    /* margin-left: 1rem; */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
