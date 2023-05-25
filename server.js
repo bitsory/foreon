@@ -395,7 +395,7 @@ app.post('/sign_up', (req,res) => {
                     fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
                     .then(response => response.json())
                     .then(response => {                
-                        console.log(response)
+                        
                         const clv_id = response.id;
                         con.query('INSERT INTO users (id, pw, first_name, last_name, clv_id, email, phone, resi_date, last_log, salt) values (?,?,?,?,?,?,?,?,?,?)', 
                         [sign_up_id, sign_up_pw, sign_up_first_name, sign_up_last_name, clv_id, sign_up_email, sign_up_phone, date, date, salt], (err, result) => {
@@ -490,7 +490,7 @@ function createCustomerCLV(firstName, lastName, email, phone) {
 
 app.post('/g_sign_in', function (req,res) {
     console.log("google sign in google sign in google sign in ")
-    console.log(req.body);
+   
 
     const aid = req.body.aid;
     const bpw = req.body.bpw;
@@ -550,8 +550,7 @@ app.post('/g_sign_in', function (req,res) {
                 
                     fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
                     .then(response => response.json())
-                    .then(response => {                
-                        console.log(response)
+                    .then(response => {
                         const clv_id = response.id;
                         con.query('INSERT INTO users (id, pw, first_name, last_name, clv_id, email, phone, resi_date, last_log, salt, description) values (?,?,?,?,?,?,?,?,?,?,?)', 
                         [g_loginid, sign_up_pw, first_name, last_name, clv_id, g_loginid, "", date, date, signup_salt, "google"]);
@@ -3180,6 +3179,8 @@ app.post('/track_my_order', (req,res) => {
 
 
 app.post('/get_track_number', (req,res) => {   
+    console.log(req.body);
+
     const user_id = req.body.user_id;
     const cart_num = req.body.cart_number;
     db.getConnection((con)=>{

@@ -1,10 +1,6 @@
-// import cart from "./cart.js";
-import Main from "../index.js"
 import * as PurchaseHistory from "./form_purchase_history.js";
 import * as SPINNER from "./spinner.js";
 import * as WEBS from "./form_webs.js";
-
-
 
 
 export default class {
@@ -13,10 +9,8 @@ export default class {
     modal_page = document.querySelector('.modal_page');
     lorem = document.getElementById('lorem');
     
-    // encrkey = '';
 
-    constructor() {
-        console.log("log in.js") 
+    constructor() {     
 
         this.modal.addEventListener('click', (e) => { 
 
@@ -75,31 +69,29 @@ export default class {
 
         this.lorem.addEventListener('click', (e)=> {
             if(e.target && e.target.className == 'sign_up_submit_btn') {                 
-
-                // document.getElementById('user_login_form').remove();
-                // this.modal_page.innerHTML = makeSignUpForm();  
+                const sign_up_form_extra = document.getElementById('sign_up_form_extra');
                 if (!(document.getElementById('sign_up_user_first_name').value)) {
-                    document.getElementById('sign_up_form_extra').textContent = "Please Input your First Name...";
+                    sign_up_form_extra.textContent = "Please Input your First Name...";
                     document.sign_up_form.sign_up_user_first_name.focus();
 
                 } else if (!(document.getElementById('sign_up_user_last_name').value)) {
-                    document.getElementById('sign_up_form_extra').textContent = "Please Input your Last Name...";
+                    sign_up_form_extra.textContent = "Please Input your Last Name...";
                     document.sign_up_form.sign_up_user_last_name.focus();
 
                 } else if (this.verifyEmail(document.getElementById('sign_up_user_email').value) != true)  {
-                    document.getElementById('sign_up_form_extra').textContent = "Please Input your valid email address...";
+                    sign_up_form_extra.textContent = "Please Input your valid email address...";
                     document.sign_up_form.sign_up_user_email.focus();               
                 
                 } else if (!(document.getElementById('sign_up_user_pw').value)) {
-                    document.getElementById('sign_up_form_extra').textContent = "Please Input your password...";
+                    sign_up_form_extra.textContent = "Please Input your password...";
                     document.sign_up_form.sign_up_user_pw.focus();
 
                 } else if (this.pwdCheck(document.getElementById('sign_up_user_pw').value)!= true) {
-                    document.getElementById('sign_up_form_extra').textContent = "password must at least 6 characters and include at least 1 digit and 1 special character";
+                    sign_up_form_extra.textContent = "password must at least 6 characters and include at least 1 digit and 1 special character";
                     document.sign_up_form.sign_up_user_pw.focus();                     
                     
                 } else if (document.getElementById('sign_up_user_pw').value != document.getElementById('sign_up_user_pw_check').value) {
-                    document.getElementById('sign_up_form_extra').textContent = "please make sure to confirm password";
+                    sign_up_form_extra.textContent = "please make sure to confirm password";
                     document.sign_up_form.sign_up_user_pw_check.focus();
                 
                 } else this.signUpSubmit();        
@@ -216,9 +208,6 @@ export default class {
        
     }
 
-
-
-
     modal_script() {
         var script = document.createElement('script');
         script.type = 'text/javascript';
@@ -265,22 +254,18 @@ export default class {
             const current_path = document.location.href;
             const remember_id = checked_remember.checked == true ? "remember" : false;
 
-            console.log(remember_id);
-
-            // const te = {key : test_text}
             const crypt = new JSEncrypt();
             crypt.setPublicKey(key);
         
             const encrypted1 = crypt.encrypt(uid);
             const encrypted2 = crypt.encrypt(upw);
             const send_data = {aid : encrypted1, bpw : encrypted2, c_path : current_path, checked_remember : remember_id}
-
             
             const data = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                    // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                 
                     },
                 body: JSON.stringify(send_data),
                 redirect: "follow"
@@ -288,8 +273,7 @@ export default class {
 
             fetch('/sign_in', data)
             .then((res) => res.json())
-            .then(result => {
-                console.log(result)
+            .then(result => {             
                 if (result.check == "not match") {
                     document.getElementById('sign_in_form_extra').innerHTML = 
                     "ID and Password not matched...<br/>please check your ID and Password";
@@ -315,8 +299,8 @@ export default class {
     
             const current_path = document.location.href;
     
-            if (sign_up_upw === sign_up_upw_confirm) {                
-                console.log("sign up progress")
+            if (sign_up_upw === sign_up_upw_confirm) {               
+             
                 SPINNER.turnOffDisplay();
                 
                 const crypt = new JSEncrypt();
@@ -342,8 +326,7 @@ export default class {
                         },
                     body: JSON.stringify(send_data),
                     redirect: "follow"
-                };
-                console.log(data);
+                };               
     
                 fetch('/sign_up', data)
                 .then((res) => res.json())

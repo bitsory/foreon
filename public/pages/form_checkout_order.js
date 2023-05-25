@@ -110,6 +110,9 @@ export function getUserOrderConfirm() {
                     <span class="usd">$</span><span id="checkout_submit_summary_order_total_value" class="checkout_submit_summary_order_total_value">00.00</span>
                     </span>
                 </div>
+                <div id="checkout_submit_summary_detail_reminder" class="checkout_submit_summary_detail_reminder">
+                REMIDER: Click "Place Your Order" only once and wait for onscreen confirmation of your payment and order number. Thanks for your patience.
+                </div>
             </div>
        
             
@@ -522,6 +525,9 @@ export function getGuestOrderConfirm() {
                     <span id="checkout_submit_summary_value" class="checkout_submit_summary_value">
                     <span class="usd">$</span><span id="checkout_submit_summary_order_total_value" class="checkout_submit_summary_order_total_value">00.00</span>
                     </span>
+                </div>
+                <div id="checkout_submit_summary_detail_reminder" class="checkout_submit_summary_detail_reminder">
+                REMIDER: Click "Place Your Order" only once and wait for onscreen confirmation of your payment and order number. Thanks for your patience.
                 </div>
             </div>
 

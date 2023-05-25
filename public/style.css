@@ -1665,6 +1665,11 @@ nav {
     margin-bottom: 0.8rem;
 }
 
+.checkout_submit_summary_detail_reminder {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: red;
+}
 
 
 
@@ -3462,6 +3467,13 @@ ul.tabs li.current{
         
     }
 
+    .online_title_label {
+        font-size: 0.9rem;
+    }
+
+    .item_search_input {
+        width: 8rem;
+    }
 
 
     .mn_btn {
@@ -3721,6 +3733,11 @@ ul.tabs li.current{
     .shop_detail_btn {
         font-size: small;
         width: 5.5rem;
+    }
+
+
+    .item_search_input {
+        width: 7.5rem;
     }
 
     .check_go_cart {
