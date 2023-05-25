@@ -695,7 +695,7 @@ export default class {
         plus_quantity_btn.setAttribute('id', `${item_attribute}_plus_quantity_btn`);
         plus_quantity_btn.setAttribute('class', `${item_attribute}_plus_quantity_btn cart_modal_ctl_btn`);
         document.querySelector(`[cart_modal_quantity_box_itemid="${prodnum}"]`).appendChild(plus_quantity_btn);
-        plus_quantity_btn.innerText = '➕'; 
+        plus_quantity_btn.innerText = '△'; 
     }
 
     setMinusQuantity(prodnum, item_attribute) {
@@ -703,7 +703,7 @@ export default class {
         minus_quantity_btn.setAttribute('id', `${item_attribute}_minus_quantity_btn`);
         minus_quantity_btn.setAttribute('class', `${item_attribute}_minus_quantity_btn cart_modal_ctl_btn`);
         document.querySelector(`[cart_modal_quantity_box_itemid="${prodnum}"]`).appendChild(minus_quantity_btn);
-        minus_quantity_btn.innerText = '➖';
+        minus_quantity_btn.innerText = '▽';
     }
 
     setItemDelete(prodnum, item_attribute) {
@@ -712,7 +712,7 @@ export default class {
         item_deleteb_tn.setAttribute('class', `${item_attribute}_delete_btn cart_modal_ctl_btn`);
         document.querySelector(`[cart_modal_name_box_itemid="${prodnum}"]`).appendChild(item_deleteb_tn);
         item_deleteb_tn.innerText = 'X';
-        // item_deleteb_tn.innerText = '✖';
+        
     }
 
     getSubTotal(prodnum, item_attribute) {
@@ -723,27 +723,13 @@ export default class {
         const item_price = parseFloat(document.querySelector(`[cart_modal_price_itemid="${prodnum}"]`).innerText.slice(1)); 
 
         const item_subtotal = parseFloat(item_quantity * item_price); 
-        // console.log(item_quantity);
-        // console.log(item_price);
-        // console.log(item_subtotal);
+        
 
         document.querySelector(`[cart_modal_price_box_itemid="${prodnum}"]`).appendChild($item_subtotal);
         $item_subtotal.innerText = '$' +item_subtotal.toFixed(2);
 
     }
 
-    /*
-    getGrandTotal(amount, item_attribute) {
-        const $item_grandtotal = document.createElement('div');
-        $item_grandtotal.setAttribute('class', `${item_attribute}_grand_total`);
-
-        // const item_orderGrandTotal = 1000;
-        // const item_orderGrandTotal = parseFloat(document.querySelector(`.online_place_order_item_subtotal.o${}`).innerTextslice(1));
-        document.getElementById(`check_out_item_grand_total`).appendChild($item_grandtotal);
-        document.querySelector(`.check_out_item_grand_total`).innerText = 'Total $' + amount.toFixed(2);
-        
-    }
-    */
 
     setTotal(param, total) {
 

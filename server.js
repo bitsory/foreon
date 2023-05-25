@@ -77,6 +77,7 @@ app.use(cookieParser("secret"));
   
 app.get('/',(req,res) => { 
     console.log("home home home");
+    /*
     const axios = require('axios');
 
 // Config Set Up
@@ -92,8 +93,8 @@ app.get('/', (req, res) => authenticate(req, res));
 const authenticate = async (req, res) => {
   const url = `${targetEnv}/oauth/authorize?client_id=${appID}`;
 
-  /* If there is no code parameter in the query string of the current url
-  redirect user for authentication. If there isn't then request API token */
+  // If there is no code parameter in the query string of the current url
+  //redirect user for authentication. If there isn't then request API token 
   !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
 }
 
@@ -106,8 +107,9 @@ const requestAPIToken = async (res, query) => {
     .then(({ data }) => res.send(data))
     .catch(err => res.send(err.message));
 }
+*/
 
-/*
+
     if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
         res.render('admin.ejs', {post : "ADMIN"});
     }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
@@ -117,7 +119,7 @@ const requestAPIToken = async (res, query) => {
         console.log("login data nothing");
 		res.sendFile(__dirname + "/public/index.html");
 	}
-    */
+    
 });
 
 

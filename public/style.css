@@ -1758,6 +1758,11 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
 
 .cart_modal_ctl_btn {
     color: white;
+    font-size: 1rem;
+}
+
+.cart_modal_item_quantity {
+    margin: 0 0.5rem;
 }
 
 .cart_modal_item_name {
