@@ -433,62 +433,6 @@ document.addEventListener('click',function(e){
     if(e.target && e.target.className == 'tab-link') {
 
         chooseTabLink(e.target);
-
-        /*
-        let tab_id = e.target.getAttribute('data-tab');
-        let tab_links = document.querySelectorAll('li.tab-link');
-        let tab_contents = document.querySelectorAll('div.tab-content');
-
-        for (const element of tab_links) {
-            element.classList.remove('current');                
-        }
-        for (const element of tab_contents) {             
-            element.classList.remove('current');
-        }
-        
-        e.target.classList.add('current');
-        document.getElementById(tab_id).classList.add('current');
-
-        if (tab_id === 'tab-2') {
-            history.pushState(null, null, `/account/billing-infomation`);
-            const billing_info_box = document.querySelector('.billing_info_box');
-            while (billing_info_box.hasChildNodes()) {	
-                billing_info_box.removeChild(billing_info_box.firstChild);
-            }
-
-            // document.querySelector('.billing_info_box').innerHTML = makeBillingInfoBox();
-            document.querySelector('.billing_info_add_btn_container').style.display = "block";
-            fetch('/get_user_billing_info') // get billiing info from DB
-            .then((res) => res.json())
-            .then(result => {
-                console.log(result);
-                if (result.length > 0) {
-                    console.log(result)
-
-                    renderBillingInfo(result);
-
-                    
-                }
-            })
-
-
-        } else if (tab_id === 'tab-3') { 
-            history.pushState(null, null, `/account/shipping-infomation`);
-            
-            const shipping_info_box = document.querySelector('.shipping_info_box');
-            while (shipping_info_box.hasChildNodes()) {	
-                shipping_info_box.removeChild(shipping_info_box.firstChild);
-            }
-
-            // document.querySelector('.shipping_info_box').innerHTML.removeChild();
-            document.querySelector('.shipping_info_add_btn_container').style.display = "block";
-            fetch('/get_user_shipping_info') // get shipping info from DB
-            .then((res) => res.json())
-            .then(result => {
-                renderShippingInfo(result)
-            });
-        }
-        */
     }
 
     if(e.target && e.target.value == 'make_default_billing_info') {
@@ -521,110 +465,104 @@ document.addEventListener('click',function(e){
         });
     }
 
-    if(e.target && e.target.value == 'delete_payment_method') {
-        console.log("Delete 'billing_info_delete_btn' 'billing_info_delete_btn' 'billing_info_delete_btn'")
-        let str = e.target.className;
-        console.log(str.indexOf("BIN"));
-        console.log(str.substring(str.indexOf("BIN")+3))
-        
+    if(e.target && e.target.value == 'delete_payment_method') {        
+        let str = e.target.className;      
     
         let uid = u_id;
         let delete_card_index = str.substring(str.indexOf("BIN")+3);
-        let default_payment_indicate = document.getElementById(`billing_info_default_btn BIN${delete_card_index}`).value;
+        let default_payment_indicate = document.getElementById(`billing_info_default_btn BIN${delete_card_index}`) ? document.getElementById(`billing_info_default_btn BIN${delete_card_index}`).value: 'n';
 
-        const data = {id : uid, card_index : delete_card_index, default_payment : default_payment_indicate}
-
-        const option = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'                
-                },
-            body: JSON.stringify(data)
-        };
-        console.log(option);
-
-        fetch('/delete_payment_method', option)
-        .then((res) => res.json())
-        .then(result => {
-            console.log(result)
-
-            const billing_info_box = document.querySelector('.billing_info_box');
-            while (billing_info_box.hasChildNodes()) {	
-                billing_info_box.removeChild(billing_info_box.firstChild);
-            }
-            renderBillingInfo(result);  
+        Swal.fire({
+            title: 'Are you sure to delete this Payment Method?',            
+           
+            showCancelButton: true, // cancel버튼 보이기. 기본은 원래 없음
+            confirmButtonColor: '#983131', // confrim 버튼 색깔 지정 98, 31, 31 3085d6
+            cancelButtonColor: '#254248241', // cancel 버튼 색깔 지정 d33
+            confirmButtonText: 'Confirm', // confirm 버튼 텍스트 지정
+            cancelButtonText: 'Cancel', // cancel 버튼 텍스트 지정
+            width: 400,
+            // height: 400,
             
-
+            reverseButtons: true, // 버튼 순서 거꾸로
             
-            if (location.pathname.substring(0, 15) == '/shop/checkout/') { // checkout page
-                document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+         }).then(result => {
+            // if get promise return
+            if (result.isConfirmed) { // button click confirm
 
-                if (result.length > 0) {
-                    console.log("if (location.pathname.substring(0, 15) == '/shop/checkout/') {")
+                const data = {id : uid, card_index : delete_card_index, default_payment : default_payment_indicate}
 
-                    // document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
-                    //     document.getElementById('user_continue_to_payment_btn').style.display = "none" : false;
-                    
-                    // document.getElementById('user_checkout_shipping_info_detail_box').style.display = "none";
-                    // document.getElementById('user_checkout_shipping_info_next_btn').style.display = "block";
-                    // document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "none";
-                    // document.getElementById('user_checkout_shipping_method_container').style.display = "block";
-                    // document.getElementById('user_checkout_shipping_method_container_cover').style.display = "none";
-                   
-                    
-                    // document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
+                const option = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'                
+                        },
+                    body: JSON.stringify(data)
+                };
 
-                    document.getElementById('user_checkout_billing_info_contents').innerHTML = 
-                    `
-                    <div id="change_profile_billing_info" class="change_profile_billing_info">
-                        <div id="billing_info_container" class="billing_info_container">
-                            <div id="billing_info_box" class="billing_info_box"></div> 
-                        </div>
-                        <div id="billing_info_add_btn_container" class="billing_info_add_btn_container info_add_btn_container">
-                            <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
-                        </div>
-                    </div>
-                    
-                    `;                    
-                    
-                    document.getElementById('billing_info_add_btn_container').style.display = "block";
-                    const billing_info_box = document.getElementById('billing_info_box');
+                fetch('/delete_payment_method', option)
+                .then((res) => res.json())
+                .then(result => {
+
+                    const billing_info_box = document.querySelector('.billing_info_box');
                     while (billing_info_box.hasChildNodes()) {	
                         billing_info_box.removeChild(billing_info_box.firstChild);
                     }
-                    renderBillingInfo(result); 
-                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
-                    document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
+                    renderBillingInfo(result);  
+                    if (location.pathname.substring(0, 15) == '/shop/checkout/') { // checkout page
+                        document.getElementById('user_checkout_submit_button').setAttribute("disabled", "true");
 
-                } else { 
-                    console.log("result.length == 0")
-                    document.getElementById('user_checkout_billing_info_contents').innerHTML = AIF.setUpPaymentMethodForm();
-                    document.getElementById('user_checkout_billing_info_detail_box_cover').innerText = '';                    
-                    
-                    document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
+                        if (result.length > 0) {
+                        
+                            document.getElementById('user_checkout_billing_info_contents').innerHTML = 
+                            `
+                            <div id="change_profile_billing_info" class="change_profile_billing_info">
+                                <div id="billing_info_container" class="billing_info_container">
+                                    <div id="billing_info_box" class="billing_info_box"></div> 
+                                </div>
+                                <div id="billing_info_add_btn_container" class="billing_info_add_btn_container info_add_btn_container">
+                                    <button id="billing_info_add_btn" class="btn billing_info_add_btn">+ Add Billing Infomation</button>
+                                </div>
+                            </div>
+                            
+                            `;                    
+                            
+                            document.getElementById('billing_info_add_btn_container').style.display = "block";
+                            const billing_info_box = document.getElementById('billing_info_box');
+                            while (billing_info_box.hasChildNodes()) {	
+                                billing_info_box.removeChild(billing_info_box.firstChild);
+                            }
+                            renderBillingInfo(result); 
+                            document.getElementById('user_checkout_change_payment_method_btn').style.display = "block";
+                            document.getElementById('user_checkout_billing_info_next_btn').style.display = "block";
 
-                    document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
-                        document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block" : false;                      
-                                        
-                    document.getElementById('user_checkout_change_payment_method_btn').style.display = "none";                    
-                    document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
-                    document.getElementById('billing_info_add_btn_container') ? document.getElementById('billing_info_add_btn_container').style.display = "none" : false;
-                    document.getElementById('user_checkout_billing_info_context').style.display = "none";
-                    document.getElementById('user_checkout_billing_info_context').setAttribute('value', 'off');
-                    
-                }                
+                        } else { 
+                            console.log("result.length == 0")
+                            document.getElementById('user_checkout_billing_info_contents').innerHTML = AIF.setUpPaymentMethodForm();
+                            document.getElementById('user_checkout_billing_info_detail_box_cover').innerText = '';                    
+                            
+                            document.getElementById('user_checkout_shipping_info_change_btn').style.display = "block";
 
-            } else { //account page
-                const billing_info_box = document.getElementById('billing_info_box');
-                while (billing_info_box.hasChildNodes()) {	
-                    billing_info_box.removeChild(billing_info_box.firstChild);
-                }
-                renderBillingInfo(result); 
-                document.getElementById('billing_info_add_btn_container').style.display = "block";
-            }               
+                            document.getElementById('user_checkout_shipping_method_container_change_btn').value == "off" ?
+                                document.getElementById('user_checkout_shipping_method_container_change_btn').style.display = "block" : false;                      
+                                                
+                            document.getElementById('user_checkout_change_payment_method_btn').style.display = "none";                    
+                            document.getElementById('user_checkout_billing_info_next_btn').style.display = "none";
+                            document.getElementById('billing_info_add_btn_container') ? document.getElementById('billing_info_add_btn_container').style.display = "none" : false;
+                            document.getElementById('user_checkout_billing_info_context').style.display = "none";
+                            document.getElementById('user_checkout_billing_info_context').setAttribute('value', 'off');
+                            
+                        }                
 
-        
-
+                    } else { //account page
+                        const billing_info_box = document.getElementById('billing_info_box');
+                        while (billing_info_box.hasChildNodes()) {	
+                            billing_info_box.removeChild(billing_info_box.firstChild);
+                        }
+                        renderBillingInfo(result); 
+                        document.getElementById('billing_info_add_btn_container').style.display = "block";
+                    }        
+                });
+            }
         });
     }
 
@@ -941,7 +879,7 @@ document.addEventListener('click',function(e){
                 
                 let uid = u_id;
                 let delete_shipping_index = str.substring(str.indexOf("SHN")+3);
-                let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value;
+                let default_addr = document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`)? document.getElementById(`shipping_info_default_btn SHN${delete_shipping_index}`).value: 'n';
             
                 const data = {id : uid, shipping_index : delete_shipping_index, default_address : default_addr}
 
