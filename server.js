@@ -75,7 +75,7 @@ app.use(session({
 
 app.use(cookieParser("secret"));
   
-
+/*
 const axios = require('axios');
 
 // Config Set Up
@@ -106,10 +106,11 @@ const requestAPIToken = async (res, query) => {
     .then(({ data }) => res.send(data))
     .catch(err => res.send(err.message));
 }
+*/
 
+app.get('/',(req,res) => { 
+    console.log("home home home");
 
-
-/*
     if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
         res.render('admin.ejs', {post : "ADMIN"});
     }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
@@ -119,7 +120,23 @@ const requestAPIToken = async (res, query) => {
         console.log("login data nothing");
 		res.sendFile(__dirname + "/public/index.html");
 	}
-*/  
+});
+
+app.get('/get_key',(req,res) => { 
+const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    }
+  };
+  
+  fetch('https://scl.clover.com/pakms/apikey', options)
+    .then(response => response.json())
+    .then(response => console.log(response))
+    .catch(err => console.error(err));
+
+});
 
 
 
