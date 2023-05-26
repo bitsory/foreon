@@ -75,6 +75,38 @@ app.use(session({
 
 app.use(cookieParser("secret"));
   
+/*
+const axios = require('axios');
+
+// Config Set Up
+// const targetEnv = 'https://sandbox.dev.clover.com'; // Pointing to Sandbox Environment
+const targetEnv = 'https://www.clover.com'; // Pointing to Prod Environment
+
+const appID = process.env.PRODUCTAPPID; // Input your app ID here
+const appSecret = process.env.PRODUCTAPPSECRET; // Input your app secret here
+
+app.get('/', (req, res) => authenticate(req, res));
+
+console.log("get api hello")
+// Steps 1 & 2 - Request merchant authorization to receive authorization code
+const authenticate = async (req, res) => {
+  const url = `${targetEnv}/oauth/authorize?client_id=${appID}`;
+
+  // If there is no code parameter in the query string of the current url
+ // redirect user for authentication. If there isn't then request API token 
+  !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
+}
+
+// Steps 3 & 4 - Request and serve up API token using the received authorization code
+const requestAPIToken = async (res, query) => {
+  const url = `${targetEnv}/oauth/token?client_id=${appID}&client_secret=${appSecret}&code=${query.code}`;
+
+  // Request
+  await axios.get(url)
+    .then(({ data }) => res.send(data))
+    .catch(err => res.send(err.message));
+}
+*/
 
 app.get('/',(req,res) => { 
     console.log("home home home");
@@ -88,6 +120,22 @@ app.get('/',(req,res) => {
         console.log("login data nothing");
 		res.sendFile(__dirname + "/public/index.html");
 	}
+});
+
+app.get('/get_key',(req,res) => { 
+const options = {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    }
+  };
+  
+  fetch('https://scl.clover.com/pakms/apikey', options)
+    .then(response => response.json())
+    .then(response => console.log(response))
+    .catch(err => console.error(err));
+
 });
 
 
@@ -391,7 +439,7 @@ app.post('/sign_up', (req,res) => {
                         })
                     };
                     
-                    fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+                    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
                     .then(response => response.json())
                     .then(response => {                
                         
@@ -479,7 +527,7 @@ function createCustomerCLV(firstName, lastName, email, phone) {
           })
       };
       
-      fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+      fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
         .then(response => response.json())
         .then(response => console.log(response))
         .catch(err => console.error(err));
@@ -546,7 +594,7 @@ app.post('/g_sign_in', function (req,res) {
                         })
                     };
                 
-                    fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+                    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
                     .then(response => response.json())
                     .then(response => {
                         const clv_id = response.id;
@@ -892,6 +940,13 @@ app.post("/add_cart", function (req, res) {
 });
 
 
+// app.post("/shop/cart/:user", function (req, res) {
+//     console.log("/shop/cart/:user");
+//     console.log(req.body);
+//     var user = req.params.user;
+//     console.log(user);
+//     // res.render('shop_order.ejs');
+// });
 
 app.post("/shop/order", function (req, res) {   
   
@@ -1039,7 +1094,7 @@ app.get('/get_user_billing_info', (req,res) => {
                     }
                 };
             
-                fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
+                fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
                 .then(response => response.json())
                 .then(response => {
                     console.log("card response")
@@ -1127,7 +1182,7 @@ app.post('/add_payment_method', (req,res) => {
         })
       };
       
-      fetch(`https://scl.clover.com/v1/customers/${clv_id}`, options)        
+      fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${clv_id}`, options)        
         .then(response => response.json())
         .then(response => {
             console.log(response)
@@ -1140,7 +1195,7 @@ app.post('/add_payment_method', (req,res) => {
                 }
               };
         
-            fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${clv_id}?expand=cards`, options)
+            fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${clv_id}?expand=cards`, options)
               .then(response => response.json())
               .then(response => { 
                 console.log(response);
@@ -1220,19 +1275,19 @@ app.post('/make_default_billing_info', (req,res) => {
     let bi_number = req.body.billing_index;
 
     db.getConnection((con)=>{
-        con.query('UPDATE cafefore.billing_info SET default_payment="n" WHERE id = ?', [u_id], (err, result) => {
+        con.query('UPDATE test1.billing_info SET default_payment="n" WHERE id = ?', [u_id], (err, result) => {
             if (err) {
                 res.send(err);
                 // con.end();
             } else {
                 console.log(result);  
-                con.query('UPDATE cafefore.billing_info SET default_payment="default" WHERE id = ? and bi_number = ?', [u_id, bi_number], (err, result) => {
+                con.query('UPDATE test1.billing_info SET default_payment="default" WHERE id = ? and bi_number = ?', [u_id, bi_number], (err, result) => {
                     if (err) {
                         res.send(err);
                         // con.end();
                     } else {
                         console.log(result);
-                        con.query('SELECT clv_id FROM cafefore.billing_info WHERE id = ?', [u_id], (err, result) => {
+                        con.query('SELECT clv_id FROM test1.billing_info WHERE id = ?', [u_id], (err, result) => {
                             if (err) {
                                 res.send(err);
                                 // con.end();
@@ -1247,7 +1302,7 @@ app.post('/make_default_billing_info', (req,res) => {
                                     }
                                 };
                     
-                                fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
+                                fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
                                 .then(response => response.json())
                                 .then(response => { 
                                     console.log(response);
@@ -1256,7 +1311,7 @@ app.post('/make_default_billing_info', (req,res) => {
                                     })
                                     console.log(res_data);
                                     
-                                    con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM cafefore.billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
+                                    con.query('SELECT bi_number, cardholder, last4, exp, type, default_payment, inuse, indate FROM test1.billing_info WHERE cd_id IN (?) and id = ? and inuse = "y"', [res_data, u_id], (err, result) => {
                                         if (err) {
                                             res.send(err);
                                             // con.end();
@@ -1385,7 +1440,7 @@ app.post('/delete_payment_method', (req,res) => {
                                 }
                             };
                 
-                            fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
+                            fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/${result[0].clv_id}?expand=cards`, options)
                             .then(response => response.json())
                             .then(response => { 
                                 console.log(response);
@@ -1615,19 +1670,19 @@ app.post('/edit_profile_shipping', (req,res) => {
 
 });
 
-// app.post('/add_profile_shipping_test', (req,res) => {
-//     console.log(`req contact: ${req}`);
-//     console.log(req.body);
-//     const test = {test : req.body}
+app.post('/add_profile_shipping_test', (req,res) => {
+    console.log(`req contact: ${req}`);
+    console.log(req.body);
+    const test = {test : req.body}
 
-//     res.send(test)
+    res.send(test)
 
-// });
+});
 
 
 app.post('/add_profile_shipping', (req,res) => {
-    // console.log(`req contact: ${req}`);
-    // console.log(req.body);
+    console.log(`req contact: ${req}`);
+    console.log(req.body);
 
     const u_id = req.session.loginData.id;
     const recipient = req.body.shipping_recipient;
@@ -1682,7 +1737,8 @@ app.post('/add_profile_shipping', (req,res) => {
                 } else {
                     console.log(result);
                     if (result.protocol41 == true) {
-                        res.send({result : "ok"});                        
+                        res.send({result : "ok"});
+                        // res.redirect('http://localhost:8080/account/shipping-infomation');
                     } else res.send("sorry... something wrong in DB SERVER.");                        
                 }
             });
@@ -1724,14 +1780,20 @@ app.post('/shop',(req,res) => {
         console.log(db.getConnection);
         
     
-    db.getConnection((con)=>{      
+    db.getConnection((con)=>{
+        // console.log("con");
+        // console.log(con);
+        
 
         con.query('SELECT * from product where useyn = "y"', (err, result) => {
             if(err){
                 res.send(err);
                 console.log(err);
                 // con.end();        
-            } else {              
+            } else {
+                console.log("SELECT * from product where prodnum = ");
+                console.log(result);
+                console.log(`${result[0].prodnum}`);
 
                 res.send(result);                
             }                        
@@ -1742,7 +1804,9 @@ app.post('/shop',(req,res) => {
 
 
 
-app.post('/shop/view/item/:item_number',(req,res) => {   
+app.post('/shop/view/item/:item_number',(req,res) => {
+    console.log(`/shop/view/item/:item_number : ${req.params.item_number}`);
+        
     const product_number = req.params.item_number
             
     db.getConnection((con)=>{
@@ -1760,7 +1824,9 @@ app.post('/shop/view/item/:item_number',(req,res) => {
 });
 
 
-app.post('/shop_category',(req,res) => { 
+app.post('/shop_category',(req,res) => {
+    console.log(`/shop_category /shop_category`);  
+    console.log(req.body);   
     
     let kind = "";
   switch (req.body.shop_category){
@@ -1794,7 +1860,8 @@ app.post('/shop_category',(req,res) => {
 });
 
 app.post('/shop_search', (req,res) => {
-  
+    console.log("/shop_search /shop_search /shop_search ");
+    console.log(req.body)
     const name = req.body.shop_search_item;
 
     db.getConnection((con)=>{   
@@ -1804,7 +1871,8 @@ app.post('/shop_search', (req,res) => {
                 console.log(err);
                 // con.end();        
             } else {
-                if (result.length > 0) {               
+                if (result.length > 0) {
+               
                 console.log(`${result[0].prodnum}`);
                 }
 
@@ -1818,7 +1886,9 @@ app.post('/shop_search', (req,res) => {
 
 
 app.post('/overwrite_cart', (req,res) => {
- 
+    console.log('/overwrite_cart/overwrite_cart /overwrite_cart/overwrite_cart')
+    console.log(req.body);
+
     const u_id = req.body[0].u_cart[0].u_id == req.session.loginData.id ? req.session.loginData.id : false;
     const overwrite_cart = req.body[0].overwrite_cart;
     const date = getDate();
@@ -1893,9 +1963,9 @@ app.post('/overwrite_cart', (req,res) => {
                         const update_query_1 = "UPDATE cart SET quantity = (case ";
                         let update_query_2 = '';
                         for (let i in update_items) {
-                            update_query_2 = update_query_2 + `when cafefore.cart.prodnum = '${update_items[i].c_item_no}' then '${update_items[i].c_item_quantity}' `
+                            update_query_2 = update_query_2 + `when test1.cart.prodnum = '${update_items[i].c_item_no}' then '${update_items[i].c_item_quantity}' `
                         }
-                        const update_query_3 = `end), modate = '${date}' WHERE cafefore.cart.prodnum IN (${update_items_prodnum}) AND u_id = '${u_id}' and result="n";`
+                        const update_query_3 = `end), modate = '${date}' WHERE test1.cart.prodnum IN (${update_items_prodnum}) AND u_id = '${u_id}' and result="n";`
                         const update_query = update_query_1 + update_query_2 + update_query_3;
                         console.log(update_query)
 
@@ -1946,7 +2016,8 @@ app.post('/overwrite_cart', (req,res) => {
                                 res.send(err);
                                 // con.end();            
                             } else {
-                             
+                                console.log("result");
+                                console.log(result);
                                 res.send(result)
                             }
                         })
@@ -2126,6 +2197,8 @@ app.post('/item_delete_v2', (req,res) => {
     const selected_number = req.body.selected_num;
     const u_id = req.session.loginData.id;
     
+    console.log('/item_delete /item_delete /item_delete /item_delete/item_delete')
+
     if (user_id == u_id) {      
         db.getConnection((con)=>{
             con.query('DELETE FROM cart WHERE u_id=? and prodnum=? and result = "n"', [u_id, item_num] ,(err, result) => {
@@ -2153,6 +2226,86 @@ app.post('/item_delete_v2', (req,res) => {
         });
     }
 });
+
+/*
+app.post('/cancel_order', (req,res) => {
+    console.log('/cancal_order cancal_order cancal_order ')
+    console.log(req.body);
+    const order_num = req.body.order_number; 
+    const u_id = req.body.user_id;
+    const page_num = req.body.page_num;
+    db.getConnection((con)=>{
+        con.query('SELECT * FROM cart JOIN orders on cart.order_number = orders.order_number WHERE refund = "n" and cart.order_number = ? and cart.u_id = ?', [order_num, u_id] ,(err, result_param) => {
+            if(err){                        
+                res.send(err);
+                       
+            } else {
+                console.log("result_param");
+                console.log(result_param);
+                const left_over = result_param.map(element => {
+                    return element;
+                })
+                const cart_nums = result_param.map(element => {
+                    return element.cartnum;
+                })
+                const item_prodnums = result_param.map(element => {
+                    return element.prodnum;
+                })
+                
+                const order_items_count = result_param[0].order_items_count;
+                if (result_param.length == order_items_count) {
+                    console.log("result_param.length == order_items_count");
+
+                    con.query('SELECT clv_charge_id from orders WHERE shipment = "n" and order_number = ? and u_id = ?', [order_num, u_id] ,(err, result) => {        
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log(result);
+                        
+                            const options = {
+                                method: 'POST',
+                                headers: {
+                                accept: 'application/json',
+                                'content-type': 'application/json',
+                                authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                                },
+                                body: JSON.stringify({charge: result[0].clv_charge_id})
+                            };
+                            
+                            fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+                            .then(response => response.json())
+                            .then(response => {
+
+                                if (response.status == 'succeeded') {
+                                    console.log(response)
+                                    con.query('UPDATE orders SET full_refunded = "y" where order_number = ?', [order_num] ,(err, result) => { 
+                                        if(err){                        
+                                            res.send(err);                                               
+                                        } else {
+                                            console.log(result);
+                                            makeAllItemsRefundFlag(order_num, con);
+                                            (u_id == 'GUEST') ? checkGuestPurchaseHistory(order_num, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                                   
+                                        }
+                                    });
+                                    
+                                }
+                            })
+                            .catch(err => console.error(err));
+                        } 
+                    });   
+                } else {
+                    console.log("cancel order left over items")
+                    const cancel_order_flag = true;
+                    cancelOrderItems(left_over, u_id, order_num, cart_nums, item_prodnums, con, res, cancel_order_flag, page_num); 
+                }
+            }
+        });
+        con.release();         
+    })
+});
+*/
+
 
 app.post('/cancel_order', (req,res) => {
     console.log('/cancal_order cancal_order cancal_order ')
@@ -2206,7 +2359,7 @@ app.post('/cancel_order', (req,res) => {
                                 body: JSON.stringify({charge: result[0].clv_charge_id})
                             };
                             
-                            fetch('https://scl.clover.com/v1/refunds', options)
+                            fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
                             .then(response => response.json())
                             .then(response => {
 
@@ -2299,7 +2452,7 @@ function getUPSLineItemID(order_num) {
             }
         };
         
-        fetch(`https://api.clover.com/v3/merchants/${process.env.MERCHANT_ID}/orders/${order_num}/line_items`, options)
+        fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/orders/${order_num}/line_items`, options)
         .then(response => response.json())
         .then(response => {
             console.log(response);
@@ -2378,7 +2531,7 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                         })
                     };
                 
-                    fetch(`https://scl.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
                     .then(response => response.json())
                     .then(response => {                      
                                             
@@ -2418,11 +2571,11 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                             const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
                             let update_query_2 = '';
                             for (let i in returned_amount) {
-                                update_query_2 = update_query_2 + `WHEN cafefore.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
                             }                           
                             const update_query = update_query_1 + update_query_2;
                             console.log(update_query)
-                            con.query(update_query + 'end) WHERE cafefore.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
                             
                                 if(err){                        
                                     res.send(err);
@@ -2488,7 +2641,7 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                         body: JSON.stringify({"items":items})
                     };
                 
-                    fetch(`https://scl.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
                     .then(response => response.json())
                     .then(response => {                      
                                             
@@ -2529,11 +2682,11 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
                             const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
                             let update_query_2 = '';
                             for (let i in returned_amount) {
-                                update_query_2 = update_query_2 + `WHEN cafefore.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
                             }                           
                             const update_query = update_query_1 + update_query_2;
                             console.log(update_query)
-                            con.query(update_query + 'end) WHERE cafefore.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
                             // con.query('UPDATE cart SET refund = "y", refund_amount = ? where cartnum = ? and prodnum = ?', [amount_returned, cartnum, last_refund[0].prodnum] ,(err, result) => { 
                                 if(err){                        
                                     res.send(err);
@@ -2553,6 +2706,167 @@ function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, r
         } 
     });
 }
+/*
+function cancelOrderItems(result_param, u_id, ordernum, cartnum, prodnum, con, res, cancel_order_flag, page_num) {
+    console.log("cancelOrderItems(result_param,");
+    console.log(result_param);
+    console.log(result_param.length);
+    getUPSLineItemID(result_param[0].clv_order_id).then(data => {
+        const shipping_fee = data;        
+        console.log(shipping_fee)      
+
+        if (result_param.length > 1) {            
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum in (?) and u_id = ? and product.prodnum in (?)', [cartnum, u_id, prodnum] ,(err, result) => {
+            // con.query('SELECT order_number, item_code, quantity from cart where result = "y" and cartnum = ? and u_id = ?', [cartnum, u_id] ,(err, result) => {
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log(result); 
+                    const items = result.map(element => {
+                        return { 
+                            parent : element.item_code,
+                            amount : element.price_sell * 100 * element.quantity * 1.06,
+                            description : element.name,
+                            quantity : element.quantity,
+                            type:"sku"                            
+                        }                
+                    });
+
+                    if (cancel_order_flag && cancel_order_flag == true) {
+                        items.push(shipping_fee);
+                    }                  
+                    
+                    console.log(items);
+
+                    const options = {
+                        method: 'POST',
+                        headers: {accept: 'application/json', 
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({
+                        "items":items
+                        })
+                    };
+                
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    .then(response => response.json())
+                    .then(response => {                      
+                                            
+                        console.log(response);                       
+                        
+                        if (response.status == 'returned') {                            
+
+                            const returned_amount = response.items.map(element => {
+                                return element.amount / 100;                        
+                            });
+
+                            const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
+                            let update_query_2 = '';
+                            for (let i in returned_amount) {
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                            }                           
+                            const update_query = update_query_1 + update_query_2;
+                            console.log(update_query)
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log("returned items DB updated"); 
+                                    makeFullRefundFlag(ordernum, con).then(e => {
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                    
+                                    });
+                                } 
+                            });   
+                        } else res.send("error : refund occur error");            
+                    })
+                    .catch(err => console.error(err));                   
+                } 
+            });
+        
+        } else if (result_param.length == 1) {
+            console.log("else if (result_param.length == 1)");
+            con.query('SELECT * from cart join product on cart.prodnum = product.prodnum where result = "y" and cartnum in (?) and u_id = ? and product.prodnum in (?)', [cartnum, u_id, prodnum] ,(err, result) => {           
+                if(err){                        
+                    res.send(err);
+                    // con.end();        
+                } else {
+                    console.log(result);
+                    const items = result.map(element => {
+                        return { 
+                            parent : element.item_code,
+                            amount : element.price_sell * 100 * element.quantity * 1.06,
+                            description : element.name,
+                            quantity : element.quantity,
+                            type:"sku"                            
+                        }                
+                    });
+
+                    items.push(shipping_fee);
+                    console.log("items");
+                    console.log(items);
+                    
+                    const refunded = result.filter(element => {
+                        return element.refund == 'y';
+                    });
+                    console.log("refunded")
+                    console.log(refunded)
+
+                    let refunded_amount = 0;
+                    refunded.forEach(element => {
+                        refunded_amount = refunded_amount + element.refund_amount;                    
+                    })
+                    const options = {
+                        method: 'POST',
+                        headers: {accept: 'application/json', 
+                        'content-type': 'application/json',
+                        authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        },
+                        body: JSON.stringify({"items":items})
+                    };
+                
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                    .then(response => response.json())
+                    .then(response => {                      
+                                            
+                        console.log(response);
+                        
+                        if (response.status == 'returned') {
+                            const returned_amount = response.items.map(element => {
+                                return element.amount / 100;                        
+                            });
+
+                            const update_query_1 = "UPDATE cart SET refund = 'y', refund_amount = (CASE ";
+                            let update_query_2 = '';
+                            for (let i in returned_amount) {
+                                update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                            }                           
+                            const update_query = update_query_1 + update_query_2;
+                            console.log(update_query)
+                            con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[cartnum] ,(err, result) => {
+                            // con.query('UPDATE cart SET refund = "y", refund_amount = ? where cartnum = ? and prodnum = ?', [amount_returned, cartnum, last_refund[0].prodnum] ,(err, result) => { 
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log(result);
+                                    makeFullRefundFlag(ordernum, con).then(e => {
+                                        (u_id == 'GUEST') ? checkGuestPurchaseHistory(ordernum, con, res) : checkPurchaseHistory(u_id, con, res, page_num);                                    
+                                    });                                    
+                                } 
+                            });   
+                        } else res.send("error : refund occur error");              
+                    })
+                    .catch(err => console.error(err));                                
+                } 
+            });
+        } 
+    });
+}
+*/
 
 function makeAllItemsRefundFlag(ordernum, con) { 
     con.query('UPDATE cart SET refund = "y" where order_number = ?', [ordernum] ,(err, result) => { 
@@ -2638,7 +2952,7 @@ app.post('/item_return', (req,res) => {
   
 
     db.getConnection((con)=>{
-        con.query('UPDATE cafefore.cart SET item_return_req = "y", item_return_result = "submitted", item_return_reason = ? WHERE order_number = ? and cartnum = ?',[set_reason, order_number, cart_number], (err, result) => {
+        con.query('UPDATE test1.cart SET item_return_req = "y", item_return_result = "submitted", item_return_reason = ? WHERE order_number = ? and cartnum = ?',[set_reason, order_number, cart_number], (err, result) => {
         
             if(err){                        
                 res.send(err);                       
@@ -2884,7 +3198,7 @@ app.post('/user_checkout_submit', (req,res) => {
         console.log('order_number');
         console.log(order_number);   
         db.getConnection((con)=>{    
-            con.query('INSERT INTO cafefore.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate, order_email, order_phone, billing_zip, order_items_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate, order_email, order_phone, billing_zip, order_items_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, total_order_amount, date, shipping_rate[1], shipping_rate[0], billing_email, billing_phone, billing_zip, order_items_count], (err, result) => {
                 if(err){                        
                     res.send(err);
@@ -2903,7 +3217,7 @@ app.post('/user_checkout_submit', (req,res) => {
 
     function updateOrderedCart(order_num, oddate, clv_order_id, cart_num, user_id, con, confirm_info) {
         // db.getConnection((con)=>{
-            con.query('UPDATE cafefore.cart SET result = "y", order_number = ?, oddate = ?, clv_order_id = ? WHERE cartnum in (?) and u_id = ?'
+            con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ?, clv_order_id = ? WHERE cartnum in (?) and u_id = ?'
             ,[order_num, oddate, clv_order_id, cart_num, user_id], (err, result) => {
                 if(err){                        
                     res.send(err);
@@ -2920,7 +3234,7 @@ app.post('/user_checkout_submit', (req,res) => {
     }
 
     function setUPSShippingInfo(order_number, default_shipping_info, con) {       
-        con.query('INSERT INTO cafefore.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+        con.query('INSERT INTO test1.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
         [order_number, u_id, default_shipping_info.recipient, default_shipping_info.address1, default_shipping_info.address2, default_shipping_info.city, default_shipping_info.state, default_shipping_info.zip, default_shipping_info.phone, default_shipping_info.email, date], (err, result) => {
             if(err){                        
                 res.send(err);
@@ -2968,7 +3282,7 @@ app.post('/user_checkout_submit', (req,res) => {
         console.log("items");
         console.log(items);
         
-        fetch('https://scl.clover.com/v1/orders', options)
+        fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
             .then(response => response.json())
             .then(response => {
                 console.log("make order")               
@@ -2990,7 +3304,7 @@ app.post('/user_checkout_submit', (req,res) => {
                             "initiator": "CARDHOLDER"}})
                     };
                     
-                    fetch(`https://scl.clover.com/v1/orders/${response.id}/pay`, options)
+                    fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
                     .then(response => response.json())
                     .then(response => {
                         console.log(`make payment for created order ${response.id}`)
@@ -3134,7 +3448,7 @@ app.post('/guest_order_checkout', (req,res) => {
       };
       console.log(options);
       
-      fetch('https://scl.clover.com/v1/orders', options)
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
     .then(response => response.json())
     .then(result => {
         console.log("make order")            
@@ -3152,7 +3466,7 @@ app.post('/guest_order_checkout', (req,res) => {
                 
             };
             
-            fetch(`https://scl.clover.com/v1/orders/${result.id}/pay`, options)
+            fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result.id}/pay`, options)
             .then(response => response.json())
             .then(response => {
                 if (response.status == 'paid') {
@@ -3280,7 +3594,7 @@ app.post('/guest_order_checkout', (req,res) => {
         console.log('order_number');
         console.log(order_number);       
         db.getConnection((con)=>{
-            con.query('INSERT INTO cafefore.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate, order_email, order_phone, billing_zip, order_items_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate, shipping_fee, shipping_rate, order_email, order_phone, billing_zip, order_items_count) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount / 100, date, shipping_rate[1], shipping_rate[0], billing_email, billing_phone, billing_zip, order_items_count], (err, result) => {
                 if(err){                        
                     res.send(err);
@@ -3297,7 +3611,7 @@ app.post('/guest_order_checkout', (req,res) => {
     function setGuestShippingInfo(order_number, date) {
         console.log('setGuestShippingInfo');
         db.getConnection((con)=>{
-            con.query('INSERT INTO cafefore.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+            con.query('INSERT INTO test1.ups_ship_info (order_number, user_id, recipient, address1, address2, city, state, zip, phone, email, indate) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
             [order_number, "GUEST", recipient, req.body.shipping_address_street_line1, req.body.shipping_address_street_line2, req.body.shipping_address_city, req.body.shipping_address_state, req.body.shipping_address_zip, req.body.order_contact_phone, req.body.order_contact_email, date], (err, result) => {
                 if(err){                        
                     res.send(err);
@@ -3601,8 +3915,8 @@ app.post('/get_shipping_rate', (req, res) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            transId: 'cafeforeEcommTR',
-            transactionSrc: 'cafeforeEcomm',
+            transId: 'test01trs',
+            transactionSrc: 'testing',
             Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`            
         },
         body: JSON.stringify(data)
@@ -3642,7 +3956,7 @@ app.post('/admin_refund_item',(req, res) => {
     const date = getDate();
 
     db.getConnection((con)=>{
-        con.query('select * from cafefore.cart left join cafefore.orders on cafefore.cart.order_number = cafefore.orders.order_number left join cafefore.product on cafefore.cart.prodnum = cafefore.product.prodnum left join cafefore.ups_ship_info on cafefore.orders.order_number = cafefore.ups_ship_info.order_number where item_return_req = "y" and cart.refund = "n" and cafefore.cart.cartnum = ?', [cartnum], (err, result) => {        
+        con.query('select * from test1.cart left join test1.orders on test1.cart.order_number = test1.orders.order_number left join test1.product on test1.cart.prodnum = test1.product.prodnum left join test1.ups_ship_info on test1.orders.order_number = test1.ups_ship_info.order_number where item_return_req = "y" and cart.refund = "n" and test1.cart.cartnum = ?', [cartnum], (err, result) => {        
             if(err){                        
                 res.send(err);
                 // con.end();        
@@ -3671,7 +3985,7 @@ app.post('/admin_refund_item',(req, res) => {
                     })
                 };
             
-                fetch(`https://scl.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
+                fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${result[0].clv_order_id}/returns`, options)
                 .then(response => response.json())
                 .then(response => {                      
                                         
@@ -3687,11 +4001,11 @@ app.post('/admin_refund_item',(req, res) => {
                         const update_query_1 = "UPDATE cart SET refund = 'y', item_return_result = 'refunded', refund_date = ?, refund_amount = (CASE ";
                         let update_query_2 = '';
                         for (let i in returned_amount) {
-                            update_query_2 = update_query_2 + `WHEN cafefore.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
+                            update_query_2 = update_query_2 + `WHEN test1.cart.prodnum = '${prodnum[i]}' THEN '${returned_amount[i]}' `
                         }                           
                         const update_query = update_query_1 + update_query_2;
                         console.log(update_query)
-                        con.query(update_query + 'end) WHERE cafefore.cart.cartnum IN (?)',[date, cartnum] ,(err, update_result) => {
+                        con.query(update_query + 'end) WHERE test1.cart.cartnum IN (?)',[date, cartnum] ,(err, update_result) => {
                         // con.query('UPDATE cart SET refund = "y", refund_amount = ? where cartnum = ? and prodnum = ?', [amount_returned, cartnum, last_refund[0].prodnum] ,(err, result) => { 
                             if(err){                        
                                 res.send(err);
@@ -4063,12 +4377,149 @@ function setUPSShipment(shipto, service_code, items, res, order_id, cart_num, it
 }
 
 
+/*
+function setUPSShipment(shipto, service_code, items, res, order_id, cart_num) {
+
+  
+    console.log("ups shipment")
+    console.log(shipto)
+    console.log(service_code)
+    console.log(items)
+   
+    const ship = {
+        ShipmentRequest: {
+            Request: {
+            SubVersion: '1801',
+            RequestOption: 'nonvalidate',
+            TransactionReference: {CustomerContext: 'cafefore'}
+            },
+            Shipment: {
+            Description: 'cafefore shipping',
+            Shipper: {
+                Name: 'cafe FORE LLC',
+                AttentionName: '',
+                TaxIdentificationNumber: '883952894',
+                Phone: {
+                Number: '4702636495',
+                Extension: ' '
+                },
+                ShipperNumber: 'B98W48',
+                FaxNumber: '',
+                Address: {
+                    AddressLine: '4400 Roswell RD Ste 126',
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                }
+            },
+            ShipTo: shipto,
+            ShipFrom: {
+                Name: 'cafe FORE LLC',
+                AttentionName: '',
+                Phone: {Number: '4702636495'},
+                FaxNumber: '',
+                Address: {
+                    AddressLine: '4400 Roswell RD Ste 126',
+                    City: 'Marietta',
+                    StateProvinceCode: 'GA',
+                    PostalCode: '30062',
+                    CountryCode: 'US'
+                }
+            },
+            PaymentInformation: {
+                ShipmentCharge: {
+                Type: '01',
+                BillShipper: {AccountNumber: 'B98W48'}
+                }
+            },
+            Service: service_code,
+            Package: items
+           
+            },
+            LabelSpecification: {
+            LabelImageFormat: {
+                Code: 'GIF',
+                Description: 'GIF'
+            },
+            HTTPUserAgent: 'Mozilla/4.5'
+            }
+        }
+    }
+
+    require("dotenv").config({ path: ".env2" }); 
+
+    const options = {
+    method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        transId: 'cafeforetrid',
+        transactionSrc: 'cafeforetrsrc',
+        Authorization: `Bearer ${process.env.UPS_AUTH_TOKEN}`
+      },
+      body: JSON.stringify(ship)
+    }
+
+    console.log(ship);
+
+    const query = new URLSearchParams({
+        additionaladdressvalidation: 'Alpharetta'
+      }).toString();
+    
+      const version = 'v1';
+    //   fetch(`https://onlinetools.ups.com/api/shipments/${version}/ship?${query}`, options)
+      
+    fetch(`https://wwwcie.ups.com/api/shipments/${version}/ship?${query}`, options)
+    .then(response => response.json())
+    .then(response => {
+        console.log("response")
+        console.log(response)  
+               
+        const track_number = response.ShipmentResponse.ShipmentResults.ShipmentIdentificationNumber;
+        console.log(track_number)
+
+        updateShipingTrackNumber().then((data) => {
+            res.send(response);
+        });
+
+        function updateShipingTrackNumber() {
+            return new Promise((resolve, reject) => {        
+            db.getConnection((con)=>{
+                    con.query('UPDATE orders SET shipment = "y", track_number = ? where order_number = ?', [track_number, order_id], (err, result) => {
+                        if(err){                        
+                            res.send(err);
+                            // con.end();        
+                        } else {
+                            console.log('update set shipment & track number'); 
+                            console.log(result);   
+                            con.query('UPDATE cart SET result = "y", track_number = ? where order_number = ? and cartnum in (?)', [track_number, order_id, cart_num], (err, result) => {
+                                if(err){                        
+                                    res.send(err);
+                                    // con.end();        
+                                } else {
+                                    console.log('update set shipment & track number'); 
+                                    console.log(result);                              
+                                    resolve(result);                     
+                                }
+                            });
+                        }
+                    });
+                    con.release();
+                });
+            });
+        }       
+
+    });
+
+
+}
+*/
 
 
 function setOrders(order_number, u_id, response, date) {
     console.log('order_number');
     console.log(order_number);       
-    con.query('INSERT INTO cafefore.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
+    con.query('INSERT INTO test1.orders (order_number, u_id, clv_order_id, clv_charge_id, clv_ref_num, clv_transaction_num, total_order_amount, indate) VALUES (?,?,?,?,?,?,?,?)',
     [order_number, u_id, response.id, response.charge, response.ref_num, response.status_transitions.paid, response.amount, date], (err, result) => {
         if(err){                        
             res.send(err);
@@ -4083,7 +4534,7 @@ function setOrders(order_number, u_id, response, date) {
 }
 
 function updateOrderedCart(order_num, oddate, cart_num, user_id) {
-    con.query('UPDATE cafefore.cart SET result = "y", order_number = ?, oddate = ? WHERE cartnum in (?) and u_id = ?'
+    con.query('UPDATE test1.cart SET result = "y", order_number = ?, oddate = ? WHERE cartnum in (?) and u_id = ?'
     ,[order_num, oddate, cart_num, user_id], (err, result) => {
         if(err){                        
             res.send(err);
@@ -4128,7 +4579,7 @@ app.get('/get_ups_toke', (req, res) => {
     },
     body : new URLSearchParams(formData).toString()    
     }
-    fetch(`https://wwwcie.ups.com/security/v1/oauth/token?client_id=${process.env.UPS_MID}&redirect_uri=https://gocafefore.com`, options)
+    fetch(`https://wwwcie.ups.com/security/v1/oauth/token?client_id=${process.env.UPS_MID}&redirect_uri=https://www.thecafefore.com`, options)
     
     .then(response => 
         response.json())
@@ -4684,5 +5135,770 @@ fetch(`https://wwwcie.ups.com/api/rating/${version}/${requestoption}?${query}`, 
 });
 
 
+
+/////////////////////////////////////////////// clover API test//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.post('/test_apikey', (req,res) => { 
+
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: 'Bearer 760328e0-a9c6-bdac-d792-163b9ab1d1f8'
+        }
+      };
+
+    fetch('https://scl-sandbox.dev.clover.com/pakms/apikey', options)
+    .then(response => response.json())
+    .then(response => console.log(response))
+    .catch(err => console.error(err));
+
+});
+
+
+app.post('/make_item_test', (req,res) => { 
+
+ /*        
+    const options = {
+        method: 'POST',
+        headers: {accept: 'application/json', 'content-type': 'application/json', authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+        body: JSON.stringify({
+          items: [
+            {
+              tax_rates: [{tax_rate_uuid: 'Q0NVFCYTZ4KYE', name: 'Jongho Kim'}],
+              inventory_id: 'DBWAF4CD2PVAE',
+              quantity: 3,
+              type: 'sku',
+              amount: 1800
+            }
+          ],
+        //   shipping: {
+        //     address: {
+        //       city: 'Buford',
+        //       country: 'US',
+        //       line1: '2742 Pearl Ridge Trce',
+        //       postal_code: '30519',
+        //       state: 'GA'
+        //     },
+        //     name: 'Jongho Kim'
+        //   },
+          currency: 'USD',
+          email: 'rangdad@gmail.com',
+        //   customer: 'ZGDVQHPESCMV6'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+*/
+        
+        
+    const options = {
+    method: 'POST',
+    headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+    body: JSON.stringify({
+        hidden: 'false',
+        available: 'true',
+        autoManage: 'false',
+        defaultTaxRates: 'true',
+        isRevenue: 'true',
+        taxRates: [{name: '0W36NQP309NSG', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
+        id: '00001',
+        name: 'UPS Shipping',
+        sku: 'ea',
+        price: 990,
+        priceType: 'PER_UNIT',
+        unitName: 'ea',
+        priceWithoutVat: 990
+    })
+    };
+
+fetch('https://sandbox.dev.clover.com/v3/merchants/NMJJ2NYZTDPN1/items', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+  
+  
+})
+
+
+
+app.get('/list_of_orders', (req,res) => {
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/orders?expand=customers', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+
+})
+
+
+app.get('/save_card', (req,res) => {
+    const options = {
+        method: 'PUT',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+        //   'idempotency-key' : uuid,
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+            body: JSON.stringify({
+            ecomind: 'ecom',
+            "source": 'clv_1TSTSCqf2JsJjwDEu93JjDBR', 
+            "email" : 'rangdad@gmail.com'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
+        // fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers/DYSFDV5WVK3S4', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+});
+
+
+// app.get('/create_customer', (req,res) => {
+
+//     let ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+//     let ENVIRONMENT = process.env.ENVIRONMENT;
+
+//     const cloverInst = new Clover(ACCESS_TOKEN, {
+//     environment: ENVIRONMENT
+//     });
+
+//     let customer = cloverInst.customers.create({
+//         email:'sample.email@example.com',
+//         source:'clv_1TSTSAi4ESnkvfoBcpCA51UV'
+//     });
+// });
+
+// app.post('/delete_payment_method', (req,res) => {
+//     console.log('/delete_payment_method /delete_payment_method /delete_payment_method/delete_payment_method')
+//     let u_id = req.body.id;
+//     let c_number = req.body.card_index;
+//     let default_payment_check = req.body.default_payment;
+//     const outdate = getDate();
+//     console.log(req.session.loginData.id)
+
+//     if (u_id === req.session.loginData.id) {
+
+//         const mysql = require('mysql');
+
+//         const con = mysql.createConnection({
+//             host: '127.0.0.1',
+//             port: '3306',
+//             user: 'root',
+//             password: '111111',
+//             database: 'test1',            
+//         });        
+
+//         con.connect((err) => {
+//             if(err){
+//             console.log('Error connecting to Db');
+//             return;
+//             }
+//             console.log('Connection established');
+//         });
+
+//         if (default_payment_check === 'default') {
+
+
+
+//         }
+
+
+//         con.query('SELECT clv_id, cd_id FROM billing_info WHERE id = ? and bi_number = ?', [u_id, c_number], (err, result) => {
+//             if (err) {
+//                 res.send(err);
+//                 con.end();
+//             } else {
+//                 console.log(result);
+
+//                 console.log("delete card from DB")
+//                         con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
+//                         (err, result) => {
+//                             if (err) {
+//                                 res.send(err);
+//                                 con.end();
+//                             } else console.log(result);                    
+//                         });
+
+//                         res.send(result);
+//             } 
+        
+                
+
+//                 ///////////// clover API fetch //////////////////
+//                 /*
+//                 const options = {
+//                     method: 'DELETE',
+//                     headers: {
+//                       accept: 'application/json',
+//                       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+//                     }
+//                 };
+//                 fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${result[0].clv_id}/sources/${result[0].cd_id}`, options)
+//                 .then(response => response.json())
+//                 .then(response => {
+//                     console.log(response)
+//                     if (response.deleted === 'true') {
+//                         console.log("delete card from DB")
+//                         con.query('UPDATE billing_info SET inuse = "n", outdate = ? WHERE id = ? and bi_number = ?', [outdate, u_id, c_number],
+//                         (err, result) => {
+//                             if (err) {
+//                                 res.send(err);
+//                                 con.end();
+//                             } else console.log(result);                    
+//                         });
+
+//                         res.send(result);
+//                     } 
+//                 })
+//                 .catch(err => console.error(err));
+                
+//             }
+//             */
+//     })
+
+//     } else {
+//         res.send("check your ID");
+//     }
+
+// })
+
+
+app.get('/delete_card', (req,res) => {
+
+const options = {
+    method: 'DELETE',
+    headers: {
+      accept: 'application/json',
+      authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    }
+  };
+//   fetch(`https://scl-sandbox.dev.clover.com/v1/customers/${customer_id}/sources/${customer_card_id}`, options)
+  fetch('https://scl-sandbox.dev.clover.com/v1/customers/W29TP8XFK9BH6/sources/9BKRRQKANF8Z0', options)
+    .then(response => response.json())
+    .then(response => console.log(response))
+    .catch(err => console.error(err));
+
+});
+
+
+
+        
+
+
+        
+      
+      
+
+
+
+
+
+
+app.get('/get_an_order_test', (req,res) => {
+    console.log('/get_an_order_test /get_an_order_test /get_an_order_test /get_an_order_test ')
+
+    const orderId = 'D0C0FKJWDDB20';
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${orderId}`, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+})
+
+
+app.get('/get_order_test', (req,res) => {
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+
+})
+
+app.get('/create_item', (req,res) => {
+    console.log('/create_item /create_item /create_item /create_item')
+    
+    const options = {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+        body: JSON.stringify({
+            hidden: 'false',
+            available: 'true',
+            autoManage: 'false',
+            defaultTaxRates: 'true',
+            isRevenue: 'true',
+            taxRates: [{name: 'Q0NVFCYTZ4KYE', rate: 6, taxType: 'VAT_TAXABLE', isDefault: true}],
+            id: '00001',
+            name: 'UPS Shipping',
+            sku: 'ea',
+            price: 990,
+            priceType: 'PER_UNIT',
+            unitName: 'ea',
+            priceWithoutVat: 990
+        })
+        };
+    
+    fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/items', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err));
+      
+})
+
+app.get('/get_single_customer', (req,res) => {
+
+    console.log('/get_single_customer get_single_customer get_single_customer /get_customer/get_customer/get_customer')
+
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+
+    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers/ZGDVQHPESCMV6?expand=cards`, options)
+      .then(response => response.json())
+      .then(response => { 
+        console.log(response);
+        // console.log(response.cards.elements);
+
+        response.cards.elements.forEach(element => {console.log(element)
+            
+        });
+        
+      })
+      .catch(err => console.error(err));
+})
+
+
+app.get('/get_customer', (req,res) => {
+
+    console.log('/get_customer/get_customer/get_customer/get_customer')
+
+   
+
+    const options = {method: 'GET', headers: {accept: 'application/json', 
+    authorization: `Bearer ${process.env.ACCESS_TOKEN}`}};
+
+    fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
+})
+
+
+app.get('/create_card_token', (req,res) => {
+
+    console.log('/create_card_token')
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          apikey: process.env.API_KEY,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          card: {
+            number: '4242424242424242',
+            exp_month: '01',
+            exp_year: '27',
+            cvv: '123',
+            last4: '4242',
+            first6: '424242',
+            name: 'Jongho Kim'
+          }
+        })
+      };
+      
+      fetch('https://token-sandbox.dev.clover.com/v1/tokens', options)
+        .then(response => response.json())
+        .then(response => {
+
+            console.log(response)
+            /*
+            const options = {
+                method: 'PUT',
+                headers: {
+                  accept: 'application/json',
+                  'content-type': 'application/json',
+                //   'idempotency-key' : uuid,
+                  authorization: `Bearer ${process.env.ACCESS_TOKEN}`},
+                body: JSON.stringify({
+                    ecomind: 'ecom',
+                    "source": response.id, 
+                    "email" : 'rangdad@gmail.com'
+                })
+              };
+              
+              fetch('https://scl-sandbox.dev.clover.com/v1/customers/ZGDVQHPESCMV6', options)
+            //   fetch('https://scl-sandbox.dev.clover.com/v1/customers/DYSFDV5WVK3S4', options)
+                // fetch('https://sandbox.dev.clover.com/v3/merchants/Q67P8MHV60X01/customers/DYSFDV5WVK3S4', options)
+                .then(response => response.json())
+                .then(response => console.log(response))
+                .catch(err => console.error(err));
+        
+
+            // const options = {
+            //     method: 'POST',
+            //     headers: {
+            //       accept: 'application/json',
+            //       'content-type': 'application/json',
+            //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            //     },
+            //     body: JSON.stringify({
+            //       ecomind: 'ecom',
+            //       shipping: {
+            //         address: {
+            //           line1: '2428 Morgan Creek Rd',
+            //           city: 'Buford',
+            //           country: 'US',
+            //           postal_code: '30519',
+            //           state: 'GA'
+            //         }
+            //       },
+            //       email: 'rangdad@gmail.com',
+            //       name: 'Jongho Kim',
+            //       source: response.id,
+            //       phone: '4702636495'
+            //     })
+            //   };
+              
+            //   fetch('https://scl-sandbox.dev.clover.com/v1/customers', options)
+            //     .then(response => response.json())
+            //     .then(response => console.log(response))
+            //     .catch(err => console.error(err));
+
+*/
+
+        })            
+        .catch(err => console.error(err));
+        
+})
+
+app.get('/pay_order_test', (req,res) => {
+
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({"source":"ZGDVQHPESCMV6",
+        "email":"rangdad@gmail.com",
+        "stored_credentials":{
+        "sequence": "SUBSEQUENT",
+        "is_scheduled": false,
+        "initiator": "CARDHOLDER"}})
+      };
+      
+      fetch(`https://scl-sandbox.dev.clover.com/v1/orders/NZQ8GJPSF4BXW/pay`, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+    // const uuid = uuid4.v4();
+    // console.log('pay_order_test pay_order_test pay_order_test pay_order_test ')
+    // const options = {
+    //     method: 'POST',
+    //     headers: {
+    //       accept: 'application/json',
+    //       'content-type': 'application/json',
+    //       'idempotency-key' : uuid,
+    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({"amount":2300,
+    //     "currency":"usd",
+    //     "source":"DYSFDV5WVK3S4"})
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+
+
+
+})
+
+
+app.get('/create_customer_test', (req,res) => {
+
+    console.log('/create_customer_test /create_customer_test /create_customer_test /create_customer_test ')
+
+
+    const options = {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({firstName: 'Ted', lastName: 'Chang',})
+      };
+      
+      fetch(`https://sandbox.dev.clover.com/v3/merchants/${process.env.MERCHANT_ID}/customers`, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+
+})
+
+
+app.get('/create_order_test', (req,res) => {
+    console.log("/create_order_test /create_order_test /create_order_test /create_order_test")
+
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({
+          items: [
+            {
+        
+              amount:1800,
+                currency:"usd",
+                description:"Ginger Bottle 16oz",
+                quantity:1,
+                type:"sku",
+                tax_rates: [{tax_rate_uuid: process.env.TAX_UUID, name: "6%"}]
+            //   inventory_id: '010001'
+            }
+          ],
+          shipping: {
+            address: {
+              city: 'LAS VEGAS',
+              line1: '6594 HULME END AVE',
+              postal_code: '89139',
+              state: 'Nevada',
+              country:"US"
+            },
+            name: 'Jongho Kim',
+            phone: '4702636495'
+          },
+          currency: 'usd',
+          email: 'rangdad@gmail.com',
+        //   customer: 'W29TP8XFK9BH6'
+        })
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/orders', options)
+        .then(response => response.json())
+        .then(response => {
+            console.log("make order")
+            console.log(response)
+
+            const options = {
+                method: 'POST',
+                headers: {
+                  accept: 'application/json',
+                  'content-type': 'application/json',
+                  authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                },
+                body: JSON.stringify({"source":"clv_1TSTSavUDzP5gBJFbMrPe2wK",
+                // body: JSON.stringify({"source":"clv_1TSTSk1pBwk66yF3NoDwwH9f",
+                "email":"rangdad@gmail.com",
+                "stored_credentials":{
+                    "sequence": "SUBSEQUENT",
+                    "is_scheduled": false,
+                    "initiator": "CARDHOLDER"}})
+              };
+              
+              fetch(`https://scl-sandbox.dev.clover.com/v1/orders/${response.id}/pay`, options)
+                .then(response => response.json())
+                .then(response => {
+                    console.log(`make payment for created order ${response.id}`)
+                    console.log(response)
+                })
+                .catch(err => console.error(err));
+
+
+            
+            
+            
+        })
+        .catch(err => console.error(err));
+})
+
+
+
+
+
+
+
+app.get('/refund_test', (req,res) => {
+    console.log("/refund_test  /refund_test /refund_test /refund_test");
+    // const options = {
+    //     method: 'POST',
+    //     headers: {accept: 'application/json', 
+    //     'content-type': 'application/json',
+    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({
+    //       "items":[{"parent":"2TXDF6YD2BW3J","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
+    //     })
+    //   };
+
+    // fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+
+
+    // const options = {
+    //     method: 'POST',
+    //     headers: {accept: 'application/json', 
+    //     'content-type': 'application/json',
+    //     authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+    //     body: JSON.stringify({
+    //       "items":[{"parent":"2TXDF6YD2BW3J,","amount":2330,"description":"Toy Storage Baskets and Play Mats","quantity":1,"type":"sku"}]
+    //     })
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/W25S7AVV28MFC/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+        
+
+    const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify({charge: '651JCRHYRPAWT'})
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/refunds', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+
+    // const options = {
+    //     method: 'POST',
+    //     headers: {
+    //       accept: 'application/json',
+    //       'content-type': 'application/json',
+    //       authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+    //     },
+        
+    //   };
+      
+    //   fetch('https://scl-sandbox.dev.clover.com/v1/orders/QQFTV1JD0AJDE/returns', options)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response))
+    //     .catch(err => console.error(err));
+
+   
+});
+
+app.get('/get_charges', (req,res) => {
+    console.log("/get_charge /get_charge /get_charge  ");
+
+    const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        }
+      };
+      
+      fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+        .catch(err => console.error(err));
+
+});
+
+app.get('/submit_payment_test', (req,res) => {
+    console.log("/order_test /order_test /order_test /order_test");
+    const uuid = uuid4.v4();
+
+    // create card token
+    const sdk = require('api')('@clover-platform/v3#g4lh1ylawketdl');
+
+        sdk.createToken(
+            { card: { number: "6011361000006668",exp_month: "12", exp_year: "2023",cvv: "123",brand: "DISCOVER"}}, 
+            { apikey: `${process.env.API_KEY}`})
+           
+
+        .then(({ data }) => {
+        console.log(data.id)
+
+        ///////////////////////////////////////////////////////////
+        // make charge
+        const options = {
+            method: 'POST',
+            headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'idempotency-key' : uuid,
+            authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            },
+            body: JSON.stringify({
+                ecomind: 'ecom',
+                currency: 'usd',
+                amount: 1300,
+                source: 
+                data.id,
+                
+                tax_rate_uuid: process.env.TAX_UUID
+            })
+        };
+
+        console.log(options);
+        
+        fetch('https://scl-sandbox.dev.clover.com/v1/charges', options)
+            .then(response => response.json())
+            .then(response => console.log(response))
+            .catch(err => console.error(err));
+
+
+        }).catch(err => console.error(err));
+    
+    res.send("app.get('/test', (req,res)")
+
+
+})
 
     
