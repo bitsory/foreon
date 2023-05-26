@@ -77,15 +77,16 @@ app.use(cookieParser("secret"));
   
 app.get('/',(req,res) => { 
     console.log("home home home");
-    /*
+    
     const axios = require('axios');
 
 // Config Set Up
 // const targetEnv = 'https://sandbox.dev.clover.com'; // Pointing to Sandbox Environment
-const targetEnv = 'https://www.clover.com'; // Pointing to Prod Environment
+// const targetEnv = 'https://www.clover.com'; // Pointing to Prod Environment
+const targetEnv = 'https://api.clover.com'; // Pointing to Prod Environment
 
-const appID = '2QSGZNGY6XY0C'; // Input your app ID here
-const appSecret = '05d767e4-5a37-8a95-b80e-3f546f743dcf'; // Input your app secret here
+const appID = process.env.PRODUCTAPPID; // Input your app ID here
+const appSecret = process.env.PRODUCTAPPSECRET; // Input your app secret here
 
 app.get('/', (req, res) => authenticate(req, res));
 
@@ -107,9 +108,9 @@ const requestAPIToken = async (res, query) => {
     .then(({ data }) => res.send(data))
     .catch(err => res.send(err.message));
 }
-*/
 
 
+/*
     if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
         res.render('admin.ejs', {post : "ADMIN"});
     }else if (req.session.loginData && req.session.loginData.id != "cafeforeadmin") {
@@ -119,7 +120,7 @@ const requestAPIToken = async (res, query) => {
         console.log("login data nothing");
 		res.sendFile(__dirname + "/public/index.html");
 	}
-    
+*/  
 });
 
 
@@ -130,9 +131,7 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(express.static('public'));
 
 
-app.get('/login_check', (req,res) => {
-    console.log("/login_check  /login_check /login_check /login_check/login_check   ");
-   
+app.get('/login_check', (req,res) => {   
     const data = req.session.loginData ? req.session.loginData : {id : 'GUEST'};    
     res.send(data);
 })
@@ -295,12 +294,10 @@ app.post('/sign_in', function (req,res) {
     const sign_in_id = decrypt.decrypt(aid);
     const sign_in_pw = decrypt.decrypt(bpw);
 
-    const redirect_path = req.body.c_path;
-      
+    const redirect_path = req.body.c_path;      
     
     const date = getDate();  
-    const crypto = require('crypto');
-    
+    const crypto = require('crypto');    
     
     db.getConnection((con)=>{
         con.query('SELECT salt from users where id = ?', [sign_in_id], (err, result) => { 
@@ -492,8 +489,7 @@ function updateLastLog(connect, u_id, u_name, request, response, date, url, clv_
     
     if (u_id == "cafeforeadmin") {
         console.log("admin login")
-        response.send(re_path); 
-        // response.sendFile("https://gocafefore.com/public/admin.html");       
+        response.send(re_path);        
     }
     else response.send(re_path);  
    
@@ -690,17 +686,6 @@ app.post('/change_password', (req,res) => {
         }); con.release();
     })
 
-
-    // db.getConnection((con)=>{
-    //     con.query('SELECT pw FROM users WHERE id = ?', [u_id], (err, result) => {
-    //         if(err){
-    //             console.log(err)
-    //             res.send(err);
-                   
-    //         } else {
-    //             console.log(result); 
-
-
     function makeKey(decrypted, salt) {
         return new Promise((resolve, reject) => {
                 crypto.pbkdf2(decrypted, salt, 1000, 32, 'SHA512', (err, key) => {
@@ -712,9 +697,7 @@ app.post('/change_password', (req,res) => {
     }
 });
 
-app.post('/find_password', (req,res) => {
-    console.log("find_password find_password find_password ");
-    console.log(req.body);
+app.post('/find_password', (req,res) => { 
     const u_id = req.body.email;
     const u_first_name = req.body.first_name;
     const u_last_name = req.body.last_name;
@@ -728,56 +711,21 @@ app.post('/find_password', (req,res) => {
                 console.log(err)
                 res.send(err);
                    
-            } else {
-                console.log(result); 
+            } else {            
                 if (result.length > 0) {
                     const tmp_pass = Math.random().toString(36).slice(2);
-                    console.log(tmp_pass);
-                                  
-                    
                     const salt = buf.toString('base64');
-                    console.log('salt');
-                    console.log(salt);
-
-                    const sendTmpPswdMail = async () => {
-                        let transporter = nodemailer.createTransport({
-                            service: "gmail",
-                            host: "smtp.gmail.com",
-                            port: 587,
-                            secure: false,
-                            auth: {
-                                user: process.env.NODEMAILER_USER,
-                                pass: process.env.NODEMAILER_PSWD
-                            },
-                        });
-                      
-                        // send mail with defined transport object
-                        let info = await transporter.sendMail({
-                          from: `"cafe FORE" <${process.env.NODEMAILER_USER}>`,                       
-                          to: u_id,
-                          subject: 'cafe FORE Temporary password',
-                          text: `cafe FORE Temporary password ${tmp_pass}` ,
-                        //   html: `<b>${generatedAuthNumber}</b>`,
-                        });
-                      
-                        console.log('Message sent: %s', info.messageId);       
-                      
-                      };
-
                     makeKey(tmp_pass, salt).then(key => {
                         con.query('UPDATE users SET pw = ?, salt = ? where id = ? and first_name = ?', [key, salt, u_id, u_first_name], (err, result) => {
                             if(err){                        
                                 res.send(err);
                                 // con.end();
-                            } else {
-                                // console.log(result);
-                                // sendTmpPswdMail();  
-                                sendTMPMailSES(u_id, tmp_pass, date)                               
-
+                            } else {                               
+                                sendTMPMailSES(u_id, tmp_pass, date); 
                                 res.send({"result" : "ok"});
                             }                    
                         });
-                    })                   
+                    })                  
                     
                 } else {
                     res.send({"result" : "not matched... check email & name again"});
@@ -863,7 +811,6 @@ function sendTMPMailSES(toAddress, tmp_pass, date) {
     // Create the promise and SES service object
     var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
 
-    // Handle promise's fulfilled/rejected states
     sendPromise.then(
     function(data) {
         console.log(data.MessageId);
@@ -875,13 +822,8 @@ function sendTMPMailSES(toAddress, tmp_pass, date) {
 
 
 
-app.post('/item_counter', (req,res) => {
-    console.log(`req test: ${req.body}`);
-    console.log("item_counter item_counter item_counter item_counter");
-    
-    const u_id = req.body.id;
-    console.log(u_id);
-    console.log(req.session.loginData.id);
+app.post('/item_counter', (req,res) => {  
+    const u_id = req.body.id;  
 
     if (req.session.loginData && req.session.loginData.id == u_id) {     
         db.getConnection((con)=>{
@@ -890,8 +832,7 @@ app.post('/item_counter', (req,res) => {
                     console.log(err)
                     res.send(err);
                       
-                } else {
-                    console.log(result); 
+                } else {           
                     res.send(result);
                 }               
             }); 
@@ -902,12 +843,8 @@ app.post('/item_counter', (req,res) => {
 
 
 app.post('/get_user_info', (req,res) => {
-    console.log(req.body);
-    console.log("/get_user_info /get_user_info /get_user_info ");
-    
-    const u_id = req.body.id;
-    console.log(u_id);
-    // console.log(req.session.loginData.id);
+
+    const u_id = req.body.id; 
 
     if (req.session.loginData && req.session.loginData.id == u_id) {     
         db.getConnection((con)=>{
@@ -916,8 +853,7 @@ app.post('/get_user_info', (req,res) => {
                     console.log(err)
                     res.send(err);
                       
-                } else {
-                    console.log(result); 
+                } else {        
                     res.send(result[0]);
                 }               
             }); 
@@ -930,22 +866,14 @@ app.post('/get_user_info', (req,res) => {
 
 
 app.post("/add_cart", function (req, res) {
-    console.log("/add_cart /add_cart /add_cart");
-    console.log(req.session.loginData.id)
-    console.log(req.body)
-    
+   
     const u_id = req.session.loginData.id;
-    // const u_name = req.body.c_name;
+ 
     const prodnum = req.body.c_item_no;
     const quantity = req.body.c_item_quantity;
 
     let date = getDate();
-
     let cartnum = date.replace(/\s|:|\-/g,"") + "CT" + u_id.substr(0, 3);
-
-    console.log(date);
-    console.log(cartnum);
-    console.log(prodnum);
     // check the same item in cart   
 
     db.getConnection((con)=>{
@@ -953,27 +881,23 @@ app.post("/add_cart", function (req, res) {
             if(err) res.send(err);
             else {
                 if (result[0] != undefined) { // overwrite item quantity
-                    console.log(result[0]);
-                    console.log(result[0].quantity);
-                    console.log(result[0].cartnum);
+              
                     con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`cartnum` = ? and u_id = ? and prodnum = ? and result = "n")', [quantity, date, result[0].cartnum, u_id, prodnum], (err, result) => {
                         if(err){                        
                             res.send(err);
                             // con.end();
                         } else {
-                            console.log(result);        
+                   
                             viewAddedItem();
                         }                    
                     })
-                } else {
-                    console.log("put in new item in cart")
+                } else {              
                     con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, indate, modate) values (?,?,?,?,?,?)', 
                     [cartnum, u_id, prodnum, quantity, date, date], (err, result) => {
                         if(err){                        
                             res.send(err);
                             // con.end();
-                        } else {
-                            console.log(result);        
+                        } else {               
                             viewAddedItem();
                         }                    
                     })
@@ -988,99 +912,28 @@ app.post("/add_cart", function (req, res) {
             ,(err, result) => {
                 if(err){                        
                     res.send(err);
-                    // con.end();            
+                     
                 } else {
-                    console.log("result");
-                    console.log(result);
-                    
+         
                     res.send(result);
                 }
             });
             con.release();
         });
     }
-
-
-    /*
-    con.query('SELECT * from cart where u_id = ? and result = "n"', [u_id],
-        (err, result) => {
-            console.log("add cart")
-            console.log(result);
-
-            if(err){                        
-                res.send(err);
-                con.end();
-            }
-            
-            else if (result[0] === undefined) { // nothing cart
-                console.log(" make new cart ")
-                con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, indate, modate) values (?,?,?,?,?,?)', 
-                [cartnum, u_id, prodnum, quantity, date, date]);
-            } else { //add up quantity, check cart number
-                console.log("result");
-                console.log(result);
-                let cartnumber = result[0].cartnum;
-                console.log(cartnumber)
-                let filtered = result.filter((element) => {
-                    console.log("element")
-                    console.log(element.prodnum);
-                    // parseInt(element.prodnum) == parseInt(prodnum)});
-                    return element.prodnum == prodnum ? true : false});
-                console.log(filtered);
-                if (filtered.length) { // exist item
-                    con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`prodnum` = ?)', [filtered[0].quantity + quantity, date, prodnum]);
-                } else {
-                    console.log("make new item in exist cart")
-                    con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, indate, modate) values (?,?,?,?,?,?)', 
-                    [cartnumber, u_id, prodnum, quantity, date, date]);
-
-                }
-                
-            }
-
-
-        })
-    */
-
-
-/*
-    con.query('SELECT cartnum, quantity from cart where u_id = ? and prodnum = ? and result = "n"',
-    //con.query('SELECT COALESCE(MAX(cartnum), "false") AS cartnum from cart where u_id = ? and prodnum = ?',
-        [u_id, prodnum], (err, result) => {
-        if (result[0] != undefined) { // add up item quantity
-            console.log(result[0]);
-            console.log(result[0].quantity);
-            console.log(result[0].cartnum);
-            con.query('UPDATE cart SET `quantity` = ?, `modate` = ? where (`cartnum` = ?)', [result[0].quantity + quantity, date, result[0].cartnum]);
-            console.log("added up same item in cart")
-
-        } else {
-            console.log("put in new item in cart")
-            con.query('INSERT INTO cart (cartnum, u_id, prodnum, quantity, indate, modate) values (?,?,?,?,?,?)', 
-            [cartnum, u_id, prodnum, quantity, date, date]);
-            
-            // res.json(req.body)
-        }
-    }); */
 });
 
 
-app.post("/shop/cart/:user", function (req, res) {
-    console.log("/shop/cart/:user");
-    console.log(req.body);
-    var user = req.params.user;
-    console.log(user);
-    // res.render('shop_order.ejs');
+// app.post("/shop/cart/:user", function (req, res) {
+//     console.log("/shop/cart/:user");
+//     console.log(req.body);
+//     var user = req.params.user;
+//     console.log(user);
+//     // res.render('shop_order.ejs');
+// });
 
-
-
-});
-
-app.post("/shop/order", function (req, res) {
-    
-    
-    console.log("/shop/order/shop/order/shop/order/shop/order");
-    console.log(req.body);
+app.post("/shop/order", function (req, res) {   
+  
     const u_id = req.body[0].u_cart.length ? req.body[0].u_cart[0].u_id : 'GUEST';
        
     db.getConnection((con)=>{
@@ -1093,14 +946,11 @@ app.post("/shop/order", function (req, res) {
                 if(err){                        
                     res.send(err);
                     // con.end();                
-                } else {
-                    console.log("result");
-                    console.log(result);                    
+                } else {                  
                     res.send(result);
                 }
             });
-        } else {
-            console.log("guest cart check out")
+        } else {          
             //guest cart check out
             const product_number = req.body.map(item => {
                 return item.c_item_no;
@@ -1112,9 +962,7 @@ app.post("/shop/order", function (req, res) {
                         res.send(err);
                         // con.end();
                     
-                    } else {
-                        console.log("result");
-                        console.log(result);                        
+                    } else {                        
                         res.send(result);
                     }
             });
@@ -1126,12 +974,7 @@ app.post("/shop/order", function (req, res) {
 
 
 app.post('/update_general_profile',(req,res) => {
-    console.log(`/update_general_profile /update_general_profile/update_general_profile`);
-    console.log(req.body);
-    console.log(req.session.loginData)
-
-    
-    // const sh_number = req.body.shipping_address_index;
+ 
     const recipient = req.body.first_name + ' ' + req.body.last_name;
     const address1 = req.body.address1;
     const address2 = req.body.address2;
@@ -1160,9 +1003,7 @@ app.post('/update_general_profile',(req,res) => {
                             if (err) {
                                 res.send(err);
                                 // con.end();
-                            } else if (result !== undefined) {
-                                console.log("UPDATE shipping_info SET default_address = n where id =?");                             
-                                console.log(result)                
+                            } else if (result !== undefined) {                   
                                 con.query('UPDATE shipping_info SET default_address = "n" where id =?', [u_id])
                                 resolve();
                             }                     
@@ -1176,18 +1017,16 @@ app.post('/update_general_profile',(req,res) => {
         }        
     
         function addShippingInfo() {
-            console.log("add ship info")
+         
             db.getConnection((con)=>{
                 con.query('INSERT INTO shipping_info (id, recipient, address1, address2, city, state, zip, phone, email, default_address, indate) values (?,?,?,?,?,?,?,?,?,?,?)', 
                     [u_id, recipient, address1, address2, city, state, zip, phone, email, default_check, indate], (err, result) => {
                     if (err) {
                         res.send(err);
                         // con.end();
-                    } else {
-                        console.log(result);
+                    } else {                      
                         if (result.protocol41 == true) {
-                            res.send({result : "ok"});
-                            // res.redirect('http://localhost:8080/account/shipping-infomation');
+                            res.send({result : "ok"});                         
                         } else res.send("sorry... something wrong in DB SERVER.");                        
                     }
                 });
@@ -1205,8 +1044,7 @@ app.post('/update_general_profile',(req,res) => {
                         res.send(err);
                         // con.end();        
                     } else {
-                        console.log('update set general info'); 
-                        console.log(result);                                                                       
+                        console.log('update set general info');                                                                                 
                     }
                 });
                 con.release();
@@ -1273,10 +1111,9 @@ app.get('/get_user_billing_info', (req,res) => {
 });
 
 app.get('/get_user_shipping_info', (req,res) => {
-    console.log("/get_user_shipping_info' /get_user_shipping_info' /get_user_shipping_info'")
-    console.log(req.body);
+   
     const u_id = req.session.loginData.id;
-    console.log(u_id);
+   
 
     db.getConnection((con)=>{
         con.query('SELECT * FROM shipping_info WHERE id = ? and inuse="y"', [u_id], (err, result) => {
