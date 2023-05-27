@@ -2684,7 +2684,7 @@ function checkPurchaseHistory(u_id, con, res, page_num) {
     // console.log("checkPurchaseHistory(u_id, con, res, page_num)")
     checkPurchaseHistoryTotal(u_id, con, res).then(data => {
         console.log(data)
-        const page_limit = page_num *10 -10;
+        const page_limit = page_num == 0 ? 0 : (page_num *10) - 10;
         // const total_purchase = data;
 
         con.query('select * from orders left join cart on cart.order_number = orders.order_number left join product on cart.prodnum = product.prodnum where result = "y" and cart.order_number IN (SELECT order_number FROM orders WHERE u_id = ?) ORDER BY oddate DESC LIMIT ?, 10',[u_id, page_limit],(err, result) => {
