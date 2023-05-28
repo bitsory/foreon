@@ -1649,7 +1649,7 @@ nav {
 }
 
 .check_out_item_content {
-    /* width: 18rem; */
+    width: 16rem;
     /* margin-left: 1rem; */
     display: flex;
     flex-direction: column;

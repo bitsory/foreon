@@ -81,7 +81,7 @@ export default class {
                 <button type="button" class="q_order q_btn">
                 <a href="#" data-link-T style="color: white";>ORDER</a></button>
                 <button type="button" class="q_call q_btn">
-                <a href='tel:470-263-6495' style="color: white";>CALL</a></button>
+                <a href='tel:470-854-6449' style="color: white";>CALL</a></button>
             </div>
 
         `;
