@@ -244,6 +244,11 @@ app.get('/shop/search/:id', (req,res) => {
     res.render('index.ejs', { post : member_name });  
 });
 
+app.get('/create-account', (req,res) => {
+    const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
+    res.render('index.ejs', { post : member_name });  
+});
+
 
 
 

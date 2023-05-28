@@ -14,8 +14,6 @@ export default class {
 
         this.modal.addEventListener('click', (e) => { 
 
-            console.log("log in.js this.modal.addEventListener( this.modal.addEventListener(")
-
             if(e.target && e.target.id == 'sign_in_btn') { 
                
                 document.getElementById('user_id').value ? this.signInSubmit() : 
@@ -213,8 +211,7 @@ export default class {
         script.type = 'text/javascript';
         script.src = 'https://accounts.google.com/gsi/client';
         document.body.appendChild(script);
-        console.log("script add");
-        
+       
     }
 
     glogin() {
@@ -239,8 +236,7 @@ export default class {
     modalClose() {
         document.getElementById('modal_body').remove();
         this.modal.style.display = 'none';
-        // document.body.style.overflow = 'auto';
-        
+      
     }
 
 
@@ -356,11 +352,8 @@ export default class {
 
     signUpSubmit() {
 
-        WEBS.getPBKey().then(key => {
-            console.log(key);
+        WEBS.getPBKey().then(key => {           
 
-            // const sign_up_uname = document.getElementById('sign_up_user_name').value;
-          
             const sign_up_ufirst_name = document.getElementById('sign_up_user_first_name').value;
             const sign_up_ulast_name = document.getElementById('sign_up_user_last_name').value;
             const sign_up_uemail = document.getElementById('sign_up_user_email').value;
@@ -371,9 +364,8 @@ export default class {
             const current_path = document.location.href;
     
             if (sign_up_upw === sign_up_upw_confirm) {                
-                console.log("sign up progress")
-                SPINNER.turnOffDisplay();
-                // const tmp_uname = sign_up_uname.split(" ");
+               
+                SPINNER.turnOffDisplay();               
                 const crypt = new JSEncrypt();
                 crypt.setPublicKey(key);         
 
@@ -399,42 +391,30 @@ export default class {
                     body: JSON.stringify(send_data),
                     redirect: "follow"
                 };
-                console.log(data);
+              
     
                 fetch('/sign_up', data)
                 .then((res) => res.json())
                 .then(result => {
-                    SPINNER.turnOnDisplay();
-                    console.log(result)
-                    // if (result.key == 'complete') {
-                    //     window.location.href = result.url;
+                    SPINNER.turnOnDisplay();                   
                         
                     if (result.key == 'use_other_id') {
                         document.getElementById('sign_up_form_extra').innerText = "please use different ID";
                         document.sign_up_form.sign_up_user_email.focus();
                     } else window.location.href = result.url;
-                    // if (result.result == 'use_other_id') {
-                    //     document.getElementById('sign_up_form_extra').innerText = "please use different ID";
-                    // } else window.location.href = result.url;
+                   
                 });
             } else {
                 document.getElementById('sign_up_form_extra').innerText = "please make sure to confirm password"     
             }
-    
-
         })
-        
-        
-       
     }
 
     getPBKey() {
         return new Promise((resolve, reject) => {
             fetch('/account_modal_pop')
             .then((res) => res.json())
-            .then(result => {
-                // console.log(result)
-                // this.encrkey = result.key;
+            .then(result => {               
                 resolve(result.key);
             });
         }) 

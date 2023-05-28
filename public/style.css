@@ -1534,7 +1534,7 @@ nav {
 
 .user_checkout_submit_container {
     width: 40%;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 .user_checkout_billing_info, .user_checkout_shipping_info, .user_shipping_method_container, .user_checkout_cover {
@@ -1765,7 +1765,7 @@ tranform속성에 0.5초의 듀레이션(동작의 시작해서 끝나는 시간
 }
 
 .cart_modal_item_quantity {
-    margin: 0 0.5rem;
+    margin: 0 0.25rem;
 }
 
 .cart_modal_item_name {
@@ -4056,10 +4056,12 @@ ul.tabs li.current{
     }
     
     
-   
+   .cart_modal_item_quantity_box  {
+        margin: 0;
+   }
 
     .cart_modal_item_quantity {
-        margin: unset;
+        margin: 0;
     }
     .cart_modal_item_price_box {
         

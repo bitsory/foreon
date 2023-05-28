@@ -137,14 +137,13 @@ export default class {
 
 
 document.addEventListener('click', function(e) {
-    console.log( " shop page double up check shop page double up check shop page double up check ")
-
+   
     if (e.target && (e.target.id =='online_main_item_name' || e.target.id == 'online_main_item_pic' || e.target.id == 'online_main_item_price')) {
-        console.log('shop_detail_page_flag');        
-        console.log(shop_detail_page_flag);
+        // console.log('shop_detail_page_flag');        
+        // console.log(shop_detail_page_flag);
         let item_num = e.target.parentElement.getAttribute('link_data_itemid');
-        console.log('itemid');
-        console.log(item_num);
+        // console.log('itemid');
+        // console.log(item_num);
 
         history.pushState(null, null, `/shop/view/item/${item_num}`);
        
@@ -202,37 +201,6 @@ document.addEventListener('click', function(e) {
         });
     }
     
-    if (e.target && e.target.className == 'shop_wellness_btn') {
-        console.log("shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn shop_wellness_btn ");
-
-        document.querySelector('.test_container').innerText = "test";
-    }  
-
-    if (e.target && e.target.id == 'shop_test_btn') {
-
-       
-        // console.log("sho[p teset sho[p teset sho[p tesetsho[p teset ")
-        // const send_data = { post : "item detail view"};
-        // const data = {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-               
-        //         },
-        //     body: JSON.stringify(send_data)
-        // };
-        // console.log(data);
-
-        // fetch(`/test_ups_ship`, data)
-        // .then(response => response.json())
-        // .then(response => {
-
-        // console.log("response")
-        // console.log(response)
-        //  response.LassoRedirectURL + `?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080&response_type=code&scope=read&type=ups_com_api`;
-        // res.redirect(`https://www.ups.com/lasso/signin`+`?client_id=GcK5bzCltXeGLVAmNXg9GP8AV9s29ACg3VkSOnOvioYRln19&redirect_uri=http://localhost:8080&response_type=code&scope=read&type=ups_com_api`)
-        // !req.query.code ? await res.redirect(url) : await requestAPIToken(res, req.query);
-    }
 
 });
 
