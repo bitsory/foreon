@@ -1,9 +1,6 @@
 export default class {
     constructor() {
-        document.title = "Cafe FORE";
-        console.log("menu");
-      
-        
+        document.title = "Cafe FORE";    
     }
 
     menuIconClickEvent (event) {
@@ -37,7 +34,7 @@ export default class {
 
     menuEventListener () {
         this.coffee_btn.addEventListener('click', (event)=> {
-            console.log("coffee event listener");
+         
             this.menuIconClickEvent2 ();
             this.menuIconClickEvent (event);
             document.querySelector(".menu_article").innerHTML = 
@@ -76,7 +73,7 @@ export default class {
         });
 
         this.smoothie_btn.addEventListener('click', (event)=> {
-            console.log("smoothie event listener");
+      
             this.menuIconClickEvent2 ();
             this.menuIconClickEvent (event);
             document.querySelector(".menu_article").innerHTML = 
@@ -151,9 +148,9 @@ export default class {
             `;});
 
         this.kbop_btn.addEventListener('click', (event)=> {
-            console.log("kbop event listener");
-            this.menuIconClickEvent2 ();
-            this.menuIconClickEvent (event);            
+           
+            this.menuIconClickEvent2();
+            this.menuIconClickEvent(event);            
             document.querySelector(".menu_article").innerHTML = 
             `<div class="menu_gl menu_kbop">
                 <div class="menu_gl menu_category">
@@ -306,7 +303,7 @@ export default class {
                     <button type="button" class="q_menu q_btn">
                     <a href="#" data-link-T style="color: white";>MENU</a></button>
                     <button type="button" class="q_order q_btn">
-                    <a href="#" data-link-T style="color: white";>ORDER</a></button>
+                    <a href="https://www.clover.com/online-ordering/cafe-fore-marietta"  target="_blank" style="color: white";>ORDER</a></button>
                     <button type="button" class="q_call q_btn">
                     <a href='tel:470-263-6495' style="color: white";>CALL</a></button>
                 </div>  
