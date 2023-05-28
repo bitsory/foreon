@@ -157,6 +157,15 @@ export default class {
                     
                     <div id="googleMap"></div>
                 </section>
+
+                <div class="q_btn_container">
+                    <button type="button" class="q_menu q_btn">
+                    <a href="#" data-link-T style="color: white";>MENU</a></button>
+                    <button type="button" class="q_order q_btn">
+                    <a href="https://www.clover.com/online-ordering/cafe-fore-marietta"  target="_blank" style="color: white";>ORDER</a></button>
+                    <button type="button" class="q_call q_btn">
+                    <a href='tel:470-854-6449' style="color: white";>CALL</a></button>
+                </div>  
             </div>
         `    
     }
