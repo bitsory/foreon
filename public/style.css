@@ -4063,11 +4063,11 @@ ul.tabs li.current{
    }
 
     .cart_modal_item_quantity {
-        margin: 0;
+        margin: 0 0.5rem 0 0;
     }
     .cart_modal_item_price_box {
         
-        margin: unset;
+        margin: 0;
     }
 
     .aboutVideo {
