@@ -108,8 +108,6 @@ app.use(cookieParser("secret"));
 
 app.get('/',(req,res) => { 
     console.log("home home home");
-    writeLogFile(req.connection.remoteAddress);
-
 
     if (req.session.loginData && req.session.loginData.id == "cafeforeadmin") {
         res.render('admin.ejs', {post : "ADMIN"});
@@ -178,7 +176,8 @@ app.post("/sign_out", function (req, res) {
 
 
 
-app.get('/home',(req,res) => {    
+app.get('/home',(req,res) => {   
+    writeLogFile(req.connection.remoteAddress); 
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});	
     } else {
@@ -187,6 +186,7 @@ app.get('/home',(req,res) => {
 });
 
 app.get('/about',(req,res) => {  
+    writeLogFile(req.connection.remoteAddress);
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
@@ -195,6 +195,7 @@ app.get('/about',(req,res) => {
 });
 
 app.get('/menu',(req,res) => { 
+    writeLogFile(req.connection.remoteAddress);
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
@@ -203,6 +204,7 @@ app.get('/menu',(req,res) => {
 });
 
 app.get('/contact',(req,res) => {   
+    writeLogFile(req.connection.remoteAddress);
     if (req.session.loginData) {
 		res.render('index.ejs', {post : req.session.loginData.name});
 	} else {
@@ -212,6 +214,7 @@ app.get('/contact',(req,res) => {
 
 
 app.get('/shop',(req,res) => {
+    writeLogFile(req.connection.remoteAddress);
     const member_name = req.session.loginData ? req.session.loginData.name : 'GUEST';      
     res.render('index.ejs', { post : member_name });   
 });
