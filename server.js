@@ -9,6 +9,7 @@ const schedule = require('node-schedule');
 const nodemailer = require('nodemailer');
 const uuid4 = require('uuid');
 const AWS = require('aws-sdk');
+const fs = require('fs');
 require('dotenv').config({ override: true });
 
 const app = express();
@@ -50,7 +51,7 @@ app.listen(process.env.PORT, function() {
             // res.send(response)
         });
     
-        const fs = require('fs');
+        
         const envItems = ['UPS_AUTH_TOKEN'];
     
         function updateEnv(items = [], eol = '\n'){
