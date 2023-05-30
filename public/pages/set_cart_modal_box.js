@@ -695,7 +695,7 @@ export default class {
         plus_quantity_btn.setAttribute('id', `${item_attribute}_plus_quantity_btn`);
         plus_quantity_btn.setAttribute('class', `${item_attribute}_plus_quantity_btn cart_modal_ctl_btn`);
         document.querySelector(`[cart_modal_quantity_box_itemid="${prodnum}"]`).appendChild(plus_quantity_btn);
-        plus_quantity_btn.innerText = '△'; 
+        plus_quantity_btn.innerText = '\U+25B2';
     }
 
     setMinusQuantity(prodnum, item_attribute) {
@@ -703,7 +703,7 @@ export default class {
         minus_quantity_btn.setAttribute('id', `${item_attribute}_minus_quantity_btn`);
         minus_quantity_btn.setAttribute('class', `${item_attribute}_minus_quantity_btn cart_modal_ctl_btn`);
         document.querySelector(`[cart_modal_quantity_box_itemid="${prodnum}"]`).appendChild(minus_quantity_btn);
-        minus_quantity_btn.innerText = '▽';
+        minus_quantity_btn.innerText = '▼';
     }
 
     setItemDelete(prodnum, item_attribute) {
