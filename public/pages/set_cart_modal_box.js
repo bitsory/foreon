@@ -695,7 +695,7 @@ export default class {
         plus_quantity_btn.setAttribute('id', `${item_attribute}_plus_quantity_btn`);
         plus_quantity_btn.setAttribute('class', `${item_attribute}_plus_quantity_btn cart_modal_ctl_btn`);
         document.querySelector(`[cart_modal_quantity_box_itemid="${prodnum}"]`).appendChild(plus_quantity_btn);
-        plus_quantity_btn.innerText = '\U+25B2';
+        plus_quantity_btn.innerText = '▲';
     }
 
     setMinusQuantity(prodnum, item_attribute) {
